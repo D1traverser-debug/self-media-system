@@ -784,12 +784,13 @@ class StudioEngine:
             dep_states = [tasks[dep]["status"] for dep in deps]
             if any(state in {"FAILED", "BLOCKED", "STALE", "CANCELLED"} for state in dep_states):
                 new_status = "BLOCKED"
+            elif not all(state == "COMPLETED" for state in dep_states):
+                # Do not label an expected upstream output as an external missing input.
+                new_status = "PENDING"
             elif not all(self._artifact_by_name(connection, project_id, name) is not None for name in _loads(row["inputs_json"], [])):
                 new_status = "WAITING_INPUT"
-            elif all(state == "COMPLETED" for state in dep_states):
-                new_status = "READY"
             else:
-                new_status = "PENDING"
+                new_status = "READY"
             if new_status != status:
                 connection.execute(
                     "UPDATE tasks SET status=?,updated_at=? WHERE project_id=? AND task_id=?",
