@@ -6,6 +6,12 @@ from pathlib import Path
 import re
 from typing import Any, Mapping
 
+from video_growth_agent.continuity import (
+    ContinuityLink,
+    ContinuityRule,
+    ContinuitySnapshot,
+    assess_continuity,
+)
 from video_growth_agent.business_metrics import (
     CommercialOutcome,
     EpisodeOutcomeReceipt,
@@ -165,6 +171,42 @@ def route_shot(payload: Mapping[str, Any]) -> dict[str, Any]:
         raise DomainAdapterError("shot routing requires at least one measured engine profile")
     decision = CostAwareShotRouter().route(request, engines)
     return _jsonable(decision)
+
+
+def assess_shot_continuity(payload: Mapping[str, Any]) -> dict[str, Any]:
+    data = _mapping(payload, "continuity assessment")
+    before_data = _mapping(data.get("before"), "before snapshot")
+    after_data = _mapping(data.get("after"), "after snapshot")
+    link_data = _mapping(data.get("link"), "continuity link")
+    before = ContinuitySnapshot(
+        shot_id=str(before_data["shot_id"]),
+        dimensions=dict(before_data["dimensions"]),
+        canon_refs=tuple(before_data.get("canon_refs", ())),
+        evidence_refs=tuple(before_data.get("evidence_refs", ())),
+    )
+    after = ContinuitySnapshot(
+        shot_id=str(after_data["shot_id"]),
+        dimensions=dict(after_data["dimensions"]),
+        canon_refs=tuple(after_data.get("canon_refs", ())),
+        evidence_refs=tuple(after_data.get("evidence_refs", ())),
+    )
+    rules = tuple(
+        ContinuityRule(**{**dict(item), "reason": str(dict(item).get("reason", ""))})
+        for item in link_data.get("rules", [])
+    )
+    link = ContinuityLink(
+        from_shot_id=str(link_data["from_shot_id"]),
+        to_shot_id=str(link_data["to_shot_id"]),
+        rules=rules,
+        rationale_refs=tuple(link_data.get("rationale_refs", ())),
+    )
+    assessment = assess_continuity(
+        before, after, link, evidence_refs=tuple(data.get("evidence_refs", ())),
+    )
+    return {
+        "hard_pass": assessment.hard_pass,
+        "assessment": _jsonable(assessment),
+    }
 
 
 def outcome_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
@@ -428,6 +470,20 @@ def run_claimed_domain_adapter(
                 }
             }
             result = {"adapter": name, "selected_engine_id": route.get("selected_engine_id"), "blocked": route.get("selected_engine_id") is None}
+
+        elif name == "continuity_assess":
+            continuity = assess_shot_continuity(_input_json(packet, str(config["continuity_input"])))
+            output_name = str(config.get("output_name", outputs[0]))
+            path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
+            _write_json(path, {"adapter": name, **continuity})
+            artifact_outputs = {
+                output_name: {
+                    "path": str(path), "kind": "evidence", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {"adapter": name, "hard_pass": continuity["hard_pass"]},
+                }
+            }
+            result = {"adapter": name, "hard_pass": continuity["hard_pass"]}
 
         elif name == "business_outcome_metrics":
             metrics = outcome_metrics(_input_json(packet, str(config["outcome_receipt_input"])))
