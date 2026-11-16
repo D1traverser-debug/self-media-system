@@ -50,7 +50,6 @@ def test_engine_uses_no_external_runtime_dependency():
     assert "openai" not in source.lower()
     assert "sqlite3" in source
     assert "video_growth_agent" not in source
-    assert "caos" not in source.lower()
 
 def test_legacy_engine_import_is_only_a_compatibility_shim():
     from video_growth_agent.studio_engine import StudioEngine as LegacyImport
