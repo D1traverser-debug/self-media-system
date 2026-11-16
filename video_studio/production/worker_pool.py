@@ -86,6 +86,10 @@ def run_ready_tool_tasks(
     return {
         "project_id": project_id, "rounds": rounds, "max_workers": max_workers,
         "claimed": claimed_total, "completed": completed, "failed": failed,
-        "ready_tool_tasks_without_registered_executor": unregistered,
-        "scheduler_status": "COMPLETED_WITH_FAILURES" if failed else "COMPLETED",
+        "ready_tool_tasks_without_registered_executor": list(unregistered_by_id.values()),
+        "scheduler_status": (
+            "COMPLETED_WITH_FAILURES" if failed else
+            "PARTIAL_UNREGISTERED_EXECUTORS" if unregistered_by_id else
+            "COMPLETED"
+        ),
     }
