@@ -845,8 +845,7 @@
       "commercial-outcome-analysis"
     ],
     "outputs": [
-      "workstream-evidence-pack",
-      "portfolio-allocation-candidate"
+      "workstream-evidence-pack"
     ],
     "requirements": {
       "workstream": "CROSS_WORKSTREAM",
@@ -860,16 +859,83 @@
     "priority": 90
   },
   {
+    "task_id": "portfolio-allocation-conservative-candidate",
+    "title": "Build a conservative portfolio allocation candidate prioritizing trust, reuse and low execution risk",
+    "kind": "portfolio_candidate",
+    "executor": "agent",
+    "depends_on": [
+      "business-flywheel-review"
+    ],
+    "inputs": [
+      "workstream-evidence-pack"
+    ],
+    "outputs": [
+      "portfolio-allocation-conservative-candidate"
+    ],
+    "requirements": {
+      "workstream": "CROSS_WORKSTREAM",
+      "coordination": {
+        "pattern": "COMPETITIVE_CANDIDATES",
+        "decision_group": "portfolio-allocation",
+        "candidate_criteria": [
+          "audience_trust",
+          "quality_floor",
+          "cash_risk",
+          "creator_capacity",
+          "reusability"
+        ]
+      }
+    },
+    "acceptance": {
+      "candidate": "State expected value, downside, budget, resource allocation, evidence and falsifier."
+    },
+    "priority": 85
+  },
+  {
+    "task_id": "portfolio-allocation-growth-candidate",
+    "title": "Build a growth-oriented portfolio allocation candidate with explicit risk and capacity limits",
+    "kind": "portfolio_candidate",
+    "executor": "agent",
+    "depends_on": [
+      "business-flywheel-review"
+    ],
+    "inputs": [
+      "workstream-evidence-pack"
+    ],
+    "outputs": [
+      "portfolio-allocation-growth-candidate"
+    ],
+    "requirements": {
+      "workstream": "CROSS_WORKSTREAM",
+      "coordination": {
+        "pattern": "COMPETITIVE_CANDIDATES",
+        "decision_group": "portfolio-allocation",
+        "candidate_criteria": [
+          "audience_trust",
+          "quality_floor",
+          "cash_risk",
+          "creator_capacity",
+          "reusability"
+        ]
+      }
+    },
+    "acceptance": {
+      "candidate": "State expected value, downside, budget, resource allocation, evidence and falsifier."
+    },
+    "priority": 85
+  },
+  {
     "task_id": "owner-portfolio-adjudication",
     "title": "Owner adjudicates portfolio and investment allocation",
     "kind": "owner_decision",
     "executor": "human",
     "depends_on": [
-      "business-flywheel-review"
+      "portfolio-allocation-conservative-candidate",
+      "portfolio-allocation-growth-candidate"
     ],
     "inputs": [
-      "workstream-evidence-pack",
-      "portfolio-allocation-candidate"
+      "portfolio-allocation-conservative-candidate",
+      "portfolio-allocation-growth-candidate"
     ],
     "outputs": [
       "portfolio-allocation-decision"
