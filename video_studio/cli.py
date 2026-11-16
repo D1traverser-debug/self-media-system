@@ -154,6 +154,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--token", required=True)
     p.add_argument("--input-name", help="declared input artifact name; defaults to the first available input")
 
+    p = sub.add_parser("run-adapter", help="run a declared deterministic Video domain adapter inside a claimed Studio task")
+    p.add_argument("project_id")
+    p.add_argument("task_id")
+    p.add_argument("--worker", required=True)
+    p.add_argument("--token", required=True)
+
     p = sub.add_parser("audit", help="independently check project graph, task outputs and artifact digests")
     p.add_argument("project_id")
 
@@ -231,6 +237,9 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "qa-media":
             from .media import run_claimed_media_qa
             _emit(run_claimed_media_qa(engine, args.project_id, args.task_id, args.worker, args.token, args.input_name))
+        elif command == "run-adapter":
+            from .adapters import run_claimed_domain_adapter
+            _emit(run_claimed_domain_adapter(engine, args.project_id, args.task_id, args.worker, args.token))
         elif command == "audit":
             report = engine.audit(args.project_id)
             _emit(report)
