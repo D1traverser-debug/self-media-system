@@ -68,10 +68,30 @@
   "media_qa_adapter": "video_studio.media.run_claimed_media_qa",
   "capabilities": {
     "deterministic_media_qa": {
-      "tool": "ffprobe",
-      "scope": "technical_measurement_only",
+      "tools": [
+        "ffprobe",
+        "ffmpeg"
+      ],
+      "checks": [
+        "video_stream",
+        "stream_duration_match",
+        "true_peak",
+        "black_frames",
+        "full_decode",
+        "brief_specific_duration_resolution_frame_rate"
+      ],
       "digest_bound": true,
+      "fail_closed": true,
+      "scope": "technical_measurement_only",
       "auto_release": false
+    },
+    "release_gates": {
+      "artifact_lineage": "IMMUTABLE_INPUT_ARTIFACT_ID_AND_SHA256",
+      "source_replacement": "INVALIDATE_CONSUMERS_AND_DEPENDENT_DESCENDANTS",
+      "rights": "FINAL_AND_USED_MEDIA_ASSETS_REQUIRE_ALLOWED_STATUS_AND_RESOLVABLE_EVIDENCE",
+      "human_review": "EXACT_DIGEST_AND_SELF_ATTESTED_HUMAN_COLD_READ",
+      "red_team": "MINIMUM_THREE_EVIDENCE_BACKED_FINDINGS",
+      "no_auto_publish": true
     }
   },
   "release_status": "ACTIVE_CANDIDATE",
