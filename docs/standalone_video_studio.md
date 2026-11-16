@@ -207,13 +207,13 @@ The brief may add mandatory checks such as duration range, resolution and frame 
 
 A review is bound to the exact artifact digest and must not be written by its producer. A brief can require reviewer kind, execution mode, blind review, inspected digest, context ID, score floors and reviewer quorum. Human cold-read contracts require `reviewer_kind=HUMAN`, `execution_mode=INDEPENDENT_COLD_READ`, `blind_review=true`, a matching inspected digest and a context ID.
 
-The Red Team contract can require at least three concrete findings. Each finding must contain a description, evidence reference, severity and disposition. A PASS with unresolved CRITICAL/HIGH findings is rejected. Findings are not decorative checklist entries; unresolved material risks block release.
+The Red Team contract can require at least three concrete findings. Each finding must contain a description, evidence reference, severity and disposition. When `require_resolvable_evidence_refs` is enabled, both review-level evidence refs and every finding's evidence ref must resolve to a current registered artifact ID/name; a free-form URI is not accepted as proof. A PASS with unresolved CRITICAL/HIGH findings is rejected. Findings are not decorative checklist entries; unresolved material risks block release.
 
 These reviewer attributes are recorded as attestations. The runtime can validate their structure and consistency but cannot cryptographically prove that a named person actually performed the review or remained blind to other verdicts. Do not describe self-attested metadata as cryptographic independence.
 
 ### Evidence and publication boundary
 
-`required_evidence_artifact_names` requires registered, current, digest-verified evidence artifacts. `required_artifact_names` requires every declared deliverable. `required_asset_names` requires source assets to be in final lineage and rights-cleared. String-only `required_evidence_refs` remain compatibility references; use artifact names/IDs for evidence that must be machine-verified.
+`required_evidence_artifact_names` requires registered, current, digest-verified artifacts of an allowed evidence/document/report/decision/timeline/domain-state kind. `required_artifact_names` requires every declared deliverable. `required_asset_names` requires source assets to be in final lineage and rights-cleared. String-only `required_evidence_refs` remain compatibility references; use artifact names/IDs for evidence that must be machine-verified.
 
 A successful release check marks the exact artifact ACCEPTED; it does not upload, publish, schedule or spend money. Publication remains a separate owner-authorized action. The CLI's `--allow-unknown-rights` compatibility switch cannot override a hard requirement in the owner brief.
 
