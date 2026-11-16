@@ -149,7 +149,7 @@ Use separate rubrics appropriate to the project. Common dimensions:
 - rights, likeness, consent, product truth, provenance and synthetic disclosure;
 - platform fit, cover, title, copy and export package.
 
-Technical QA and editorial/craft QA are different. FFprobe can measure streams, duration, dimensions and frame rate; it cannot prove a film is compelling, funny, accurate, legally cleared or commercially effective.
+Technical QA and editorial/craft QA are different. FFmpeg/FFprobe can measure streams, duration, dimensions, frame rate, stream timing, full decode, black frames and true peak; they cannot prove a film is compelling, funny, accurate, legally cleared or commercially effective.
 
 Bind every review to the exact artifact ID and SHA-256. Conflicting PASS and FAIL verdicts block release. Replaced bytes invalidate prior review authority. Run `release-check` on the exact final deliverable with required rubrics, rights and platform evidence. Release admission is not publication; upload or paid external actions require owner authorization.
 
@@ -204,4 +204,4 @@ vga-studio --root ./studio-work audit episode-001
 vga-studio --root ./studio-work events episode-001
 ```
 
-Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The canonical package uses only Python standard-library runtime dependencies; optional media QA requires FFprobe. Existing 0.8 modules are compatibility adapters, not the new Studio's control plane.
+Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The canonical package uses only Python standard-library runtime dependencies; media QA requires both FFmpeg and FFprobe. Existing 0.8 modules are compatibility adapters, not the new Studio's control plane.
