@@ -1215,14 +1215,27 @@ class StudioEngine:
             ).fetchone()
             if artifact is None:
                 raise ProjectNotFound(artifact_id)
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            release_policy = brief.get("release_policy", {})
+            strict_evidence = bool(release_policy.get("require_resolvable_evidence_refs", False))
             failures: list[str] = []
-            artifact_path = self._project_dir(project_id) / artifact["relative_path"]
-            if not artifact_path.is_file() or _sha256(artifact_path) != artifact["sha256"]:
-                failures.append("artifact_bytes_missing_or_digest_changed")
-            if artifact["status"] not in {"CURRENT", "ACCEPTED"}:
-                failures.append(f"artifact_not_current:{artifact['status']}")
+
+            def verify_artifact_row(row: sqlite3.Row, label: str) -> bool:
+                if row["status"] not in {"CURRENT", "ACCEPTED"}:
+                    failures.append(f"{label}_not_current:{row['name']}:{row['status']}")
+                    return False
+                path = self._project_dir(project_id) / row["relative_path"]
+                if not path.is_file() or _sha256(path) != row["sha256"]:
+                    failures.append(f"{label}_bytes_missing_or_digest_changed:{row['name']}")
+                    return False
+                return True
+
+            verify_artifact_row(artifact, "final_artifact")
+            if artifact["kind"] != "video" or not str(artifact["media_type"]).startswith("video/"):
+                failures.append(f"release_target_is_not_video:{artifact['kind']}:{artifact['media_type']}")
             if require_rights and artifact["rights_status"] not in RIGHTS_ALLOWED:
                 failures.append(f"rights_not_cleared:{artifact['rights_status']}")
+
             review_rows = connection.execute(
                 "SELECT * FROM reviews WHERE project_id=? AND artifact_id=? AND artifact_digest=?",
                 (project_id, artifact_id, artifact["sha256"]),
@@ -1230,8 +1243,25 @@ class StudioEngine:
             by_rubric: dict[str, list[str]] = {}
             for review in review_rows:
                 by_rubric.setdefault(review["rubric_id"], []).append(review["outcome"])
-            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
-            release_policy = brief.get("release_policy", {})
+                if strict_evidence:
+                    bindings = _loads(review["evidence_bindings_json"], [])
+                    if not bindings:
+                        failures.append(f"review_evidence_unresolved:{review['rubric_id']}:{review['review_id']}")
+                    for binding in bindings:
+                        if not isinstance(binding, dict):
+                            failures.append(f"review_evidence_binding_malformed:{review['review_id']}")
+                            continue
+                        evidence = connection.execute(
+                            "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                            (project_id, binding.get("artifact_id")),
+                        ).fetchone()
+                        if evidence is None:
+                            failures.append(f"review_evidence_artifact_missing:{review['review_id']}:{binding.get('artifact_id')}")
+                        elif evidence["sha256"] != binding.get("sha256"):
+                            failures.append(f"review_evidence_digest_binding_mismatch:{review['review_id']}:{binding.get('artifact_id')}")
+                        else:
+                            verify_artifact_row(evidence, "review_evidence")
+
             effective_rubrics = sorted(set(required_rubrics or []) | set(release_policy.get("required_review_rubrics", [])))
             if not effective_rubrics:
                 raise ContractError("release_check requires at least one review rubric in the brief or command")
@@ -1239,20 +1269,40 @@ class StudioEngine:
                 outcomes = by_rubric.get(rubric, [])
                 if not outcomes or any(outcome != "PASS" for outcome in outcomes):
                     failures.append(f"required_review_missing_or_conflicting:{rubric}:{outcomes}")
+
             supplied_evidence = set(evidence_refs or [])
             required_evidence = set(release_policy.get("required_evidence_refs", []))
             missing_evidence = sorted(required_evidence - supplied_evidence)
             if missing_evidence:
                 failures.append(f"release_evidence_missing:{missing_evidence}")
+            if strict_evidence and evidence_refs:
+                try:
+                    release_evidence_bindings = self._resolve_artifact_refs(
+                        connection, project_id, list(evidence_refs), label="release:evidence",
+                    )
+                except (ContractError, GateError) as exc:
+                    failures.append(f"release_evidence_unresolved:{exc}")
+                    release_evidence_bindings = []
+            else:
+                release_evidence_bindings = []
+
+            required_evidence_artifacts = list(release_policy.get("required_evidence_artifact_names", []))
+            for evidence_name in required_evidence_artifacts:
+                try:
+                    self._resolve_artifact_refs(
+                        connection, project_id, [evidence_name], label=f"required_evidence:{evidence_name}",
+                    )
+                except (ContractError, GateError) as exc:
+                    failures.append(f"required_evidence_artifact_invalid:{evidence_name}:{exc}")
+
             required_artifacts = list(release_policy.get("required_artifact_names", []))
             for required_name in required_artifacts:
                 required_artifact = self._artifact_by_name(connection, project_id, required_name)
                 if required_artifact is None:
                     failures.append(f"required_deliverable_missing:{required_name}")
                 else:
-                    required_path = self._project_dir(project_id) / required_artifact["relative_path"]
-                    if not required_path.is_file() or _sha256(required_path) != required_artifact["sha256"]:
-                        failures.append(f"required_deliverable_bytes_changed:{required_name}")
+                    verify_artifact_row(required_artifact, "required_deliverable")
+
             required_assets = list(release_policy.get("required_asset_names", []))
             for asset_name in required_assets:
                 source_asset = self._artifact_by_name(connection, project_id, asset_name)
@@ -1261,15 +1311,105 @@ class StudioEngine:
                 elif source_asset["rights_status"] not in RIGHTS_ALLOWED:
                     failures.append(f"required_source_asset_rights_not_cleared:{asset_name}:{source_asset['rights_status']}")
                 else:
-                    source_path = self._project_dir(project_id) / source_asset["relative_path"]
-                    if not source_path.is_file() or _sha256(source_path) != source_asset["sha256"]:
-                        failures.append(f"required_source_asset_bytes_changed:{asset_name}")
+                    verify_artifact_row(source_asset, "required_source_asset")
+
+            if release_policy.get("require_technical_qa", False):
+                qa_name = str(release_policy.get("technical_qa_artifact_name", "technical-qa-receipt"))
+                qa_artifact = self._artifact_by_name(connection, project_id, qa_name)
+                if qa_artifact is None:
+                    failures.append(f"technical_qa_missing:{qa_name}")
+                elif verify_artifact_row(qa_artifact, "technical_qa"):
+                    try:
+                        qa_report = json.loads((self._project_dir(project_id) / qa_artifact["relative_path"]).read_text(encoding="utf-8"))
+                    except (OSError, json.JSONDecodeError) as exc:
+                        failures.append(f"technical_qa_unreadable:{qa_name}:{exc}")
+                    else:
+                        if qa_report.get("hard_pass") is not True:
+                            failures.append(f"technical_qa_hard_fail:{qa_name}")
+                        if qa_report.get("media_sha256") != artifact["sha256"]:
+                            failures.append(f"technical_qa_media_digest_mismatch:{qa_name}")
+                        if qa_report.get("input_artifact_id") != artifact_id:
+                            failures.append(f"technical_qa_input_artifact_mismatch:{qa_name}")
+                        check_status = {
+                            item.get("check_id"): item.get("status")
+                            for item in qa_report.get("checks", []) if isinstance(item, dict)
+                        }
+                        for check_id in release_policy.get("required_technical_checks", []):
+                            if check_status.get(check_id) != "PASS":
+                                failures.append(f"technical_qa_required_check_not_pass:{check_id}:{check_status.get(check_id)}")
+
+            if release_policy.get("require_lineage", False):
+                visited: set[str] = set()
+
+                def walk_lineage(row: sqlite3.Row) -> None:
+                    ref = row["artifact_id"]
+                    if ref in visited:
+                        return
+                    visited.add(ref)
+                    if not verify_artifact_row(row, "lineage_artifact"):
+                        return
+                    media_kinds = {"video", "audio", "image", "font", "footage", "source_media", "source_code", "3d_model"}
+                    if row["kind"] in media_kinds and row["rights_status"] not in RIGHTS_ALLOWED:
+                        failures.append(f"lineage_media_rights_not_cleared:{row['name']}:{row['rights_status']}")
+                    producer_task = row["produced_by_task"]
+                    if not producer_task:
+                        return
+                    task_row = connection.execute(
+                        "SELECT result_json FROM tasks WHERE project_id=? AND task_id=?",
+                        (project_id, producer_task),
+                    ).fetchone()
+                    if task_row is None:
+                        failures.append(f"lineage_producer_task_missing:{producer_task}:{row['name']}")
+                        return
+                    task_result = _loads(task_row["result_json"], {})
+                    bindings = task_result.get("input_bindings")
+                    if not isinstance(bindings, list):
+                        failures.append(f"lineage_input_bindings_missing:{producer_task}:{row['name']}")
+                        return
+                    for binding in bindings:
+                        if not isinstance(binding, dict):
+                            failures.append(f"lineage_input_binding_malformed:{producer_task}:{row['name']}")
+                            continue
+                        source = connection.execute(
+                            "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                            (project_id, binding.get("artifact_id")),
+                        ).fetchone()
+                        if source is None:
+                            failures.append(f"lineage_source_artifact_missing:{producer_task}:{binding.get('artifact_id')}")
+                            continue
+                        if source["sha256"] != binding.get("sha256") or source["version"] != binding.get("version"):
+                            failures.append(f"lineage_source_binding_mismatch:{producer_task}:{source['name']}")
+                            continue
+                        walk_lineage(source)
+
+                walk_lineage(artifact)
+                lineage_count = len(visited)
+            else:
+                lineage_count = 0
+
+            if release_policy.get("require_no_open_failures", False):
+                open_failures = connection.execute(
+                    "SELECT failure_id FROM failures WHERE project_id=? AND status='OPEN'",
+                    (project_id,),
+                ).fetchall()
+                if open_failures:
+                    failures.append("open_failures_block_release:" + ",".join(row["failure_id"] for row in open_failures))
+
+            if release_policy.get("require_all_tasks_complete", False):
+                unfinished = connection.execute(
+                    "SELECT task_id,status FROM tasks WHERE project_id=? AND status NOT IN ('COMPLETED','CANCELLED')",
+                    (project_id,),
+                ).fetchall()
+                if unfinished:
+                    failures.append("unfinished_tasks_block_release:" + ",".join(f"{row['task_id']}:{row['status']}" for row in unfinished))
+
             receipt = {
                 "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
                 "required_rubrics": effective_rubrics, "required_artifacts": required_artifacts,
-                "required_assets": required_assets, "evidence_refs": sorted(supplied_evidence),
-                "rights_status": artifact["rights_status"], "failures": failures,
-                "pass": not failures,
+                "required_assets": required_assets, "required_evidence_artifacts": required_evidence_artifacts,
+                "evidence_refs": sorted(supplied_evidence), "evidence_bindings": release_evidence_bindings,
+                "lineage_artifact_count": lineage_count, "rights_status": artifact["rights_status"],
+                "failures": failures, "pass": not failures,
             }
             if not failures:
                 connection.execute("UPDATE artifacts SET status='ACCEPTED' WHERE project_id=? AND artifact_id=?", (project_id, artifact_id))
