@@ -1323,6 +1323,21 @@ class StudioEngine:
                         refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
                         if not isinstance(refs, list) or not refs:
                             failures.append(f"lineage_rights_evidence_missing:{source['name']}:{source['artifact_id']}")
+                        else:
+                            for ref in refs:
+                                if not isinstance(ref, str) or not ref.strip():
+                                    failures.append(f"lineage_rights_evidence_ref_invalid:{source['name']}:{source['artifact_id']}")
+                                    continue
+                                if ref.startswith(("https://", "http://")):
+                                    continue
+                                evidence_row = connection.execute(
+                                    """SELECT 1 FROM artifacts WHERE project_id=?
+                                       AND (artifact_id=? OR name=?)
+                                       AND status IN ('CURRENT','ACCEPTED') LIMIT 1""",
+                                    (project_id, ref, ref),
+                                ).fetchone()
+                                if evidence_row is None:
+                                    failures.append(f"lineage_rights_evidence_ref_unresolved:{source['name']}:{ref}")
                 checked_lineage.append({
                     "artifact_id": source["artifact_id"], "name": source["name"],
                     "sha256": source["sha256"], "rights_status": source["rights_status"],
