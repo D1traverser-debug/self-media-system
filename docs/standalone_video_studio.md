@@ -43,7 +43,7 @@ This is not a claim that every external provider is connected. The repository cu
 - **Event log** is append-only operational history.
 - **IPOS** remains the sole authority for original character/identity canon.
 
-The new runtime is standalone. It has no CAOS imports, network calls, API, parent task identity, parent lease, hidden chat-memory dependency or external governance callback. The old 0.8 product architecture, `vga` CLI, stage workflow, and CAOS integration notes remain compatibility/history surfaces; the new `vga-studio` runtime does not load them.
+The new runtime is standalone. It has no CAOS imports, network calls, API, parent task identity, parent lease, hidden chat-memory dependency or external governance callback. The old 0.8 controller, `vga` CLI and fixed-stage workflow remain compatibility/history surfaces and are not loaded as a controller by `vga-studio`. Specialized domain modules are imported only through the explicit `video_studio.adapters` bridge when a task declares a tested adapter. CAOS integration notes remain historical documentation only.
 
 ## 3. Goal recovery and requirement governance
 
