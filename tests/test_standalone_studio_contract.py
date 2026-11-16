@@ -36,6 +36,7 @@ def test_example_graphs_are_valid_dynamic_dags(tmp_path):
     for project_id, brief_name, tasks_name in (
         ("explainer", "technology-explainer.brief.json", "technology-explainer.tasks.json"),
         ("satire", "news-fictional-media.brief.json", "news-fictional-media.tasks.json"),
+        ("media-program", "ai-self-media-commercialization.brief.json", "ai-self-media-commercialization.tasks.json"),
     ):
         brief = json.loads((ROOT / "examples" / brief_name).read_text(encoding="utf-8"))
         tasks = json.loads((ROOT / "examples" / tasks_name).read_text(encoding="utf-8"))
@@ -66,3 +67,41 @@ def test_all_canonical_runtime_modules_are_independent_of_legacy_namespace():
         assert "video_growth_agent" not in source
         assert "from caos" not in source.lower()
         assert "import caos" not in source.lower()
+
+
+def test_example_briefs_preserve_nonnegotiable_video_release_gates():
+    root = ROOT / "examples"
+    explainer = json.loads((root / "technology-explainer.brief.json").read_text(encoding="utf-8"))
+    satire = json.loads((root / "news-fictional-media.brief.json").read_text(encoding="utf-8"))
+    program = json.loads((root / "ai-self-media-commercialization.brief.json").read_text(encoding="utf-8"))
+
+    policy = explainer["release_policy"]
+    assert policy["require_rights"] is True
+    assert policy["require_rights_evidence"] is True
+    assert policy["require_technical_qa"] is True
+    assert "red-team" in policy["required_review_rubrics"]
+    assert policy["review_contracts"]["red-team"]["min_findings"] >= 3
+    assert policy["review_contracts"]["human-cold-read"]["execution_mode"] == "INDEPENDENT_COLD_READ"
+    assert satire["release_policy"]["required_asset_names"] == ["source-video"]
+    assert satire["release_policy"]["no_auto_publish"] is True
+    assert program["program_context"]["ip_identity_authority"] == "IPOS"
+    assert program["program_context"]["caos_runtime_dependency"] is False
+
+
+def test_program_example_keeps_independent_workstreams_parallel_and_ipos_fail_closed(tmp_path):
+    engine = StudioEngine(tmp_path)
+    brief_path = ROOT / "examples" / "ai-self-media-commercialization.brief.json"
+    tasks_path = ROOT / "examples" / "ai-self-media-commercialization.tasks.json"
+    project_brief = json.loads(brief_path.read_text(encoding="utf-8"))
+    tasks = json.loads(tasks_path.read_text(encoding="utf-8"))
+    engine.create_project("program", "Integrated media program", project_brief)
+    engine.add_tasks("program", tasks)
+    status = engine.status("program")
+    task_map = {item["task_id"]: item for item in engine.list_tasks("program")}
+    assert task_map["growth-baseline-and-topic-hypotheses"]["status"] == "READY"
+    assert task_map["commercial-advertiser-map"]["status"] == "READY"
+    assert task_map["ipos-video-identity-bundle-import"]["status"] == "WAITING_INPUT"
+    assert task_map["jensen-source-media-inspection"]["status"] == "WAITING_INPUT"
+    assert task_map["commercial-offer-native-integration"]["status"] == "PENDING"
+    assert status["task_counts"]["READY"] >= 4
+    assert engine.audit("program")["pass"] is True
