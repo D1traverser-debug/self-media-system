@@ -1,7 +1,10 @@
-# CAOS Governance Entry — Video Growth Agent
+# Historical CAOS Governance Entry — Video Growth Agent 0.8
 
-Status: ACTIVE
+Status: LEGACY_COMPATIBILITY_ONLY
+Current standalone entry: `STUDIO_ENTRY.md`
 Effective date: 2026-11-14
+
+> This file preserves the historical 0.8 ChatGPT-session integration contract. It is not the startup authority or a runtime dependency for new Video Studio work. New work must use `STUDIO_ENTRY.md`, `skills/video-growth-agent/SKILL.md` and `docs/standalone_video_studio.md`. The CAOS repository itself remains outside the scope of this repository.
 Domain: VIDEO_GROWTH
 Repository: D1traverser-debug/video-growth-agent
 
