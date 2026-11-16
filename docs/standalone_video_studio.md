@@ -89,7 +89,7 @@ The planner creates nodes around the work actually needed. A node declares:
 - non-empty `acceptance` conditions;
 - priority and bounded retry count.
 
-The graph must be acyclic. Each output name has one producer. Independent nodes are eligible concurrently. A task with missing inputs waits; a task whose dependency fails or becomes stale is blocked. The engine does not force every project through research → script → storyboard → lookdev → generation → rough cut → sound → QA. Those are possible tasks only when the project needs them.
+The graph must be acyclic. Each output name has one producer. Independent nodes are eligible concurrently. A task with missing inputs waits; a task whose dependency fails or becomes stale is blocked. The runtime distinguishes READY work from actual dispatch: only a registered executor can be claimed by the local worker pool. The engine does not force every project through research → script → storyboard → lookdev → generation → rough cut → sound → QA. Those are possible tasks only when the project needs them.
 
 Typical parallel lanes may include:
 
@@ -119,6 +119,27 @@ The runtime uses SQLite with WAL, foreign keys, busy timeout and `BEGIN IMMEDIAT
 The work packet contains only the declared task, acceptance contract, requirements and exact input artifacts/digests. Workers do not peer-chat as an authority mechanism; handoffs occur through artifacts and receipts.
 
 A task completes only when all declared output names are supplied and each output is a real regular file inside the project workspace. The runtime computes SHA-256 and size itself. Registered artifact paths are immutable; a new take or revision gets a new path and version. Files outside the project must first be imported as source assets.
+
+## 7.1 Local audiovisual assembly and delivery packaging
+
+The production execution package provides two registered operations:
+
+- `ffmpeg_assemble`: consumes a versioned render spec plus exact registered video/audio/SRT inputs. It assembles sequential shot assets, applies cover/contain fit, mixes offset/gain-controlled audio tracks, optionally burns valid SRT captions, and emits a candidate MP4, a separate 24-bit/48 kHz WAV audio master and a receipt binding input artifact IDs/digests to output hashes. It requires FFmpeg and FFprobe. The current first version uses cut-based sequential assembly; transitions and complex overlays belong in shot rendering or a later tested timeline capability.
+- `delivery_package`: validates required artifact presence, SHA-256 and expected media types, then creates a ZIP containing final deliverables, project timeline/source assets and QA/rights evidence plus an external manifest with the package digest. It is candidate-only and never authorizes release.
+
+Run registered local tools with:
+
+```bash
+vga-studio --root ./studio-work run-ready-tools PROJECT_ID --max-workers 4
+```
+
+The worker pool claims up to the configured concurrency of independent READY tool tasks, executes them concurrently, refreshes the DAG and continues in downstream rounds. It only runs registered local operations and FFprobe technical-measurement tasks. It reports tool tasks with no registered executor instead of claiming them. It does not spawn LLM agents, human reviewers or external providers. Use executor-filtered claims for session agent work:
+
+```bash
+vga-studio --root ./studio-work claim PROJECT_ID --worker researcher-01 --executor agent
+```
+
+The assembler composes shot assets; it is not itself a general scene renderer. Engineering-proof capture, cinematic 2.5D shot rendering, voice/narration, music/SFX creation, cover design and platform copy must be produced by their own verified route and supplied as registered artifacts. No paid provider operation is inferred from a task label.
 
 ## 8. Asset, rights and provenance contract
 
@@ -183,8 +204,9 @@ vga-studio --root ./studio-work plan episode-001 examples/technology-explainer.t
 vga-studio --root ./studio-work status episode-001
 vga-studio --root ./studio-work tasks episode-001
 
-# atomically claim the next ready task
-vga-studio --root ./studio-work claim episode-001 --worker researcher-01 --lease-seconds 900
+# atomically claim an agent task, or run registered local tool tasks in parallel
+vga-studio --root ./studio-work claim episode-001 --worker researcher-01 --executor agent
+vga-studio --root ./studio-work run-ready-tools episode-001 --max-workers 4
 
 # record an artifact-bound independent review
 vga-studio --root ./studio-work review episode-001 ARTIFACT_ID --reviewer reviewer-01 --rubric craft --outcome PASS --dimensions review-dimensions.json --evidence frame://01 --evidence frame://02
@@ -202,6 +224,6 @@ The existing `vga` CLI and 0.8 Media Business OS remain available for historical
 
 ## 14. Known limits of this first standalone runtime
 
-The core supplies durable project governance, DAG scheduling, worker leases, artifact identity, review evidence, failure records and learning admission. It does not itself contain a universal LLM, image/video generation model, NLE, music library or paid provider credential. Nor does the core itself implement every business-domain object; the Skill coordinates those domain capabilities through explicit adapters and evidence-bound artifacts. The active worker must use the actual available media tools/provider adapters, report capability gaps honestly, and return files into the project workspace. The absence of a provider blocks only the affected operation or triggers an explicitly accepted degradation path; it never fabricates media output.
+The core supplies durable project governance, DAG scheduling, atomic claims, leases, artifact identity, review evidence, failure records and learning admission. The first local production executor now assembles registered shot assets and audio into a candidate audiovisual master and packages exact delivery/source artifacts. It still does not itself create every shot, provide a universal LLM, NLE, music library, human voice or paid provider credential. Nor does the core itself implement every business-domain object; the Skill coordinates those domain capabilities through explicit adapters and evidence-bound artifacts. The active worker must use the actual available media tools/provider adapters, report capability gaps honestly, and return files into the project workspace. The absence of a provider blocks only the affected operation or triggers an explicitly accepted degradation path; it never fabricates media output.
 
 This boundary is intentional: the orchestration core remains provider-neutral and independently operable instead of pretending a generic task scheduler can create cinematic video by itself.
