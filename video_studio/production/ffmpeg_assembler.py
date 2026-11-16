@@ -87,8 +87,18 @@ class FfmpegAssembler:
         for track in spec.audio_tracks:
             if track.input_name not in ordered_names:
                 ordered_names.append(track.input_name)
+        video_input_names = {clip.input_name for clip in spec.clips}
+        audio_input_names = {track.input_name for track in spec.audio_tracks}
+        if video_input_names.intersection(audio_input_names):
+            raise ProductionContractError("one artifact cannot be used as both a video clip and an audio track")
         for name in ordered_names:
             artifact = input_artifacts[name]
+            kind = str(artifact.get("kind", "")).lower()
+            media_type = str(artifact.get("media_type", "")).lower()
+            if name in video_input_names and (kind != "video" or not media_type.startswith("video/")):
+                raise ProductionContractError(f"video clip input must be a registered video artifact: {name}")
+            if name in audio_input_names and (kind != "audio" or not media_type.startswith("audio/")):
+                raise ProductionContractError(f"audio track input must be a registered audio artifact: {name}")
             path = Path(str(artifact.get("path", ""))).resolve()
             if not path.is_file() or path.stat().st_size <= 0:
                 raise RenderExecutionError(f"declared input artifact is missing or empty: {name}")
@@ -108,6 +118,12 @@ class FfmpegAssembler:
         captions_qa = None
         if spec.captions_input:
             caption_artifact = input_artifacts[spec.captions_input]
+            caption_kind = str(caption_artifact.get("kind", "")).lower()
+            caption_type = str(caption_artifact.get("media_type", "")).lower()
+            if caption_kind not in {"subtitle", "document"} or not (
+                "subrip" in caption_type or caption_type.startswith("text/") or caption_type == "application/octet-stream"
+            ):
+                raise ProductionContractError("captions_input must be a declared subtitle/document artifact")
             captions_path = Path(str(caption_artifact.get("path", ""))).resolve()
             if not captions_path.is_file() or captions_path.stat().st_size <= 0:
                 raise RenderExecutionError(f"caption input is missing or empty: {spec.captions_input}")
