@@ -642,7 +642,7 @@ class StudioEngine:
                 )
                 for descendant in descendants:
                     connection.execute(
-                        "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
+                        "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,lease_until=NULL,claim_inputs_json='[]',error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": f"upstream task {task_id} contract changed"}), now, project_id, descendant),
                     )
                     connection.execute(
@@ -1438,7 +1438,7 @@ class StudioEngine:
             now = _iso()
             for affected in descendants:
                 connection.execute(
-                    "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
+                    "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,lease_until=NULL,claim_inputs_json='[]',error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                     (_json({"reason": reason}), now, project_id, affected),
                 )
                 connection.execute(
