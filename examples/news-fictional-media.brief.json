@@ -104,12 +104,14 @@
         "execution_mode": "INDEPENDENT_COLD_READ",
         "blind_review": true,
         "require_digest_attestation": true,
-        "require_context_id": true
+        "require_context_id": true,
+        "require_resolvable_evidence_refs": true
       },
       "red-team": {
         "min_findings": 3,
         "require_evidence_per_finding": true,
-        "require_disposition_per_finding": true
+        "require_disposition_per_finding": true,
+        "require_resolvable_evidence_refs": true
       }
     }
   }
