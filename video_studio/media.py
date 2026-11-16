@@ -224,7 +224,15 @@ def run_claimed_media_qa(
         raise ContractError(f"QA input {selected!r} is not a declared, available task input")
     if len(task["outputs"]) != 1:
         raise ContractError("qa-media task must declare exactly one output receipt")
-    report = probe_media(packet["input_artifacts"][selected]["path"], requirements)
+    try:
+        report = probe_media(packet["input_artifacts"][selected]["path"], requirements)
+    except (GateError, ContractError) as exc:
+        engine.fail_task(
+            project_id, task_id, worker_id, claim_token,
+            {"category": "technical_qa_execution_blocked", "message": str(exc)},
+            retryable=False,
+        )
+        raise
     report["project_id"] = project_id
     report["task_id"] = task_id
     report["input_artifact_id"] = packet["input_artifacts"][selected]["artifact_id"]
