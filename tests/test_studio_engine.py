@@ -760,3 +760,70 @@ def test_release_check_rejects_red_team_without_three_evidence_backed_findings(t
     release = engine.release_check("red", artifact_id, required_rubrics=[])
     assert release["pass"] is False
     assert any(item.startswith("review_findings_below_minimum:red-team:1<3") for item in release["failures"])
+
+
+def test_competitive_candidates_require_owner_adjudication_over_every_candidate(tmp_path):
+    engine = make_engine(tmp_path)
+    candidate_a = task("candidate-a")
+    candidate_a["requirements"] = {"coordination": {
+        "pattern": "COMPETITIVE_CANDIDATES",
+        "decision_group": "topic-slate",
+        "candidate_criteria": ["audience fit", "originality", "repeatability"],
+    }}
+    candidate_b = task("candidate-b")
+    candidate_b["requirements"] = {"coordination": {
+        "pattern": "COMPETITIVE_CANDIDATES",
+        "decision_group": "topic-slate",
+        "candidate_criteria": ["audience fit", "originality", "repeatability"],
+    }}
+    adjudication = task("owner-adjudication", deps=["candidate-a", "candidate-b"])
+    adjudication["executor"] = "human"
+    adjudication["requirements"] = {"coordination": {
+        "pattern": "OWNER_ADJUDICATION",
+        "consumes_group": "topic-slate",
+        "adjudicator": "showrunner",
+        "decision_receipt_required": True,
+    }}
+    engine.add_tasks("demo", [candidate_a, candidate_b, adjudication])
+    assert {item["task_id"] for item in engine.list_tasks("demo")} == {
+        "candidate-a", "candidate-b", "owner-adjudication",
+    }
+
+
+def test_owner_adjudication_cannot_skip_a_competing_candidate(tmp_path):
+    engine = make_engine(tmp_path)
+    candidate_a = task("candidate-a")
+    candidate_a["requirements"] = {"coordination": {
+        "pattern": "COMPETITIVE_CANDIDATES",
+        "decision_group": "topic-slate",
+        "candidate_criteria": ["audience fit"],
+    }}
+    candidate_b = task("candidate-b")
+    candidate_b["requirements"] = {"coordination": {
+        "pattern": "COMPETITIVE_CANDIDATES",
+        "decision_group": "topic-slate",
+        "candidate_criteria": ["audience fit"],
+    }}
+    adjudication = task("owner-adjudication", deps=["candidate-a"])
+    adjudication["executor"] = "human"
+    adjudication["requirements"] = {"coordination": {
+        "pattern": "OWNER_ADJUDICATION",
+        "consumes_group": "topic-slate",
+        "adjudicator": "showrunner",
+        "decision_receipt_required": True,
+    }}
+    with pytest.raises(ContractError, match="depend on every candidate"):
+        engine.add_tasks("demo", [candidate_a, candidate_b, adjudication])
+    assert engine.list_tasks("demo") == []
+
+
+def test_consultative_advice_cannot_claim_decision_authority(tmp_path):
+    engine = make_engine(tmp_path)
+    advisory = task("advice")
+    advisory["requirements"] = {"coordination": {
+        "pattern": "CONSULTATIVE_ADVICE",
+        "advisory_only": False,
+        "decision_owner": "showrunner",
+    }}
+    with pytest.raises(ContractError, match="must be advisory_only"):
+        engine.add_tasks("demo", [advisory])
