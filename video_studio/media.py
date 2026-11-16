@@ -164,6 +164,14 @@ def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *,
             raise GateError(f"true-peak measurement timed out after {timeout_seconds}s") from exc
         true_peak_log = (peak_result.stderr or "") + "\n" + (peak_result.stdout or "")
         peak_match = re.search(r"True peak:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*dBFS", true_peak_log, re.IGNORECASE)
+        if peak_match is None:
+            # FFmpeg versions that format ebur128 as a section header followed by
+            # an indented "Peak:" value put the measurement on the next line.
+            peak_match = re.search(
+                r"True peak:\s*\\r?\\n\\s*Peak:\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*dBFS",
+                true_peak_log,
+                re.IGNORECASE,
+            )
         if peak_match:
             true_peak = float(peak_match.group(1))
         true_peak_ok = peak_result.returncode == 0 and true_peak is not None and true_peak <= true_peak_limit
@@ -171,6 +179,8 @@ def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *,
         "true_peak_dbfs": true_peak,
         "limit_dbfs": true_peak_limit,
         "measurement_available": true_peak is not None or (audio is None and not audio_required),
+        "ffmpeg_return_code": peak_result.returncode if audio is not None else None,
+        "diagnostic_excerpt": true_peak_log[-3000:] if audio is not None and true_peak is None else "",
     }, f"<= {true_peak_limit} dBFS")
 
     hard_failures = [item["check_id"] for item in checks if item["status"] == "FAIL"]
