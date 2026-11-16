@@ -384,7 +384,7 @@ def test_builtin_ffprobe_qa_measures_real_media_and_completes_a_claimed_task(tmp
         connection.commit()
     packet = engine.claim_next("demo", "qa-worker")
     result = run_claimed_media_qa(engine, "demo", "technical-qa", "qa-worker", packet["claim"]["claim_token"], "final-candidate")
-    assert result["report"]["hard_pass"] is True
+    assert result["report"]["hard_pass"] is True, result["report"]["checks"]
     assert result["report"]["summary"]["width"] == 320
     assert result["report"]["summary"]["frame_rate"] == 25
     assert result["task_completion"]["status"] == "COMPLETED"
@@ -531,7 +531,7 @@ def test_repeated_media_qa_uses_new_immutable_receipt_path(tmp_path):
     assert second["report"]["metadata"]["checker"] == "ffmpeg-ffprobe-v1.0"
     required_checks = {"video_stream", "stream_duration_match", "true_peak", "black_frames", "full_decode"}
     assert required_checks.issubset({item["check_id"] for item in second["report"]["checks"]})
-    assert second["report"]["hard_pass"] is True, second["report"]["hard_failures"]
+    assert second["report"]["hard_pass"] is True, second["report"]["checks"]
     assert engine.audit("demo")["pass"] is True
 
 
