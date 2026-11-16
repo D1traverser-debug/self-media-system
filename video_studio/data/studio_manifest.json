@@ -104,7 +104,8 @@
       "shot_route": "video_growth_agent.engine_routing.CostAwareShotRouter",
       "business_outcome_metrics": "video_growth_agent.business_metrics.EpisodeOutcomeReceipt",
       "extended_media_qa": "video_growth_agent.media_qa.MediaQAChecker",
-      "programmatic_graphic_render": "video_growth_agent.programmatic_graphics.render_programmatic_graphic"
+      "programmatic_graphic_render": "video_growth_agent.programmatic_graphics.render_programmatic_graphic",
+      "media_graph_initialize": "video_growth_agent.media_graph.MediaGraph"
     },
     "domain_adapter_execution": {
       "entrypoint": "vga-studio run-adapter",
