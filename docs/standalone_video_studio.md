@@ -14,6 +14,19 @@ Supported work may include cinematic explainers, technology/business documentari
 
 No single visual style, runtime, aspect ratio, duration, model, editor or production method is universal.
 
+## 1.1 Business-domain scope
+
+The Studio is the standalone control plane for the complete Video Growth Agent domain, not only a clip renderer. A project graph may cover one workstream or connect several:
+
+- **MEDIA_GROWTH** — audience/problem research, demand signals, platform strategy, portfolio and series hypotheses, packaging, distribution, retention and audience outcomes.
+- **ORIGINAL_DIGITAL_IP** — video-side use of approved IP, recognition/performance evidence, character/asset usage strategy and licensing-use value. Canon, likeness and identity rights remain owned by IPOS.
+- **COMMERCIALIZATION** — sponsor/category fit, offer hypotheses, deliverable obligations, product-truth requirements, rights scope, measurement and commercial outcomes.
+- **PRODUCTION_SYSTEM** — editorial research and claims, story/shot design, assets/takes, generation, compositing, edit, sound, QA and release.
+
+Cross-workstream decisions must be explicit. Audience evidence may change a series hypothesis; IP performance may change packaging or licensing strategy; sponsor obligations may change format and product-asset requirements; production cost, failure and reuse evidence may change future portfolio allocation. Editorial truth, rights and owner authority remain hard constraints. Do not optimize one proxy such as views, CTR, cinematic quality, AI-video percentage or lowest credit cost.
+
+The `video_studio` engine supplies the durable project control plane: briefs, dynamic task DAGs, leases, artifacts, decisions, reviews, failures and learning receipts. It does **not** silently recreate every legacy domain object. When Program/Series/Episode/Shot/Timeline, continuity, provider routing, business metrics or IP identity semantics are required, reuse the corresponding Video-owned domain module through an explicit, tested adapter and register its outputs as versioned Studio artifacts. Do not use the legacy fixed-stage `StudioOrchestrator` as the new controller. Existing specialized modules are optional capability libraries, not a hidden parent workflow.
+
 ## 2. Authority and independence
 
 - **Owner request and corrections** define the goal and constraints.
@@ -131,7 +144,7 @@ The runtime does not impose one global quality score. The brief selects relevant
 - rights, likeness, provenance and disclosure;
 - platform format and packaging.
 
-Technical tools can verify streams, durations, frame rate, resolution, loudness, clipping, black frames, subtitle bounds and file integrity. They cannot prove that a film is compelling, funny, emotionally coherent or commercially effective. Human or genuinely independent multimodal review must inspect the actual media when the rubric requires it.
+The built-in FFprobe adapter currently measures stream presence, duration, resolution, frame rate and available stream-duration consistency. Additional FFmpeg/ subtitle analyzers may be added as separately declared, tested adapters for loudness, clipping, black frames or subtitle bounds; do not claim those checks ran unless their receipts exist. No technical tool proves that a film is compelling, funny, emotionally coherent or commercially effective. Human or genuinely independent multimodal review must inspect the actual media when the rubric requires it.
 
 `release-check` verifies the exact current file digest, required independent PASS reviews, rights state and configured release evidence. It records acceptance evidence; it does not publish to a platform. Publication remains a separate authorized action.
 
@@ -189,6 +202,6 @@ The existing `vga` CLI and 0.8 Media Business OS remain available for historical
 
 ## 14. Known limits of this first standalone runtime
 
-The core supplies durable project governance, DAG scheduling, worker leases, artifact identity, review evidence, failure records and learning admission. It does not itself contain a universal LLM, image/video generation model, NLE, music library or paid provider credential. The active worker must use the actual available media tools/provider adapters, report capability gaps honestly, and return files into the project workspace. The absence of a provider blocks only the affected operation or triggers an explicitly accepted degradation path; it never fabricates media output.
+The core supplies durable project governance, DAG scheduling, worker leases, artifact identity, review evidence, failure records and learning admission. It does not itself contain a universal LLM, image/video generation model, NLE, music library or paid provider credential. Nor does the core itself implement every business-domain object; the Skill coordinates those domain capabilities through explicit adapters and evidence-bound artifacts. The active worker must use the actual available media tools/provider adapters, report capability gaps honestly, and return files into the project workspace. The absence of a provider blocks only the affected operation or triggers an explicitly accepted degradation path; it never fabricates media output.
 
 This boundary is intentional: the orchestration core remains provider-neutral and independently operable instead of pretending a generic task scheduler can create cinematic video by itself.
