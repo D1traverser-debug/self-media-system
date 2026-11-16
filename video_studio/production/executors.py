@@ -75,6 +75,7 @@ def run_claimed_production_task(
 
         if operation == "delivery_package":
             package_map = _mapping(config.get("package_map"), "package_map")
+            expected_types = _mapping(config.get("expected_types", {}), "expected_types")
             required = config.get("required_artifacts", [])
             if not isinstance(required, list) or not all(isinstance(item, str) for item in required):
                 raise ProductionContractError("required_artifacts must be an array of artifact names")
@@ -93,6 +94,7 @@ def run_claimed_production_task(
                 package_path=output_dir / f"{package_output}.zip",
                 manifest_path=output_dir / f"{manifest_output}.json",
                 project_id=project_id,
+                expected_types=expected_types,
             )
             artifact_outputs = {
                 package_output: _output_payload(
