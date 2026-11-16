@@ -306,5 +306,6 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
 
     invalid = json.loads(frame_spec.read_text(encoding="utf-8"))
     invalid["trusted_code_execution"] = False
+    invalid_spec = FrameRenderSpec.from_dict(invalid)
     with pytest.raises(ProductionContractError, match="trusted_code_execution=true"):
-        FrameRenderSpec.from_dict(invalid)
+        invalid_spec.validate_inputs({"renderer-script"})
