@@ -212,7 +212,11 @@ def main(argv: list[str] | None = None) -> int:
                 max_rounds=args.max_rounds,
             )
             _emit(result)
-            if result["failed"] or result["ready_tool_tasks_without_registered_executor"]:
+            if (
+                result["failed"]
+                or result["ready_tool_tasks_without_registered_executor"]
+                or result["remaining_ready_registered_tool_tasks"]
+            ):
                 return 2
         elif command == "heartbeat":
             _emit({"lease_until": engine.heartbeat(args.project_id, args.task_id, args.worker, args.token, args.lease_seconds)})
