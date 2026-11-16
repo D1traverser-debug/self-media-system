@@ -126,7 +126,9 @@ class StudioEngine:
         review_columns = {row[1] for row in connection.execute("PRAGMA table_info(reviews)").fetchall()}
         if "evidence_bindings_json" not in review_columns:
             connection.execute("ALTER TABLE reviews ADD COLUMN evidence_bindings_json TEXT NOT NULL DEFAULT '[]'")
-        connection.execute("INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '2')")
+        version_row = connection.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()
+        if version_row is None or version_row["value"] != "2":
+            connection.execute("INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '2')")
 
     def _connect(self, project_id: str) -> sqlite3.Connection:
         db_path = self._project_dir(project_id) / "studio.sqlite3"
