@@ -64,6 +64,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("status", help="show project and task readiness")
     p.add_argument("project_id")
 
+    p = sub.add_parser("resume", help="reconstruct the project handoff from durable Video state without chat memory")
+    p.add_argument("project_id")
+    p.add_argument("--event-limit", type=int, default=40)
+
     p = sub.add_parser("tasks", help="list the dynamic task graph")
     p.add_argument("project_id")
 
@@ -196,6 +200,8 @@ def main(argv: list[str] | None = None) -> int:
                                       rights_status=args.rights_status, metadata=metadata))
         elif command == "status":
             _emit(engine.status(args.project_id))
+        elif command == "resume":
+            _emit(engine.resume(args.project_id, event_limit=args.event_limit))
         elif command == "tasks":
             _emit(engine.list_tasks(args.project_id))
         elif command == "claim":
