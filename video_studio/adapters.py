@@ -268,7 +268,8 @@ def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         raise DomainAdapterError(f"adapter output already exists; refusing overwrite: {path.name}")
-    path.write_text(json.dumps(_jsonable(payload), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with path.open("x", encoding="utf-8") as stream:
+        stream.write(json.dumps(_jsonable(payload), ensure_ascii=False, indent=2) + "\n")
 
 
 def run_claimed_domain_adapter(
