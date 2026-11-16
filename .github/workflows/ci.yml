@@ -35,7 +35,7 @@ jobs:
           audit = json.load(open('/tmp/studio-audit.json', encoding='utf-8'))
           assert set(status['ready_tasks']) == {'research', 'creative-directions'}, status
           assert audit['pass'] is True, audit
-          assert audit['task_count'] == 9, audit
+          assert audit['task_count'] == 10, audit
           print('standalone-video-studio-smoke: PASS')
           PY
       - name: Smoke test installed CLI outside repository
