@@ -27,6 +27,7 @@ def create_delivery_package(
     package_path: str | Path,
     manifest_path: str | Path,
     project_id: str,
+    expected_types: Mapping[str, Mapping[str, str]] | None = None,
 ) -> dict[str, Any]:
     if not package_map:
         raise ProductionContractError("delivery package requires a non-empty artifact-to-path map")
@@ -43,6 +44,11 @@ def create_delivery_package(
         if artifact_name not in input_artifacts:
             raise ProductionContractError(f"delivery artifact is not a declared task input: {artifact_name}")
         artifact = input_artifacts[artifact_name]
+        expected = (expected_types or {}).get(artifact_name, {})
+        if expected.get("kind") and artifact.get("kind") != expected["kind"]:
+            raise ProductionContractError(f"delivery artifact {artifact_name} has kind {artifact.get('kind')!r}; expected {expected['kind']!r}")
+        if expected.get("media_type") and artifact.get("media_type") != expected["media_type"]:
+            raise ProductionContractError(f"delivery artifact {artifact_name} has media_type {artifact.get('media_type')!r}; expected {expected['media_type']!r}")
         source = Path(str(artifact.get("path", ""))).resolve()
         if not source.is_file() or source.stat().st_size <= 0:
             raise DeliveryPackageError(f"delivery artifact is missing or empty: {artifact_name}")
