@@ -22,7 +22,7 @@ Standalone, outcome-driven Video Studio for research, creative development, para
 - `video_growth_agent/data/` — versioned legacy/specialized episode workflow, specialists and coordination resources.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
 
-The new `video_studio` package owns its requirement interpretation, decision receipts, task graph, leases, artifact history, review receipts, root-cause repair, recovery and learning admission. `vga-studio` and `python -m video_studio` both enter this package; legacy import paths are compatibility shims. It has no parent task identity, no parent lease and no CAOS runtime/API/Skill dependency. The 0.8 compatibility surfaces below retain their historical governance records but are not loaded by `vga-studio`.
+The new `video_studio` package owns its requirement interpretation, decision receipts, task graph, leases, artifact history, review receipts, root-cause repair, recovery and learning admission. `vga-studio` and `python -m video_studio` both enter this package; legacy import paths are compatibility shims. It has no parent task identity, no parent lease and no CAOS runtime/API/Skill dependency. The 0.8 controller, fixed-stage workflow and parent-governance surfaces are not loaded by `vga-studio`. Specialized domain modules are imported only through the explicit `video_studio.adapters` bridge when a task declares a verified adapter.
 
 ## Legacy Media Business OS 0.8.0 compatibility layer
 
