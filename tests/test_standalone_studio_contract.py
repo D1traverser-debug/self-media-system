@@ -76,6 +76,20 @@ def test_standalone_control_plane_is_independent_and_domain_bridge_is_explicit()
     assert "run_claimed_domain_adapter" in adapters
 
 
+def test_standalone_manifest_registers_explicit_domain_adapters_and_font_rights_metadata():
+    manifest = json.loads((ROOT / "video_studio" / "data" / "studio_manifest.json").read_text(encoding="utf-8"))
+    adapters = manifest["capabilities"]["domain_adapters"]
+    assert {
+        "editorial_plan_validate", "shot_contract_materialize", "ipos_bundle_import",
+        "ipos_shot_bind", "ipos_continuity_snapshot", "ipos_continuity_link",
+        "media_graph_initialize", "timeline_validate", "continuity_assess",
+        "shot_route", "business_outcome_metrics", "extended_media_qa",
+        "programmatic_graphic_render",
+    }.issubset(adapters)
+    font_metadata = json.loads((ROOT / "examples" / "adapter-demo-font.metadata.json").read_text(encoding="utf-8"))
+    assert font_metadata["rights_evidence_refs"] == ["rights-clearance"]
+
+
 def test_example_briefs_preserve_nonnegotiable_video_release_gates():
     root = ROOT / "examples"
     explainer = json.loads((root / "technology-explainer.brief.json").read_text(encoding="utf-8"))
