@@ -34,6 +34,7 @@ from video_growth_agent.engine_routing import (
 from video_growth_agent.ip_identity import import_ipos_bundle, inspect_ipos_bundle
 from video_growth_agent.production_os import ReferenceBinding
 from video_growth_agent.media_graph import MediaGraph
+from video_growth_agent.media_qa import MediaQAChecker
 from video_growth_agent.programmatic_graphics import (
     graphic_spec_from_dict,
     register_graph_candidate,
@@ -470,6 +471,27 @@ def run_claimed_domain_adapter(
                 }
             }
             result = {"adapter": name, "selected_engine_id": route.get("selected_engine_id"), "blocked": route.get("selected_engine_id") is None}
+
+        elif name == "extended_media_qa":
+            media_name = str(config["media_input"])
+            media_path = _input_path(packet, media_name)
+            report = MediaQAChecker().inspect(media_path).to_dict()
+            output_name = str(config.get("output_name", outputs[0]))
+            path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
+            payload = {"adapter": name, **report}
+            _write_json(path, payload)
+            artifact_outputs = {
+                output_name: {
+                    "path": str(path), "kind": "qa_report", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {
+                        "adapter": name, "checker": report.get("metadata", {}).get("checker"),
+                        "media_sha256": report.get("metadata", {}).get("sha256"),
+                        "hard_pass": report.get("hard_pass"),
+                    },
+                }
+            }
+            result = {"adapter": name, "hard_pass": report.get("hard_pass"), "check_count": len(report.get("checks", []))}
 
         elif name == "continuity_assess":
             continuity = assess_shot_continuity(_input_json(packet, str(config["continuity_input"])))
