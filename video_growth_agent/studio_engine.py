@@ -997,3 +997,307 @@ class StudioEngine:
             self._event(connection, project_id, "DECISION", decision_id, "DECISION_RECORDED", payload)
             connection.commit()
         return {"decision_id": decision_id, "status": "ACTIVE", "payload": payload}
+    def record_failure(self, project_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        required = ["symptom", "hypotheses", "selected_root_cause", "method_challenge", "repair_plan", "falsifier", "rollback", "evidence_refs"]
+        missing = [key for key in required if not payload.get(key)]
+        if missing:
+            raise ContractError(f"failure diagnosis missing fields: {missing}")
+        if len(payload["hypotheses"]) < 2:
+            raise ContractError("failure diagnosis must compare at least two root-cause hypotheses")
+        if not all(item.get("discriminator") for item in payload["hypotheses"]):
+            raise ContractError("each failure hypothesis needs a discriminator")
+        hypothesis_ids = {item.get("id") for item in payload["hypotheses"]}
+        if payload["selected_root_cause"] not in hypothesis_ids:
+            raise ContractError("selected_root_cause must identify one declared hypothesis")
+        failure_id = _safe_id(payload.get("failure_id") or "f_" + uuid.uuid4().hex[:16], "failure_id")
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            self._project_row(connection, project_id)
+            if payload.get("task_id"):
+                task = connection.execute("SELECT 1 FROM tasks WHERE project_id=? AND task_id=?", (project_id, payload["task_id"])).fetchone()
+                if task is None:
+                    raise ContractError(f"unknown task_id: {payload['task_id']}")
+            now = _iso()
+            connection.execute(
+                "INSERT INTO failures(project_id,failure_id,task_id,status,payload_json,created_at,updated_at) VALUES(?,?,?,?,?,?,?)",
+                (project_id, failure_id, payload.get("task_id"), "OPEN", _json(payload), now, now),
+            )
+            self._event(connection, project_id, "FAILURE", failure_id, "FAILURE_DIAGNOSED", payload)
+            connection.commit()
+        return {"failure_id": failure_id, "status": "OPEN", "payload": payload}
+
+    def resolve_failure(self, project_id: str, failure_id: str, resolution: dict[str, Any]) -> None:
+        if not resolution.get("verification_refs") or not resolution.get("regression_refs"):
+            raise ContractError("failure resolution requires independent verification_refs and regression_refs")
+        if resolution.get("result") != "PASS":
+            raise ContractError("failure can be resolved only when independent verification and regression result are PASS")
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute("SELECT * FROM failures WHERE project_id=? AND failure_id=?", (project_id, failure_id)).fetchone()
+            if row is None:
+                raise ProjectNotFound(failure_id)
+            if row["status"] != "OPEN":
+                raise ContractError("only OPEN failures can be resolved")
+            connection.execute(
+                "UPDATE failures SET status='RESOLVED',resolution_json=?,updated_at=? WHERE project_id=? AND failure_id=?",
+                (_json(resolution), _iso(), project_id, failure_id),
+            )
+            self._event(connection, project_id, "FAILURE", failure_id, "FAILURE_RESOLVED", resolution)
+            connection.commit()
+
+    def record_review(
+        self, project_id: str, artifact_id: str, *, reviewer_id: str, rubric_id: str,
+        outcome: str, dimensions: dict[str, Any], evidence_refs: list[str], notes: str = "",
+    ) -> dict[str, Any]:
+        if outcome not in {"PASS", "REVISE", "FAIL", "BLOCKED", "NOT_TESTED"}:
+            raise ContractError("invalid review outcome")
+        if not reviewer_id or not rubric_id or not evidence_refs:
+            raise ContractError("review requires reviewer, rubric and evidence_refs")
+        _safe_id(reviewer_id, "reviewer_id")
+        _safe_id(rubric_id, "rubric_id")
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            artifact = connection.execute(
+                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?", (project_id, artifact_id)
+            ).fetchone()
+            if artifact is None:
+                raise ProjectNotFound(artifact_id)
+            if artifact["status"] not in {"CURRENT", "ACCEPTED"}:
+                raise ContractError("stale artifacts cannot receive a current review")
+            artifact_path = self._project_dir(project_id) / artifact["relative_path"]
+            if not artifact_path.is_file() or _sha256(artifact_path) != artifact["sha256"]:
+                raise ContractError("artifact bytes changed; review must target a verified current digest")
+            if reviewer_id == artifact["producer_id"]:
+                raise ContractError("producer cannot independently review its own artifact")
+            review_id = "r_" + uuid.uuid4().hex[:16]
+            payload = {
+                "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
+                "rubric_id": rubric_id, "reviewer_id": reviewer_id,
+                "producer_id": artifact["producer_id"], "outcome": outcome,
+                "dimensions": dimensions, "evidence_refs": evidence_refs, "notes": notes,
+            }
+            connection.execute(
+                """INSERT INTO reviews(project_id,review_id,artifact_id,artifact_digest,rubric_id,reviewer_id,
+                   producer_id,outcome,dimensions_json,evidence_refs_json,notes,created_at)
+                   VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (project_id, review_id, artifact_id, artifact["sha256"], rubric_id, reviewer_id,
+                 artifact["producer_id"], outcome, _json(dimensions), _json(evidence_refs), notes, _iso()),
+            )
+            self._event(connection, project_id, "REVIEW", review_id, "REVIEW_RECORDED", payload)
+            connection.commit()
+        return {"review_id": review_id, **payload}
+
+    def release_check(
+        self, project_id: str, artifact_id: str, *, required_rubrics: list[str],
+        evidence_refs: list[str] | None = None, require_rights: bool = True,
+    ) -> dict[str, Any]:
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            artifact = connection.execute(
+                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?", (project_id, artifact_id)
+            ).fetchone()
+            if artifact is None:
+                raise ProjectNotFound(artifact_id)
+            failures: list[str] = []
+            artifact_path = self._project_dir(project_id) / artifact["relative_path"]
+            if not artifact_path.is_file() or _sha256(artifact_path) != artifact["sha256"]:
+                failures.append("artifact_bytes_missing_or_digest_changed")
+            if artifact["status"] not in {"CURRENT", "ACCEPTED"}:
+                failures.append(f"artifact_not_current:{artifact['status']}")
+            if require_rights and artifact["rights_status"] not in RIGHTS_ALLOWED:
+                failures.append(f"rights_not_cleared:{artifact['rights_status']}")
+            review_rows = connection.execute(
+                "SELECT * FROM reviews WHERE project_id=? AND artifact_id=? AND artifact_digest=?",
+                (project_id, artifact_id, artifact["sha256"]),
+            ).fetchall()
+            by_rubric: dict[str, list[str]] = {}
+            for review in review_rows:
+                by_rubric.setdefault(review["rubric_id"], []).append(review["outcome"])
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            release_policy = brief.get("release_policy", {})
+            effective_rubrics = sorted(set(required_rubrics or []) | set(release_policy.get("required_review_rubrics", [])))
+            if not effective_rubrics:
+                raise ContractError("release_check requires at least one review rubric in the brief or command")
+            for rubric in effective_rubrics:
+                outcomes = by_rubric.get(rubric, [])
+                if not outcomes or any(outcome != "PASS" for outcome in outcomes):
+                    failures.append(f"required_review_missing_or_conflicting:{rubric}:{outcomes}")
+            supplied_evidence = set(evidence_refs or [])
+            required_evidence = set(release_policy.get("required_evidence_refs", []))
+            missing_evidence = sorted(required_evidence - supplied_evidence)
+            if missing_evidence:
+                failures.append(f"release_evidence_missing:{missing_evidence}")
+            required_artifacts = list(release_policy.get("required_artifact_names", []))
+            for required_name in required_artifacts:
+                required_artifact = self._artifact_by_name(connection, project_id, required_name)
+                if required_artifact is None:
+                    failures.append(f"required_deliverable_missing:{required_name}")
+                else:
+                    required_path = self._project_dir(project_id) / required_artifact["relative_path"]
+                    if not required_path.is_file() or _sha256(required_path) != required_artifact["sha256"]:
+                        failures.append(f"required_deliverable_bytes_changed:{required_name}")
+            required_assets = list(release_policy.get("required_asset_names", []))
+            for asset_name in required_assets:
+                source_asset = self._artifact_by_name(connection, project_id, asset_name)
+                if source_asset is None:
+                    failures.append(f"required_source_asset_missing:{asset_name}")
+                elif source_asset["rights_status"] not in RIGHTS_ALLOWED:
+                    failures.append(f"required_source_asset_rights_not_cleared:{asset_name}:{source_asset['rights_status']}")
+                else:
+                    source_path = self._project_dir(project_id) / source_asset["relative_path"]
+                    if not source_path.is_file() or _sha256(source_path) != source_asset["sha256"]:
+                        failures.append(f"required_source_asset_bytes_changed:{asset_name}")
+            receipt = {
+                "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
+                "required_rubrics": effective_rubrics, "required_artifacts": required_artifacts,
+                "required_assets": required_assets, "evidence_refs": sorted(supplied_evidence),
+                "rights_status": artifact["rights_status"], "failures": failures,
+                "pass": not failures,
+            }
+            if not failures:
+                connection.execute("UPDATE artifacts SET status='ACCEPTED' WHERE project_id=? AND artifact_id=?", (project_id, artifact_id))
+                self._event(connection, project_id, "ARTIFACT", artifact_id, "ARTIFACT_RELEASE_ACCEPTED", receipt)
+            else:
+                self._event(connection, project_id, "ARTIFACT", artifact_id, "ARTIFACT_RELEASE_BLOCKED", receipt)
+            connection.commit()
+            return receipt
+
+    def invalidate(self, project_id: str, task_id: str, reason: str) -> dict[str, Any]:
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            tasks = self._task_map(connection, project_id)
+            if task_id not in tasks:
+                raise ProjectNotFound(task_id)
+            descendants: set[str] = set()
+            changed = True
+            while changed:
+                changed = False
+                for candidate, row in tasks.items():
+                    deps = _loads(row["depends_on_json"], [])
+                    if candidate == task_id or any(dep in descendants or dep == task_id for dep in deps):
+                        if candidate not in descendants:
+                            descendants.add(candidate)
+                            changed = True
+            now = _iso()
+            for affected in descendants:
+                connection.execute(
+                    "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
+                    (_json({"reason": reason}), now, project_id, affected),
+                )
+                connection.execute(
+                    "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
+                    (project_id, affected),
+                )
+                self._event(connection, project_id, "TASK", affected, "TASK_INVALIDATED", {"root_task": task_id, "reason": reason})
+            connection.commit()
+        return {"root_task": task_id, "invalidated_tasks": sorted(descendants), "reason": reason}
+
+    def reopen(self, project_id: str, task_id: str, reason: str) -> list[str]:
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            tasks = self._task_map(connection, project_id)
+            if task_id not in tasks:
+                raise ProjectNotFound(task_id)
+            descendants: set[str] = set()
+            changed = True
+            while changed:
+                changed = False
+                for candidate, row in tasks.items():
+                    deps = _loads(row["depends_on_json"], [])
+                    if candidate == task_id or any(dep in descendants or dep == task_id for dep in deps):
+                        if candidate not in descendants:
+                            descendants.add(candidate)
+                            changed = True
+            for affected in descendants:
+                connection.execute(
+                    "UPDATE tasks SET status='PENDING',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=NULL,updated_at=? WHERE project_id=? AND task_id=? AND status IN ('STALE','BLOCKED','FAILED','WAITING_INPUT')",
+                    (_iso(), project_id, affected),
+                )
+                self._event(connection, project_id, "TASK", affected, "TASK_REOPENED", {"reason": reason})
+            self._refresh_in_tx(connection, project_id)
+            connection.commit()
+        return sorted(descendants)
+
+    def record_learning(self, project_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        required = ["method", "applicability", "counterexamples", "failure_conditions", "evidence_refs", "replay_refs"]
+        missing = [key for key in required if not payload.get(key)]
+        if missing:
+            raise ContractError(f"learning candidate missing fields: {missing}")
+        learning_id = _safe_id(payload.get("learning_id") or "l_" + uuid.uuid4().hex[:16], "learning_id")
+        independently_validated = (
+            payload.get("independent_replay_pass") is True
+            and bool(payload.get("validation_evidence_refs"))
+            and bool(payload.get("counterexample_trials"))
+        )
+        status = "VALIDATED" if independently_validated else "CANDIDATE"
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            connection.execute(
+                "INSERT INTO learning(project_id,learning_id,status,payload_json,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+                (project_id, learning_id, status, _json(payload), _iso(), _iso()),
+            )
+            self._event(connection, project_id, "LEARNING", learning_id, "LEARNING_RECORDED", {"status": status, "payload": payload})
+            connection.commit()
+        return {"learning_id": learning_id, "status": status, "payload": payload}
+
+    def status(self, project_id: str) -> dict[str, Any]:
+        project = self.project(project_id)
+        tasks = self.list_tasks(project_id)
+        counts: dict[str, int] = {}
+        for task in tasks:
+            counts[task["status"]] = counts.get(task["status"], 0) + 1
+        ready = [task["task_id"] for task in tasks if task["status"] == "READY"]
+        with closing(self._connect(project_id)) as connection:
+            events = connection.execute("SELECT COUNT(*) AS count FROM events WHERE project_id=?", (project_id,)).fetchone()["count"]
+            open_failures = connection.execute("SELECT COUNT(*) AS count FROM failures WHERE project_id=? AND status='OPEN'", (project_id,)).fetchone()["count"]
+        return {"project": project, "task_counts": counts, "ready_tasks": ready, "open_failures": open_failures, "event_count": events}
+
+    def events(self, project_id: str, limit: int = 100) -> list[dict[str, Any]]:
+        with closing(self._connect(project_id)) as connection:
+            rows = connection.execute(
+                "SELECT * FROM events WHERE project_id=? ORDER BY event_no DESC LIMIT ?",
+                (project_id, max(1, min(limit, 1000))),
+            ).fetchall()
+            return [{**dict(row), "payload": _loads(row["payload_json"], {})} for row in reversed(rows)]
+
+    def audit(self, project_id: str) -> dict[str, Any]:
+        failures: list[str] = []
+        tasks = self.list_tasks(project_id)
+        task_map = {task["task_id"]: task for task in tasks}
+        try:
+            self._validate_graph(task_map)
+        except ContractError as exc:
+            failures.append(str(exc))
+        for task in tasks:
+            if task["status"] == "RUNNING":
+                if not task.get("worker_id") or not task.get("claim_token") or not task.get("lease_until"):
+                    failures.append(f"running_task_missing_lease:{task['task_id']}")
+            if task["status"] == "COMPLETED":
+                outputs = task.get("result", {}).get("outputs", {})
+                if set(outputs) != set(task["outputs"]):
+                    failures.append(f"completed_task_output_contract_mismatch:{task['task_id']}")
+        with closing(self._connect(project_id)) as connection:
+            artifacts = connection.execute("SELECT * FROM artifacts WHERE project_id=?", (project_id,)).fetchall()
+            for artifact in artifacts:
+                path = self._project_dir(project_id) / artifact["relative_path"]
+                if artifact["status"] in {"CURRENT", "ACCEPTED"}:
+                    if not path.is_file():
+                        failures.append(f"current_artifact_missing:{artifact['artifact_id']}")
+                    elif _sha256(path) != artifact["sha256"]:
+                        failures.append(f"current_artifact_digest_mismatch:{artifact['artifact_id']}")
+            reviews = connection.execute("SELECT * FROM reviews WHERE project_id=?", (project_id,)).fetchall()
+            for review in reviews:
+                artifact = connection.execute(
+                    "SELECT sha256,producer_id FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, review["artifact_id"]),
+                ).fetchone()
+                if artifact is None or review["artifact_digest"] != artifact["sha256"]:
+                    failures.append(f"review_artifact_binding_mismatch:{review['review_id']}")
+                if review["reviewer_id"] == review["producer_id"]:
+                    failures.append(f"self_review_detected:{review['review_id']}")
+            decisions = connection.execute("SELECT * FROM decisions WHERE project_id=?", (project_id,)).fetchall()
+            for row in decisions:
+                payload = _loads(row["payload_json"], {})
+                if not payload.get("falsifier") or not payload.get("rollback"):
+                    failures.append(f"decision_missing_falsifier_or_rollback:{row['decision_id']}")
+        return {"project_id": project_id, "task_count": len(tasks), "artifact_count": len(artifacts), "failures": failures, "pass": not failures}
