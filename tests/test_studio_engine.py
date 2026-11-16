@@ -231,8 +231,14 @@ def test_reviews_are_bound_to_exact_digest_and_independent_reviewer(tmp_path):
 
 def test_release_check_requires_all_reviews_rights_and_platform_evidence(tmp_path):
     engine = make_engine(tmp_path)
-    engine.add_tasks("demo", [task("render")])
-    artifact = complete(engine, tmp_path, "render", "artist")
+    engine.add_tasks("demo", [task("render", outputs=["final-video"])])
+    packet = engine.claim_next("demo", "artist")
+    output = engine._project_dir("demo") / "artifacts" / "final-video.mp4"
+    output.write_bytes(b"verified final video bytes")
+    result = engine.complete_task("demo", "render", "artist", packet["claim"]["claim_token"], {
+        "final-video": {"path": str(output), "kind": "video", "media_type": "video/mp4", "rights_status": "OWNED"}
+    })
+    artifact = result["artifacts"]["final-video"]
     for rubric in ("editorial", "craft", "technical"):
         engine.record_review("demo", artifact["artifact_id"], reviewer_id=f"reviewer-{rubric}", rubric_id=rubric, outcome="PASS", dimensions={"score": 4}, evidence_refs=[f"evidence://{rubric}"])
     blocked = engine.release_check("demo", artifact["artifact_id"], required_rubrics=["editorial", "craft", "technical"], evidence_refs=[])
@@ -354,7 +360,7 @@ def test_release_check_rehashes_final_artifact_before_acceptance(tmp_path):
     output.write_text("modified after review", encoding="utf-8")
     result = engine.release_check("demo", artifact["artifact_id"], required_rubrics=["craft"], evidence_refs=["platform-format-review"])
     assert result["pass"] is False
-    assert "artifact_bytes_missing_or_digest_changed" in result["failures"]
+    assert any(item.startswith("final_artifact_bytes_missing_or_digest_changed") for item in result["failures"])
 
 
 def test_builtin_ffprobe_qa_measures_real_media_and_completes_a_claimed_task(tmp_path):
