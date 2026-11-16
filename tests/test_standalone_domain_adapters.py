@@ -337,6 +337,6 @@ def test_ipos_bundle_import_adapter_preserves_external_canon_and_graph_lineage(t
     graph_result = json.loads(Path(graph_artifact["path"]).read_text(encoding="utf-8"))
     receipt = json.loads(Path(receipt_artifact["path"]).read_text(encoding="utf-8"))
     assert receipt["canon_ref"].endswith("@v1")
-    assert len(receipt["imported_asset_refs"]) == 1
+    assert len(receipt["imported_asset_refs"]) == 2
     assert any(item["kind"] == "IPOS_IDENTITY_BUNDLE" for item in graph_result["assets"])
     assert engine.audit("ipos")["pass"] is True
