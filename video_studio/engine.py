@@ -506,12 +506,61 @@ class StudioEngine:
         for task_id in all_tasks:
             visit(task_id)
         output_owners: dict[str, str] = {}
+        candidate_groups: dict[str, set[str]] = {}
+        adjudications: list[tuple[str, dict[str, Any]]] = []
         for task_id, task in all_tasks.items():
             for output in task.get("outputs", []):
                 previous = output_owners.get(output)
                 if previous is not None and previous != task_id:
                     raise ContractError(f"artifact output {output!r} has multiple producers: {previous}, {task_id}")
                 output_owners[output] = task_id
+            requirements = task.get("requirements", {})
+            coordination = requirements.get("coordination", {}) if isinstance(requirements, dict) else {}
+            if not coordination:
+                continue
+            if not isinstance(coordination, dict):
+                raise ContractError(f"{task_id}: requirements.coordination must be an object")
+            pattern = coordination.get("pattern")
+            if pattern == "COMPETITIVE_CANDIDATES":
+                group = coordination.get("decision_group")
+                criteria = coordination.get("candidate_criteria")
+                if not isinstance(group, str) or not group.strip():
+                    raise ContractError(f"{task_id}: competitive candidate task requires decision_group")
+                if not isinstance(criteria, list) or not criteria:
+                    raise ContractError(f"{task_id}: competitive candidate task requires declared candidate_criteria")
+                candidate_groups.setdefault(group, set()).add(task_id)
+            elif pattern == "OWNER_ADJUDICATION":
+                group = coordination.get("consumes_group")
+                adjudicator = coordination.get("adjudicator")
+                if not isinstance(group, str) or not group.strip() or not isinstance(adjudicator, str) or not adjudicator.strip():
+                    raise ContractError(f"{task_id}: owner adjudication requires consumes_group and adjudicator")
+                if task.get("executor") != "human":
+                    raise ContractError(f"{task_id}: owner adjudication must use the human executor")
+                if coordination.get("decision_receipt_required") is not True:
+                    raise ContractError(f"{task_id}: owner adjudication requires a durable decision receipt")
+                adjudications.append((task_id, coordination))
+            elif pattern == "CONSULTATIVE_ADVICE":
+                if coordination.get("advisory_only") is not True or not coordination.get("decision_owner"):
+                    raise ContractError(f"{task_id}: consultative advice must be advisory_only and name decision_owner")
+            elif pattern == "STRUCTURED_CRITIQUE_AND_REVISION":
+                rounds = int(coordination.get("max_rounds", 0))
+                if rounds < 1 or rounds > 3:
+                    raise ContractError(f"{task_id}: critique/revision must declare bounded max_rounds in 1..3")
+            elif pattern in {"INDEPENDENT_PARALLEL", "SERIAL_DEPENDENCY", "FAN_OUT_FAN_IN", "QUORUM_OR_PANEL_REVIEW"}:
+                pass
+            else:
+                raise ContractError(f"{task_id}: unknown coordination pattern {pattern!r}")
+        for group, candidates in candidate_groups.items():
+            if len(candidates) < 2:
+                raise ContractError(f"decision group {group!r} requires at least two independent candidates")
+        for task_id, coordination in adjudications:
+            group = coordination["consumes_group"]
+            candidates = candidate_groups.get(group)
+            if not candidates:
+                raise ContractError(f"{task_id}: unknown decision group {group!r}")
+            missing_candidates = sorted(candidates - set(all_tasks[task_id].get("depends_on", [])))
+            if missing_candidates:
+                raise ContractError(f"{task_id}: owner adjudication must depend on every candidate in {group!r}: {missing_candidates}")
 
     def add_tasks(self, project_id: str, tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not isinstance(tasks, list) or not tasks:
@@ -534,6 +583,8 @@ class StudioEngine:
                     row["task_id"]: {
                         "depends_on": _loads(row["depends_on_json"], []),
                         "outputs": _loads(row["outputs_json"], []),
+                        "requirements": _loads(row["requirements_json"], {}),
+                        "executor": row["executor"],
                     } for row in existing_rows
                 }
                 prepared: list[dict[str, Any]] = []
@@ -662,10 +713,18 @@ class StudioEngine:
                 if revised["max_attempts"] < 1 or revised["max_attempts"] > 20:
                     raise ContractError("max_attempts must be 1..20")
                 graph = {
-                    key: {"depends_on": _loads(value["depends_on_json"], []), "outputs": _loads(value["outputs_json"], [])}
+                    key: {
+                        "depends_on": _loads(value["depends_on_json"], []),
+                        "outputs": _loads(value["outputs_json"], []),
+                        "requirements": _loads(value["requirements_json"], {}),
+                        "executor": value["executor"],
+                    }
                     for key, value in rows.items()
                 }
-                graph[task_id] = {"depends_on": revised["depends_on"], "outputs": revised["outputs"]}
+                graph[task_id] = {
+                    "depends_on": revised["depends_on"], "outputs": revised["outputs"],
+                    "requirements": revised["requirements"], "executor": revised["executor"],
+                }
                 existing_artifact_names = {
                     row["name"] for row in connection.execute(
                         "SELECT name FROM artifacts WHERE project_id=? AND status IN ('CURRENT','ACCEPTED') AND produced_by_task IS NULL",
