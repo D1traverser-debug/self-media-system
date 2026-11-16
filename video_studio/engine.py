@@ -1102,6 +1102,43 @@ class StudioEngine:
             self._event(connection, project_id, "FAILURE", failure_id, "FAILURE_RESOLVED", resolution)
             connection.commit()
 
+    def _resolve_artifact_refs(
+        self, connection: sqlite3.Connection, project_id: str, references: list[str],
+        *, label: str, allowed_kinds: set[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        if not isinstance(references, list) or not references:
+            raise ContractError(f"{label} must be a non-empty array of registered artifact references")
+        resolved: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for reference in references:
+            if isinstance(reference, dict):
+                reference = reference.get("artifact_id") or reference.get("name")
+            if not isinstance(reference, str) or not reference.strip():
+                raise ContractError(f"{label} contains an invalid artifact reference")
+            row = connection.execute(
+                """SELECT * FROM artifacts WHERE project_id=? AND (artifact_id=? OR name=?)
+                   ORDER BY CASE WHEN artifact_id=? THEN 0 ELSE 1 END, version DESC LIMIT 1""",
+                (project_id, reference, reference, reference),
+            ).fetchone()
+            if row is None:
+                raise ContractError(f"{label} does not resolve to a registered artifact: {reference}")
+            if row["status"] not in {"CURRENT", "ACCEPTED"}:
+                raise ContractError(f"{label} resolves to a non-current artifact: {reference}:{row['status']}")
+            if allowed_kinds and row["kind"] not in allowed_kinds:
+                raise ContractError(f"{label} resolves to an unsupported evidence kind: {reference}:{row['kind']}")
+            path = self._project_dir(project_id) / row["relative_path"]
+            if not path.is_file() or _sha256(path) != row["sha256"]:
+                raise GateError(f"{label} artifact bytes are missing or changed: {reference}")
+            if row["artifact_id"] not in seen:
+                seen.add(row["artifact_id"])
+                resolved.append({
+                    "artifact_id": row["artifact_id"], "name": row["name"],
+                    "version": row["version"], "sha256": row["sha256"],
+                    "kind": row["kind"], "media_type": row["media_type"],
+                    "rights_status": row["rights_status"],
+                })
+        return resolved
+
     def record_review(
         self, project_id: str, artifact_id: str, *, reviewer_id: str, rubric_id: str,
         outcome: str, dimensions: dict[str, Any], evidence_refs: list[str], notes: str = "",
@@ -1126,19 +1163,29 @@ class StudioEngine:
                 raise ContractError("artifact bytes changed; review must target a verified current digest")
             if reviewer_id == artifact["producer_id"]:
                 raise ContractError("producer cannot independently review its own artifact")
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            release_policy = brief.get("release_policy", {})
+            evidence_bindings = []
+            if release_policy.get("require_resolvable_evidence_refs", False):
+                evidence_bindings = self._resolve_artifact_refs(
+                    connection, project_id, evidence_refs, label=f"review:{rubric_id}:evidence",
+                    allowed_kinds={"evidence", "document", "rights_record", "qa_report", "review_report", "decision", "timeline", "domain_state", "image", "video", "audio", "source_code"},
+                )
             review_id = "r_" + uuid.uuid4().hex[:16]
             payload = {
                 "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
                 "rubric_id": rubric_id, "reviewer_id": reviewer_id,
                 "producer_id": artifact["producer_id"], "outcome": outcome,
-                "dimensions": dimensions, "evidence_refs": evidence_refs, "notes": notes,
+                "dimensions": dimensions, "evidence_refs": evidence_refs,
+                "evidence_bindings": evidence_bindings, "notes": notes,
             }
             connection.execute(
                 """INSERT INTO reviews(project_id,review_id,artifact_id,artifact_digest,rubric_id,reviewer_id,
-                   producer_id,outcome,dimensions_json,evidence_refs_json,notes,created_at)
-                   VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
+                   producer_id,outcome,dimensions_json,evidence_refs_json,evidence_bindings_json,notes,created_at)
+                   VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (project_id, review_id, artifact_id, artifact["sha256"], rubric_id, reviewer_id,
-                 artifact["producer_id"], outcome, _json(dimensions), _json(evidence_refs), notes, _iso()),
+                 artifact["producer_id"], outcome, _json(dimensions), _json(evidence_refs),
+                 _json(evidence_bindings), notes, _iso()),
             )
             self._event(connection, project_id, "REVIEW", review_id, "REVIEW_RECORDED", payload)
             connection.commit()
