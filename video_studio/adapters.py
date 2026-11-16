@@ -26,6 +26,7 @@ from video_growth_agent.engine_routing import (
     ShotRequest,
 )
 from video_growth_agent.ip_identity import import_ipos_bundle, inspect_ipos_bundle
+from video_growth_agent.production_os import ReferenceBinding
 from video_growth_agent.media_graph import MediaGraph
 from video_growth_agent.programmatic_graphics import (
     graphic_spec_from_dict,
@@ -107,6 +108,20 @@ def editorial_plan_from_dict(payload: Mapping[str, Any]) -> EditorialPlan:
         derived_from_version=data.get("derived_from_version"),
         revision_reason=str(data.get("revision_reason", "")),
     )
+
+
+def validate_shot_against_editorial_plan(plan: EditorialPlan, shot: Any) -> None:
+    planned = plan.shot(shot.shot_id)
+    if shot.editorial_plan_ref != plan.plan_ref:
+        raise DomainAdapterError("ShotContract editorial_plan_ref does not match the exact supplied EditorialPlan")
+    if shot.beat_id != planned.beat_id:
+        raise DomainAdapterError("ShotContract beat_id does not match the supplied EditorialPlan")
+    if tuple(shot.source_claim_ids) != tuple(planned.source_claim_ids):
+        raise DomainAdapterError("ShotContract source_claim_ids do not match the supplied EditorialPlan")
+    if abs(float(shot.duration_seconds) - float(planned.target_duration_seconds)) > 0.01:
+        raise DomainAdapterError("ShotContract duration does not match the supplied EditorialPlan")
+    if shot.truth_mode != planned.truth_mode or shot.risk != planned.risk:
+        raise DomainAdapterError("ShotContract truth_mode/risk do not match the supplied EditorialPlan")
 
 
 def timeline_spec_from_dict(payload: Mapping[str, Any]) -> TimelineSpec:
@@ -267,6 +282,42 @@ def run_claimed_domain_adapter(
             }
             result = {"adapter": name, "valid": True, "plan_ref": plan.plan_ref}
 
+        elif name == "shot_contract_materialize":
+            plan_name = str(config["editorial_plan_input"])
+            plan = editorial_plan_from_dict(_input_json(packet, plan_name))
+            references = config.get("references", [])
+            references_input = str(config.get("references_input", "")).strip()
+            if references_input:
+                reference_payload = _input_json(packet, references_input)
+                references = reference_payload.get("references", [])
+            if not isinstance(references, list) or not all(isinstance(item, dict) for item in references):
+                raise DomainAdapterError("shot materialization references must be an array of objects")
+            shot = materialize_shot_contract(
+                plan,
+                shot_id=str(config["shot_id"]),
+                sequence_id=str(config["sequence_id"]),
+                required_capabilities=frozenset(config.get("required_capabilities", [])),
+                quality_targets=dict(config.get("quality_targets", {})),
+                references=tuple(ReferenceBinding(**item) for item in references),
+                continuity_ref=str(config.get("continuity_ref", "")),
+                graceful_degradation=tuple(config.get("graceful_degradation", [])),
+                stop_conditions=tuple(config.get("stop_conditions", [])),
+                budget_usd=config.get("budget_usd"),
+                disclosure_required=bool(config.get("disclosure_required", False)),
+            )
+            output_name = str(config.get("output_name", outputs[0]))
+            path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
+            payload = {"adapter": name, "valid": True, "shot_contract": _jsonable(shot)}
+            _write_json(path, payload)
+            artifact_outputs = {
+                output_name: {
+                    "path": str(path), "kind": "evidence", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {"adapter": name, "valid": True, "shot_id": shot.shot_id, "editorial_plan_ref": shot.editorial_plan_ref},
+                }
+            }
+            result = {"adapter": name, "valid": True, "shot_id": shot.shot_id, "editorial_plan_ref": shot.editorial_plan_ref}
+
         elif name == "shot_contract_validate":
             input_name = str(config["shot_contract_input"])
             shot = shot_contract_from_dict(_input_json(packet, input_name))
@@ -395,6 +446,9 @@ def run_claimed_domain_adapter(
             rights_name = str(config["rights_evidence_input"])
             spec = graphic_spec_from_dict(_input_json(packet, spec_name))
             shot = shot_contract_from_dict(_input_json(packet, shot_name))
+            editorial_plan_name = str(config["editorial_plan_input"])
+            editorial_plan = editorial_plan_from_dict(_input_json(packet, editorial_plan_name))
+            validate_shot_against_editorial_plan(editorial_plan, shot)
             font_path = _input_path(packet, font_name)
             rights_artifact = packet["input_artifacts"].get(rights_name)
             if rights_artifact is None:
@@ -414,6 +468,8 @@ def run_claimed_domain_adapter(
                 if not graph_input or not graph_output:
                     raise DomainAdapterError("media_graph_input and media_graph_output must be supplied together")
                 expected.add(graph_output)
+            if shot.references and not graph_input:
+                raise DomainAdapterError("referenced shots require media_graph_input for exact promoted-asset validation")
             if set(outputs) != expected:
                 raise DomainAdapterError(f"programmatic_graphic_render outputs must be {sorted(expected)}")
             media_path = output_dir / f"{_safe_filename(video_output)}-attempt-{attempt}.mp4"
