@@ -4,20 +4,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from ..engine import StudioEngine
-from ..media import run_claimed_media_qa
-from .executors import run_claimed_production_task
-
-
-SUPPORTED_PRODUCTION_OPERATIONS = {"python_frame_render", "ffmpeg_assemble", "delivery_package"}
-
-
-def _tool_operation(task: dict[str, Any]) -> str | None:
-    if task.get("kind") == "technical_measurement":
-        requirements = task.get("requirements", {})
-        if requirements.get("tool") == "ffprobe" or "ffprobe" in requirements.get("tools", []):
-            return "ffprobe_media_qa"
-    operation = task.get("requirements", {}).get("production", {}).get("operation")
-    return str(operation) if operation in SUPPORTED_PRODUCTION_OPERATIONS else None
+from .executors import run_claimed_tool_task
+from .registry import PRODUCTION_EXECUTORS
 
 
 def run_ready_tool_tasks(
@@ -39,9 +27,9 @@ def run_ready_tool_tasks(
         rounds = round_number
         tasks = engine.list_tasks(project_id)
         ready = [item for item in tasks if item.get("status") == "READY" and item.get("executor") == "tool"]
-        candidates = [item for item in ready if _tool_operation(item)]
+        candidates = [item for item in ready if PRODUCTION_EXECUTORS.operation_for_task(item)]
         for item in ready:
-            if not _tool_operation(item):
+            if not PRODUCTION_EXECUTORS.operation_for_task(item):
                 unregistered_by_id[item["task_id"]] = {
                     "task_id": item["task_id"], "title": item.get("title"),
                     "kind": item.get("kind"), "requirements": item.get("requirements", {}),
@@ -59,23 +47,13 @@ def run_ready_tool_tasks(
         if not claims:
             break
 
-        def execute(packet: dict[str, Any]) -> dict[str, Any]:
-            task = packet["task"]
-            worker_id = packet["claim"]["worker_id"]
-            token = packet["claim"]["claim_token"]
-            if task.get("kind") == "technical_measurement":
-                try:
-                    return run_claimed_media_qa(engine, project_id, task["task_id"], worker_id, token)
-                except Exception as exc:
-                    try:
-                        engine.fail_task(project_id, task["task_id"], worker_id, token, {"failure_type": "MEDIA_QA_FAILURE", "error_type": type(exc).__name__, "message": str(exc)}, retryable=False)
-                    except Exception:
-                        pass
-                    raise
-            return run_claimed_production_task(engine, project_id, task["task_id"], worker_id, token)
-
         with ThreadPoolExecutor(max_workers=len(claims), thread_name_prefix="vga-tool") as pool:
-            futures = {pool.submit(execute, packet): packet for packet in claims}
+            futures = {
+                pool.submit(
+                    run_claimed_tool_task, engine, project_id, packet["task"]["task_id"],
+                    packet["claim"]["worker_id"], packet["claim"]["claim_token"],
+                ): packet for packet in claims
+            }
             for future in as_completed(futures):
                 packet = futures[future]
                 try:
