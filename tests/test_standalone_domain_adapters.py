@@ -329,6 +329,7 @@ def test_ipos_bundle_import_adapter_preserves_external_canon_and_graph_lineage(t
             "media_graph_input": "media-graph", "program_context_id": "program",
             "media_graph_output": "media-graph-imported", "receipt_output": "ipos-import-receipt",
         }},
+        "acceptance": {"import": "Only owner-approved READY_FOR_VIDEO bundles are imported with exact asset digests."},
     }])
     packet = engine.claim_next("ipos", "ipos-adapter")
     result = run_claimed_domain_adapter(engine, "ipos", "import-ipos", "ipos-adapter", packet["claim"]["claim_token"])
