@@ -126,7 +126,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--evidence", action="append", required=True)
     p.add_argument("--notes", default="")
 
-    p = sub.add_parser("release-check", help="check final artifact against exact-digest reviews and rights")
+    p = sub.add_parser("release-check", help="check final artifact against exact-digest reviews, rights, lineage, evidence and technical QA")
     p.add_argument("project_id")
     p.add_argument("artifact_id")
     p.add_argument("--rubric", action="append", default=[])
@@ -147,7 +147,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project_id")
     p.add_argument("payload", type=Path)
 
-    p = sub.add_parser("qa-media", help="run real ffprobe technical QA for a claimed technical_measurement task")
+    p = sub.add_parser("qa-media", help="run full FFmpeg/FFprobe technical QA for a claimed technical_measurement task")
     p.add_argument("project_id")
     p.add_argument("task_id")
     p.add_argument("--worker", required=True)
