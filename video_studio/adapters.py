@@ -33,7 +33,7 @@ from video_growth_agent.engine_routing import (
 )
 from video_growth_agent.ip_identity import import_ipos_bundle, inspect_ipos_bundle
 from video_growth_agent.production_os import ReferenceBinding
-from video_growth_agent.media_graph import MediaGraph
+from video_growth_agent.media_graph import ContextRecord, MediaGraph
 from video_growth_agent.media_qa import MediaQAChecker
 from video_growth_agent.programmatic_graphics import (
     graphic_spec_from_dict,
@@ -405,6 +405,28 @@ def run_claimed_domain_adapter(
                 }
             }
             result = {"adapter": name, "ipos_ready": True, "bundle_ref": readiness.bundle_ref}
+
+        elif name == "media_graph_initialize":
+            contexts = config.get("contexts", [])
+            if not isinstance(contexts, list) or not contexts:
+                raise DomainAdapterError("media_graph_initialize requires a non-empty contexts array")
+            graph = MediaGraph()
+            for raw_context in contexts:
+                context_data = _mapping(raw_context, "MediaGraph context")
+                graph.add_context(ContextRecord(**context_data))
+            output_name = str(config.get("output_name", outputs[0]))
+            if outputs != [output_name]:
+                raise DomainAdapterError("media_graph_initialize must declare exactly its output_name")
+            path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
+            _write_json(path, graph.to_dict())
+            artifact_outputs = {
+                output_name: {
+                    "path": str(path), "kind": "domain_state", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {"adapter": name, "context_count": len(graph.contexts), "asset_count": 0},
+                }
+            }
+            result = {"adapter": name, "context_count": len(graph.contexts), "asset_count": 0}
 
         elif name == "ipos_bundle_import":
             bundle_name = str(config["bundle_input"])
