@@ -124,6 +124,19 @@ vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai
 vga-studio --root ./studio-work status ai-self-media-commercialization
 ```
 
+### Run the standalone domain-adapter proof
+
+This sample produces a silent, candidate-only title card with the real local renderer, then binds canonical FFmpeg/FFprobe QA to the exact registered MP4. It requires a local font file and evidence that the font may be used:
+
+```bash
+vga-studio --root ./studio-work init adapter-demo --title "Standalone adapter demo" --brief examples/standalone-domain-adapters.brief.json
+vga-studio --root ./studio-work plan adapter-demo examples/standalone-domain-adapters.tasks.json
+vga-studio --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED
+vga-studio --root ./studio-work import-asset adapter-demo rights-clearance ./font-license-evidence.txt --kind document --media-type text/plain --rights-status OWNED
+```
+
+Claim and complete the authoring task with the exact EditorialPlan JSON, then use `run-adapter` for validation/materialization/rendering and `qa-media` for canonical technical QA. The renderer's receipt explicitly states that the output is silent, candidate-only and not release-authorized.
+
 ## Validation
 
 After `pip install -e .`:
