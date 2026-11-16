@@ -31,7 +31,15 @@ from video_growth_agent.engine_routing import (
     EngineProfile,
     ShotRequest,
 )
-from video_growth_agent.ip_identity import import_ipos_bundle, inspect_ipos_bundle
+from video_growth_agent.ip_identity import (
+    IPIdentityImportReceipt,
+    bind_ipos_identity_to_shot,
+    build_ipos_continuity_link,
+    build_ipos_continuity_rules,
+    build_ipos_continuity_snapshot,
+    import_ipos_bundle,
+    inspect_ipos_bundle,
+)
 from video_growth_agent.production_os import ReferenceBinding
 from video_growth_agent.media_graph import ContextRecord, MediaGraph
 from video_growth_agent.media_qa import MediaQAChecker
@@ -240,6 +248,20 @@ def outcome_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
         "derived_metrics": receipt.derived_metrics(),
         "objective_vector": _jsonable(receipt.objective_vector()),
     }
+
+
+def ipos_import_receipt_from_dict(payload: Mapping[str, Any]) -> IPIdentityImportReceipt:
+    data = _mapping(payload, "IPOS import receipt")
+    return IPIdentityImportReceipt(
+        bundle_ref=str(data["bundle_ref"]),
+        canon_ref=str(data["canon_ref"]),
+        bundle_digest=str(data["bundle_digest"]),
+        bundle_asset_ref=AssetRef(**_mapping(data["bundle_asset_ref"], "bundle_asset_ref")),
+        asset_refs=tuple(AssetRef(**_mapping(item, "asset_ref")) for item in data.get("asset_refs", [])),
+        reference_bindings=tuple(ReferenceBinding(**_mapping(item, "reference_binding")) for item in data.get("reference_bindings", [])),
+        imported_asset_refs=tuple(AssetRef(**_mapping(item, "imported_asset_ref")) for item in data.get("imported_asset_refs", [])),
+        invalidated_refs=tuple(AssetRef(**_mapping(item, "invalidated_ref")) for item in data.get("invalidated_refs", [])),
+    )
 
 
 def _input_json(packet: Mapping[str, Any], name: str) -> dict[str, Any]:
@@ -456,6 +478,69 @@ def run_claimed_domain_adapter(
                 },
             }
             result = {"adapter": name, "bundle_ref": receipt.bundle_ref, "imported_asset_count": len(receipt.imported_asset_refs)}
+
+        elif name == "ipos_shot_bind":
+            bundle = _input_json(packet, str(config["bundle_input"]))
+            receipt = ipos_import_receipt_from_dict(_input_json(packet, str(config["import_receipt_input"])))
+            shot = shot_contract_from_dict(_input_json(packet, str(config["shot_contract_input"])))
+            bound = bind_ipos_identity_to_shot(
+                shot, bundle, receipt, required=bool(config.get("required", True)),
+            )
+            rules = build_ipos_continuity_rules(bundle)
+            shot_output = str(config["shot_contract_output"])
+            rules_output = str(config["continuity_rules_output"])
+            if set(outputs) != {shot_output, rules_output}:
+                raise DomainAdapterError("ipos_shot_bind must declare exactly shot_contract_output and continuity_rules_output")
+            shot_path = output_dir / f"{_safe_filename(shot_output)}-attempt-{attempt}.json"
+            rules_path = output_dir / f"{_safe_filename(rules_output)}-attempt-{attempt}.json"
+            _write_json(shot_path, {"adapter": name, "shot_contract": _jsonable(bound)})
+            _write_json(rules_path, {"adapter": name, "continuity_rules": _jsonable(rules)})
+            artifact_outputs = {
+                shot_output: {
+                    "path": str(shot_path), "kind": "evidence", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {"adapter": name, "shot_id": bound.shot_id, "ip_identity_required": bound.ip_identity_required, "ip_identity_bundle_ref": bound.ip_identity_bundle_ref},
+                },
+                rules_output: {
+                    "path": str(rules_path), "kind": "evidence", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {"adapter": name, "canon_ref": receipt.canon_ref, "rule_count": len(rules)},
+                },
+            }
+            result = {"adapter": name, "shot_id": bound.shot_id, "ip_identity_required": bound.ip_identity_required, "canon_ref": receipt.canon_ref, "reference_count": len(bound.references)}
+
+        elif name == "ipos_continuity_snapshot":
+            bundle = _input_json(packet, str(config["bundle_input"]))
+            shot_id = str(config["shot_id"])
+            snapshot = build_ipos_continuity_snapshot(shot_id, bundle)
+            output_name = str(config.get("output_name", outputs[0]))
+            path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
+            _write_json(path, {"adapter": name, "snapshot": _jsonable(snapshot)})
+            artifact_outputs = {
+                output_name: {
+                    "path": str(path), "kind": "evidence", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {"adapter": name, "shot_id": shot_id, "canon_refs": list(snapshot.canon_refs)},
+                }
+            }
+            result = {"adapter": name, "shot_id": shot_id, "dimension_count": len(snapshot.dimensions)}
+
+        elif name == "ipos_continuity_link":
+            bundle = _input_json(packet, str(config["bundle_input"]))
+            link = build_ipos_continuity_link(
+                str(config["from_shot_id"]), str(config["to_shot_id"]), bundle,
+            )
+            output_name = str(config.get("output_name", outputs[0]))
+            path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
+            _write_json(path, {"adapter": name, "link": _jsonable(link)})
+            artifact_outputs = {
+                output_name: {
+                    "path": str(path), "kind": "evidence", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {"adapter": name, "from_shot_id": link.from_shot_id, "to_shot_id": link.to_shot_id, "rule_count": len(link.rules)},
+                }
+            }
+            result = {"adapter": name, "from_shot_id": link.from_shot_id, "to_shot_id": link.to_shot_id, "rule_count": len(link.rules)}
 
         elif name == "timeline_validate":
             timeline = timeline_spec_from_dict(_input_json(packet, str(config["timeline_input"])))
