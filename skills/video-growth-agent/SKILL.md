@@ -166,7 +166,7 @@ The final media and every used media asset in its recursive artifact lineage mus
 
 When the brief requires a human cold read, the review receipt must attest to a human reviewer, independent cold-read mode, blind review, the exact inspected digest and a unique context ID. These are auditable attestations, not cryptographic proof of human identity or independent cognition.
 
-When the brief requires Red Team, require at least three concrete findings, each with evidence, severity and disposition. A PASS cannot coexist with unresolved critical/high findings. Required evidence artifacts must exist and be current; free-form strings alone are not sufficient proof.
+When the brief requires Red Team, require at least three concrete findings, each with evidence, severity and disposition. If `require_resolvable_evidence_refs` is enabled, review-level and finding-level evidence references must resolve to current registered artifact IDs/names; free-form URIs do not count. A PASS cannot coexist with unresolved critical/high findings. Required evidence artifacts must exist, be current and use an allowed evidence/document/report/decision/timeline/domain-state kind.
 
 ## 9. Failure, repair and recovery loop
 
