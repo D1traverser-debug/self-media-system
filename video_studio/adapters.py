@@ -482,6 +482,12 @@ def run_claimed_domain_adapter(
         elif name == "ipos_shot_bind":
             bundle = _input_json(packet, str(config["bundle_input"]))
             receipt = ipos_import_receipt_from_dict(_input_json(packet, str(config["import_receipt_input"])))
+            graph = MediaGraph.from_dict(_input_json(packet, str(config["media_graph_input"])))
+            for binding in receipt.reference_bindings:
+                ref = AssetRef(binding.asset_id, binding.version_id)
+                asset = graph.assets.get(ref)
+                if asset is None or graph.asset_state(ref) != "PROMOTED" or asset.digest != binding.digest:
+                    raise DomainAdapterError(f"IPOS reference is not present as the exact promoted MediaGraph version: {ref.key()}")
             shot = shot_contract_from_dict(_input_json(packet, str(config["shot_contract_input"])))
             bound = bind_ipos_identity_to_shot(
                 shot, bundle, receipt, required=bool(config.get("required", True)),
