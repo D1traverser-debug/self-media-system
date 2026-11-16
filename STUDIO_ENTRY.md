@@ -37,7 +37,8 @@ python -m pip install -e .
 vga-studio --root ./studio-work init episode-001 --title "Episode 001" --brief examples/technology-explainer.brief.json
 vga-studio --root ./studio-work plan episode-001 examples/technology-explainer.tasks.json
 vga-studio --root ./studio-work status episode-001
-vga-studio --root ./studio-work claim episode-001 --worker director-01
+vga-studio --root ./studio-work claim episode-001 --worker director-01 --executor agent
+vga-studio --root ./studio-work run-ready-tools episode-001 --max-workers 4
 ```
 
 A claim returns a bounded work packet, exact input asset digests and a lease token. Complete the task only after the declared output files have been written inside the project workspace:
@@ -45,6 +46,8 @@ A claim returns a bounded work packet, exact input asset digests and a lease tok
 ```bash
 vga-studio --root ./studio-work complete episode-001 research --worker researcher-01 --token CLAIM_TOKEN --outputs research.outputs.json
 ```
+
+Use `vga-studio claim --executor agent` for session-executed agent tasks. Use `vga-studio run-ready-tools` to claim and execute registered local tool tasks concurrently in dependency-ready rounds. That worker pool does not dispatch agent or human work and does not claim tool tasks without a registered executor. The current `ffmpeg_assemble` operation composes already-produced shot assets and audio into a candidate MP4 plus a separate 24-bit/48 kHz WAV master; it validates optional SRT input and writes an input/output digest receipt. It is a master assembler, not a scene-generation engine. `delivery_package` creates a candidate ZIP and manifest from explicitly typed, digest-verified artifacts. Neither operation authorizes release.
 
 Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-studio --help` for the complete command set. The existing `vga` command remains the 0.8 compatibility CLI; new standalone projects use `vga-studio` or `python -m video_studio`. The canonical implementation is the `video_studio` package; `video_growth_agent.studio_*` imports are compatibility shims only.
 
