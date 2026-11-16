@@ -34,16 +34,18 @@ def run_claimed_production_task(
 ) -> dict[str, Any]:
     packet = engine.claimed_packet(project_id, task_id, worker_id, claim_token)
     task = packet["task"]
-    if task.get("executor") != "tool":
-        raise ProductionContractError("production executor only accepts tasks declared with executor=tool")
-    config = _mapping(task.get("requirements", {}).get("production"), "task.requirements.production")
-    operation = str(config.get("operation", "")).strip()
-    attempt = int(task.get("attempt", 1))
-    output_dir = engine._project_dir(project_id) / "artifacts" / "production" / task_id / f"attempt-{attempt}"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    outputs = set(task.get("outputs", []))
-
+    config: Mapping[str, Any] = {}
+    operation = ""
     try:
+        if task.get("executor") != "tool":
+            raise ProductionContractError("production executor only accepts tasks declared with executor=tool")
+        config = _mapping(task.get("requirements", {}).get("production"), "task.requirements.production")
+        operation = str(config.get("operation", "")).strip()
+        attempt = int(task.get("attempt", 1))
+        output_dir = engine._project_dir(project_id) / "artifacts" / "production" / task_id / f"attempt-{attempt}"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        outputs = set(task.get("outputs", []))
+
         if operation == "ffmpeg_assemble":
             spec_name = str(config.get("render_spec_input", "")).strip()
             spec_artifact = packet["input_artifacts"].get(spec_name)
