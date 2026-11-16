@@ -112,6 +112,19 @@
           "archive_path_safety"
         ],
         "release_authorized": false
+      },
+      "python_frame_render": {
+        "entrypoint": "video_studio.production.python_frame_renderer.PythonFrameRenderer",
+        "contract": "video_studio.production.contracts.FrameRenderSpec",
+        "output": "silent_candidate_shot_mp4_and_digest_receipt",
+        "code_execution": "explicit_owner_approved_trusted_project_code",
+        "security": "NOT_AN_OS_OR_NETWORK_SANDBOX__RUN_WITHOUT_SECRETS",
+        "requires": [
+          "python",
+          "Pillow",
+          "ffmpeg",
+          "ffprobe"
+        ]
       }
     },
     "production_execution": {
@@ -119,7 +132,13 @@
       "concurrency_limit": 16,
       "rounds_until_no_registered_ready_tool_tasks": true,
       "unregistered_tool_tasks": "REPORTED_NOT_CLAIMED",
-      "no_implicit_paid_provider_calls": true
+      "no_implicit_paid_provider_calls": true,
+      "registered_operations": [
+        "python_frame_render",
+        "ffmpeg_assemble",
+        "delivery_package",
+        "ffprobe_media_qa"
+      ]
     }
   },
   "release_status": "ACTIVE_CANDIDATE",
