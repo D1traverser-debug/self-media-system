@@ -27,6 +27,11 @@ Cross-workstream decisions must be explicit. Audience evidence may change a seri
 
 The `video_studio` engine supplies the durable project control plane: briefs, dynamic task DAGs, leases, artifacts, decisions, reviews, failures and learning receipts. It does **not** silently recreate every legacy domain object. When Program/Series/Episode/Shot/Timeline, continuity, provider routing, business metrics or IP identity semantics are required, reuse the corresponding Video-owned domain module through an explicit, tested adapter and register its outputs as versioned Studio artifacts. Do not use the legacy fixed-stage `StudioOrchestrator` as the new controller. Existing specialized modules are optional capability libraries, not a hidden parent workflow.
 
+The standalone runtime now exposes those explicit adapters through `vga-studio run-adapter`: EditorialPlan validation, ShotContract materialization/validation, IPOS bundle inspection/import, TimelineSpec validation, shot continuity assessment, operation-specific shot routing, business outcome metrics, supplementary loudness/silence QA and deterministic programmatic-graphics rendering. Each adapter reads only declared, digest-verified task inputs and registers exact outputs through the Studio artifact transaction. The graphic renderer creates a silent candidate only; a separate sound task, canonical technical QA, human review and release check remain required.
+
+This is not a claim that every external provider is connected. The repository currently has no trusted external generative-video executor registered. Provider generation remains a tool/session capability operation; the router can select only from supplied, current, evidence-backed engine profiles. The standalone runtime does not invent availability or invoke paid providers implicitly.
+
+
 ## 2. Authority and independence
 
 - **Owner request and corrections** define the goal and constraints.
@@ -250,6 +255,32 @@ vga-studio --root ./studio-work events episode-001
 ```
 
 `vga-studio --help` lists brief revision/history, task-contract revision, claim heartbeat, complete, fail, wait-input, decision, failure, resolve-failure, invalidate, reopen, learn and release-check commands. `qa-media` runs the built-in FFmpeg/FFprobe measurement adapter against a claimed `technical_measurement` task, writes a digest-bound QA receipt and completes that measurement task. It checks technical properties only; it cannot approve craft, truth, rights or release.
+
+`run-adapter` executes a task's declared `requirements.domain_adapter` against its registered inputs and completes the task with immutable output artifacts. Example task requirement:
+
+```json
+{
+  "domain_adapter": {
+    "name": "programmatic_graphic_render",
+    "editorial_plan_input": "editorial-plan",
+    "shot_contract_input": "shot-contract",
+    "graphic_spec_input": "graphic-spec",
+    "font_input": "font-asset",
+    "rights_evidence_input": "rights-clearance",
+    "video_output": "graphic-candidate",
+    "receipt_output": "graphic-render-receipt"
+  }
+}
+```
+
+Run it only after claiming the task:
+
+```bash
+vga-studio run-adapter PROJECT TASK_ID --worker local-renderer --token CLAIM_TOKEN
+```
+
+The adapter verifies the ShotContract against the exact EditorialPlan, requires the font and rights evidence as declared inputs, and emits a candidate plus receipt. It does not promote the asset. A later `qa-media` task must bind canonical FFmpeg/FFprobe QA to the registered candidate artifact ID and digest.
+
 
 ## 14. Migration and compatibility
 
