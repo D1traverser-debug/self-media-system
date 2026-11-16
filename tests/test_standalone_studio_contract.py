@@ -58,3 +58,11 @@ def test_legacy_engine_import_is_only_a_compatibility_shim():
     from video_studio.engine import StudioEngine as CanonicalEngine
 
     assert LegacyImport is CanonicalEngine
+
+
+def test_all_canonical_runtime_modules_are_independent_of_legacy_namespace():
+    for module in ("__init__.py", "__main__.py", "cli.py", "media.py"):
+        source = (ROOT / "video_studio" / module).read_text(encoding="utf-8")
+        assert "video_growth_agent" not in source
+        assert "from caos" not in source.lower()
+        assert "import caos" not in source.lower()
