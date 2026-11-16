@@ -297,8 +297,8 @@ Import a licensed font and its rights evidence before claiming the renderer task
 ```bash
 vga-studio --root ./studio-work init adapter-demo --title "Standalone adapter demo" --brief examples/standalone-domain-adapters.brief.json
 vga-studio --root ./studio-work plan adapter-demo examples/standalone-domain-adapters.tasks.json
-vga-studio --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED
 vga-studio --root ./studio-work import-asset adapter-demo rights-clearance ./font-license-evidence.txt --kind document --media-type text/plain --rights-status OWNED
+vga-studio --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED --metadata examples/adapter-demo-font.metadata.json
 ```
 
 The example is an adapter integration proof, not a claim that a title card alone is a finished film or that external generative-video providers are connected.
