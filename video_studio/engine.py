@@ -1501,9 +1501,13 @@ class StudioEngine:
                         qa_payload = {}
                     if not qa_path.is_file() or _sha256(qa_path) != qa_artifact["sha256"]:
                         failures.append("technical_qa_receipt_bytes_missing_or_changed")
+                    if not isinstance(qa_payload, dict):
+                        qa_payload = {}
                     if qa_artifact["kind"] != "qa_report":
                         failures.append(f"technical_qa_artifact_wrong_kind:{qa_artifact['kind']}")
-                    qa_metadata = qa_payload.get("metadata", {}) if isinstance(qa_payload, dict) else {}
+                    qa_metadata = qa_payload.get("metadata", {})
+                    if not isinstance(qa_metadata, dict):
+                        qa_metadata = {}
                     if qa_metadata.get("checker") != "ffmpeg-ffprobe-v1.0":
                         failures.append("technical_qa_checker_unrecognized")
                     if qa_payload.get("hard_pass") is not True or qa_payload.get("hard_failures"):
