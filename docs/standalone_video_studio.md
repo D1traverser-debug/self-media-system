@@ -144,7 +144,7 @@ The runtime does not impose one global quality score. The brief selects relevant
 - rights, likeness, provenance and disclosure;
 - platform format and packaging.
 
-The built-in FFprobe adapter currently measures stream presence, duration, resolution, frame rate and available stream-duration consistency. Additional FFmpeg/ subtitle analyzers may be added as separately declared, tested adapters for loudness, clipping, black frames or subtitle bounds; do not claim those checks ran unless their receipts exist. No technical tool proves that a film is compelling, funny, emotionally coherent or commercially effective. Human or genuinely independent multimodal review must inspect the actual media when the rubric requires it.
+The built-in FFmpeg/FFprobe adapter measures stream presence, stream-duration agreement, complete video/audio decode, black-frame segments and audio true peak. When the brief specifies them, it also checks duration range, resolution and frame rate. Subtitle geometry, caption safe-area compliance, integrated loudness, visual continuity and editorial craft require separate declared analyzers or human review; do not claim those checks ran unless their receipts exist. No technical tool proves that a film is compelling, funny, emotionally coherent or commercially effective. Human or genuinely independent multimodal review must inspect the actual media when the rubric requires it.
 
 `release-check` verifies the exact current file digest, required independent PASS reviews, rights state and configured release evidence. It records acceptance evidence; it does not publish to a platform. Publication remains a separate authorized action.
 
