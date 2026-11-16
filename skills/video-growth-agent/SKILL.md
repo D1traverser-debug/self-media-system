@@ -110,6 +110,8 @@ Each task declares:
 
 Parallelize independent research, concept exploration, visual/audio tests, rights checks, tool evaluation, packaging research and other work when inputs are ready. Merge only at real decision or dependency points. Avoid artificial dependencies and peer-chat as an authority mechanism. Handoff through task packets, files, digests and decision receipts.
 
+A declared executor must resolve to an executable worker. The local Studio currently registers the production operations `ffmpeg_assemble` and `delivery_package`, plus FFprobe technical measurement. A task labelled `tool` without a registered operation is not executable and must remain unclaimed/blocked for capability work; do not mark it complete manually. Agent and human work are different executor classes, not aliases for local tools.
+
 Before expensive production, prototype the highest-risk creative assumption with the smallest near-final sample that can test the actual craft requirement. A tool-running proof is not a quality proof.
 
 ## 6. Production method and tool choice
@@ -124,6 +126,8 @@ If a required tool is unavailable, record the blocked capability and compare an 
 
 Use `vga-studio claim` to atomically claim ready work. Respect the lease and heartbeat it for long operations. The work packet defines the exact scope and current input digests. A worker may not broaden its task or change the owner outcome.
 
+Use `vga-studio claim --executor agent` when the current session is executing agent work. Use `vga-studio run-ready-tools PROJECT --max-workers N` to execute all currently ready, registered local tool tasks in concurrent rounds; this can run independent renders or measurements at the same time and then continue to newly-ready downstream tool tasks. The worker pool reports unsupported tool tasks instead of claiming them. It does not launch LLM agents, human reviewers or external providers. Dispatch those only through an actual current-session/external worker and record its run and output evidence.
+
 Before marking work complete:
 
 - create every declared output as a real file inside the project workspace;
@@ -133,6 +137,8 @@ Before marking work complete:
 - record provenance, source and rights state truthfully.
 
 Import external inputs with `import-asset`. Do not write outputs over an existing registered path. A new version gets a new path. A changed upstream artifact makes affected descendants stale; regenerate or re-review them.
+
+A finished production package should explicitly include every owner-requested item. Unless the brief narrows the scope, check for final master video, audio master/stems, subtitles, cover, editable/reproducible project source and assets, platform copy, rights/provenance manifest, technical QA and review receipts. The local FFmpeg assembler currently combines declared shot assets and audio tracks; it does not create the shots, voice, music, cover or editorial copy.
 
 ## 8. Independent review and release
 
