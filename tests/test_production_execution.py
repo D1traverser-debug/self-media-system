@@ -233,3 +233,78 @@ def test_local_tool_pool_claims_independent_render_tasks_in_the_same_round(tmp_p
     assert {item["task_id"] for item in result["completed"]} == {"render-1", "render-2"}
     assert len({item["worker_id"] for item in result["claimed"]}) == 2
     assert all(task["status"] == "COMPLETED" for task in engine.list_tasks("parallel-demo"))
+
+
+
+def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
+    from video_studio.production.contracts import FrameRenderSpec, ProductionContractError
+
+    engine = StudioEngine(tmp_path / "motion-workspace")
+    engine.create_project("motion-demo", "Trusted motion renderer demo", _brief())
+    renderer = tmp_path / "renderer.py"
+    renderer.write_text(
+        "from PIL import Image, ImageDraw\n"
+        "def render_frame(t, width, height, assets, params):\n"
+        "    image = Image.new('RGB', (width, height), tuple(params['background']))\n"
+        "    draw = ImageDraw.Draw(image)\n"
+        "    x = int((0.1 + 0.8 * t / params['duration']) * width)\n"
+        "    y = height // 2\n"
+        "    radius = max(3, min(width, height) // 12)\n"
+        "    draw.ellipse((x-radius, y-radius, x+radius, y+radius), fill=tuple(params['accent']))\n"
+        "    draw.text((8, 8), params['title'], fill=(255, 255, 255))\n"
+        "    return image\n",
+        encoding="utf-8",
+    )
+    frame_spec = tmp_path / "frame-render-spec.json"
+    frame_spec.write_text(json.dumps({
+        "schema_version": "1.0",
+        "project_id": "motion-demo",
+        "renderer_input": "renderer-script",
+        "entrypoint": "render_frame",
+        "width": 160,
+        "height": 284,
+        "fps": 5,
+        "duration_seconds": 2,
+        "asset_inputs": [],
+        "params": {"duration": 2, "title": "Motion test", "background": [7, 17, 35], "accent": [0, 220, 255]},
+        "trusted_code_execution": True,
+        "video_output": "shot-candidate",
+        "receipt_output": "shot-render-receipt",
+    }, indent=2), encoding="utf-8")
+    engine.import_asset("motion-demo", "renderer-script", renderer, kind="source_code", media_type="text/x-python", rights_status="OWNED")
+    engine.import_asset("motion-demo", "frame-render-spec", frame_spec, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+    engine.add_tasks("motion-demo", [{
+        "task_id": "render-motion-shot",
+        "title": "Render a project-owned animated scene with explicit code execution approval",
+        "kind": "production_render",
+        "executor": "tool",
+        "depends_on": [],
+        "inputs": ["renderer-script", "frame-render-spec"],
+        "outputs": ["shot-candidate", "shot-render-receipt"],
+        "requirements": {"production": {
+            "operation": "python_frame_render",
+            "render_spec_input": "frame-render-spec",
+            "trusted_code_execution": True,
+        }},
+        "acceptance": {"render": "Produce exactly 10 frames and a digest-bound candidate receipt."},
+    }])
+
+    result = run_ready_tool_tasks(engine, "motion-demo", worker_prefix="motion-renderer", max_workers=1)
+    assert result["scheduler_status"] == "COMPLETED", result
+    assert result["failed"] == []
+    task = engine.list_tasks("motion-demo")[0]
+    assert task["status"] == "COMPLETED"
+    output_dir = engine._project_dir("motion-demo") / "artifacts" / "production" / "render-motion-shot" / "attempt-1"
+    shot = output_dir / "shot-candidate.mp4"
+    receipt = json.loads((output_dir / "shot-render-receipt.json").read_text(encoding="utf-8"))
+    assert shot.is_file() and shot.stat().st_size > 0
+    assert receipt["renderer"] == "python-frame-renderer-v1"
+    assert receipt["trusted_project_code_execution"] is True
+    assert receipt["candidate_only"] is True
+    assert receipt["frame_count"] == 10
+    assert engine.audit("motion-demo")["pass"] is True
+
+    invalid = json.loads(frame_spec.read_text(encoding="utf-8"))
+    invalid["trusted_code_execution"] = False
+    with pytest.raises(ProductionContractError, match="trusted_code_execution=true"):
+        FrameRenderSpec.from_dict(invalid)
