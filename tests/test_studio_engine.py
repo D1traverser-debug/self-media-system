@@ -528,6 +528,10 @@ def test_repeated_media_qa_uses_new_immutable_receipt_path(tmp_path):
     second_path = second["task_completion"]["artifacts"]["technical-qa-receipt"]["path"]
     assert first_path != second_path
     assert second["task_completion"]["status"] == "COMPLETED"
+    assert second["report"]["metadata"]["checker"] == "ffmpeg-ffprobe-v1.0"
+    required_checks = {"video_stream", "stream_duration_match", "true_peak", "black_frames", "full_decode"}
+    assert required_checks.issubset({item["check_id"] for item in second["report"]["checks"]})
+    assert second["report"]["hard_pass"] is True, second["report"]["hard_failures"]
     assert engine.audit("demo")["pass"] is True
 
 
