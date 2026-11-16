@@ -1464,7 +1464,11 @@ class StudioEngine:
                     required_path = self._project_dir(project_id) / required_artifact["relative_path"]
                     if not required_path.is_file() or _sha256(required_path) != required_artifact["sha256"]:
                         failures.append(f"required_deliverable_bytes_changed:{required_name}")
-                    if effective_require_rights and required_artifact["rights_status"] not in allowed_rights:
+                    if (
+                        effective_require_rights
+                        and required_artifact["rights_status"] != "NOT_APPLICABLE"
+                        and required_artifact["rights_status"] not in allowed_rights
+                    ):
                         failures.append(f"required_deliverable_rights_not_cleared:{required_name}:{required_artifact['rights_status']}")
 
             required_assets = list(release_policy.get("required_asset_names", []))
