@@ -153,6 +153,20 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
                 "package_map": package_map,
                 "package_output": "delivery-package",
                 "manifest_output": "delivery-manifest",
+                "expected_types": {
+                    "final-video": {"kind": "video", "media_type": "video/mp4"},
+                    "audio-master": {"kind": "audio", "media_type": "audio/wav"},
+                    "captions": {"kind": "subtitle", "media_type": "application/x-subrip"},
+                    "cover": {"kind": "image", "media_type": "image/png"},
+                    "publish-copy": {"kind": "document", "media_type": "text/markdown"},
+                    "rights-manifest": {"kind": "evidence", "media_type": "application/json"},
+                    "timeline-spec": {"kind": "document", "media_type": "application/json"},
+                    "shot-01": {"kind": "video", "media_type": "video/mp4"},
+                    "shot-02": {"kind": "video", "media_type": "video/mp4"},
+                    "audio-mix": {"kind": "audio", "media_type": "audio/wav"},
+                    "render-receipt": {"kind": "evidence", "media_type": "application/json"},
+                    "technical-qa": {"kind": "qa_report", "media_type": "application/json"}
+                }
             }},
             "acceptance": {"delivery": "Every required deliverable and source dependency is present with exact artifact identity and digest."},
         },
