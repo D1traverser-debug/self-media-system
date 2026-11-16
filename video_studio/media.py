@@ -25,7 +25,7 @@ def _fraction(value: str | None) -> float | None:
 
 
 def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *, timeout_seconds: int = 120) -> dict[str, Any]:
-    """Inspect real media bytes with ffprobe; this measures technical facts only."""
+    """Inspect real media bytes with FFmpeg and FFprobe; this measures technical facts only."""
     media = Path(path).resolve(strict=True)
     if not media.is_file() or media.stat().st_size == 0:
         raise ContractError("media must be a non-empty regular file")
