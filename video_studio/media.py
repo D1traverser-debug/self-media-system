@@ -168,7 +168,7 @@ def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *,
             # FFmpeg versions that format ebur128 as a section header followed by
             # an indented "Peak:" value put the measurement on the next line.
             peak_match = re.search(
-                r"True peak:\s*\\r?\\n\\s*Peak:\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*dBFS",
+                r"True peak:\s*\r?\n\s*Peak:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*dBFS",
                 true_peak_log,
                 re.IGNORECASE,
             )
