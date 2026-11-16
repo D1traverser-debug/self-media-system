@@ -41,6 +41,25 @@ jobs:
       - name: Smoke test installed CLI outside repository
         run: |
           cd /tmp
+          vga-studio --help > /tmp/vga-studio-outside-repo.txt
+          python -m video_studio --help > /tmp/video-studio-module-help.txt
+          studio_root="$(mktemp -d)"
+          vga-studio --root "$studio_root" init outside-repo-smoke --title "Installed standalone smoke" --brief "$GITHUB_WORKSPACE/examples/technology-explainer.brief.json" > /tmp/standalone-init.json
+          vga-studio --root "$studio_root" plan outside-repo-smoke "$GITHUB_WORKSPACE/examples/technology-explainer.tasks.json" > /tmp/standalone-plan.json
+          vga-studio --root "$studio_root" audit outside-repo-smoke > /tmp/standalone-audit.json
+          python - <<'PY'
+          import json
+          import sys
+          from video_studio.engine import StudioEngine
+          import video_studio
+          assert "video_growth_agent" not in sys.modules
+          from video_growth_agent.studio_engine import StudioEngine as LegacyEngine
+          assert LegacyEngine is StudioEngine
+          report = json.load(open('/tmp/standalone-audit.json', encoding='utf-8'))
+          assert report['pass'] is True, report
+          assert report['task_count'] == 10, report
+          print('standalone-video-studio-outside-repo: PASS')
+          PY
           vga system-audit > /tmp/system-audit.json
           python - <<'PY'
           import json
