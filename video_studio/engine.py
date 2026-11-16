@@ -734,10 +734,17 @@ class StudioEngine:
             "instructions": "Produce only the declared outputs. Preserve source truth, provenance and rights. If the task cannot meet its acceptance contract, return a structured failure instead of claiming completion.",
         }
 
-    def claim_next(self, project_id: str, worker_id: str, lease_seconds: int = 900) -> dict[str, Any] | None:
+    def claim_next(
+        self, project_id: str, worker_id: str, lease_seconds: int = 900, *,
+        executor: str | None = None, task_id: str | None = None,
+    ) -> dict[str, Any] | None:
         worker_id = _safe_id(worker_id, "worker_id")
         if lease_seconds < 30 or lease_seconds > 86400:
             raise ContractError("lease_seconds must be 30..86400")
+        if executor is not None:
+            executor = _safe_id(executor, "executor")
+        if task_id is not None:
+            task_id = _safe_id(task_id, "task_id")
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
@@ -755,10 +762,16 @@ class StudioEngine:
                     )
                     self._event(connection, project_id, "TASK", row["task_id"], "TASK_LEASE_EXPIRED", {"worker_id": row["worker_id"], "attempt": row["attempts"], "next_status": next_status})
                 self._refresh_in_tx(connection, project_id)
-                row = connection.execute(
-                    "SELECT * FROM tasks WHERE project_id=? AND status='READY' ORDER BY priority DESC,created_at,task_id LIMIT 1",
-                    (project_id,),
-                ).fetchone()
+                query = "SELECT * FROM tasks WHERE project_id=? AND status='READY'"
+                parameters: list[Any] = [project_id]
+                if executor is not None:
+                    query += " AND executor=?"
+                    parameters.append(executor)
+                if task_id is not None:
+                    query += " AND task_id=?"
+                    parameters.append(task_id)
+                query += " ORDER BY priority DESC,created_at,task_id LIMIT 1"
+                row = connection.execute(query, parameters).fetchone()
                 if row is None:
                     connection.commit()
                     return None
