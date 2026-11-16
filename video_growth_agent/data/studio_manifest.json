@@ -1,77 +1,8 @@
 {
   "schema_version": 1,
-  "studio_version": "1.0.0",
-  "product_name": "Standalone Video Studio",
-  "owner": "VIDEO_GROWTH_AGENT",
-  "default_entrypoint": "STUDIO_ENTRY.md",
-  "cli": "vga-studio",
-  "runtime": "video_growth_agent.studio_engine.StudioEngine",
-  "state_store": "SQLite_WAL_PER_PROJECT",
-  "event_history": "APPEND_ONLY_SQLITE_EVENTS",
-  "task_model": "PROJECT_SPECIFIC_DYNAMIC_DAG",
-  "execution": {
-    "atomic_claims": true,
-    "lease_recovery": true,
-    "bounded_retries": true,
-    "parallel_ready_tasks": true,
-    "fixed_stage_machine": false,
-    "peer_chat_authority": false
-  },
-  "artifact_model": {
-    "immutable_versions": true,
-    "sha256_required": true,
-    "project_workspace_only": true,
-    "rights_and_provenance": true,
-    "downstream_invalidation": true
-  },
-  "governance": {
-    "system": "VIDEO_STUDIO_NATIVE",
-    "mode": "STANDALONE",
-    "caos_runtime_dependency": false,
-    "caos_api_dependency": false,
-    "caos_skill_dependency": false,
-    "parent_task_or_lease_dependency": false,
-    "governance_method_owned_by_video": true
-  },
-  "decision_method": [
-    "COMPETING_HYPOTHESES",
-    "DISCRIMINATING_TESTS",
-    "ALTERNATIVE_COMPARISON",
-    "COUNTEREVIDENCE",
-    "FALSIFIER",
-    "ROLLBACK"
-  ],
-  "failure_method": [
-    "OBSERVED_SYMPTOM",
-    "ROOT_CAUSE_HYPOTHESES",
-    "METHOD_CHALLENGE",
-    "REPAIR_PLAN",
-    "INDEPENDENT_VERIFICATION",
-    "REGRESSION_REPLAY"
-  ],
-  "learning_policy": {
-    "default_status": "CANDIDATE",
-    "requires_evidence": true,
-    "requires_counterexamples": true,
-    "requires_failure_conditions": true,
-    "requires_independent_replay_for_validation": true
-  },
-  "legacy_compatibility": {
-    "vga_cli": "video_growth_agent.cli:main",
-    "baseline": "0.8.0",
-    "authority": "COMPATIBILITY_ONLY_FOR_NEW_STUDIO_PROJECTS"
-  },
-  "ip_authority": {
-    "original_identity_canon": "IPOS",
-    "video_studio_may_mutate_canon": false
-  },
-  "media_qa_adapter": "video_growth_agent.studio_media.run_claimed_media_qa",
-  "capabilities": {
-    "deterministic_media_qa": {
-      "tool": "ffprobe",
-      "scope": "technical_measurement_only",
-      "digest_bound": true,
-      "auto_release": false
-    }
-  }
+  "deprecated": true,
+  "canonical_manifest": "video_studio/data/studio_manifest.json",
+  "canonical_runtime": "video_studio.engine.StudioEngine",
+  "authority": "STUDIO_ENTRY.md",
+  "compatibility_note": "This file is retained only as a historical path pointer. New Video Studio work must read the canonical manifest."
 }
