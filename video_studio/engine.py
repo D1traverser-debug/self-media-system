@@ -1526,6 +1526,84 @@ class StudioEngine:
             open_failures = connection.execute("SELECT COUNT(*) AS count FROM failures WHERE project_id=? AND status='OPEN'", (project_id,)).fetchone()["count"]
         return {"project": project, "task_counts": counts, "ready_tasks": ready, "open_failures": open_failures, "event_count": events}
 
+    def resume(self, project_id: str, *, event_limit: int = 40) -> dict[str, Any]:
+        """Reconstruct an actionable project handoff from durable Video state only."""
+        self.refresh(project_id)
+        status = self.status(project_id)
+        tasks = self.list_tasks(project_id)
+        with closing(self._connect(project_id)) as connection:
+            artifact_rows = connection.execute(
+                "SELECT * FROM artifacts WHERE project_id=? AND status IN ('CURRENT','ACCEPTED') ORDER BY created_at DESC",
+                (project_id,),
+            ).fetchall()
+            decision_rows = connection.execute(
+                "SELECT * FROM decisions WHERE project_id=? ORDER BY created_at DESC",
+                (project_id,),
+            ).fetchall()
+            failure_rows = connection.execute(
+                "SELECT * FROM failures WHERE project_id=? AND status='OPEN' ORDER BY created_at",
+                (project_id,),
+            ).fetchall()
+            learning_rows = connection.execute(
+                "SELECT * FROM learning WHERE project_id=? ORDER BY updated_at DESC",
+                (project_id,),
+            ).fetchall()
+        ready_by_executor: dict[str, list[str]] = {}
+        for task in tasks:
+            if task["status"] == "READY":
+                ready_by_executor.setdefault(task["executor"], []).append(task["task_id"])
+        unfinished = [task for task in tasks if task["status"] not in {"COMPLETED", "CANCELLED"}]
+        if failure_rows:
+            next_action = "Resolve the open root-cause records with artifact-backed verification and regression evidence."
+        elif ready_by_executor.get("tool"):
+            next_action = "Run the registered local tool workers; independent READY tool tasks can execute concurrently."
+        elif ready_by_executor.get("agent"):
+            next_action = "Dispatch the READY agent work packets; do not treat the declared executor as proof of execution."
+        elif ready_by_executor.get("human"):
+            next_action = "Obtain the required owner/human decision or review; do not synthesize an approval."
+        elif ready_by_executor.get("external"):
+            next_action = "Verify the external capability, rights, availability and cost; obtain owner authorization before any paid operation."
+        elif any(task["status"] == "WAITING_INPUT" for task in tasks):
+            next_action = "Import or produce the missing declared inputs, then refresh the task graph."
+        elif unfinished:
+            next_action = "Inspect dependency blockers and task failures; revise only the affected descendants."
+        else:
+            next_action = "All declared tasks are complete; run the exact-digest release check and verify the delivery package."
+        return {
+            "project": status["project"],
+            "project_status": "TASK_GRAPH_COMPLETE" if not unfinished else "IN_PROGRESS",
+            "task_counts": status["task_counts"],
+            "ready_by_executor": ready_by_executor,
+            "unfinished_tasks": [
+                {"task_id": task["task_id"], "executor": task["executor"], "status": task["status"],
+                 "depends_on": task["depends_on"], "inputs": task["inputs"], "outputs": task["outputs"]}
+                for task in unfinished
+            ],
+            "current_artifacts": [
+                {"artifact_id": row["artifact_id"], "name": row["name"], "version": row["version"],
+                 "sha256": row["sha256"], "kind": row["kind"], "media_type": row["media_type"],
+                 "rights_status": row["rights_status"], "status": row["status"]}
+                for row in artifact_rows
+            ],
+            "decisions": [
+                {"decision_id": row["decision_id"], "question": row["question"], "status": row["status"],
+                 "payload": _loads(row["payload_json"], {})}
+                for row in decision_rows
+            ],
+            "open_failures": [
+                {"failure_id": row["failure_id"], "task_id": row["task_id"], "payload": _loads(row["payload_json"], {})}
+                for row in failure_rows
+            ],
+            "learning": [
+                {"learning_id": row["learning_id"], "status": row["status"], "payload": _loads(row["payload_json"], {})}
+                for row in learning_rows
+            ],
+            "recent_events": self.events(project_id, event_limit),
+            "open_failure_count": status["open_failures"],
+            "next_action": next_action,
+            "release_authorized": False,
+        }
+
     def events(self, project_id: str, limit: int = 100) -> list[dict[str, Any]]:
         with closing(self._connect(project_id)) as connection:
             rows = connection.execute(
@@ -1547,9 +1625,13 @@ class StudioEngine:
                 if not task.get("worker_id") or not task.get("claim_token") or not task.get("lease_until"):
                     failures.append(f"running_task_missing_lease:{task['task_id']}")
             if task["status"] == "COMPLETED":
-                outputs = task.get("result", {}).get("outputs", {})
+                task_result = task.get("result", {})
+                outputs = task_result.get("outputs", {})
                 if set(outputs) != set(task["outputs"]):
                     failures.append(f"completed_task_output_contract_mismatch:{task['task_id']}")
+                input_bindings = task_result.get("input_bindings")
+                if not isinstance(input_bindings, list):
+                    failures.append(f"completed_task_input_lineage_missing:{task['task_id']}")
         with closing(self._connect(project_id)) as connection:
             artifacts = connection.execute("SELECT * FROM artifacts WHERE project_id=?", (project_id,)).fetchall()
             for artifact in artifacts:
