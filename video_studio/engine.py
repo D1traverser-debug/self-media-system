@@ -127,7 +127,37 @@ class StudioEngine:
         connection.execute("PRAGMA foreign_keys = ON")
         connection.execute("PRAGMA busy_timeout = 30000")
         connection.execute("PRAGMA synchronous = FULL")
+        self._ensure_schema_extensions(connection)
         return connection
+
+    @staticmethod
+    def _ensure_schema_extensions(connection: sqlite3.Connection) -> None:
+        """Idempotent migrations for projects created by earlier standalone releases."""
+        connection.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS artifact_inputs (
+                project_id TEXT NOT NULL,
+                output_artifact_id TEXT NOT NULL,
+                input_artifact_id TEXT NOT NULL,
+                input_sha256 TEXT NOT NULL,
+                relationship TEXT NOT NULL DEFAULT 'DERIVED_FROM',
+                created_at TEXT NOT NULL,
+                PRIMARY KEY(project_id, output_artifact_id, input_artifact_id),
+                FOREIGN KEY(project_id, output_artifact_id)
+                    REFERENCES artifacts(project_id, artifact_id),
+                FOREIGN KEY(project_id, input_artifact_id)
+                    REFERENCES artifacts(project_id, artifact_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_artifact_inputs_input
+                ON artifact_inputs(project_id, input_artifact_id);
+            CREATE TRIGGER IF NOT EXISTS artifact_inputs_no_update
+                BEFORE UPDATE ON artifact_inputs
+                BEGIN SELECT RAISE(ABORT, 'artifact lineage is immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS artifact_inputs_no_delete
+                BEFORE DELETE ON artifact_inputs
+                BEGIN SELECT RAISE(ABORT, 'artifact lineage is immutable'); END;
+            """
+        )
 
     @staticmethod
     def _schema(connection: sqlite3.Connection) -> None:
@@ -882,6 +912,70 @@ class StudioEngine:
                 output_owner = next((row["task_id"] for row in output_rows if safe_name in _loads(row["outputs_json"], [])), None)
                 if output_owner is not None:
                     raise ContractError(f"imported asset name is already reserved as a task output by {output_owner}: {safe_name}")
+                previous_rows = connection.execute(
+                    "SELECT * FROM artifacts WHERE project_id=? AND name=? AND status IN ('CURRENT','ACCEPTED')",
+                    (project_id, safe_name),
+                ).fetchall()
+                if previous_rows:
+                    # A new source version revokes every task that declared or actually
+                    # consumed the old version, including RUNNING leases and descendants.
+                    root_tasks: set[str] = set()
+                    for task_row in connection.execute("SELECT task_id,inputs_json FROM tasks WHERE project_id=?", (project_id,)).fetchall():
+                        if safe_name in _loads(task_row["inputs_json"], []):
+                            root_tasks.add(task_row["task_id"])
+                    previous_ids = {row["artifact_id"] for row in previous_rows}
+                    frontier = set(previous_ids)
+                    seen_artifacts = set(previous_ids)
+                    while frontier:
+                        placeholders = ",".join("?" for _ in frontier)
+                        consumers = connection.execute(
+                            f"""SELECT DISTINCT a.artifact_id,a.produced_by_task
+                                FROM artifact_inputs ai
+                                JOIN artifacts a ON a.project_id=ai.project_id
+                                                AND a.artifact_id=ai.output_artifact_id
+                                WHERE ai.project_id=? AND ai.input_artifact_id IN ({placeholders})""",
+                            (project_id, *sorted(frontier)),
+                        ).fetchall()
+                        next_frontier: set[str] = set()
+                        for consumer in consumers:
+                            if consumer["produced_by_task"]:
+                                root_tasks.add(consumer["produced_by_task"])
+                            if consumer["artifact_id"] not in seen_artifacts:
+                                seen_artifacts.add(consumer["artifact_id"])
+                                next_frontier.add(consumer["artifact_id"])
+                        frontier = next_frontier
+                    task_map = self._task_map(connection, project_id)
+                    affected = set(root_tasks)
+                    changed = True
+                    while changed:
+                        changed = False
+                        for candidate, row in task_map.items():
+                            deps = _loads(row["depends_on_json"], [])
+                            if candidate not in affected and any(dep in affected for dep in deps):
+                                affected.add(candidate)
+                                changed = True
+                    for affected_task in sorted(affected):
+                        connection.execute(
+                            """UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,
+                               lease_until=NULL,error_json=?,updated_at=?
+                               WHERE project_id=? AND task_id=?""",
+                            (_json({"reason": f"source artifact {safe_name} was replaced"}), _iso(), project_id, affected_task),
+                        )
+                        connection.execute(
+                            "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
+                            (project_id, affected_task),
+                        )
+                        self._event(connection, project_id, "TASK", affected_task, "TASK_INVALIDATED_BY_SOURCE_REVISION", {
+                            "source_name": safe_name, "superseded_artifact_ids": sorted(previous_ids),
+                        })
+                    connection.executemany(
+                        "UPDATE artifacts SET status='STALE' WHERE project_id=? AND artifact_id=?",
+                        [(project_id, row["artifact_id"]) for row in previous_rows],
+                    )
+                    for previous in previous_rows:
+                        self._event(connection, project_id, "ARTIFACT", previous["artifact_id"], "ASSET_VERSION_SUPERSEDED", {
+                            "replacement_name": safe_name,
+                        })
                 version_row = connection.execute(
                     "SELECT MAX(version) AS version FROM artifacts WHERE project_id=? AND name=?",
                     (project_id, safe_name),
@@ -916,6 +1010,15 @@ class StudioEngine:
                 expected = set(_loads(task["outputs_json"], []))
                 if set(outputs) != expected:
                     raise ContractError(f"expected outputs {sorted(expected)}, got {sorted(outputs)}")
+                input_rows: list[sqlite3.Row] = []
+                for input_name in _loads(task["inputs_json"], []):
+                    input_row = self._artifact_by_name(connection, project_id, input_name)
+                    if input_row is None:
+                        raise GateError(f"declared input is no longer current: {input_name}")
+                    input_path = self._project_dir(project_id) / input_row["relative_path"]
+                    if not input_path.is_file() or _sha256(input_path) != input_row["sha256"]:
+                        raise GateError(f"declared input changed during execution: {input_name}")
+                    input_rows.append(input_row)
                 registered: dict[str, Any] = {}
                 for name, payload in outputs.items():
                     if not isinstance(payload, dict) or not payload.get("path"):
@@ -929,6 +1032,14 @@ class StudioEngine:
                         metadata=dict(payload.get("metadata", {})),
                         expected_sha256=payload.get("sha256"),
                     )
+                    for input_row in input_rows:
+                        connection.execute(
+                            """INSERT INTO artifact_inputs(
+                                   project_id,output_artifact_id,input_artifact_id,input_sha256,relationship,created_at
+                               ) VALUES(?,?,?,?,?,?)""",
+                            (project_id, registered[name]["artifact_id"], input_row["artifact_id"],
+                             input_row["sha256"], "DERIVED_FROM", _iso()),
+                        )
                     self._event(connection, project_id, "ARTIFACT", registered[name]["artifact_id"], "ARTIFACT_CREATED", registered[name])
                 result_payload = {"outputs": {key: value["artifact_id"] for key, value in registered.items()}, **(result or {})}
                 connection.execute(
@@ -1048,7 +1159,16 @@ class StudioEngine:
     def record_review(
         self, project_id: str, artifact_id: str, *, reviewer_id: str, rubric_id: str,
         outcome: str, dimensions: dict[str, Any], evidence_refs: list[str], notes: str = "",
+        attestation: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        if not isinstance(dimensions, dict):
+            raise ContractError("review dimensions must be a JSON object")
+        if "_attestation" in dimensions:
+            raise ContractError("_attestation is reserved; pass reviewer attestation separately")
+        if attestation is not None:
+            if not isinstance(attestation, dict):
+                raise ContractError("review attestation must be a JSON object")
+            dimensions = {**dimensions, "_attestation": attestation}
         if outcome not in {"PASS", "REVISE", "FAIL", "BLOCKED", "NOT_TESTED"}:
             raise ContractError("invalid review outcome")
         if not reviewer_id or not rubric_id or not evidence_refs:
@@ -1087,6 +1207,48 @@ class StudioEngine:
             connection.commit()
         return {"review_id": review_id, **payload}
 
+    def _artifact_lineage_rows(
+        self, connection: sqlite3.Connection, project_id: str, artifact_id: str,
+    ) -> tuple[list[sqlite3.Row], list[str]]:
+        rows: dict[str, sqlite3.Row] = {}
+        failures: list[str] = []
+        pending = [artifact_id]
+        while pending:
+            current_id = pending.pop()
+            if current_id in rows:
+                continue
+            current = connection.execute(
+                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                (project_id, current_id),
+            ).fetchone()
+            if current is None:
+                failures.append(f"lineage_artifact_missing:{current_id}")
+                continue
+            rows[current_id] = current
+            parents = connection.execute(
+                "SELECT input_artifact_id,input_sha256 FROM artifact_inputs WHERE project_id=? AND output_artifact_id=?",
+                (project_id, current_id),
+            ).fetchall()
+            for parent in parents:
+                parent_row = connection.execute(
+                    "SELECT sha256 FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, parent["input_artifact_id"]),
+                ).fetchone()
+                if parent_row is None:
+                    failures.append(f"lineage_parent_missing:{current_id}:{parent['input_artifact_id']}")
+                elif parent_row["sha256"] != parent["input_sha256"]:
+                    failures.append(f"lineage_parent_digest_mismatch:{current_id}:{parent['input_artifact_id']}")
+                pending.append(parent["input_artifact_id"])
+        return list(rows.values()), failures
+
+    @staticmethod
+    def _is_media_artifact(artifact: sqlite3.Row) -> bool:
+        media_type = str(artifact["media_type"] or "").lower()
+        kind = str(artifact["kind"] or "").lower()
+        return media_type.startswith(("video/", "image/", "audio/")) or kind in {
+            "media", "video", "image", "audio", "visual_asset", "sound_asset", "font_asset",
+        }
+
     def release_check(
         self, project_id: str, artifact_id: str, *, required_rubrics: list[str],
         evidence_refs: list[str] | None = None, require_rights: bool = True,
@@ -1104,29 +1266,148 @@ class StudioEngine:
                 failures.append("artifact_bytes_missing_or_digest_changed")
             if artifact["status"] not in {"CURRENT", "ACCEPTED"}:
                 failures.append(f"artifact_not_current:{artifact['status']}")
-            if require_rights and artifact["rights_status"] not in RIGHTS_ALLOWED:
+
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            release_policy = brief.get("release_policy", {})
+            # CLI flags cannot weaken a hard requirement declared by the owner brief.
+            effective_require_rights = bool(require_rights or release_policy.get("require_rights", True))
+            allowed_rights = set(release_policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)))
+            require_rights_evidence = bool(release_policy.get("require_rights_evidence", False))
+            if effective_require_rights and artifact["rights_status"] not in allowed_rights:
                 failures.append(f"rights_not_cleared:{artifact['rights_status']}")
+
+            lineage, lineage_failures = self._artifact_lineage_rows(connection, project_id, artifact_id)
+            failures.extend(lineage_failures)
+            checked_lineage: list[dict[str, Any]] = []
+            for source in lineage:
+                source_path = self._project_dir(project_id) / source["relative_path"]
+                if not source_path.is_file() or _sha256(source_path) != source["sha256"]:
+                    failures.append(f"lineage_bytes_missing_or_changed:{source['artifact_id']}")
+                if effective_require_rights and self._is_media_artifact(source):
+                    if source["rights_status"] not in allowed_rights:
+                        failures.append(f"lineage_rights_not_cleared:{source['name']}:{source['artifact_id']}:{source['rights_status']}")
+                    if require_rights_evidence:
+                        metadata = _loads(source["metadata_json"], {})
+                        refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
+                        if not isinstance(refs, list) or not refs:
+                            failures.append(f"lineage_rights_evidence_missing:{source['name']}:{source['artifact_id']}")
+                checked_lineage.append({
+                    "artifact_id": source["artifact_id"], "name": source["name"],
+                    "sha256": source["sha256"], "rights_status": source["rights_status"],
+                })
+
             review_rows = connection.execute(
                 "SELECT * FROM reviews WHERE project_id=? AND artifact_id=? AND artifact_digest=?",
                 (project_id, artifact_id, artifact["sha256"]),
             ).fetchall()
-            by_rubric: dict[str, list[str]] = {}
+            by_rubric: dict[str, list[sqlite3.Row]] = {}
             for review in review_rows:
-                by_rubric.setdefault(review["rubric_id"], []).append(review["outcome"])
-            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
-            release_policy = brief.get("release_policy", {})
+                by_rubric.setdefault(review["rubric_id"], []).append(review)
             effective_rubrics = sorted(set(required_rubrics or []) | set(release_policy.get("required_review_rubrics", [])))
             if not effective_rubrics:
                 raise ContractError("release_check requires at least one review rubric in the brief or command")
+
+            review_contracts = release_policy.get("review_contracts", {})
+            review_summary: dict[str, Any] = {}
             for rubric in effective_rubrics:
-                outcomes = by_rubric.get(rubric, [])
+                rows = by_rubric.get(rubric, [])
+                outcomes = [row["outcome"] for row in rows]
                 if not outcomes or any(outcome != "PASS" for outcome in outcomes):
                     failures.append(f"required_review_missing_or_conflicting:{rubric}:{outcomes}")
+                contract = review_contracts.get(rubric, {}) if isinstance(review_contracts, dict) else {}
+                attestations: list[dict[str, Any]] = []
+                reviewer_ids: set[str] = set()
+                context_ids: set[str] = set()
+                for review in rows:
+                    reviewer_ids.add(review["reviewer_id"])
+                    dimensions = _loads(review["dimensions_json"], {})
+                    attestation = dimensions.get("_attestation", {}) if isinstance(dimensions, dict) else {}
+                    if not isinstance(attestation, dict):
+                        attestation = {}
+                    attestations.append(attestation)
+                    required_kind = contract.get("reviewer_kind")
+                    if required_kind and attestation.get("reviewer_kind") != required_kind:
+                        failures.append(f"reviewer_kind_mismatch:{rubric}:{review['review_id']}:{attestation.get('reviewer_kind')}")
+                    required_mode = contract.get("execution_mode")
+                    if required_mode and attestation.get("execution_mode") != required_mode:
+                        failures.append(f"review_execution_mode_mismatch:{rubric}:{review['review_id']}:{attestation.get('execution_mode')}")
+                    if contract.get("blind_review") and attestation.get("blind_review") is not True:
+                        failures.append(f"blind_review_attestation_missing:{rubric}:{review['review_id']}")
+                    if contract.get("require_digest_attestation") and attestation.get("inspected_artifact_digest") != artifact["sha256"]:
+                        failures.append(f"review_inspected_digest_mismatch:{rubric}:{review['review_id']}")
+                    if contract.get("require_context_id"):
+                        context_id = attestation.get("context_id")
+                        if not isinstance(context_id, str) or not context_id.strip():
+                            failures.append(f"review_context_id_missing:{rubric}:{review['review_id']}")
+                        else:
+                            context_ids.add(context_id)
+                    scorecard = dimensions.get("scorecard", dimensions.get("scores", {})) if isinstance(dimensions, dict) else {}
+                    if not isinstance(scorecard, dict):
+                        scorecard = {}
+                    for dimension, floor in contract.get("dimension_floors", {}).items():
+                        try:
+                            score = float(scorecard[dimension])
+                        except (KeyError, TypeError, ValueError):
+                            failures.append(f"review_score_missing:{rubric}:{dimension}:{review['review_id']}")
+                            continue
+                        if score < float(floor):
+                            failures.append(f"review_score_below_floor:{rubric}:{dimension}:{score:g}<{float(floor):g}")
+                    score_dimensions = contract.get("score_dimensions", [])
+                    if score_dimensions:
+                        try:
+                            values = [float(scorecard[name]) for name in score_dimensions]
+                            average = sum(values) / len(values)
+                            minimum_average = float(contract.get("min_average", 0))
+                            if average < minimum_average:
+                                failures.append(f"review_average_below_floor:{rubric}:{average:.2f}<{minimum_average:g}")
+                        except (KeyError, TypeError, ValueError, ZeroDivisionError):
+                            failures.append(f"review_scorecard_incomplete:{rubric}:{review['review_id']}")
+                    min_findings = int(contract.get("min_findings", 0))
+                    if min_findings:
+                        findings = dimensions.get("findings", []) if isinstance(dimensions, dict) else []
+                        if not isinstance(findings, list) or len(findings) < min_findings:
+                            failures.append(f"review_findings_below_minimum:{rubric}:{len(findings) if isinstance(findings, list) else 0}<{min_findings}")
+                        else:
+                            for index, finding in enumerate(findings):
+                                if not isinstance(finding, dict) or not finding.get("finding"):
+                                    failures.append(f"review_finding_incomplete:{rubric}:{index}")
+                                    continue
+                                if contract.get("require_evidence_per_finding") and not finding.get("evidence_ref"):
+                                    failures.append(f"review_finding_evidence_missing:{rubric}:{index}")
+                                if contract.get("require_disposition_per_finding") and finding.get("disposition") not in {
+                                    "UNRESOLVED", "MITIGATED", "ACCEPTED", "NOT_APPLICABLE",
+                                }:
+                                    failures.append(f"review_finding_disposition_missing:{rubric}:{index}")
+                                severity = str(finding.get("severity", "MEDIUM")).upper()
+                                disposition = finding.get("disposition")
+                                if disposition == "UNRESOLVED" and severity in {"CRITICAL", "HIGH"} and review["outcome"] == "PASS":
+                                    failures.append(f"red_team_unresolved_high_risk:{rubric}:{index}")
+                if contract.get("min_reviewers", 0) and len(reviewer_ids) < int(contract["min_reviewers"]):
+                    failures.append(f"reviewer_quorum_missing:{rubric}:{len(reviewer_ids)}<{int(contract['min_reviewers'])}")
+                if contract.get("distinct_contexts") and len(context_ids) < len(rows):
+                    failures.append(f"review_contexts_not_independent:{rubric}")
+                review_summary[rubric] = {
+                    "review_ids": [row["review_id"] for row in rows],
+                    "reviewer_ids": sorted(reviewer_ids),
+                    "outcomes": outcomes,
+                    "attestations": attestations,
+                }
+
             supplied_evidence = set(evidence_refs or [])
             required_evidence = set(release_policy.get("required_evidence_refs", []))
             missing_evidence = sorted(required_evidence - supplied_evidence)
             if missing_evidence:
                 failures.append(f"release_evidence_missing:{missing_evidence}")
+
+            for evidence_name in release_policy.get("required_evidence_artifact_names", []):
+                evidence_artifact = self._artifact_by_name(connection, project_id, evidence_name)
+                if evidence_artifact is None:
+                    failures.append(f"required_evidence_artifact_missing:{evidence_name}")
+                    continue
+                evidence_path = self._project_dir(project_id) / evidence_artifact["relative_path"]
+                if not evidence_path.is_file() or _sha256(evidence_path) != evidence_artifact["sha256"]:
+                    failures.append(f"required_evidence_artifact_bytes_changed:{evidence_name}")
+
             required_artifacts = list(release_policy.get("required_artifact_names", []))
             for required_name in required_artifacts:
                 required_artifact = self._artifact_by_name(connection, project_id, required_name)
@@ -1136,23 +1417,81 @@ class StudioEngine:
                     required_path = self._project_dir(project_id) / required_artifact["relative_path"]
                     if not required_path.is_file() or _sha256(required_path) != required_artifact["sha256"]:
                         failures.append(f"required_deliverable_bytes_changed:{required_name}")
+                    if effective_require_rights and required_artifact["rights_status"] not in allowed_rights:
+                        failures.append(f"required_deliverable_rights_not_cleared:{required_name}:{required_artifact['rights_status']}")
+
             required_assets = list(release_policy.get("required_asset_names", []))
             for asset_name in required_assets:
                 source_asset = self._artifact_by_name(connection, project_id, asset_name)
                 if source_asset is None:
                     failures.append(f"required_source_asset_missing:{asset_name}")
-                elif source_asset["rights_status"] not in RIGHTS_ALLOWED:
-                    failures.append(f"required_source_asset_rights_not_cleared:{asset_name}:{source_asset['rights_status']}")
                 else:
                     source_path = self._project_dir(project_id) / source_asset["relative_path"]
                     if not source_path.is_file() or _sha256(source_path) != source_asset["sha256"]:
                         failures.append(f"required_source_asset_bytes_changed:{asset_name}")
+                    if effective_require_rights and source_asset["rights_status"] not in allowed_rights:
+                        failures.append(f"required_source_asset_rights_not_cleared:{asset_name}:{source_asset['rights_status']}")
+                    if require_rights_evidence:
+                        metadata = _loads(source_asset["metadata_json"], {})
+                        refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
+                        if not isinstance(refs, list) or not refs:
+                            failures.append(f"required_source_asset_rights_evidence_missing:{asset_name}")
+
+            qa_receipt: dict[str, Any] | None = None
+            if release_policy.get("require_technical_qa"):
+                qa_name = release_policy.get("technical_qa_artifact_name", "technical-qa-receipt")
+                qa_artifact = self._artifact_by_name(connection, project_id, qa_name)
+                if qa_artifact is None:
+                    failures.append(f"technical_qa_receipt_missing:{qa_name}")
+                else:
+                    qa_path = self._project_dir(project_id) / qa_artifact["relative_path"]
+                    try:
+                        qa_payload = json.loads(qa_path.read_text(encoding="utf-8")) if qa_path.is_file() else {}
+                    except (OSError, json.JSONDecodeError):
+                        qa_payload = {}
+                    if not qa_path.is_file() or _sha256(qa_path) != qa_artifact["sha256"]:
+                        failures.append("technical_qa_receipt_bytes_missing_or_changed")
+                    if qa_artifact["kind"] != "qa_report":
+                        failures.append(f"technical_qa_artifact_wrong_kind:{qa_artifact['kind']}")
+                    if qa_payload.get("hard_pass") is not True or qa_payload.get("hard_failures"):
+                        failures.append("technical_qa_hard_pass_missing")
+                    if qa_payload.get("media_sha256") != artifact["sha256"]:
+                        failures.append("technical_qa_target_digest_mismatch")
+                    if qa_payload.get("input_artifact_id") != artifact_id:
+                        failures.append("technical_qa_target_artifact_id_mismatch")
+                    checks = qa_payload.get("checks", [])
+                    check_statuses = {item.get("check_id"): item.get("status") for item in checks if isinstance(item, dict)}
+                    required_check_ids = set(release_policy.get("technical_qa_required_check_ids", [
+                        "video_stream", "stream_duration_match", "true_peak", "black_frames", "full_decode",
+                    ]))
+                    missing_checks = sorted(required_check_ids - set(check_statuses))
+                    failed_checks = sorted(key for key, status in check_statuses.items() if status != "PASS")
+                    if missing_checks:
+                        failures.append(f"technical_qa_checks_missing:{missing_checks}")
+                    if failed_checks:
+                        failures.append(f"technical_qa_checks_failed:{failed_checks}")
+                    metadata = _loads(qa_artifact["metadata_json"], {})
+                    if metadata.get("hard_pass") is not True or metadata.get("media_sha256") != artifact["sha256"]:
+                        failures.append("technical_qa_artifact_metadata_mismatch")
+                    qa_receipt = {
+                        "artifact_id": qa_artifact["artifact_id"], "sha256": qa_artifact["sha256"],
+                        "media_sha256": qa_payload.get("media_sha256"), "hard_pass": qa_payload.get("hard_pass"),
+                        "checks": check_statuses,
+                    }
+
             receipt = {
                 "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
-                "required_rubrics": effective_rubrics, "required_artifacts": required_artifacts,
-                "required_assets": required_assets, "evidence_refs": sorted(supplied_evidence),
-                "rights_status": artifact["rights_status"], "failures": failures,
-                "pass": not failures,
+                "required_rubrics": effective_rubrics, "review_summary": review_summary,
+                "required_artifacts": required_artifacts,
+                "required_assets": required_assets,
+                "required_evidence_artifacts": list(release_policy.get("required_evidence_artifact_names", [])),
+                "evidence_refs": sorted(supplied_evidence),
+                "rights_status": artifact["rights_status"],
+                "artifact_lineage": checked_lineage,
+                "technical_qa": qa_receipt,
+                "rights_evidence_required": require_rights_evidence,
+                "failures": failures, "pass": not failures,
+                "review_attestation_limit": "Reviewer kind, execution mode, blind review and context are self-attested metadata; the runtime cannot cryptographically prove a human actually performed an independent cold read.",
             }
             if not failures:
                 connection.execute("UPDATE artifacts SET status='ACCEPTED' WHERE project_id=? AND artifact_id=?", (project_id, artifact_id))
@@ -1286,6 +1625,20 @@ class StudioEngine:
                     failures.append(f"artifact_file_missing:{artifact['artifact_id']}:{artifact['status']}")
                 elif _sha256(path) != artifact["sha256"]:
                     failures.append(f"artifact_digest_mismatch:{artifact['artifact_id']}:{artifact['status']}")
+            lineage_rows = connection.execute("SELECT * FROM artifact_inputs WHERE project_id=?", (project_id,)).fetchall()
+            for lineage_row in lineage_rows:
+                input_row = connection.execute(
+                    "SELECT sha256 FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, lineage_row["input_artifact_id"]),
+                ).fetchone()
+                output_row = connection.execute(
+                    "SELECT 1 FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, lineage_row["output_artifact_id"]),
+                ).fetchone()
+                if input_row is None or output_row is None:
+                    failures.append(f"artifact_lineage_reference_missing:{lineage_row['output_artifact_id']}:{lineage_row['input_artifact_id']}")
+                elif input_row["sha256"] != lineage_row["input_sha256"]:
+                    failures.append(f"artifact_lineage_digest_mismatch:{lineage_row['output_artifact_id']}:{lineage_row['input_artifact_id']}")
             reviews = connection.execute("SELECT * FROM reviews WHERE project_id=?", (project_id,)).fetchall()
             for review in reviews:
                 artifact = connection.execute(
