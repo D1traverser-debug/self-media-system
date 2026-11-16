@@ -153,6 +153,16 @@ Technical QA and editorial/craft QA are different. FFprobe can measure streams, 
 
 Bind every review to the exact artifact ID and SHA-256. Conflicting PASS and FAIL verdicts block release. Replaced bytes invalidate prior review authority. Run `release-check` on the exact final deliverable with required rubrics, rights and platform evidence. Release admission is not publication; upload or paid external actions require owner authorization.
 
+## 8A. Non-negotiable media release gates
+
+For a video release, the exact final artifact must have an FFmpeg/FFprobe receipt bound to its artifact ID and SHA-256. The mandatory checks are video stream, stream-duration agreement, true peak, black-frame detection and full decode. The brief may add duration, resolution and frame-rate requirements but cannot remove those checks. Missing tools, unavailable measurements, stale receipts or digest mismatch fail closed.
+
+The final media and every used media asset in its recursive artifact lineage must have an allowed rights status and resolvable rights evidence. A source version change invalidates every consumer and dependent descendant. No UNKNOWN rights, unreviewed likeness, unverified music/voice/font, unsupported product-truth claim or unresolved disclosure gap may be waved through.
+
+When the brief requires a human cold read, the review receipt must attest to a human reviewer, independent cold-read mode, blind review, the exact inspected digest and a unique context ID. These are auditable attestations, not cryptographic proof of human identity or independent cognition.
+
+When the brief requires Red Team, require at least three concrete findings, each with evidence, severity and disposition. A PASS cannot coexist with unresolved critical/high findings. Required evidence artifacts must exist and be current; free-form strings alone are not sufficient proof.
+
 ## 9. Failure, repair and recovery loop
 
 When something fails, do not reflexively add another prompt, role, stage or gate. First record the observed symptom and affected outcome. Compare at least two root-cause hypotheses and identify a test that distinguishes them.
