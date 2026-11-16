@@ -1280,11 +1280,12 @@ class StudioEngine:
             artifacts = connection.execute("SELECT * FROM artifacts WHERE project_id=?", (project_id,)).fetchall()
             for artifact in artifacts:
                 path = self._project_dir(project_id) / artifact["relative_path"]
-                if artifact["status"] in {"CURRENT", "ACCEPTED"}:
-                    if not path.is_file():
-                        failures.append(f"current_artifact_missing:{artifact['artifact_id']}")
-                    elif _sha256(path) != artifact["sha256"]:
-                        failures.append(f"current_artifact_digest_mismatch:{artifact['artifact_id']}")
+                # Stale versions are immutable evidence too; stale status removes
+                # release authority, not the obligation to preserve historical bytes.
+                if not path.is_file():
+                    failures.append(f"artifact_file_missing:{artifact['artifact_id']}:{artifact['status']}")
+                elif _sha256(path) != artifact["sha256"]:
+                    failures.append(f"artifact_digest_mismatch:{artifact['artifact_id']}:{artifact['status']}")
             reviews = connection.execute("SELECT * FROM reviews WHERE project_id=?", (project_id,)).fetchall()
             for review in reviews:
                 artifact = connection.execute(
