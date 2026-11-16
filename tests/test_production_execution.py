@@ -26,6 +26,15 @@ def _brief():
     }
 
 
+def _simple_task(task_id: str, inputs=()):
+    return {
+        "task_id": task_id, "title": task_id, "kind": "production",
+        "executor": "agent", "depends_on": [], "inputs": list(inputs),
+        "outputs": [f"{task_id}-artifact"],
+        "acceptance": {"observable": "A concrete output artifact is registered."},
+    }
+
+
 def _ffmpeg(path: Path, *args: str) -> None:
     subprocess.run(
         ["ffmpeg", "-hide_banner", "-nostdin", "-v", "error", *args, "-y", str(path)],
@@ -230,7 +239,7 @@ def test_local_tool_pool_claims_independent_render_tasks_in_the_same_round(tmp_p
         })
     engine.add_tasks("parallel-demo", tasks)
     result = run_ready_tool_tasks(engine, "parallel-demo", worker_prefix="parallel-renderer", max_workers=2)
-    assert result["scheduler_status"] == "COMPLETED", result
+    assert result["scheduler_status"] == "TASK_GRAPH_COMPLETE_NOT_RELEASED", result
     assert {item["task_id"] for item in result["claimed"]} == {"render-1", "render-2"}
     assert {item["task_id"] for item in result["completed"]} == {"render-1", "render-2"}
     assert len({item["worker_id"] for item in result["claimed"]}) == 2
@@ -292,7 +301,7 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
     }])
 
     result = run_ready_tool_tasks(engine, "motion-demo", worker_prefix="motion-renderer", max_workers=1)
-    assert result["scheduler_status"] == "COMPLETED", result
+    assert result["scheduler_status"] == "TASK_GRAPH_COMPLETE_NOT_RELEASED", result
     assert result["failed"] == []
     task = engine.list_tasks("motion-demo")[0]
     assert task["status"] == "COMPLETED"
@@ -421,7 +430,7 @@ def test_completion_binds_exact_input_artifact_digest_and_rejects_mutated_claim_
         "lineage", "source-evidence", source, kind="evidence",
         media_type="text/plain", rights_status="NOT_APPLICABLE",
     )
-    engine.add_tasks("lineage", [task("consume-source", inputs=["source-evidence"])])
+    engine.add_tasks("lineage", [_simple_task("consume-source", inputs=["source-evidence"])])
     packet = engine.claim_next("lineage", "lineage-worker")
     output = engine._project_dir("lineage") / "artifacts" / "output.txt"
     output.write_text("derived result", encoding="utf-8")
