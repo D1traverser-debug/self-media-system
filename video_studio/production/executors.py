@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ..engine import StudioEngine, StudioError
-from .contracts import ProductionContractError, RenderSpec
+from .contracts import FrameRenderSpec, ProductionContractError, RenderSpec
 from .delivery import create_delivery_package
 from .ffmpeg_assembler import FfmpegAssembler
+from .python_frame_renderer import PythonFrameRenderer
 
 
 class ProductionTaskError(StudioError):
@@ -45,6 +46,34 @@ def run_claimed_production_task(
         output_dir = engine._project_dir(project_id) / "artifacts" / "production" / task_id / f"attempt-{attempt}"
         output_dir.mkdir(parents=True, exist_ok=True)
         outputs = set(task.get("outputs", []))
+
+        if operation == "python_frame_render":
+            if config.get("trusted_code_execution") is not True:
+                raise ProductionContractError("task config must explicitly authorize trusted_code_execution=true")
+            spec_name = str(config.get("render_spec_input", "")).strip()
+            spec_artifact = packet["input_artifacts"].get(spec_name)
+            if not spec_artifact:
+                raise ProductionContractError(f"frame render spec is not a declared task input: {spec_name}")
+            spec = FrameRenderSpec.from_dict(json.loads(Path(str(spec_artifact["path"])).read_text(encoding="utf-8")))
+            result = PythonFrameRenderer().render(
+                spec, input_artifacts=packet["input_artifacts"], output_dir=output_dir,
+                expected_outputs=outputs, project_root=engine._project_dir(project_id),
+            )
+            artifact_outputs = {
+                spec.video_output: _output_payload(
+                    Path(result["video_path"]), kind="video", media_type="video/mp4",
+                    metadata={"production_executor": operation, "candidate_only": True, "render_receipt_ref": spec.receipt_output},
+                ),
+                spec.receipt_output: _output_payload(
+                    Path(result["receipt_path"]), kind="evidence", media_type="application/json",
+                    metadata={"production_executor": operation, "frame_count": spec.frame_count, "media_sha256": result["receipt"]["output"]["sha256"]},
+                ),
+            }
+            completion = engine.complete_task(
+                project_id, task_id, worker_id, claim_token, artifact_outputs,
+                {"production_executor": operation, "candidate_only": True, "render_receipt": result["receipt"]},
+            )
+            return {"operation": operation, "completion": completion}
 
         if operation == "ffmpeg_assemble":
             spec_name = str(config.get("render_spec_input", "")).strip()
