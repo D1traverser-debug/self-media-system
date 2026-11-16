@@ -61,13 +61,24 @@ def run_ready_tool_tasks(
                 except Exception as exc:
                     failed.append({"task_id": packet["task"]["task_id"], "error_type": type(exc).__name__, "error": str(exc)})
 
+    remaining_tasks = engine.list_tasks(project_id)
+    remaining_ready = [
+        {"task_id": item["task_id"], "title": item.get("title")}
+        for item in remaining_tasks
+        if item.get("status") == "READY" and item.get("executor") == "tool"
+        and PRODUCTION_EXECUTORS.operation_for_task(item)
+    ]
+    status = (
+        "COMPLETED_WITH_FAILURES" if failed else
+        "PARTIAL_UNREGISTERED_EXECUTORS" if unregistered_by_id else
+        "MAX_ROUNDS_REACHED" if remaining_ready else
+        "COMPLETED" if completed else
+        "NO_READY_REGISTERED_TOOL_TASKS"
+    )
     return {
         "project_id": project_id, "rounds": rounds, "max_workers": max_workers,
         "claimed": claimed_total, "completed": completed, "failed": failed,
         "ready_tool_tasks_without_registered_executor": list(unregistered_by_id.values()),
-        "scheduler_status": (
-            "COMPLETED_WITH_FAILURES" if failed else
-            "PARTIAL_UNREGISTERED_EXECUTORS" if unregistered_by_id else
-            "COMPLETED"
-        ),
+        "remaining_ready_registered_tool_tasks": remaining_ready,
+        "scheduler_status": status,
     }
