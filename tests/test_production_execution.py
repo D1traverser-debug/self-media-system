@@ -18,7 +18,7 @@ def _brief():
         "goal": "Assemble and package a short audiovisual production master from declared shot and audio assets.",
         "audience": "Video production operators.",
         "deliverables": [
-            "final-video", "audio-master", "captions", "cover", "editable-project-source",
+            "final-video", "audio-master", "captions", "cover", "reproducible-project-source-bundle",
             "publish-copy", "rights-manifest", "technical-qa", "delivery-package",
         ],
     }
@@ -171,20 +171,10 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
         "package-delivery": "COMPLETED",
     }
 
-    package_artifact = engine._artifact_by_name_for_test("delivery-demo", "delivery-package") if hasattr(engine, "_artifact_by_name_for_test") else None
-    # The immutable output ledger is the source of truth; inspect the registered package through its task result.
-    events = engine.events("delivery-demo", limit=200)
-    package_event = next(event for event in events if event.get("event_type") == "TASK_COMPLETED" and event.get("entity_id") == "package-delivery")
-    package_id = package_event["payload"]["outputs"]["delivery-package"]
-    package_row = engine.artifact("delivery-demo", package_id) if hasattr(engine, "artifact") else None
-    if package_row is None:
-        # Public audit verifies the same registered artifact and bytes when a lookup helper is not exposed.
-        assert engine.audit("delivery-demo")["pass"] is True
-        artifact_path = next(
-            path for path in (engine._project_dir("delivery-demo") / "artifacts" / "production" / "package-delivery").rglob("delivery-package.zip")
-        )
-    else:
-        artifact_path = Path(package_row["path"])
+    assert engine.audit("delivery-demo")["pass"] is True
+    artifact_path = next(
+        path for path in (engine._project_dir("delivery-demo") / "artifacts" / "production" / "package-delivery").rglob("delivery-package.zip")
+    )
     assert artifact_path.is_file()
     with zipfile.ZipFile(artifact_path) as archive:
         names = set(archive.namelist())
