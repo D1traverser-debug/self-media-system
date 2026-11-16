@@ -100,7 +100,7 @@ Commercial planning may begin before production when rights, sponsor deliverable
 
 ## Production execution layer
 
-The standalone Studio now has a provider-neutral local production executor layer. `ffmpeg_assemble` builds a candidate MP4 and separate WAV audio master from declared shot/audio assets and a render spec; `delivery_package` creates a digest-verified ZIP and manifest containing requested deliverables and reproducible project assets. The `run-ready-tools` worker pool executes independent registered local tool tasks concurrently in dependency-ready rounds. It does not claim unsupported tools or launch agent/human/external workers. The assembler is a composition engine, not a general scene renderer; shot generation, narration, sound design, cover design and editorial work remain separate verified capabilities.
+The standalone Studio now has a provider-neutral local production executor layer. `python_frame_render` can execute explicitly trusted project-owned Python scene code to create motion-shot candidates; `ffmpeg_assemble` builds a candidate MP4 and separate WAV audio master from declared shot/audio assets and a render spec; `delivery_package` creates a digest-verified ZIP and manifest containing requested deliverables and reproducible project assets. The `run-ready-tools` worker pool executes independent registered local tool tasks concurrently in dependency-ready rounds. It does not claim unsupported tools or launch agent/human/external workers. The assembler is a composition engine, not a general scene renderer; shot generation, narration, sound design, cover design and editorial work remain separate verified capabilities.
 
 ## Capability and assurance boundary
 
