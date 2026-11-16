@@ -51,6 +51,8 @@ Use `vga-studio init` for a new project. Use `revise-brief` for outcome changes 
 
 ## 2A. Video business workstreams
 
+Video production is the primary standalone product outcome. Media growth, original digital IP and commercialization are optional adjacent contexts; do not add them to a production graph unless the owner brief establishes a real dependency.
+
 Treat Video Growth Agent as a coupled media-business system, not merely a video-rendering pipeline. Determine which workstream(s) the owner's goal actually engages:
 
 - **MEDIA_GROWTH:** audience/problem evidence, demand, platform positioning, content portfolio, series hypotheses, hooks/packaging, distribution and audience outcomes.
