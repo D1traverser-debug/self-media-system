@@ -71,6 +71,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project_id")
     p.add_argument("--worker", required=True)
     p.add_argument("--lease-seconds", type=int, default=900)
+    p.add_argument("--executor", choices=["agent", "human", "tool", "external"])
+    p.add_argument("--task-id", help="claim this exact ready task instead of the next matching task")
+
+    p = sub.add_parser("run-ready-tools", help="execute registered local tool tasks concurrently in dependency-ready rounds")
+    p.add_argument("project_id")
+    p.add_argument("--worker-prefix", default="local-tool")
+    p.add_argument("--max-workers", type=int, default=2)
+    p.add_argument("--lease-seconds", type=int, default=900)
+    p.add_argument("--max-rounds", type=int, default=50)
 
     p = sub.add_parser("heartbeat", help="extend a current worker lease")
     p.add_argument("project_id")
@@ -190,8 +199,21 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "tasks":
             _emit(engine.list_tasks(args.project_id))
         elif command == "claim":
-            packet = engine.claim_next(args.project_id, args.worker, args.lease_seconds)
-            _emit(packet or {"claimed": False, "reason": "NO_READY_TASK"})
+            packet = engine.claim_next(
+                args.project_id, args.worker, args.lease_seconds,
+                executor=args.executor, task_id=args.task_id,
+            )
+            _emit(packet or {"claimed": False, "reason": "NO_MATCHING_READY_TASK"})
+        elif command == "run-ready-tools":
+            from .production.worker_pool import run_ready_tool_tasks
+            result = run_ready_tool_tasks(
+                engine, args.project_id, worker_prefix=args.worker_prefix,
+                max_workers=args.max_workers, lease_seconds=args.lease_seconds,
+                max_rounds=args.max_rounds,
+            )
+            _emit(result)
+            if result["failed"] or result["ready_tool_tasks_without_registered_executor"]:
+                return 2
         elif command == "heartbeat":
             _emit({"lease_until": engine.heartbeat(args.project_id, args.task_id, args.worker, args.token, args.lease_seconds)})
         elif command == "complete":
