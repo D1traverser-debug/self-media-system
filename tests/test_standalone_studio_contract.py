@@ -4,17 +4,17 @@ import json
 from pathlib import Path
 import tomllib
 
-from video_growth_agent.studio_engine import StudioEngine
+from video_studio.engine import StudioEngine
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_standalone_studio_is_the_new_entry_and_has_no_parent_runtime_dependency():
-    manifest = json.loads((ROOT / "video_growth_agent/data/studio_manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads((ROOT / "video_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     skill = (ROOT / "skills/video-growth-agent/SKILL.md").read_text(encoding="utf-8")
     entry = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
-    source = (ROOT / "video_growth_agent/studio_engine.py").read_text(encoding="utf-8")
+    source = (ROOT / "video_studio/engine.py").read_text(encoding="utf-8")
 
     assert manifest["governance"]["system"] == "VIDEO_STUDIO_NATIVE"
     assert manifest["governance"]["mode"] == "STANDALONE"
@@ -22,7 +22,7 @@ def test_standalone_studio_is_the_new_entry_and_has_no_parent_runtime_dependency
     assert manifest["governance"]["caos_api_dependency"] is False
     assert manifest["governance"]["caos_skill_dependency"] is False
     assert manifest["execution"]["fixed_stage_machine"] is False
-    assert pyproject["project"]["scripts"]["vga-studio"] == "video_growth_agent.studio_cli:main"
+    assert pyproject["project"]["scripts"]["vga-studio"] == "video_studio.cli:main"
     assert "STUDIO_ENTRY.md" in skill and "STUDIO_ENTRY.md" in entry
     assert "CAOS_VIDEO_ENTRY.md" not in skill
     assert "import caos" not in source.lower()
