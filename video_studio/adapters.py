@@ -76,33 +76,39 @@ def _mapping(payload: Any, label: str) -> dict[str, Any]:
     return dict(payload)
 
 
+def _string_tuple(value: Any, label: str) -> tuple[str, ...]:
+    if not isinstance(value, (list, tuple)) or not all(isinstance(item, str) and item.strip() for item in value):
+        raise DomainAdapterError(f"{label} must be an array of non-empty strings")
+    return tuple(value)
+
+
 def editorial_plan_from_dict(payload: Mapping[str, Any]) -> EditorialPlan:
     data = _mapping(payload, "EditorialPlan")
     intent_data = _mapping(data.get("intent"), "EditorialPlan.intent")
     for field in ("evidence_refs", "desired_outcomes", "constraints", "commercial_context_refs"):
         if field in intent_data:
-            intent_data[field] = tuple(intent_data[field])
+            intent_data[field] = _string_tuple(intent_data[field], f"EditorialPlan.intent.{field}")
     intent = EpisodeIntent(**intent_data)
 
     claims = []
     for raw in data.get("claims", []):
         item = _mapping(raw, "EditorialPlan.claim")
-        item["evidence_refs"] = tuple(item.get("evidence_refs", ()))
+        item["evidence_refs"] = _string_tuple(item.get("evidence_refs", []), "EditorialPlan.claim.evidence_refs") if item.get("evidence_refs", []) else ()
         claims.append(ClaimSpec(**item))
 
     beats = []
     for raw in data.get("beats", []):
         item = _mapping(raw, "EditorialPlan.beat")
         for field in ("claim_ids", "depends_on"):
-            item[field] = tuple(item.get(field, ()))
+            item[field] = _string_tuple(item.get(field, []), f"EditorialPlan.beat.{field}") if item.get(field, []) else ()
         beats.append(BeatSpec(**item))
 
     shots = []
     for raw in data.get("shots", []):
         item = _mapping(raw, "EditorialPlan.shot")
         for field in ("source_claim_ids", "continuity_dimensions", "reference_intents", "must_show", "must_avoid"):
-            item[field] = tuple(item.get(field, ()))
-        item["allowed_production_modes"] = frozenset(item.get("allowed_production_modes", ()))
+            item[field] = _string_tuple(item.get(field, []), f"EditorialPlan.shot.{field}") if item.get(field, []) else ()
+        item["allowed_production_modes"] = frozenset(_string_tuple(item.get("allowed_production_modes", []), "EditorialPlan.shot.allowed_production_modes"))
         item["value_vector"] = dict(item.get("value_vector", {}))
         shots.append(ShotIntent(**item))
 
