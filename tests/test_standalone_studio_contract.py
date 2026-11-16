@@ -107,7 +107,8 @@ def test_program_example_keeps_independent_workstreams_parallel_and_ipos_fail_cl
     task_map = {item["task_id"]: item for item in engine.list_tasks("program")}
     assert task_map["growth-baseline-and-topic-hypotheses"]["status"] == "READY"
     assert task_map["commercial-advertiser-map"]["status"] == "READY"
-    assert task_map["ipos-video-identity-bundle-import"]["status"] == "WAITING_INPUT"
+    assert task_map["media-graph-bootstrap"]["status"] == "READY"
+    assert task_map["ipos-video-identity-bundle-import"]["status"] == "PENDING"
     assert task_map["jensen-source-media-inspection"]["status"] == "WAITING_INPUT"
     assert task_map["commercial-offer-native-integration"]["status"] == "PENDING"
     assert status["task_counts"]["READY"] >= 4
