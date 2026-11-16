@@ -32,7 +32,7 @@ def run_ready_tool_tasks(
     completed: list[dict[str, Any]] = []
     failed: list[dict[str, Any]] = []
     claimed_total: list[dict[str, Any]] = []
-    unregistered: list[dict[str, Any]] = []
+    unregistered_by_id: dict[str, dict[str, Any]] = {}
     rounds = 0
 
     for round_number in range(1, max_rounds + 1):
@@ -40,10 +40,12 @@ def run_ready_tool_tasks(
         tasks = engine.list_tasks(project_id)
         ready = [item for item in tasks if item.get("status") == "READY" and item.get("executor") == "tool"]
         candidates = [item for item in ready if _tool_operation(item)]
-        unregistered.extend(
-            {"task_id": item["task_id"], "title": item.get("title"), "kind": item.get("kind"), "requirements": item.get("requirements", {})}
-            for item in ready if not _tool_operation(item)
-        )
+        for item in ready:
+            if not _tool_operation(item):
+                unregistered_by_id[item["task_id"]] = {
+                    "task_id": item["task_id"], "title": item.get("title"),
+                    "kind": item.get("kind"), "requirements": item.get("requirements", {}),
+                }
         if not candidates:
             break
 
