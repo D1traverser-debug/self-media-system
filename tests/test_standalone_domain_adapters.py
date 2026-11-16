@@ -276,3 +276,67 @@ def test_extended_media_qa_adapter_records_loudness_and_silence_analysis(tmp_pat
     check_ids = {item["check_id"] for item in report["checks"]}
     assert {"integrated_loudness", "true_peak", "long_silence", "black_frames"}.issubset(check_ids)
     assert report["metadata"]["checker"] == "ffmpeg-ffprobe-v0.2"
+
+
+def _ipos_bundle():
+    return {
+        "schema_version": "1.0", "issuer": "IP_STUDIO_OS",
+        "bundle_id": "creator-character-v1", "project_id": "ipos-project",
+        "issued_at": "2026-11-13T12:00:00+08:00",
+        "canon": {
+            "canon_id": "creator-character", "version": "v1", "carrier": "ORIGINAL_CHARACTER",
+            "identity_thesis": "An owner-approved recurring character.",
+            "identity_invariants": ["preserve silhouette", "preserve face geometry"],
+            "allowed_variations": ["expression may change"], "forbidden_drift": ["do not replace the identity"],
+        },
+        "approval": {"status": "OWNER_APPROVED", "approval_ref": "owner-approval://canon-v1", "approved_at": "2026-11-13T11:55:00+08:00"},
+        "readiness": {"status": "READY_FOR_VIDEO", "gates": {"G2": "PASS", "G7": "PASS", "G8": "PASS"}},
+        "usage": {"video_allowed": True, "usage_constraints": ["organic creator video"]},
+        "assets": [{
+            "asset_id": "hero-reference", "version_id": "v1", "kind": "IMAGE",
+            "role": "PRIMARY_VISUAL_REFERENCE", "uri": "asset://ipos/hero-reference/v1.png",
+            "digest": "sha256:" + "a" * 64, "state": "PROMOTED", "approved_for_video": True,
+            "rights_ref": "rights://owner/character", "consent_ref": None, "requires_consent": False,
+            "provenance_refs": ["ipos-source://design-ledger/R39"],
+        }],
+        "continuity": {
+            "dimensions": {"silhouette": "approved silhouette v1"},
+            "rules": [{"dimension": "silhouette", "severity": "HARD", "mode": "PRESERVE", "reason": "Identity anchor."}],
+        },
+        "source_provenance_refs": ["ipos-source://owner-brief/R39"],
+        "bundle_uri": "ipos://exports/creator-character/v1.json",
+    }
+
+
+def test_ipos_bundle_import_adapter_preserves_external_canon_and_graph_lineage(tmp_path):
+    engine = StudioEngine(tmp_path)
+    engine.create_project("ipos", "IPOS adapter", _brief())
+    bundle_path = tmp_path / "ipos-bundle.json"
+    bundle_path.write_text(json.dumps(_ipos_bundle()), encoding="utf-8")
+    graph = MediaGraph()
+    graph.add_context(ContextRecord("program", "PROGRAM"))
+    graph_path = tmp_path / "media-graph.json"
+    graph_path.write_text(json.dumps(graph.to_dict()), encoding="utf-8")
+    engine.import_asset("ipos", "ipos-bundle", bundle_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+    engine.import_asset("ipos", "media-graph", graph_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+    engine.add_tasks("ipos", [{
+        "task_id": "import-ipos", "title": "Import the owner-approved IPOS bundle",
+        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+        "inputs": ["ipos-bundle", "media-graph"],
+        "outputs": ["media-graph-imported", "ipos-import-receipt"],
+        "requirements": {"domain_adapter": {
+            "name": "ipos_bundle_import", "bundle_input": "ipos-bundle",
+            "media_graph_input": "media-graph", "program_context_id": "program",
+            "media_graph_output": "media-graph-imported", "receipt_output": "ipos-import-receipt",
+        }},
+    }])
+    packet = engine.claim_next("ipos", "ipos-adapter")
+    result = run_claimed_domain_adapter(engine, "ipos", "import-ipos", "ipos-adapter", packet["claim"]["claim_token"])
+    graph_artifact = result["completion"]["artifacts"]["media-graph-imported"]
+    receipt_artifact = result["completion"]["artifacts"]["ipos-import-receipt"]
+    graph_result = json.loads(Path(graph_artifact["path"]).read_text(encoding="utf-8"))
+    receipt = json.loads(Path(receipt_artifact["path"]).read_text(encoding="utf-8"))
+    assert receipt["canon_ref"].endswith("@v1")
+    assert len(receipt["imported_asset_refs"]) == 1
+    assert any(item["kind"] == "IPOS_IDENTITY_BUNDLE" for item in graph_result["assets"])
+    assert engine.audit("ipos")["pass"] is True
