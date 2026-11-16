@@ -1,0 +1,80 @@
+{
+  "goal": "Create a platform-native news × fictional-video satire package from a verified current event and an owner-supplied fictional clip.",
+  "audience": "Technology and internet-culture viewers who follow current events but dislike generic news recaps and forced meme copy.",
+  "deliverables": [
+    "editorial-reading.md",
+    "platform-copies.json",
+    "cover-candidates/",
+    "release-evidence-pack.json"
+  ],
+  "format": {
+    "platforms": [
+      "X",
+      "TikTok",
+      "YouTube",
+      "Xiaohongshu",
+      "WeChat Channels",
+      "Bilibili",
+      "Douyin"
+    ],
+    "language": [
+      "en",
+      "zh-CN"
+    ]
+  },
+  "content_contract": {
+    "core": "Find the event-specific contradiction and make the supplied fictional visual add a second layer of meaning without retelling its plot.",
+    "reading_order": [
+      "FACT",
+      "INTENT",
+      "VISUAL",
+      "PLATFORM"
+    ],
+    "must_not": [
+      "treat allegations as established facts",
+      "invent what unseen media depicts",
+      "force keywords",
+      "write seven synonym variants"
+    ]
+  },
+  "hard_constraints": [
+    "Separate verified facts, attributed reporting, allegations and unknowns.",
+    "Inspect exact media bytes before making visual claims.",
+    "Verify rights and likeness before release.",
+    "Do not publish automatically."
+  ],
+  "preferences": [
+    "Natural spoken language",
+    "Platform-native humor and speaker perspective"
+  ],
+  "examples": [],
+  "unknowns": [
+    "Rights and identity are unknown until evidence is supplied.",
+    "Synthetic-media disclosure is platform-specific."
+  ],
+  "success_criteria": [
+    "News and visual have mutual semantic relevance without plot recap.",
+    "The copy is natural and genuinely platform-specific.",
+    "Factual and fictional layers are not confused."
+  ],
+  "release_policy": {
+    "required_evidence_refs": [
+      "rights-review",
+      "platform-format-review",
+      "synthetic-upload-disclosure"
+    ],
+    "required_review_rubrics": [
+      "editorial",
+      "platform",
+      "rights"
+    ],
+    "required_artifact_names": [
+      "editorial-reading",
+      "platform-copies",
+      "release-evidence-pack"
+    ],
+    "required_asset_names": [
+      "source-video"
+    ]
+  }
+}
