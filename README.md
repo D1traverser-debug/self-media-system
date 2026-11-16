@@ -98,6 +98,10 @@ Platform derivatives preserve master lineage but re-author hook, packaging, paci
 
 Commercial planning may begin before production when rights, sponsor deliverables, product-truth media or measurement alter the work. Sponsorship never overrides factual/editorial truth. Pricing learns from audience evidence, production cost, rights scope and real outcomes rather than a single static rate card.
 
+## Production execution layer
+
+The standalone Studio now has a provider-neutral local production executor layer. `ffmpeg_assemble` builds a candidate MP4 and separate WAV audio master from declared shot/audio assets and a render spec; `delivery_package` creates a digest-verified ZIP and manifest containing requested deliverables and reproducible project assets. The `run-ready-tools` worker pool executes independent registered local tool tasks concurrently in dependency-ready rounds. It does not claim unsupported tools or launch agent/human/external workers. The assembler is a composition engine, not a general scene renderer; shot generation, narration, sound design, cover design and editorial work remain separate verified capabilities.
+
 ## Capability and assurance boundary
 
 Before generation/edit/review/QA/release, handshake the exact current-session capability required by the action. Repository declarations are ceilings, not execution proof.
