@@ -632,11 +632,13 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
                 "blind_review": True,
                 "require_digest_attestation": True,
                 "require_context_id": True,
+                "require_resolvable_evidence_refs": True,
             },
             "red-team": {
                 "min_findings": 3,
                 "require_evidence_per_finding": True,
                 "require_disposition_per_finding": True,
+                "require_resolvable_evidence_refs": True,
             },
         },
     }
@@ -647,6 +649,15 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         "strict", "rights-clearance", rights_file, kind="document",
         media_type="text/plain", rights_status="OWNED",
     )
+    evidence_paths = {}
+    for evidence_name in ("cold-read-evidence", "red-team-review-evidence", "frame-001", "frame-012", "frame-018"):
+        evidence_path = tmp_path / f"{evidence_name}.txt"
+        evidence_path.write_text(f"Evidence for {evidence_name}", encoding="utf-8")
+        evidence_paths[evidence_name] = evidence_path
+        engine.import_asset(
+            "strict", evidence_name, evidence_path, kind="evidence",
+            media_type="text/plain", rights_status="NOT_APPLICABLE",
+        )
     engine.add_tasks("strict", [
         task("render", inputs=["rights-clearance"], outputs=["final-video"]),
         task("qa", deps=["render"], inputs=["final-video"], outputs=["technical-qa-receipt"]),
@@ -700,7 +711,7 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
     engine.record_review(
         "strict", final_artifact["artifact_id"], reviewer_id="human-cold-reader",
         rubric_id="human-cold-read", outcome="PASS", dimensions={},
-        evidence_refs=["review://cold-read"],
+        evidence_refs=["cold-read-evidence"],
         attestation={
             "reviewer_kind": "HUMAN",
             "execution_mode": "INDEPENDENT_COLD_READ",
@@ -713,11 +724,11 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         "strict", final_artifact["artifact_id"], reviewer_id="red-team-reviewer",
         rubric_id="red-team", outcome="PASS",
         dimensions={"findings": [
-            {"finding": "Opening promise may be too broad.", "evidence_ref": "frame://001", "severity": "MEDIUM", "disposition": "MITIGATED"},
-            {"finding": "A transition may obscure the key mechanism.", "evidence_ref": "frame://012", "severity": "LOW", "disposition": "ACCEPTED"},
-            {"finding": "Caption density may reduce mobile readability.", "evidence_ref": "frame://018", "severity": "MEDIUM", "disposition": "MITIGATED"},
+            {"finding": "Opening promise may be too broad.", "evidence_ref": "frame-001", "severity": "MEDIUM", "disposition": "MITIGATED"},
+            {"finding": "A transition may obscure the key mechanism.", "evidence_ref": "frame-012", "severity": "LOW", "disposition": "ACCEPTED"},
+            {"finding": "Caption density may reduce mobile readability.", "evidence_ref": "frame-018", "severity": "MEDIUM", "disposition": "MITIGATED"},
         ]},
-        evidence_refs=["review://red-team"],
+        evidence_refs=["red-team-review-evidence"],
     )
     release = engine.release_check("strict", final_artifact["artifact_id"], required_rubrics=[])
     assert release["pass"] is True, release["failures"]
@@ -736,10 +747,17 @@ def test_release_check_rejects_red_team_without_three_evidence_backed_findings(t
                 "min_findings": 3,
                 "require_evidence_per_finding": True,
                 "require_disposition_per_finding": True,
+                "require_resolvable_evidence_refs": True,
             },
         },
     }
     engine.create_project("red", "Red team contract", red_brief)
+    review_evidence = tmp_path / "red-team-review-evidence.txt"
+    review_evidence.write_text("Red Team review evidence.", encoding="utf-8")
+    engine.import_asset("red", "red-team-review-evidence", review_evidence, kind="evidence", media_type="text/plain", rights_status="NOT_APPLICABLE")
+    frame_evidence = tmp_path / "frame-001.txt"
+    frame_evidence.write_text("Observed frame evidence.", encoding="utf-8")
+    engine.import_asset("red", "frame-001", frame_evidence, kind="evidence", media_type="text/plain", rights_status="NOT_APPLICABLE")
     engine.add_tasks("red", [task("render")])
     packet = engine.claim_next("red", "producer")
     output = engine._project_dir("red") / "artifacts" / "candidate.txt"
@@ -753,13 +771,14 @@ def test_release_check_rejects_red_team_without_three_evidence_backed_findings(t
         "red", artifact_id, reviewer_id="red-team-reviewer", rubric_id="red-team",
         outcome="PASS",
         dimensions={"findings": [
-            {"finding": "One concern.", "evidence_ref": "frame://001", "severity": "LOW", "disposition": "MITIGATED"},
+            {"finding": "One concern.", "evidence_ref": "frame://unregistered", "severity": "LOW", "disposition": "MITIGATED"},
         ]},
-        evidence_refs=["review://red-team"],
+        evidence_refs=["red-team-review-evidence"],
     )
     release = engine.release_check("red", artifact_id, required_rubrics=[])
     assert release["pass"] is False
     assert any(item.startswith("review_findings_below_minimum:red-team:1<3") for item in release["failures"])
+    assert any(item.startswith("review_finding_evidence_unresolved:red-team:0:frame://unregistered") for item in release["failures"])
 
 
 def test_competitive_candidates_require_owner_adjudication_over_every_candidate(tmp_path):
