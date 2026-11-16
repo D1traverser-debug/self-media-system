@@ -30,11 +30,17 @@ class ProductionExecutorRegistry:
         return tuple(sorted(self._executors))
 
     def operation_for_task(self, task: Mapping[str, Any]) -> str | None:
+        requirements = task.get("requirements", {})
+        if not isinstance(requirements, Mapping):
+            return None
         if task.get("kind") == "technical_measurement":
-            requirements = task.get("requirements", {})
-            if requirements.get("tool") == "ffprobe" or "ffprobe" in requirements.get("tools", []):
+            tools = requirements.get("tools", [])
+            if requirements.get("tool") == "ffprobe" or (isinstance(tools, list) and "ffprobe" in tools):
                 return "ffprobe_media_qa"
-        operation = task.get("requirements", {}).get("production", {}).get("operation")
+        production = requirements.get("production", {})
+        if not isinstance(production, Mapping):
+            return None
+        operation = production.get("operation")
         return str(operation) if isinstance(operation, str) and self.supports(operation) else None
 
     def execute(self, operation: str, context: ProductionTaskContext) -> dict[str, Any]:
