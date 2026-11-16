@@ -1503,6 +1503,9 @@ class StudioEngine:
                         failures.append("technical_qa_receipt_bytes_missing_or_changed")
                     if qa_artifact["kind"] != "qa_report":
                         failures.append(f"technical_qa_artifact_wrong_kind:{qa_artifact['kind']}")
+                    qa_metadata = qa_payload.get("metadata", {}) if isinstance(qa_payload, dict) else {}
+                    if qa_metadata.get("checker") != "ffmpeg-ffprobe-v1.0":
+                        failures.append("technical_qa_checker_unrecognized")
                     if qa_payload.get("hard_pass") is not True or qa_payload.get("hard_failures"):
                         failures.append("technical_qa_hard_pass_missing")
                     if qa_payload.get("media_sha256") != artifact["sha256"]:
@@ -1510,6 +1513,8 @@ class StudioEngine:
                     if qa_payload.get("input_artifact_id") != artifact_id:
                         failures.append("technical_qa_target_artifact_id_mismatch")
                     checks = qa_payload.get("checks", [])
+                    if not isinstance(checks, list):
+                        checks = []
                     check_statuses = {item.get("check_id"): item.get("status") for item in checks if isinstance(item, dict)}
                     required_check_ids = {
                         "video_stream", "stream_duration_match", "true_peak", "black_frames", "full_decode",
