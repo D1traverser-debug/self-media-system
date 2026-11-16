@@ -50,7 +50,7 @@ A claim returns a bounded work packet, exact input asset digests and a lease tok
 vga-studio --root ./studio-work complete episode-001 research --worker researcher-01 --token CLAIM_TOKEN --outputs research.outputs.json
 ```
 
-Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-studio --help` for the complete command set. The existing `vga` command remains the 0.8 compatibility CLI; new standalone projects use `vga-studio` or `python -m video_studio`. The canonical implementation is the `video_studio` package; `video_growth_agent.studio_*` imports are compatibility shims only.
+Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-studio --help` for the complete command set. Use `vga-studio run-adapter PROJECT TASK_ID --worker ID --token TOKEN` for a task that declares a supported `requirements.domain_adapter` contract. This connects EditorialPlan, ShotContract, IPOS, Timeline, continuity, routing, business metrics, supplementary audio QA and local programmatic graphics to the standalone artifact ledger. External generative-video executors remain unconnected and must be verified separately. The existing `vga` command remains the 0.8 compatibility CLI; new standalone projects use `vga-studio` or `python -m video_studio`. The canonical implementation is the `video_studio` package; `video_growth_agent.studio_*` imports are compatibility shims only.
 
 ## Completion rule
 
