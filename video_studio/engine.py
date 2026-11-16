@@ -1069,7 +1069,12 @@ class StudioEngine:
         failure_id = _safe_id(payload.get("failure_id") or "f_" + uuid.uuid4().hex[:16], "failure_id")
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
-            self._project_row(connection, project_id)
+            project_row = self._project_row(connection, project_id)
+            brief = _loads(project_row["brief_json"], {})
+            if brief.get("release_policy", {}).get("require_resolvable_evidence_refs", False):
+                payload["evidence_bindings"] = self._resolve_artifact_refs(
+                    connection, project_id, payload["evidence_refs"], label="failure:evidence",
+                )
             if payload.get("task_id"):
                 task = connection.execute("SELECT 1 FROM tasks WHERE project_id=? AND task_id=?", (project_id, payload["task_id"])).fetchone()
                 if task is None:
@@ -1095,6 +1100,14 @@ class StudioEngine:
                 raise ProjectNotFound(failure_id)
             if row["status"] != "OPEN":
                 raise ContractError("only OPEN failures can be resolved")
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            if brief.get("release_policy", {}).get("require_resolvable_evidence_refs", False):
+                resolution["verification_bindings"] = self._resolve_artifact_refs(
+                    connection, project_id, resolution["verification_refs"], label="failure:verification",
+                )
+                resolution["regression_bindings"] = self._resolve_artifact_refs(
+                    connection, project_id, resolution["regression_refs"], label="failure:regression",
+                )
             connection.execute(
                 "UPDATE failures SET status='RESOLVED',resolution_json=?,updated_at=? WHERE project_id=? AND failure_id=?",
                 (_json(resolution), _iso(), project_id, failure_id),
@@ -1328,14 +1341,31 @@ class StudioEngine:
         if missing:
             raise ContractError(f"learning candidate missing fields: {missing}")
         learning_id = _safe_id(payload.get("learning_id") or "l_" + uuid.uuid4().hex[:16], "learning_id")
-        independently_validated = (
-            payload.get("independent_replay_pass") is True
-            and bool(payload.get("validation_evidence_refs"))
-            and bool(payload.get("counterexample_trials"))
-        )
-        status = "VALIDATED" if independently_validated else "CANDIDATE"
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            strict_evidence = brief.get("release_policy", {}).get("require_resolvable_evidence_refs", False)
+            independently_validated = (
+                payload.get("independent_replay_pass") is True
+                and bool(payload.get("validation_evidence_refs"))
+                and bool(payload.get("counterexample_trials"))
+            )
+            if independently_validated and strict_evidence:
+                try:
+                    payload["validation_bindings"] = self._resolve_artifact_refs(
+                        connection, project_id, payload["validation_evidence_refs"], label="learning:validation",
+                    )
+                    trial_bindings = []
+                    for index, trial in enumerate(payload["counterexample_trials"]):
+                        refs = trial.get("evidence_refs") if isinstance(trial, dict) else None
+                        trial_bindings.append(self._resolve_artifact_refs(
+                            connection, project_id, refs, label=f"learning:counterexample:{index}",
+                        ))
+                    payload["counterexample_bindings"] = trial_bindings
+                except (ContractError, GateError) as exc:
+                    independently_validated = False
+                    payload["validation_blockers"] = [str(exc)]
+            status = "VALIDATED" if independently_validated else "CANDIDATE"
             connection.execute(
                 "INSERT INTO learning(project_id,learning_id,status,payload_json,created_at,updated_at) VALUES(?,?,?,?,?,?)",
                 (project_id, learning_id, status, _json(payload), _iso(), _iso()),
