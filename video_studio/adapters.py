@@ -321,6 +321,10 @@ def run_claimed_domain_adapter(
         elif name == "shot_contract_validate":
             input_name = str(config["shot_contract_input"])
             shot = shot_contract_from_dict(_input_json(packet, input_name))
+            editorial_plan_name = str(config.get("editorial_plan_input", "")).strip()
+            if editorial_plan_name:
+                plan = editorial_plan_from_dict(_input_json(packet, editorial_plan_name))
+                validate_shot_against_editorial_plan(plan, shot)
             output_name = str(config.get("output_name", outputs[0]))
             path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
             payload = {"adapter": name, "valid": True, "shot_contract": _jsonable(shot)}
