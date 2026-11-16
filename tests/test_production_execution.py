@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import time
 import zipfile
 
 import pytest
@@ -11,6 +12,7 @@ from PIL import Image
 
 from video_studio.engine import StudioEngine
 from video_studio.production.worker_pool import run_ready_tool_tasks
+from video_studio.engine import GateError
 
 
 def _brief():
@@ -173,7 +175,7 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
     ])
 
     result = run_ready_tool_tasks(engine, "delivery-demo", worker_prefix="test-renderer", max_workers=2)
-    assert result["scheduler_status"] == "COMPLETED", result
+    assert result["scheduler_status"] == "TASK_GRAPH_COMPLETE_NOT_RELEASED", result
     assert [item["task_id"] for item in result["completed"]] == ["render-master", "technical-qa", "package-delivery"]
     assert result["failed"] == []
     assert result["ready_tool_tasks_without_registered_executor"] == []
@@ -332,8 +334,131 @@ def test_executor_registry_reports_unknown_tool_tasks_without_claiming_them(tmp_
         "acceptance": {"execution": "Must not be silently claimed or marked complete."},
     }])
     result = run_ready_tool_tasks(engine, "unknown-tool", max_workers=2)
-    assert result["scheduler_status"] == "PARTIAL_UNREGISTERED_EXECUTORS"
+    assert result["scheduler_status"] == "BLOCKED_UNREGISTERED_TOOL_EXECUTOR"
     assert result["claimed"] == []
     assert result["completed"] == []
     assert result["ready_tool_tasks_without_registered_executor"][0]["task_id"] == "unknown-local-tool"
     assert engine.list_tasks("unknown-tool")[0]["status"] == "READY"
+
+
+def test_local_tool_completion_does_not_claim_project_complete_while_agent_work_is_ready(tmp_path):
+    engine = StudioEngine(tmp_path / "mixed-workspace")
+    engine.create_project("mixed", "Mixed executor graph", _brief())
+    assets = _source_assets(tmp_path)
+    source_path = assets["shot-01"][0]
+    engine.import_asset("mixed", "shot-01", source_path, kind="video", media_type="video/mp4", rights_status="OWNED")
+    engine.add_tasks("mixed", [
+        {
+            "task_id": "agent-research", "title": "Research and author the source package",
+            "kind": "editorial_research", "executor": "agent", "depends_on": [],
+            "inputs": [], "outputs": ["research-package"],
+            "acceptance": {"research": "Every claim has a source and counterevidence."},
+        },
+        {
+            "task_id": "technical-measurement", "title": "Measure the imported shot",
+            "kind": "technical_measurement", "executor": "tool", "depends_on": [],
+            "inputs": ["shot-01"], "outputs": ["technical-qa"],
+            "requirements": {"tools": ["ffmpeg", "ffprobe"], "audio_required": False},
+            "acceptance": {"qa": "Produce a digest-bound technical report."},
+        },
+    ])
+    result = run_ready_tool_tasks(engine, "mixed", max_workers=1)
+    assert result["scheduler_status"] == "AWAITING_AGENT_WORK"
+    assert result["project_status"] == "IN_PROGRESS"
+    assert result["ready_by_executor"]["agent"] == ["agent-research"]
+    assert result["task_counts"]["COMPLETED"] == 1
+    assert engine.resume("mixed")["next_action"].startswith("Dispatch the READY agent work packets")
+
+
+def test_worker_pool_heartbeats_long_running_tool_claim(tmp_path, monkeypatch):
+    import video_studio.production.worker_pool as worker_pool
+
+    engine = StudioEngine(tmp_path / "heartbeat-workspace")
+    engine.create_project("heartbeat", "Lease heartbeat demo", _brief())
+    engine.add_tasks("heartbeat", [{
+        "task_id": "slow-measurement", "title": "Simulate a long-running local measurement",
+        "kind": "technical_measurement", "executor": "tool", "depends_on": [],
+        "inputs": [], "outputs": ["measurement-receipt"],
+        "requirements": {"tools": ["ffprobe"]},
+        "acceptance": {"measurement": "Complete under a renewed worker lease."},
+    }])
+    original_heartbeat = engine.heartbeat
+    heartbeat_calls = []
+
+    def counted_heartbeat(*args, **kwargs):
+        heartbeat_calls.append(args[1])
+        return original_heartbeat(*args, **kwargs)
+
+    monkeypatch.setattr(engine, "heartbeat", counted_heartbeat)
+
+    def slow_complete(active_engine, project_id, task_id, worker_id, claim_token):
+        time.sleep(0.14)
+        output = active_engine._project_dir(project_id) / "artifacts" / "measurement.json"
+        output.write_text(json.dumps({"measurement": "complete"}), encoding="utf-8")
+        return active_engine.complete_task(project_id, task_id, worker_id, claim_token, {
+            "measurement-receipt": {
+                "path": str(output), "kind": "qa_report", "media_type": "application/json",
+                "rights_status": "NOT_APPLICABLE",
+            }
+        })
+
+    monkeypatch.setattr(worker_pool, "run_claimed_tool_task", slow_complete)
+    result = run_ready_tool_tasks(
+        engine, "heartbeat", max_workers=1, lease_seconds=30,
+        heartbeat_interval_seconds=0.02,
+    )
+    assert heartbeat_calls
+    assert result["scheduler_status"] == "TASK_GRAPH_COMPLETE_NOT_RELEASED"
+    assert engine.list_tasks("heartbeat")[0]["status"] == "COMPLETED"
+
+
+def test_completion_binds_exact_input_artifact_digest_and_rejects_mutated_claim_input(tmp_path):
+    engine = StudioEngine(tmp_path / "lineage-workspace")
+    engine.create_project("lineage", "Input lineage demo", _brief())
+    source = tmp_path / "source.txt"
+    source.write_text("approved source bytes", encoding="utf-8")
+    imported = engine.import_asset(
+        "lineage", "source-evidence", source, kind="evidence",
+        media_type="text/plain", rights_status="NOT_APPLICABLE",
+    )
+    engine.add_tasks("lineage", [task("consume-source", inputs=["source-evidence"])])
+    packet = engine.claim_next("lineage", "lineage-worker")
+    output = engine._project_dir("lineage") / "artifacts" / "output.txt"
+    output.write_text("derived result", encoding="utf-8")
+    imported_path = Path(imported["path"])
+    imported_path.write_text("tampered source bytes", encoding="utf-8")
+    with pytest.raises(GateError, match="claimed input artifact bytes changed"):
+        engine.complete_task("lineage", "consume-source", "lineage-worker", packet["claim"]["claim_token"], {
+            "consume-source-artifact": {
+                "path": str(output), "kind": "document", "media_type": "text/plain", "rights_status": "OWNED",
+            }
+        })
+    assert engine.list_tasks("lineage")[0]["status"] == "RUNNING"
+    assert engine.audit("lineage")["pass"] is False
+
+
+def test_completed_task_persists_exact_input_lineage_for_resume_and_release(tmp_path):
+    engine = StudioEngine(tmp_path / "lineage-complete-workspace")
+    engine.create_project("lineage-complete", "Completed lineage", _brief())
+    source = tmp_path / "source.txt"
+    source.write_text("source bytes", encoding="utf-8")
+    imported = engine.import_asset(
+        "lineage-complete", "source-evidence", source, kind="evidence",
+        media_type="text/plain", rights_status="NOT_APPLICABLE",
+    )
+    engine.add_tasks("lineage-complete", [task("consume-source", inputs=["source-evidence"])])
+    packet = engine.claim_next("lineage-complete", "lineage-worker")
+    output = engine._project_dir("lineage-complete") / "artifacts" / "output.txt"
+    output.write_text("derived result", encoding="utf-8")
+    engine.complete_task("lineage-complete", "consume-source", "lineage-worker", packet["claim"]["claim_token"], {
+        "consume-source-artifact": {
+            "path": str(output), "kind": "document", "media_type": "text/plain", "rights_status": "OWNED",
+        }
+    })
+    task_record = engine.list_tasks("lineage-complete")[0]
+    bindings = task_record["result"]["input_bindings"]
+    assert len(bindings) == 1
+    assert bindings[0]["artifact_id"] == imported["artifact_id"]
+    assert bindings[0]["sha256"] == imported["sha256"]
+    assert engine.resume("lineage-complete")["project_status"] == "TASK_GRAPH_COMPLETE"
+    assert engine.audit("lineage-complete")["pass"] is True
