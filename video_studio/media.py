@@ -95,7 +95,7 @@ def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *,
         check("stream_duration_match", False, stream_durations, "measurable durations for every stream")
 
     ffmpeg = [
-        "ffmpeg", "-hide_banner", "-nostats", "-v", "error",
+        "ffmpeg", "-hide_banner", "-nostats", "-v", "error", "-xerror",
         "-i", str(media), "-map", "0:v?", "-map", "0:a?", "-f", "null", "-",
     ]
     try:
@@ -104,7 +104,7 @@ def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *,
         raise GateError("ffmpeg is not installed or is not on PATH") from exc
     except subprocess.TimeoutExpired as exc:
         raise GateError(f"full media decode timed out after {timeout_seconds}s") from exc
-    check("full_decode", decode.returncode == 0, {
+    check("full_decode", decode.returncode == 0 and not decode.stderr.strip(), {
         "return_code": decode.returncode,
         "stderr": decode.stderr.strip()[:2000],
     }, "complete decode without errors")
