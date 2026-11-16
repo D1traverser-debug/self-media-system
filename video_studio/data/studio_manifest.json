@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "studio_version": "1.0.0",
+  "product_name": "Standalone Video Studio",
+  "owner": "VIDEO_GROWTH_AGENT",
+  "default_entrypoint": "STUDIO_ENTRY.md",
+  "cli": "vga-studio",
+  "runtime": "video_studio.engine.StudioEngine",
+  "state_store": "SQLite_WAL_PER_PROJECT",
+  "event_history": "APPEND_ONLY_SQLITE_EVENTS",
+  "task_model": "PROJECT_SPECIFIC_DYNAMIC_DAG",
+  "execution": {
+    "atomic_claims": true,
+    "lease_recovery": true,
+    "bounded_retries": true,
+    "parallel_ready_tasks": true,
+    "fixed_stage_machine": false,
+    "peer_chat_authority": false
+  },
+  "artifact_model": {
+    "immutable_versions": true,
+    "sha256_required": true,
+    "project_workspace_only": true,
+    "rights_and_provenance": true,
+    "downstream_invalidation": true
+  },
+  "governance": {
+    "system": "VIDEO_STUDIO_NATIVE",
+    "mode": "STANDALONE",
+    "caos_runtime_dependency": false,
+    "caos_api_dependency": false,
+    "caos_skill_dependency": false,
+    "parent_task_or_lease_dependency": false,
+    "governance_method_owned_by_video": true
+  },
+  "decision_method": [
+    "COMPETING_HYPOTHESES",
+    "DISCRIMINATING_TESTS",
+    "ALTERNATIVE_COMPARISON",
+    "COUNTEREVIDENCE",
+    "FALSIFIER",
+    "ROLLBACK"
+  ],
+  "failure_method": [
+    "OBSERVED_SYMPTOM",
+    "ROOT_CAUSE_HYPOTHESES",
+    "METHOD_CHALLENGE",
+    "REPAIR_PLAN",
+    "INDEPENDENT_VERIFICATION",
+    "REGRESSION_REPLAY"
+  ],
+  "learning_policy": {
+    "default_status": "CANDIDATE",
+    "requires_evidence": true,
+    "requires_counterexamples": true,
+    "requires_failure_conditions": true,
+    "requires_independent_replay_for_validation": true
+  },
+  "legacy_compatibility": {
+    "vga_cli": "video_growth_agent.cli:main",
+    "baseline": "0.8.0",
+    "authority": "COMPATIBILITY_ONLY_FOR_NEW_STUDIO_PROJECTS"
+  },
+  "ip_authority": {
+    "original_identity_canon": "IPOS",
+    "video_studio_may_mutate_canon": false
+  },
+  "media_qa_adapter": "video_studio.media.run_claimed_media_qa",
+  "capabilities": {
+    "deterministic_media_qa": {
+      "tool": "ffprobe",
+      "scope": "technical_measurement_only",
+      "digest_bound": true,
+      "auto_release": false
+    }
+  },
+  "release_status": "ACTIVE_CANDIDATE",
+  "business_workstreams": {
+    "MEDIA_GROWTH": [
+      "audience_research",
+      "portfolio_strategy",
+      "series_hypotheses",
+      "platform_packaging",
+      "distribution",
+      "audience_outcomes"
+    ],
+    "ORIGINAL_DIGITAL_IP": [
+      "approved_ip_usage",
+      "recognition_evidence",
+      "performance_evidence",
+      "licensing_use_value"
+    ],
+    "COMMERCIALIZATION": [
+      "sponsor_fit",
+      "offer_design",
+      "deliverable_obligations",
+      "product_truth",
+      "rights_scope",
+      "commercial_measurement"
+    ],
+    "PRODUCTION_SYSTEM": [
+      "editorial_research",
+      "story_shot_design",
+      "media_generation",
+      "editing",
+      "sound",
+      "quality_review",
+      "release"
+    ]
+  },
+  "domain_adapter_policy": {
+    "control_plane": "video_studio",
+    "legacy_specialized_modules": "OPTIONAL_VERIFIED_ADAPTERS",
+    "legacy_fixed_stage_orchestrator": "NOT_A_CONTROLLER",
+    "require_artifact_receipts": true
+  }
+}

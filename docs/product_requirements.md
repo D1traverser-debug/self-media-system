@@ -1,5 +1,8 @@
 # Video Growth Agent — Product Requirements Baseline
 
+> **Current authority (2026-11-16):** This document is retained as a Video 0.8 domain/product reference. New Video work is governed by `STUDIO_ENTRY.md`, `skills/video-growth-agent/SKILL.md` and `docs/standalone_video_studio.md`, with the standalone `video_studio` runtime. Any CAOS-governance wording below describes the historical 0.8 operating arrangement only; it is not a dependency or authority for new Studio work.
+
+
 Status: `CANDIDATE_0_8_0`
 Date: `2026-10-15`
 Owner: `DOMAIN:video`

@@ -1,15 +1,19 @@
 # Video Growth Agent
 
-Executable AI-native media business domain governed by CAOS in the active ChatGPT session, integrating media growth, original digital IP, commercialization and provider-neutral audiovisual production.
+Standalone, outcome-driven Video Studio for research, creative development, parallel media production, audiovisual QA, release preparation and evidence-based learning. New Video work does not require CAOS.
 
 ## Current authority
 
-- `CAOS_VIDEO_ENTRY.md` — current Video-domain governance and operating entry.
-- `video_growth_agent/data/domain_manifest.json` and `video_growth_agent/data/capabilities.json` — Video-owned runtime manifest, external CAOS governance binding and domain capability ceiling.
-- `docs/product_requirements.md` — current product requirements.
-- `docs/media_business_os.md` — primary media-business architecture.
-- `docs/architecture.md` — compact architecture/compatibility view.
-- `docs/agent_operability_scenarios.md` — CURRENT_AGENT dogfood, failure/recovery and resume acceptance scenarios.
+- `STUDIO_ENTRY.md` — current standalone startup and operating entry for new Video work.
+- `docs/standalone_video_studio.md` — Video-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
+- `video_studio/data/studio_manifest.json` — canonical standalone runtime and governance contract; no CAOS runtime/API/Skill dependency.
+- `video_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFprobe QA.
+- `skills/video-growth-agent/SKILL.md` — self-contained Video-owned agent operating instructions.
+- `CAOS_VIDEO_ENTRY.md`, `domain_manifest.json` and `capabilities.json` — retained for 0.8 compatibility/history; not startup dependencies for new Studio work.
+- `docs/product_requirements.md` — historical 0.8 product-requirements baseline; new operating authority is the standalone contract.
+- `docs/media_business_os.md` — 0.8 media-business domain reference; new execution/governance authority is standalone Video Studio.
+- `docs/architecture.md` — historical 0.8 architecture reference.
+- `docs/agent_operability_scenarios.md` — historical 0.8 operability scenarios; standalone operating rules live in the new Skill and contract.
 - `docs/provider_benchmark_protocol.md` — owner benchmark method for volatile provider quality/cost evidence.
 - `projects/PROJECT_INDEX.json` — child-owned project/program discovery authority.
 - `projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json` — growth/IP/commercial/production feedback loops.
@@ -17,9 +21,9 @@ Executable AI-native media business domain governed by CAOS in the active ChatGP
 - `video_growth_agent/data/` — versioned legacy/specialized episode workflow, specialists and coordination resources.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
 
-CAOS is an external cognition/governance layer in the active ChatGPT session. Video has no parent runtime task identity, no copied parent controller and no CAOS API/lease dependency; all Video business identities remain domain-owned.
+The new `video_studio` package owns its requirement interpretation, decision receipts, task graph, leases, artifact history, review receipts, root-cause repair, recovery and learning admission. `vga-studio` and `python -m video_studio` both enter this package; legacy import paths are compatibility shims. It has no parent task identity, no parent lease and no CAOS runtime/API/Skill dependency. The 0.8 compatibility surfaces below retain their historical governance records but are not loaded by `vga-studio`.
 
-## Runtime 0.8.0 candidate
+## Legacy Media Business OS 0.8.0 compatibility layer
 
 Video 0.8 makes the media-business system operable from natural-language/editorial intent through production and learning rather than starting mechanically at the Shot layer.
 
@@ -37,7 +41,7 @@ Linked state surfaces remain distinct:
 6. **Experiment/outcome state** — pre-registered tests and typed growth/production/commercial observations.
 7. **Operator projection** — recomputable current-Agent view of outcome, ready/blocking actions, stale evidence and recovery refs; never authority.
 
-The previous stage/work-order episode engine remains a proven 0.7 compatibility adapter bundle. Its resource version may trail the 0.8 core while unchanged; the bundle must remain internally version-aligned and system-audit verified.
+The previous stage/work-order episode engine remains a historical 0.7/0.8 compatibility bundle. New projects use the dynamic task graph in `video_studio`; do not treat the old fixed stage sequence as the new Studio controller.
 
 Core 0.8 runtime surfaces:
 
@@ -53,7 +57,7 @@ Core 0.8 runtime surfaces:
 - `business_objects.py` — typed content-portfolio, distinctive-asset, commercial-fit, rights-package, offer and business-decision objects;
 - `business_metrics.py` — platform, production and commercial outcome receipts without one vanity score;
 - `operator_view.py` — non-authoritative CURRENT_AGENT projection;
-- `owner_behavior_admission.py` — Video-domain recovery, root-scope analysis, typed evolution and repair closure; CAOS supplies parent-level decision governance without copied code.
+- `owner_behavior_admission.py` — legacy 0.8 Video-domain recovery, root-scope analysis, typed evolution and repair closure.
 
 ## Integrated Media Business Program
 
@@ -102,22 +106,23 @@ Before generation/edit/review/QA/release, handshake the exact current-session ca
 
 Missing a high-assurance reviewer blocks only operations that require that tier. Missing a real generation provider blocks the affected shot or activates its declared degradation path; it never authorizes fabricated execution.
 
-## Cognition, dogfood and evolution
+## Standalone cognition, dogfood and evolution
 
-Video is governed by CAOS decision and architecture-experience methods in the active ChatGPT session. Material architecture/Agent-experience changes are exercised through concern-appropriate structural/temporal/causal/cognitive views and CURRENT_AGENT scenarios rather than accepted from document completeness alone.
+New Studio work uses the self-contained method in `docs/standalone_video_studio.md`: recover the real outcome; compare competing hypotheses and methods; use discriminating tests and counterevidence; execute a project-specific DAG; inspect exact artifact bytes; diagnose failures at the causal layer; independently replay repairs; and promote learning only with applicability, counterexamples and regression evidence. None of these operations calls CAOS.
 
-Video-specific media/growth/IP/commercial rules remain Video-owned. Material cross-domain changes are reviewed through CAOS governance in the active session; no automatic runtime upcall is claimed. Durable evolution requires causal history plus tests/replay and post-promotion observation.
+The following legacy 0.8 adapter continues to describe its historical CAOS-governed workflow for compatibility only. It is not the standalone Studio runtime.
 
 ## Validation
 
 After `pip install -e .`:
 
 ```bash
-vga system-audit --repo-root .
+vga-studio --help
+vga system-audit --repo-root .  # legacy 0.8 compatibility audit
 pytest -q
 ```
 
-The system audit covers CAOS governance binding, Video business ownership, all canonical 0.8 runtime surfaces, agent-operability scenario presence, Media Business OS authorities, project/flywheel integrity, provider-neutral capability semantics, Program graph validity, absence of a parallel controller, artifact reachability, legacy-adapter bundle consistency, evolution discoverability and runtime-version consistency. It fails closed when a declared canonical runtime surface disappears or drifts.
+The legacy system audit covers the historical 0.8 CAOS governance binding, Video business ownership, all canonical 0.8 runtime surfaces, agent-operability scenario presence, Media Business OS authorities, project/flywheel integrity, provider-neutral capability semantics, Program graph validity, absence of a parallel controller, artifact reachability, legacy-adapter bundle consistency, evolution discoverability and runtime-version consistency. It fails closed when a declared canonical runtime surface disappears or drifts.
 
 CI success is validation evidence, not branch-protection enforcement unless GitHub separately reports branch protection/rulesets as enabled.
 

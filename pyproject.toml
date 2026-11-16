@@ -11,13 +11,15 @@ requires-python = ">=3.11"
 
 [project.scripts]
 vga = "video_growth_agent.cli:main"
+vga-studio = "video_studio.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["video_growth_agent*"]
+include = ["video_growth_agent*", "video_studio*"]
 exclude = ["tests*", "skills*", "projects*"]
 
 [tool.setuptools.package-data]
 video_growth_agent = ["data/*.json", "data/*.md"]
+video_studio = ["data/*.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

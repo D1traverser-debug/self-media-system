@@ -1,0 +1,98 @@
+[
+  {
+    "task_id": "fact-research",
+    "title": "Verify the event and classify each claim",
+    "kind": "news_research",
+    "executor": "agent",
+    "depends_on": [],
+    "inputs": [],
+    "outputs": ["fact-map"],
+    "requirements": {"source_priority": ["primary", "reputable independent reporting"], "separate_allegations": true},
+    "acceptance": {"truth": "Each claim is classified as confirmed, attributed, alleged or unknown with source refs."},
+    "priority": 100
+  },
+  {
+    "task_id": "media-inspection",
+    "title": "Inspect the exact supplied media and record a visual evidence map",
+    "kind": "media_inspection",
+    "executor": "tool",
+    "depends_on": [],
+    "inputs": ["source-video"],
+    "outputs": ["visual-evidence-map"],
+    "requirements": {"inspect_actual_bytes": true, "digest_required": true},
+    "acceptance": {"visual_truth": "Observed details are separated from owner description and inference."},
+    "priority": 100
+  },
+  {
+    "task_id": "rights-and-identity",
+    "title": "Verify source ownership, likeness and reuse permissions",
+    "kind": "rights_review",
+    "executor": "human",
+    "depends_on": [],
+    "inputs": ["source-video"],
+    "outputs": ["rights-status"],
+    "requirements": {"no_inferred_permission": true},
+    "acceptance": {"rights": "Permission, likeness and reuse scope are evidenced or explicitly remain blocked."},
+    "priority": 100
+  },
+  {
+    "task_id": "editorial-angles",
+    "title": "Find and compare event-specific editorial contradictions and humor mechanisms",
+    "kind": "creative_research",
+    "executor": "agent",
+    "depends_on": ["fact-research", "media-inspection"],
+    "inputs": ["fact-map", "visual-evidence-map"],
+    "outputs": ["angle-candidates"],
+    "requirements": {"distinct_angles_min": 3, "news_visual_counterfactuals_required": true},
+    "acceptance": {"semantic_fit": "Candidate angles require both the exact news and exact visual to retain their full meaning."},
+    "priority": 100
+  },
+  {
+    "task_id": "editorial-selection",
+    "title": "Select an angle with a decision receipt and explicit fiction boundary",
+    "kind": "editorial_decision",
+    "executor": "agent",
+    "depends_on": ["editorial-angles", "rights-and-identity"],
+    "inputs": ["fact-map", "visual-evidence-map", "angle-candidates", "rights-status"],
+    "outputs": ["editorial-reading"],
+    "requirements": {"decision_receipt_required": true, "unverified_claims_excluded": true},
+    "acceptance": {"editorial": "Primary satire target, selected observation, fiction boundary and rejected angles are explicit."},
+    "priority": 100
+  },
+  {
+    "task_id": "platform-packaging",
+    "title": "Write platform-native variants with genuinely different perspectives",
+    "kind": "platform_copywriting",
+    "executor": "agent",
+    "depends_on": ["editorial-selection"],
+    "inputs": ["editorial-reading"],
+    "outputs": ["platform-copies"],
+    "requirements": {"platform_native": true, "no_keyword_stuffing": true},
+    "acceptance": {"copy": "Each version is natural, fact-safe, and adapted to its platform rather than translated mechanically."},
+    "priority": 90
+  },
+  {
+    "task_id": "cold-read-and-platform-review",
+    "title": "Independently cold-read the exact copy and check platform format/disclosure",
+    "kind": "independent_editorial_review",
+    "executor": "human",
+    "depends_on": ["platform-packaging"],
+    "inputs": ["editorial-reading", "platform-copies", "fact-map", "visual-evidence-map"],
+    "outputs": ["editorial-review", "platform-review"],
+    "requirements": {"reviewer_independent": true, "check_actual_copy": true},
+    "acceptance": {"review": "Naturalness, humor, news/visual bridge, truth and platform rules are reviewed with evidence."},
+    "priority": 100
+  },
+  {
+    "task_id": "release-evidence",
+    "title": "Assemble the release package without publishing",
+    "kind": "release_review",
+    "executor": "human",
+    "depends_on": ["cold-read-and-platform-review", "rights-and-identity"],
+    "inputs": ["editorial-reading", "platform-copies", "editorial-review", "platform-review", "rights-status"],
+    "outputs": ["release-evidence-pack"],
+    "requirements": {"rights_and_disclosure_required": true, "no_auto_publish": true},
+    "acceptance": {"release": "All release blockers are cleared or listed explicitly; no publication is implied."},
+    "priority": 100
+  }
+]

@@ -1,0 +1,80 @@
+{
+  "goal": "Produce a publishable 60-second cinematic explainer showing why AI inference is moving toward edge devices.",
+  "audience": "Technology-curious viewers aged 20-40 who understand consumer technology but do not know chip architecture.",
+  "deliverables": [
+    "final.mp4",
+    "cover.png",
+    "captions.srt",
+    "publish-copy.md"
+  ],
+  "format": {
+    "duration_seconds": 60,
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920",
+    "frame_rate": 30,
+    "language": "zh-CN",
+    "platforms": [
+      "Douyin",
+      "Bilibili Shorts"
+    ]
+  },
+  "content_contract": {
+    "editorial_question": "What changes when inference moves from centralized cloud systems to devices near the user?",
+    "audience_promise": "Explain the trade-offs through one clear story rather than a list of buzzwords.",
+    "must_explain": [
+      "latency",
+      "bandwidth",
+      "privacy",
+      "power and thermal constraints"
+    ],
+    "must_not_become": [
+      "generic AI tool advertisement",
+      "unsubstantiated prediction",
+      "static slide deck"
+    ]
+  },
+  "craft_contract": {
+    "visual_direction": "Cinematic, tactile, high-contrast but readable; abstract mechanisms should have spatial cause and effect.",
+    "audio_direction": "Narration, music, sound effects and deliberate silence are designed as one timeline.",
+    "editing_direction": "Clear opening promise, escalating mechanism, concise payoff; no filler shots."
+  },
+  "hard_constraints": [
+    "Factual chip and performance claims require sources.",
+    "Do not imply synthetic product footage is real product evidence."
+  ],
+  "preferences": [
+    "Use hybrid production methods where they improve clarity or craft."
+  ],
+  "examples": [],
+  "unknowns": [
+    "Final platform disclosure settings must be checked at upload."
+  ],
+  "success_criteria": [
+    "All deliverables exist and play.",
+    "The argument is understandable on a first watch.",
+    "The actual final media passes technical QA and independent craft review."
+  ],
+  "release_policy": {
+    "required_evidence_refs": [
+      "platform-format-review",
+      "synthetic-upload-disclosure"
+    ],
+    "required_rights_statuses": [
+      "OWNED",
+      "AUTHORIZED",
+      "LICENSED",
+      "PUBLIC_DOMAIN"
+    ],
+    "required_review_rubrics": [
+      "editorial",
+      "craft",
+      "technical"
+    ],
+    "required_artifact_names": [
+      "final-candidate",
+      "captions",
+      "cover-candidate",
+      "publish-copy-candidate"
+    ]
+  }
+}
