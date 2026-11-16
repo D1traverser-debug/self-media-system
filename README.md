@@ -10,10 +10,10 @@ Standalone, outcome-driven Video Studio for research, creative development, para
 - `video_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFprobe QA.
 - `skills/video-growth-agent/SKILL.md` — self-contained Video-owned agent operating instructions.
 - `CAOS_VIDEO_ENTRY.md`, `domain_manifest.json` and `capabilities.json` — retained for 0.8 compatibility/history; not startup dependencies for new Studio work.
-- `docs/product_requirements.md` — current product requirements.
-- `docs/media_business_os.md` — primary media-business architecture.
-- `docs/architecture.md` — compact architecture/compatibility view.
-- `docs/agent_operability_scenarios.md` — CURRENT_AGENT dogfood, failure/recovery and resume acceptance scenarios.
+- `docs/product_requirements.md` — historical 0.8 product-requirements baseline; new operating authority is the standalone contract.
+- `docs/media_business_os.md` — 0.8 media-business domain reference; new execution/governance authority is standalone Video Studio.
+- `docs/architecture.md` — historical 0.8 architecture reference.
+- `docs/agent_operability_scenarios.md` — historical 0.8 operability scenarios; standalone operating rules live in the new Skill and contract.
 - `docs/provider_benchmark_protocol.md` — owner benchmark method for volatile provider quality/cost evidence.
 - `projects/PROJECT_INDEX.json` — child-owned project/program discovery authority.
 - `projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json` — growth/IP/commercial/production feedback loops.
