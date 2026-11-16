@@ -184,7 +184,7 @@ def test_programmatic_graphic_adapter_executes_and_registers_candidate_with_line
     engine.import_asset("demo", "editorial-plan", plan_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
     engine.import_asset("demo", "shot-contract", shot_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
     engine.import_asset("demo", "graphic-spec", spec_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
-    engine.import_asset("demo", "font-asset", font, kind="font", media_type="font/ttf", rights_status="LICENSED")
+    engine.import_asset("demo", "font-asset", font, kind="font", media_type="font/ttf", rights_status="LICENSED", metadata={"rights_evidence_refs": ["rights-clearance"]})
     engine.import_asset("demo", "rights-clearance", rights_path, kind="document", media_type="text/plain", rights_status="OWNED")
 
     engine.add_tasks("demo", [{
