@@ -8,7 +8,7 @@ from ..media import run_claimed_media_qa
 from .executors import run_claimed_production_task
 
 
-SUPPORTED_PRODUCTION_OPERATIONS = {"ffmpeg_assemble", "delivery_package"}
+SUPPORTED_PRODUCTION_OPERATIONS = {"python_frame_render", "ffmpeg_assemble", "delivery_package"}
 
 
 def _tool_operation(task: dict[str, Any]) -> str | None:
