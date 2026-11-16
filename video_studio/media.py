@@ -84,15 +84,23 @@ def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *,
     if fps_expected is not None:
         check("frame_rate", fps is not None and abs(fps - float(fps_expected)) < 0.05, fps, float(fps_expected))
 
-    stream_durations = [float(item["duration"]) for item in streams if item.get("duration") not in (None, "N/A")]
+    timed_streams = [item for item in streams if item.get("codec_type") in {"video", "audio"}]
+    stream_durations = [
+        float(item["duration"]) for item in timed_streams
+        if item.get("duration") not in (None, "N/A")
+    ]
     # Preserve the legacy production hard gates: complete decode, stream timing,
     # true peak and black-frame detection. A metadata-only ffprobe pass is not enough.
-    if duration is not None and stream_durations:
+    if timed_streams and len(stream_durations) == len(timed_streams):
         tolerance = float(req.get("stream_duration_tolerance_seconds", 0.25))
         delta = max(stream_durations) - min(stream_durations)
-        check("stream_duration_match", delta <= tolerance, delta, f"<= {tolerance}s")
+        check("stream_duration_match", delta <= tolerance, {
+            "stream_durations": stream_durations, "max_delta_seconds": delta,
+        }, f"<= {tolerance}s across every audio/video stream")
     else:
-        check("stream_duration_match", False, stream_durations, "measurable durations for every stream")
+        check("stream_duration_match", False, {
+            "measurable_durations": stream_durations, "audio_video_stream_count": len(timed_streams),
+        }, "measurable duration for every audio/video stream")
 
     ffmpeg = [
         "ffmpeg", "-hide_banner", "-nostats", "-v", "error", "-xerror",
@@ -243,6 +251,15 @@ def run_claimed_media_qa(
             retryable=False,
         )
         raise
+    expected_input_digest = packet["input_artifacts"][selected]["sha256"]
+    if report["media_sha256"] != expected_input_digest:
+        engine.fail_task(
+            project_id, task_id, worker_id, claim_token,
+            {"category": "technical_qa_input_changed_during_measurement",
+             "expected_sha256": expected_input_digest, "observed_sha256": report["media_sha256"]},
+            retryable=False,
+        )
+        raise GateError("media bytes changed while technical QA was running")
     report["project_id"] = project_id
     report["task_id"] = task_id
     report["input_artifact_id"] = packet["input_artifacts"][selected]["artifact_id"]
