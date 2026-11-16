@@ -318,25 +318,36 @@ def test_ipos_bundle_import_adapter_preserves_external_canon_and_graph_lineage(t
     engine.create_project("ipos", "IPOS adapter", _brief())
     bundle_path = tmp_path / "ipos-bundle.json"
     bundle_path.write_text(json.dumps(_ipos_bundle()), encoding="utf-8")
-    graph = MediaGraph()
-    graph.add_context(ContextRecord("program", "PROGRAM"))
-    graph_path = tmp_path / "media-graph.json"
-    graph_path.write_text(json.dumps(graph.to_dict()), encoding="utf-8")
     engine.import_asset("ipos", "ipos-bundle", bundle_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
-    engine.import_asset("ipos", "media-graph", graph_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
-    engine.add_tasks("ipos", [{
-        "task_id": "import-ipos", "title": "Import the owner-approved IPOS bundle",
-        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
-        "inputs": ["ipos-bundle", "media-graph"],
-        "outputs": ["media-graph-imported", "ipos-import-receipt"],
-        "requirements": {"domain_adapter": {
-            "name": "ipos_bundle_import", "bundle_input": "ipos-bundle",
-            "media_graph_input": "media-graph", "program_context_id": "program",
-            "media_graph_output": "media-graph-imported", "receipt_output": "ipos-import-receipt",
-        }},
-        "acceptance": {"import": "Only owner-approved READY_FOR_VIDEO bundles are imported with exact asset digests."},
-    }])
+    engine.add_tasks("ipos", [
+        {
+            "task_id": "bootstrap-graph", "title": "Initialize the Video-owned MediaGraph root",
+            "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+            "inputs": [], "outputs": ["media-graph"],
+            "requirements": {"domain_adapter": {
+                "name": "media_graph_initialize", "output_name": "media-graph",
+                "contexts": [{"context_id": "program", "kind": "PROGRAM"}],
+            }},
+            "acceptance": {"graph": "Create the Video-owned Program context without importing or mutating IPOS canon."},
+        },
+        {
+            "task_id": "import-ipos", "title": "Import the owner-approved IPOS bundle",
+            "kind": "domain_adapter", "executor": "tool", "depends_on": ["bootstrap-graph"],
+            "inputs": ["ipos-bundle", "media-graph"],
+            "outputs": ["media-graph-imported", "ipos-import-receipt"],
+            "requirements": {"domain_adapter": {
+                "name": "ipos_bundle_import", "bundle_input": "ipos-bundle",
+                "media_graph_input": "media-graph", "program_context_id": "program",
+                "media_graph_output": "media-graph-imported", "receipt_output": "ipos-import-receipt",
+            }},
+            "acceptance": {"import": "Only owner-approved READY_FOR_VIDEO bundles are imported with exact asset digests."},
+        },
+    ])
+    bootstrap = engine.claim_next("ipos", "ipos-adapter")
+    assert bootstrap["task"]["task_id"] == "bootstrap-graph"
+    run_claimed_domain_adapter(engine, "ipos", "bootstrap-graph", "ipos-adapter", bootstrap["claim"]["claim_token"])
     packet = engine.claim_next("ipos", "ipos-adapter")
+    assert packet["task"]["task_id"] == "import-ipos"
     result = run_claimed_domain_adapter(engine, "ipos", "import-ipos", "ipos-adapter", packet["claim"]["claim_token"])
     graph_artifact = result["completion"]["artifacts"]["media-graph-imported"]
     receipt_artifact = result["completion"]["artifacts"]["ipos-import-receipt"]
