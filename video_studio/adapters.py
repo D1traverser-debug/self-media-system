@@ -461,6 +461,8 @@ def run_claimed_domain_adapter(
 
         elif name == "shot_route":
             route = route_shot(_input_json(packet, str(config["routing_request_input"])))
+            if route.get("selected_engine_id") is None and config.get("block_if_no_engine", True):
+                raise DomainAdapterError("shot routing blocked: no supplied engine satisfies capability, quality, evidence, availability and cost policy")
             output_name = str(config.get("output_name", outputs[0]))
             path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
             _write_json(path, {"adapter": name, **route})
@@ -477,6 +479,8 @@ def run_claimed_domain_adapter(
             media_name = str(config["media_input"])
             media_path = _input_path(packet, media_name)
             report = MediaQAChecker().inspect(media_path).to_dict()
+            if report.get("hard_pass") is not True and config.get("block_on_hard_fail", True):
+                raise DomainAdapterError("supplementary media QA hard-failed: " + json.dumps(report.get("checks", []), ensure_ascii=False))
             output_name = str(config.get("output_name", outputs[0]))
             path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
             payload = {"adapter": name, **report}
@@ -496,6 +500,9 @@ def run_claimed_domain_adapter(
 
         elif name == "continuity_assess":
             continuity = assess_shot_continuity(_input_json(packet, str(config["continuity_input"])))
+            if not continuity["hard_pass"] and config.get("block_on_hard_fail", True):
+                violations = continuity["assessment"]["violations"]
+                raise DomainAdapterError("hard continuity violation(s): " + json.dumps(violations, ensure_ascii=False))
             output_name = str(config.get("output_name", outputs[0]))
             path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
             _write_json(path, {"adapter": name, **continuity})
