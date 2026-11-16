@@ -70,6 +70,10 @@ def test_editorial_plan_adapter_validates_claim_beat_shot_traceability():
     broken["shots"][0]["beat_id"] = "missing-beat"
     with pytest.raises(ValueError, match="missing beat"):
         editorial_plan_from_dict(broken)
+    malformed = _editorial_payload()
+    malformed["intent"]["evidence_refs"] = "research://not-an-array"
+    with pytest.raises(ValueError, match="array of non-empty strings"):
+        editorial_plan_from_dict(malformed)
 
 
 def test_timeline_adapter_reconstructs_refs_and_requires_promoted_graph_assets():
