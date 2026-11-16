@@ -209,4 +209,4 @@ vga-studio --root ./studio-work audit episode-001
 vga-studio --root ./studio-work events episode-001
 ```
 
-Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The canonical package uses only Python standard-library runtime dependencies; media QA requires both FFmpeg and FFprobe. Existing 0.8 modules are compatibility adapters, not the new Studio's control plane.
+Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The standalone control-plane core uses Python's standard library. The explicit domain-adapter layer also uses the project-declared Pillow and filelock dependencies; media QA and local graphics rendering require FFmpeg and FFprobe. Existing specialized modules are imported only through the tested adapter bridge, not as a second controller.
