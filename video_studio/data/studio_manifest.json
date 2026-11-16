@@ -73,5 +73,45 @@
       "digest_bound": true,
       "auto_release": false
     }
+  },
+  "release_status": "ACTIVE_CANDIDATE",
+  "business_workstreams": {
+    "MEDIA_GROWTH": [
+      "audience_research",
+      "portfolio_strategy",
+      "series_hypotheses",
+      "platform_packaging",
+      "distribution",
+      "audience_outcomes"
+    ],
+    "ORIGINAL_DIGITAL_IP": [
+      "approved_ip_usage",
+      "recognition_evidence",
+      "performance_evidence",
+      "licensing_use_value"
+    ],
+    "COMMERCIALIZATION": [
+      "sponsor_fit",
+      "offer_design",
+      "deliverable_obligations",
+      "product_truth",
+      "rights_scope",
+      "commercial_measurement"
+    ],
+    "PRODUCTION_SYSTEM": [
+      "editorial_research",
+      "story_shot_design",
+      "media_generation",
+      "editing",
+      "sound",
+      "quality_review",
+      "release"
+    ]
+  },
+  "domain_adapter_policy": {
+    "control_plane": "video_studio",
+    "legacy_specialized_modules": "OPTIONAL_VERIFIED_ADAPTERS",
+    "legacy_fixed_stage_orchestrator": "NOT_A_CONTROLLER",
+    "require_artifact_receipts": true
   }
 }
