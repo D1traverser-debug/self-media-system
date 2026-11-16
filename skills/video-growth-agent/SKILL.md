@@ -112,7 +112,7 @@ Each task declares:
 
 Parallelize independent research, concept exploration, visual/audio tests, rights checks, tool evaluation, packaging research and other work when inputs are ready. Merge only at real decision or dependency points. Avoid artificial dependencies and peer-chat as an authority mechanism. Handoff through task packets, files, digests and decision receipts.
 
-A declared executor must resolve to an executable worker. The local Studio currently registers the production operations `ffmpeg_assemble` and `delivery_package`, plus FFprobe technical measurement. A task labelled `tool` without a registered operation is not executable and must remain unclaimed/blocked for capability work; do not mark it complete manually. Agent and human work are different executor classes, not aliases for local tools.
+A declared executor must resolve to an executable worker. The local Studio currently registers `python_frame_render` for explicitly trusted project-owned motion code, `ffmpeg_assemble` for audiovisual master composition, `delivery_package` for reproducible source/delivery packaging, and FFprobe technical measurement. A task labelled `tool` without a registered operation is not executable and must remain unclaimed/blocked for capability work; do not mark it complete manually. Agent and human work are different executor classes, not aliases for local tools.
 
 Before expensive production, prototype the highest-risk creative assumption with the smallest near-final sample that can test the actual craft requirement. A tool-running proof is not a quality proof.
 
@@ -127,6 +127,8 @@ If a required tool is unavailable, record the blocked capability and compare an 
 ## 7. Worker execution and artifact custody
 
 Use `vga-studio claim` to atomically claim ready work. Respect the lease and heartbeat it for long operations. The work packet defines the exact scope and current input digests. A worker may not broaden its task or change the owner outcome.
+
+A Python scene renderer must be a declared source_code artifact and expose `render_frame(t, width, height, assets, params)`, returning a PIL image. Both the task contract and FrameRenderSpec must explicitly set `trusted_code_execution=true`. The renderer runs in an isolated Python process with a minimal environment, but it is not an OS/network sandbox. Execute only project-owned, reviewed code and never expose secrets. The output is a silent shot candidate; sound and final assembly are separate tasks.
 
 Use `vga-studio claim --executor agent` when the current session is executing agent work. Use `vga-studio run-ready-tools PROJECT --max-workers N` to execute all currently ready, registered local tool tasks in concurrent rounds; this can run independent renders or measurements at the same time and then continue to newly-ready downstream tool tasks. The worker pool reports unsupported tool tasks instead of claiming them. It does not launch LLM agents, human reviewers or external providers. Dispatch those only through an actual current-session/external worker and record its run and output evidence.
 
