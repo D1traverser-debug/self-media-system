@@ -1425,9 +1425,27 @@ class StudioEngine:
                 attestations: list[dict[str, Any]] = []
                 reviewer_ids: set[str] = set()
                 context_ids: set[str] = set()
+                def evidence_artifact_resolves(reference: Any) -> bool:
+                    if not isinstance(reference, str) or not reference.strip():
+                        return False
+                    return connection.execute(
+                        """SELECT 1 FROM artifacts WHERE project_id=?
+                           AND (artifact_id=? OR name=?)
+                           AND status IN ('CURRENT','ACCEPTED') LIMIT 1""",
+                        (project_id, reference, reference),
+                    ).fetchone() is not None
+
                 for review in rows:
                     reviewer_ids.add(review["reviewer_id"])
                     dimensions = _loads(review["dimensions_json"], {})
+                    if contract.get("require_resolvable_evidence_refs"):
+                        review_evidence = _loads(review["evidence_refs_json"], [])
+                        if not isinstance(review_evidence, list) or not review_evidence:
+                            failures.append(f"review_evidence_missing:{rubric}:{review['review_id']}")
+                        else:
+                            for reference in review_evidence:
+                                if not evidence_artifact_resolves(reference):
+                                    failures.append(f"review_evidence_unresolved:{rubric}:{review['review_id']}:{reference}")
                     attestation = dimensions.get("_attestation", {}) if isinstance(dimensions, dict) else {}
                     if not isinstance(attestation, dict):
                         attestation = {}
@@ -1481,6 +1499,9 @@ class StudioEngine:
                                     continue
                                 if contract.get("require_evidence_per_finding") and not finding.get("evidence_ref"):
                                     failures.append(f"review_finding_evidence_missing:{rubric}:{index}")
+                                if contract.get("require_resolvable_evidence_refs") and finding.get("evidence_ref"):
+                                    if not evidence_artifact_resolves(finding["evidence_ref"]):
+                                        failures.append(f"review_finding_evidence_unresolved:{rubric}:{index}:{finding['evidence_ref']}")
                                 if contract.get("require_disposition_per_finding") and finding.get("disposition") not in {
                                     "UNRESOLVED", "MITIGATED", "ACCEPTED", "NOT_APPLICABLE",
                                 }:
@@ -1514,6 +1535,8 @@ class StudioEngine:
                 evidence_path = self._project_dir(project_id) / evidence_artifact["relative_path"]
                 if not evidence_path.is_file() or _sha256(evidence_path) != evidence_artifact["sha256"]:
                     failures.append(f"required_evidence_artifact_bytes_changed:{evidence_name}")
+                if evidence_artifact["kind"] not in {"evidence", "document", "rights_record", "qa_report", "review_report", "decision", "timeline", "domain_state"}:
+                    failures.append(f"required_evidence_artifact_wrong_kind:{evidence_name}:{evidence_artifact['kind']}")
 
             required_artifacts = list(release_policy.get("required_artifact_names", []))
             for required_name in required_artifacts:
