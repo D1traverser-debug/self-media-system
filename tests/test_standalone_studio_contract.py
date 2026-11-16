@@ -44,8 +44,16 @@ def test_example_graphs_are_valid_dynamic_dags(tmp_path):
 
 
 def test_engine_uses_no_external_runtime_dependency():
-    source = (ROOT / "video_growth_agent/studio_engine.py").read_text(encoding="utf-8")
+    source = (ROOT / "video_studio/engine.py").read_text(encoding="utf-8")
     assert "requests" not in source
     assert "httpx" not in source
     assert "openai" not in source.lower()
     assert "sqlite3" in source
+    assert "video_growth_agent" not in source
+    assert "caos" not in source.lower()
+
+def test_legacy_engine_import_is_only_a_compatibility_shim():
+    from video_growth_agent.studio_engine import StudioEngine as LegacyImport
+    from video_studio.engine import StudioEngine as CanonicalEngine
+
+    assert LegacyImport is CanonicalEngine
