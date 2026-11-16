@@ -170,7 +170,62 @@ Learning sources must be explicitly admitted and source-bound. A method candidat
 
 A candidate remains `CANDIDATE` until there is independent validation evidence and at least one counterexample trial. A successful single project or a model's self-rating does not establish a universal rule. Provider-specific knowledge expires faster than durable storytelling or production principles. Rejected approaches remain recorded with the reason they failed.
 
-## 12. Operational commands
+## 12. Hard release gates and provenance
+
+The task graph is a scheduler, not the authority that decides whether a deliverable may be released. Release policy is declared in the owner brief and enforced against exact registered artifacts.
+
+### Artifact lineage and source changes
+
+When a task completes, the runtime records each declared input artifact ID and SHA-256 as an immutable `DERIVED_FROM` edge for every output. The lineage is recursive. The release check verifies all bytes and recorded parent digests. Re-importing a new version of an existing source name marks the prior version stale and invalidates every task that declared or consumed it, plus dependency descendants; old outputs and receipts remain historical evidence. Workers must reopen and regenerate affected tasks rather than reusing stale outputs.
+
+### Rights and provenance
+
+For public release, the final deliverable and every used media asset in its lineage must have one of `OWNED`, `AUTHORIZED`, `LICENSED` or `PUBLIC_DOMAIN`. `UNKNOWN` is fail-closed. By default, media artifacts also require non-empty `metadata.rights_evidence_refs`; each reference must resolve to a registered current artifact name/ID or an explicit HTTP(S) source URL. Briefs may name mandatory source assets and evidence artifacts. Required source assets must actually occur in the final artifact's recorded lineage, not merely exist elsewhere in the project.
+
+The rights status field is a declaration backed by evidence, not an automatic legal opinion. Likeness, voice, music, font, stock footage, product truth, territory, duration, paid-media and derivative-use scope still require a competent human review.
+
+### Technical media QA
+
+A video artifact automatically requires a current technical QA receipt at release, even if the brief forgets to set `require_technical_qa`. A project can also explicitly require QA for a non-video output. The receipt must identify the exact target artifact ID and SHA-256, contain a recognized `ffmpeg-ffprobe-v1.0` checker identity, have `hard_pass=true`, no hard failures, and PASS for every mandatory check.
+
+Mandatory checks are:
+
+- `video_stream` — a video stream exists;
+- `stream_duration_match` — measurable stream durations agree within the declared tolerance;
+- `true_peak` — audio true peak is measured and stays within the configured ceiling;
+- `black_frames` — black segments are detected and remain within the configured maximum;
+- `full_decode` — FFmpeg can decode the complete selected video/audio streams without errors.
+
+The brief may add mandatory checks such as duration range, resolution and frame rate; it cannot remove the five core checks. Missing FFmpeg/FFprobe, timeout, malformed reports, unavailable measurements or digest mismatch block release. The QA adapter does not certify editorial truth, craft, rights, continuity or audience response.
+
+### Independent reviews and Red Team
+
+A review is bound to the exact artifact digest and must not be written by its producer. A brief can require reviewer kind, execution mode, blind review, inspected digest, context ID, score floors and reviewer quorum. Human cold-read contracts require `reviewer_kind=HUMAN`, `execution_mode=INDEPENDENT_COLD_READ`, `blind_review=true`, a matching inspected digest and a context ID.
+
+The Red Team contract can require at least three concrete findings. Each finding must contain a description, evidence reference, severity and disposition. A PASS with unresolved CRITICAL/HIGH findings is rejected. Findings are not decorative checklist entries; unresolved material risks block release.
+
+These reviewer attributes are recorded as attestations. The runtime can validate their structure and consistency but cannot cryptographically prove that a named person actually performed the review or remained blind to other verdicts. Do not describe self-attested metadata as cryptographic independence.
+
+### Evidence and publication boundary
+
+`required_evidence_artifact_names` requires registered, current, digest-verified evidence artifacts. `required_artifact_names` requires every declared deliverable. `required_asset_names` requires source assets to be in final lineage and rights-cleared. String-only `required_evidence_refs` remain compatibility references; use artifact names/IDs for evidence that must be machine-verified.
+
+A successful release check marks the exact artifact ACCEPTED; it does not upload, publish, schedule or spend money. Publication remains a separate owner-authorized action. The CLI's `--allow-unknown-rights` compatibility switch cannot override a hard requirement in the owner brief.
+
+### Review and QA CLI
+
+Review dimensions and scores are supplied as JSON. Independence metadata is supplied separately:
+
+```bash
+vga-studio review PROJECT ARTIFACT_ID \
+  --reviewer human-reviewer-01 --rubric human-cold-read --outcome PASS \
+  --dimensions review-scores.json --attestation review-attestation.json \
+  --evidence frame://00:00:02 --notes "Blind cold read of exact final digest"
+```
+
+The attestation JSON should identify `reviewer_kind`, `execution_mode`, `blind_review`, `inspected_artifact_digest` and `context_id`. Red Team review dimensions should include a `findings` array with at least three evidence-backed findings when the brief requires it.
+
+## 13. Operational commands
 
 ```bash
 # create a project from an outcome brief
