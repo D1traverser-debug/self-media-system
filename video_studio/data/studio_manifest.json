@@ -161,5 +161,15 @@
     "legacy_specialized_modules": "OPTIONAL_VERIFIED_ADAPTERS",
     "legacy_fixed_stage_orchestrator": "NOT_A_CONTROLLER",
     "require_artifact_receipts": true
+  },
+  "product_boundary": {
+    "primary": "VIDEO_PRODUCTION",
+    "primary_success_oracle": "COMPLETE_INSPECTABLE_REPRODUCIBLE_VIDEO_DELIVERY_PACKAGE",
+    "optional_adjacent_workstreams": [
+      "MEDIA_GROWTH",
+      "ORIGINAL_DIGITAL_IP",
+      "COMMERCIALIZATION"
+    ],
+    "optional_workstream_policy": "Attach only when an explicit owner requirement or typed dependency requires it; never impose as universal production gates."
   }
 }
