@@ -11,6 +11,7 @@ requires-python = ">=3.11"
 
 [project.scripts]
 vga = "video_growth_agent.cli:main"
+vga-studio = "video_growth_agent.studio_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["video_growth_agent*"]
