@@ -15,7 +15,10 @@
     "bounded_retries": true,
     "parallel_ready_tasks": true,
     "fixed_stage_machine": false,
-    "peer_chat_authority": false
+    "peer_chat_authority": false,
+    "parallel_local_tool_workers": true,
+    "worker_pool_cli": "vga-studio run-ready-tools",
+    "agent_worker_dispatch": "CURRENT_SESSION_OR_EXTERNAL_WORKER_REQUIRED"
   },
   "artifact_model": {
     "immutable_versions": true,
@@ -72,6 +75,51 @@
       "scope": "technical_measurement_only",
       "digest_bound": true,
       "auto_release": false
+    },
+    "production_executors": {
+      "ffmpeg_assemble": {
+        "entrypoint": "video_studio.production.executors.run_claimed_production_task",
+        "engine": "FFmpeg",
+        "inputs": [
+          "declared_video_artifacts",
+          "declared_audio_artifacts",
+          "optional_SRT"
+        ],
+        "outputs": [
+          "candidate_MP4",
+          "24bit_48kHz_WAV_audio_master",
+          "digest_bound_render_receipt"
+        ],
+        "candidate_only": true,
+        "requires": [
+          "ffmpeg",
+          "ffprobe"
+        ]
+      },
+      "delivery_package": {
+        "entrypoint": "video_studio.production.delivery.create_delivery_package",
+        "inputs": [
+          "exact_declared_artifacts_with_digests"
+        ],
+        "outputs": [
+          "delivery_ZIP",
+          "release_manifest"
+        ],
+        "validates": [
+          "artifact_existence",
+          "SHA256",
+          "media_type",
+          "archive_path_safety"
+        ],
+        "release_authorized": false
+      }
+    },
+    "production_execution": {
+      "worker_pool": "video_studio.production.worker_pool.run_ready_tool_tasks",
+      "concurrency_limit": 16,
+      "rounds_until_no_registered_ready_tool_tasks": true,
+      "unregistered_tool_tasks": "REPORTED_NOT_CLAIMED",
+      "no_implicit_paid_provider_calls": true
     }
   },
   "release_status": "ACTIVE_CANDIDATE",
