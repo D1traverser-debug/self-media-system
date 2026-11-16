@@ -8,7 +8,7 @@ import threading
 
 import pytest
 
-from video_growth_agent.studio_engine import ClaimError, ContractError, StudioEngine
+from video_studio.engine import ClaimError, ContractError, StudioEngine
 
 
 def brief():
@@ -289,10 +289,10 @@ def test_learning_stays_candidate_until_independent_replay_and_counterexample_tr
 
 
 def test_cli_exposes_standalone_entry_without_caos_import(tmp_path):
-    source = (Path(__file__).parents[1] / "video_growth_agent" / "studio_engine.py").read_text(encoding="utf-8")
+    source = (Path(__file__).parents[1] / "video_studio" / "engine.py").read_text(encoding="utf-8")
     assert "import caos" not in source.lower()
     assert "caos_runtime" not in source.lower()
-    from video_growth_agent.studio_cli import main
+    from video_studio.cli import main
     brief_file = tmp_path / "brief.json"
     brief_file.write_text(json.dumps(brief()), encoding="utf-8")
     assert main(["--root", str(tmp_path / "ws"), "init", "cli-demo", "--brief", str(brief_file)]) == 0
@@ -361,7 +361,7 @@ def test_builtin_ffprobe_qa_measures_real_media_and_completes_a_claimed_task(tmp
     import shutil
     import subprocess
 
-    from video_growth_agent.studio_media import run_claimed_media_qa
+    from video_studio.media import run_claimed_media_qa
 
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
         pytest.skip("FFmpeg/ffprobe are not installed")
