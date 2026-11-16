@@ -1,6 +1,6 @@
 # Video Studio — Standalone Entry
 
-Status: `ACTIVE`
+Status: `ACTIVE_CANDIDATE`
 This file, `STUDIO_ENTRY.md`, is the standalone startup authority for new Video work.
 Runtime: `video_studio.engine.StudioEngine`
 CLI: `vga-studio`
@@ -13,7 +13,7 @@ Turn the owner's actual media goal into a finished, independently checked delive
 
 ## Independence
 
-The current Studio owns its own requirement interpretation protocol, decision receipts, task graph, execution leases, artifact history, review evidence, failure diagnosis, recovery and learning admission. It does not import, call, require, or wait for CAOS, a CAOS Skill, a CAOS runtime, a parent task ID, or a parent lease. The legacy `CAOS_VIDEO_ENTRY.md` and the 0.8 runtime are historical/compatibility material, not startup dependencies for new Studio work.
+The current Studio owns its own requirement interpretation protocol, decision receipts, task graph, execution leases, artifact history, review evidence, failure diagnosis, recovery and learning admission. It covers MEDIA_GROWTH, ORIGINAL_DIGITAL_IP usage (without owning canon), COMMERCIALIZATION and PRODUCTION_SYSTEM through explicit task graphs and verified domain adapters. It does not import, call, require, or wait for CAOS, a CAOS Skill, a CAOS runtime, a parent task ID, or a parent lease. The legacy `CAOS_VIDEO_ENTRY.md` and the 0.8 runtime are historical/compatibility material, not startup dependencies for new Studio work.
 
 IPOS remains the sole authority for the owner's original character/identity canon. The Studio consumes approved, versioned IPOS exports; it does not create a competing canon.
 
