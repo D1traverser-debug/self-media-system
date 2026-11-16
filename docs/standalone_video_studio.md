@@ -282,6 +282,27 @@ vga-studio run-adapter PROJECT TASK_ID --worker local-renderer --token CLAIM_TOK
 The adapter verifies the ShotContract against the exact EditorialPlan, requires the font and rights evidence as declared inputs, and emits a candidate plus receipt. It does not promote the asset. A later `qa-media` task must bind canonical FFmpeg/FFprobe QA to the registered candidate artifact ID and digest.
 
 
+### Standalone adapter proof
+
+The repository includes `examples/standalone-domain-adapters.brief.json` and `examples/standalone-domain-adapters.tasks.json`. They demonstrate a real, deterministic local render rather than a mocked task completion:
+
+1. An agent authors an EditorialPlan and GraphicSpec.
+2. The `editorial_plan_validate` adapter validates claims, beats and shots.
+3. The `shot_contract_materialize` adapter derives a ShotContract from the exact plan.
+4. The `programmatic_graphic_render` adapter checks the plan binding, font input and rights evidence, then writes a silent MP4 candidate and render receipt.
+5. The `qa-media` command runs the canonical digest-bound FFmpeg/FFprobe checks against that registered candidate.
+
+Import a licensed font and its rights evidence before claiming the renderer task:
+
+```bash
+vga-studio --root ./studio-work init adapter-demo --title "Standalone adapter demo" --brief examples/standalone-domain-adapters.brief.json
+vga-studio --root ./studio-work plan adapter-demo examples/standalone-domain-adapters.tasks.json
+vga-studio --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED
+vga-studio --root ./studio-work import-asset adapter-demo rights-clearance ./font-license-evidence.txt --kind document --media-type text/plain --rights-status OWNED
+```
+
+The example is an adapter integration proof, not a claim that a title card alone is a finished film or that external generative-video providers are connected.
+
 ## 14. Migration and compatibility
 
 The existing `vga` CLI and 0.8 Media Business OS remain available for historical Pilot recovery and proven specialized capabilities. They are not the new Studio's controller or task graph. Reuse old modules only through explicit adapters after verifying their current behavior, compatibility, real outputs and failure cases. Do not migrate old fixed stage order or role assignments merely because they exist.
