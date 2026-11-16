@@ -62,12 +62,18 @@ def test_legacy_engine_import_is_only_a_compatibility_shim():
     assert LegacyImport is CanonicalEngine
 
 
-def test_all_canonical_runtime_modules_are_independent_of_legacy_namespace():
-    for module in ("__init__.py", "__main__.py", "cli.py", "media.py"):
+def test_standalone_control_plane_is_independent_and_domain_bridge_is_explicit():
+    for module in ("__init__.py", "__main__.py", "cli.py", "engine.py", "media.py"):
         source = (ROOT / "video_studio" / module).read_text(encoding="utf-8")
         assert "video_growth_agent" not in source
         assert "from caos" not in source.lower()
         assert "import caos" not in source.lower()
+
+    adapters = (ROOT / "video_studio" / "adapters.py").read_text(encoding="utf-8")
+    assert "from video_growth_agent." in adapters
+    assert "from caos" not in adapters.lower()
+    assert "import caos" not in adapters.lower()
+    assert "run_claimed_domain_adapter" in adapters
 
 
 def test_example_briefs_preserve_nonnegotiable_video_release_gates():
