@@ -1478,6 +1478,8 @@ class StudioEngine:
                         failures.append(f"required_source_asset_bytes_changed:{asset_name}")
                     if effective_require_rights and source_asset["rights_status"] not in allowed_rights:
                         failures.append(f"required_source_asset_rights_not_cleared:{asset_name}:{source_asset['rights_status']}")
+                    if source_asset["artifact_id"] not in {row["artifact_id"] for row in lineage}:
+                        failures.append(f"required_source_asset_not_in_final_lineage:{asset_name}")
                     if require_rights_evidence:
                         metadata = _loads(source_asset["metadata_json"], {})
                         refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
