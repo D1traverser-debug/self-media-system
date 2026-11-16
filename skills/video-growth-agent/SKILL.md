@@ -49,6 +49,19 @@ Keep hard requirements separate from preferences. When trade-offs are necessary,
 
 Use `vga-studio init` for a new project. Use `revise-brief` for outcome changes and `revise-task` for contract changes. Always supply the reason. Let the engine invalidate the changed node and affected descendants; never reuse stale downstream work as current.
 
+## 2A. Video business workstreams
+
+Treat Video Growth Agent as a coupled media-business system, not merely a video-rendering pipeline. Determine which workstream(s) the owner's goal actually engages:
+
+- **MEDIA_GROWTH:** audience/problem evidence, demand, platform positioning, content portfolio, series hypotheses, hooks/packaging, distribution and audience outcomes.
+- **ORIGINAL_DIGITAL_IP:** video-side use and recognition of approved original IP, performance evidence, repeatable asset usage and licensing-use value. IPOS alone owns character identity canon, likeness and identity rights.
+- **COMMERCIALIZATION:** sponsor/category fit, offer design, deliverable obligations, product truth, rights scope, disclosure and commercial measurement.
+- **PRODUCTION_SYSTEM:** research, editorial intent, claims, story/shot design, assets, generation, compositing, editing, sound, technical/craft QA and release.
+
+Connect these workstreams only through explicit evidence and decisions. Audience evidence can revise portfolio hypotheses; IP performance can revise packaging or licensing strategy; sponsor obligations can change format and production requirements; production cost, failure, reuse and quality evidence can change future investment. Keep separate objective evidence for trust/truth, usefulness/story, retention, IP recognition, audiovisual craft, qualified growth, commercial value, rights, cost and learning. Never collapse them into a single vanity score.
+
+The `video_studio` engine is the control plane for durable work, not a claim that all business-domain models have been rewritten. When Program/Series/Episode/Shot/Timeline, continuity, provider routing, business metrics or IP identity semantics are required, use the corresponding Video-owned specialized module only through an explicit, verified adapter. Register resulting state and files as versioned Studio artifacts. Never restore the old fixed-stage `StudioOrchestrator` as the new controller.
+
 ## 3. Research and evidence
 
 For factual or current-affairs work:
