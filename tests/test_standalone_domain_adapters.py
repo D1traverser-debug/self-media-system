@@ -16,6 +16,7 @@ from video_growth_agent.media_graph import (
 )
 from video_growth_agent.timeline import TimelineClip, TimelineSpec
 from video_studio.adapters import (
+    assess_shot_continuity,
     editorial_plan_from_dict,
     outcome_metrics,
     route_shot,
@@ -222,3 +223,56 @@ def test_programmatic_graphic_adapter_executes_and_registers_candidate_with_line
         ).fetchone()[0]
     assert lineage == 5
     assert engine.audit("demo")["pass"] is True
+
+
+def test_continuity_adapter_distinguishes_hard_identity_from_allowed_location_change():
+    report = assess_shot_continuity({
+        "before": {"shot_id": "S1", "dimensions": {"face": "approved-face", "wardrobe": "blue", "location": "office"}},
+        "after": {"shot_id": "S2", "dimensions": {"face": "generic-face", "wardrobe": "blue", "location": "street"}},
+        "link": {
+            "from_shot_id": "S1", "to_shot_id": "S2",
+            "rules": [
+                {"dimension": "face", "severity": "HARD", "mode": "PRESERVE", "reason": "Identity must remain stable."},
+                {"dimension": "wardrobe", "severity": "HARD", "mode": "PRESERVE"},
+                {"dimension": "location", "severity": "SOFT", "mode": "ALLOW_CHANGE"},
+            ],
+        },
+        "evidence_refs": ["frame://S1", "frame://S2"],
+    })
+    assert report["hard_pass"] is False
+    violations = report["assessment"]["violations"]
+    assert len(violations) == 1
+    assert violations[0]["dimension"] == "face"
+    assert violations[0]["severity"] == "HARD"
+
+
+def test_extended_media_qa_adapter_records_loudness_and_silence_analysis(tmp_path):
+    import subprocess
+
+    if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
+        pytest.skip("FFmpeg/ffprobe are required for extended media QA")
+    engine = StudioEngine(tmp_path)
+    engine.create_project("audio", "Extended QA", _brief())
+    media = tmp_path / "audio-video.mp4"
+    subprocess.run([
+        "ffmpeg", "-hide_banner", "-v", "error",
+        "-f", "lavfi", "-i", "color=c=blue:s=320x240:d=1:r=25",
+        "-f", "lavfi", "-i", "sine=frequency=1000:duration=1",
+        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", "-y", str(media),
+    ], check=True, capture_output=True)
+    engine.import_asset("audio", "final-candidate", media, kind="video", media_type="video/mp4", rights_status="OWNED")
+    engine.add_tasks("audio", [{
+        "task_id": "extended-qa", "title": "Run supplementary loudness and silence QA",
+        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+        "inputs": ["final-candidate"], "outputs": ["extended-audio-qa"],
+        "requirements": {"domain_adapter": {
+            "name": "extended_media_qa", "media_input": "final-candidate", "output_name": "extended-audio-qa",
+        }},
+        "acceptance": {"qa": "Record integrated loudness, true peak, long silence and black-frame diagnostics."},
+    }])
+    packet = engine.claim_next("audio", "audio-qa")
+    result = run_claimed_domain_adapter(engine, "audio", "extended-qa", "audio-qa", packet["claim"]["claim_token"])
+    report = json.loads(Path(result["completion"]["artifacts"]["extended-audio-qa"]["path"]).read_text(encoding="utf-8"))
+    check_ids = {item["check_id"] for item in report["checks"]}
+    assert {"integrated_loudness", "true_peak", "long_silence", "black_frames"}.issubset(check_ids)
+    assert report["metadata"]["checker"] == "ffmpeg-ffprobe-v0.2"
