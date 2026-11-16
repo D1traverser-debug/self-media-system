@@ -318,7 +318,16 @@ def test_ipos_bundle_import_adapter_preserves_external_canon_and_graph_lineage(t
     engine.create_project("ipos", "IPOS adapter", _brief())
     bundle_path = tmp_path / "ipos-bundle.json"
     bundle_path.write_text(json.dumps(_ipos_bundle()), encoding="utf-8")
+    shot_path = tmp_path / "shot-contract.json"
+    shot_path.write_text(json.dumps({
+        "shot_id": "SHOT-001", "sequence_id": "SEQ-001",
+        "narrative_job": "Introduce the approved recurring character.",
+        "duration_seconds": 4, "truth_mode": "SYNTHETIC", "risk": "HERO",
+        "allowed_modes": ["I2V", "T2V"], "required_capabilities": ["I2V"],
+        "quality_targets": {"identity": 4.0, "motion": 3.5}, "budget_usd": 5.0,
+    }), encoding="utf-8")
     engine.import_asset("ipos", "ipos-bundle", bundle_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+    engine.import_asset("ipos", "shot-contract", shot_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
     engine.add_tasks("ipos", [
         {
             "task_id": "bootstrap-graph", "title": "Initialize the Video-owned MediaGraph root",
@@ -356,4 +365,31 @@ def test_ipos_bundle_import_adapter_preserves_external_canon_and_graph_lineage(t
     assert receipt["canon_ref"].endswith("@v1")
     assert len(receipt["imported_asset_refs"]) == 2
     assert any(item["kind"] == "IPOS_IDENTITY_BUNDLE" for item in graph_result["assets"])
+
+    engine.add_tasks("ipos", [{
+        "task_id": "bind-ipos-shot", "title": "Bind the exact imported IPOS canon to a shot contract",
+        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+        "inputs": ["ipos-bundle", "ipos-import-receipt", "media-graph-imported", "shot-contract"],
+        "outputs": ["shot-contract-ipos-bound", "ipos-continuity-rules"],
+        "requirements": {"domain_adapter": {
+            "name": "ipos_shot_bind", "bundle_input": "ipos-bundle",
+            "import_receipt_input": "ipos-import-receipt", "media_graph_input": "media-graph-imported",
+            "shot_contract_input": "shot-contract", "shot_contract_output": "shot-contract-ipos-bound",
+            "continuity_rules_output": "ipos-continuity-rules",
+        }},
+        "acceptance": {"binding": "Bind exact imported asset versions and external identity invariants without mutating IPOS canon."},
+    }])
+    bind_packet = engine.claim_next("ipos", "ipos-shot-binder")
+    assert bind_packet["task"]["task_id"] == "bind-ipos-shot"
+    bound_result = run_claimed_domain_adapter(
+        engine, "ipos", "bind-ipos-shot", "ipos-shot-binder", bind_packet["claim"]["claim_token"],
+    )
+    bound_path = bound_result["completion"]["artifacts"]["shot-contract-ipos-bound"]["path"]
+    bound = json.loads(Path(bound_path).read_text(encoding="utf-8"))["shot_contract"]
+    assert bound["ip_identity_required"] is True
+    assert bound["ip_identity_bundle_ref"].endswith("@v1")
+    assert any(item["role"].startswith("IPOS_") for item in bound["references"])
+    rules_path = bound_result["completion"]["artifacts"]["ipos-continuity-rules"]["path"]
+    rules = json.loads(Path(rules_path).read_text(encoding="utf-8"))["continuity_rules"]
+    assert any(item["severity"] == "HARD" for item in rules)
     assert engine.audit("ipos")["pass"] is True
