@@ -1,10 +1,10 @@
 # Standalone Video Studio — Product, Method and Runtime Contract
 
 Status: `ACTIVE_CANDIDATE_1.0`
-Runtime: `video_growth_agent.studio_engine`
+Runtime: `video_studio.engine`
 Entry: `STUDIO_ENTRY.md`
 CLI: `vga-studio`
-Manifest: `video_growth_agent/data/studio_manifest.json`
+Manifest: `video_studio/data/studio_manifest.json`
 
 ## 1. Product outcome
 
