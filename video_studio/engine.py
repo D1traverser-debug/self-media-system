@@ -364,6 +364,13 @@ class StudioEngine:
             for mapping_field in ("dimension_floors",):
                 if mapping_field in contract and not isinstance(contract[mapping_field], dict):
                     raise ContractError(f"review_contracts.{rubric}.{mapping_field} must be an object")
+            for boolean_field in (
+                "reviewer_kind", "execution_mode", "blind_review", "require_digest_attestation",
+                "require_context_id", "require_evidence_per_finding", "require_disposition_per_finding",
+                "require_resolvable_evidence_refs", "distinct_contexts",
+            ):
+                if boolean_field in contract and boolean_field not in {"reviewer_kind", "execution_mode"} and not isinstance(contract[boolean_field], bool):
+                    raise ContractError(f"review_contracts.{rubric}.{boolean_field} must be boolean")
             if "score_dimensions" in contract and not isinstance(contract["score_dimensions"], list):
                 raise ContractError(f"review_contracts.{rubric}.score_dimensions must be an array")
         if policy.get("require_technical_qa") and not isinstance(
