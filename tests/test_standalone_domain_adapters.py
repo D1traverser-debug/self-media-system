@@ -16,6 +16,7 @@ from video_growth_agent.media_graph import (
 )
 from video_growth_agent.timeline import TimelineClip, TimelineSpec
 from video_studio.adapters import (
+    DomainAdapterError,
     assess_shot_continuity,
     editorial_plan_from_dict,
     outcome_metrics,
@@ -72,7 +73,7 @@ def test_editorial_plan_adapter_validates_claim_beat_shot_traceability():
         editorial_plan_from_dict(broken)
     malformed = _editorial_payload()
     malformed["intent"]["evidence_refs"] = "research://not-an-array"
-    with pytest.raises(ValueError, match="array of non-empty strings"):
+    with pytest.raises(DomainAdapterError, match="array of non-empty strings"):
         editorial_plan_from_dict(malformed)
 
 
