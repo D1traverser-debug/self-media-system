@@ -124,6 +124,7 @@ A task completes only when all declared output names are supplied and each outpu
 
 The production execution package provides two registered operations:
 
+- `python_frame_render`: executes a declared project-owned Python source artifact exposing `render_frame(t, width, height, assets, params)`. Both the task contract and FrameRenderSpec must set `trusted_code_execution=true`. It streams exact RGB frames to FFmpeg and emits a silent candidate shot plus a receipt binding source/assets to the output digest. This is trusted code execution, not an OS/network sandbox; never expose secrets and execute only reviewed project code.
 - `ffmpeg_assemble`: consumes a versioned render spec plus exact registered video/audio/SRT inputs. It assembles sequential shot assets, applies cover/contain fit, mixes offset/gain-controlled audio tracks, optionally burns valid SRT captions, and emits a candidate MP4, a separate 24-bit/48 kHz WAV audio master and a receipt binding input artifact IDs/digests to output hashes. It requires FFmpeg and FFprobe. The current first version uses cut-based sequential assembly; transitions and complex overlays belong in shot rendering or a later tested timeline capability.
 - `delivery_package`: validates required artifact presence, SHA-256 and expected media types, then creates a ZIP containing final deliverables, project timeline/source assets and QA/rights evidence plus an external manifest with the package digest. It is candidate-only and never authorizes release.
 
@@ -133,7 +134,7 @@ Run registered local tools with:
 vga-studio --root ./studio-work run-ready-tools PROJECT_ID --max-workers 4
 ```
 
-The worker pool claims up to the configured concurrency of independent READY tool tasks, executes them concurrently, refreshes the DAG and continues in downstream rounds. It only runs registered local operations and FFprobe technical-measurement tasks. It reports tool tasks with no registered executor instead of claiming them. It does not spawn LLM agents, human reviewers or external providers. Use executor-filtered claims for session agent work:
+The worker pool claims up to the configured concurrency of independent READY tool tasks, executes them concurrently, refreshes the DAG and continues in downstream rounds. It only runs registered local operations, including trusted Python frame rendering, FFmpeg master assembly, delivery packaging and FFprobe technical-measurement tasks. It reports tool tasks with no registered executor instead of claiming them. It does not spawn LLM agents, human reviewers or external providers. Use executor-filtered claims for session agent work:
 
 ```bash
 vga-studio --root ./studio-work claim PROJECT_ID --worker researcher-01 --executor agent
