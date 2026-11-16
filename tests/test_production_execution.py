@@ -309,3 +309,31 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
     invalid_spec = FrameRenderSpec.from_dict(invalid)
     with pytest.raises(ProductionContractError, match="trusted_code_execution=true"):
         invalid_spec.validate_inputs({"renderer-script"})
+
+
+
+def test_executor_registry_reports_unknown_tool_tasks_without_claiming_them(tmp_path):
+    from video_studio.production.registry import PRODUCTION_EXECUTORS
+
+    assert set(PRODUCTION_EXECUTORS.operations()) == {
+        "python_frame_render", "ffmpeg_assemble", "delivery_package", "ffprobe_media_qa",
+    }
+    engine = StudioEngine(tmp_path / "unknown-tool-workspace")
+    engine.create_project("unknown-tool", "Unregistered tool demo", _brief())
+    engine.add_tasks("unknown-tool", [{
+        "task_id": "unknown-local-tool",
+        "title": "A tool task with no registered executor",
+        "kind": "unknown_tool_operation",
+        "executor": "tool",
+        "depends_on": [],
+        "inputs": [],
+        "outputs": ["unproduced-output"],
+        "requirements": {"tool_name": "not-installed"},
+        "acceptance": {"execution": "Must not be silently claimed or marked complete."},
+    }])
+    result = run_ready_tool_tasks(engine, "unknown-tool", max_workers=2)
+    assert result["scheduler_status"] == "PARTIAL_UNREGISTERED_EXECUTORS"
+    assert result["claimed"] == []
+    assert result["completed"] == []
+    assert result["ready_tool_tasks_without_registered_executor"][0]["task_id"] == "unknown-local-tool"
+    assert engine.list_tasks("unknown-tool")[0]["status"] == "READY"
