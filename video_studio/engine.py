@@ -338,6 +338,38 @@ class StudioEngine:
             raise ContractError("brief.goal and brief.audience must be strings")
         if not isinstance(brief["deliverables"], list) or not all(isinstance(item, str) and item.strip() for item in brief["deliverables"]):
             raise ContractError("brief.deliverables must be a non-empty array of strings")
+        policy = brief.get("release_policy", {})
+        if not isinstance(policy, dict):
+            raise ContractError("brief.release_policy must be an object")
+        for field in (
+            "required_evidence_refs", "required_evidence_artifact_names",
+            "required_review_rubrics", "required_artifact_names",
+            "required_asset_names", "required_rights_statuses",
+            "technical_qa_required_check_ids",
+        ):
+            value = policy.get(field, [])
+            if not isinstance(value, list) or not all(isinstance(item, str) and item.strip() for item in value):
+                raise ContractError(f"release_policy.{field} must be an array of non-empty strings")
+        allowed_rights = set(policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)))
+        if not allowed_rights.issubset(RIGHTS_ALLOWED):
+            raise ContractError("release_policy.required_rights_statuses contains a non-cleared rights status")
+        contracts = policy.get("review_contracts", {})
+        if not isinstance(contracts, dict) or not all(isinstance(value, dict) for value in contracts.values()):
+            raise ContractError("release_policy.review_contracts must map rubric IDs to objects")
+        for rubric, contract in contracts.items():
+            _safe_id(rubric, "review rubric")
+            for count_field in ("min_reviewers", "min_findings"):
+                if count_field in contract and int(contract[count_field]) < 0:
+                    raise ContractError(f"review_contracts.{rubric}.{count_field} cannot be negative")
+            for mapping_field in ("dimension_floors",):
+                if mapping_field in contract and not isinstance(contract[mapping_field], dict):
+                    raise ContractError(f"review_contracts.{rubric}.{mapping_field} must be an object")
+            if "score_dimensions" in contract and not isinstance(contract["score_dimensions"], list):
+                raise ContractError(f"review_contracts.{rubric}.score_dimensions must be an array")
+        if policy.get("require_technical_qa") and not isinstance(
+            policy.get("technical_qa_artifact_name", "technical-qa-receipt"), str
+        ):
+            raise ContractError("release_policy.technical_qa_artifact_name must be a string")
 
     def create_project(self, project_id: str, title: str, brief: dict[str, Any]) -> dict[str, Any]:
         project_id = _safe_id(project_id, "project_id")
@@ -1272,7 +1304,7 @@ class StudioEngine:
             # CLI flags cannot weaken a hard requirement declared by the owner brief.
             effective_require_rights = bool(require_rights or release_policy.get("require_rights", True))
             allowed_rights = set(release_policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)))
-            require_rights_evidence = bool(release_policy.get("require_rights_evidence", False))
+            require_rights_evidence = bool(release_policy.get("require_rights_evidence", True))
             if effective_require_rights and artifact["rights_status"] not in allowed_rights:
                 failures.append(f"rights_not_cleared:{artifact['rights_status']}")
 
@@ -1438,7 +1470,8 @@ class StudioEngine:
                             failures.append(f"required_source_asset_rights_evidence_missing:{asset_name}")
 
             qa_receipt: dict[str, Any] | None = None
-            if release_policy.get("require_technical_qa"):
+            requires_technical_qa = bool(release_policy.get("require_technical_qa", artifact["kind"] == "video" or str(artifact["media_type"]).startswith("video/")))
+            if requires_technical_qa:
                 qa_name = release_policy.get("technical_qa_artifact_name", "technical-qa-receipt")
                 qa_artifact = self._artifact_by_name(connection, project_id, qa_name)
                 if qa_artifact is None:
@@ -1461,9 +1494,9 @@ class StudioEngine:
                         failures.append("technical_qa_target_artifact_id_mismatch")
                     checks = qa_payload.get("checks", [])
                     check_statuses = {item.get("check_id"): item.get("status") for item in checks if isinstance(item, dict)}
-                    required_check_ids = set(release_policy.get("technical_qa_required_check_ids", [
+                    required_check_ids = {
                         "video_stream", "stream_duration_match", "true_peak", "black_frames", "full_decode",
-                    ]))
+                    } | set(release_policy.get("technical_qa_required_check_ids", []))
                     missing_checks = sorted(required_check_ids - set(check_statuses))
                     failed_checks = sorted(key for key, status in check_statuses.items() if status != "PASS")
                     if missing_checks:
