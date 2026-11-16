@@ -37,6 +37,7 @@ def test_example_graphs_are_valid_dynamic_dags(tmp_path):
         ("explainer", "technology-explainer.brief.json", "technology-explainer.tasks.json"),
         ("satire", "news-fictional-media.brief.json", "news-fictional-media.tasks.json"),
         ("media-program", "ai-self-media-commercialization.brief.json", "ai-self-media-commercialization.tasks.json"),
+        ("adapter-demo", "standalone-domain-adapters.brief.json", "standalone-domain-adapters.tasks.json"),
     ):
         brief = json.loads((ROOT / "examples" / brief_name).read_text(encoding="utf-8"))
         tasks = json.loads((ROOT / "examples" / tasks_name).read_text(encoding="utf-8"))
@@ -105,3 +106,20 @@ def test_program_example_keeps_independent_workstreams_parallel_and_ipos_fail_cl
     assert task_map["commercial-offer-native-integration"]["status"] == "PENDING"
     assert status["task_counts"]["READY"] >= 4
     assert engine.audit("program")["pass"] is True
+
+
+def test_standalone_adapter_demo_wires_editorial_to_real_local_render_and_qa(tmp_path):
+    engine = StudioEngine(tmp_path)
+    brief_path = ROOT / "examples" / "standalone-domain-adapters.brief.json"
+    tasks_path = ROOT / "examples" / "standalone-domain-adapters.tasks.json"
+    project_brief = json.loads(brief_path.read_text(encoding="utf-8"))
+    tasks = json.loads(tasks_path.read_text(encoding="utf-8"))
+    engine.create_project("adapter-demo", "Standalone adapter demo", project_brief)
+    engine.add_tasks("adapter-demo", tasks)
+    task_map = {item["task_id"]: item for item in engine.list_tasks("adapter-demo")}
+    assert task_map["author-editorial-plan"]["status"] == "READY"
+    assert task_map["validate-editorial-plan"]["status"] == "PENDING"
+    assert task_map["render-programmatic-graphic"]["executor"] == "tool"
+    assert task_map["render-programmatic-graphic"]["requirements"]["domain_adapter"]["name"] == "programmatic_graphic_render"
+    assert task_map["technical-qa"]["kind"] == "technical_measurement"
+    assert engine.audit("adapter-demo")["pass"] is True
