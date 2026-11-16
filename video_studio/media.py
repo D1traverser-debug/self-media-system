@@ -85,11 +85,6 @@ def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *,
         check("frame_rate", fps is not None and abs(fps - float(fps_expected)) < 0.05, fps, float(fps_expected))
 
     stream_durations = [float(item["duration"]) for item in streams if item.get("duration") not in (None, "N/A")]
-    if duration is not None and stream_durations:
-        tolerance = float(req.get("stream_duration_tolerance_seconds", 0.25))
-        delta = max(stream_durations) - min(stream_durations)
-        check("stream_duration_match", delta <= tolerance, delta, f"<= {tolerance}s")
-
     # Preserve the legacy production hard gates: complete decode, stream timing,
     # true peak and black-frame detection. A metadata-only ffprobe pass is not enough.
     if duration is not None and stream_durations:
@@ -101,7 +96,7 @@ def probe_media(path: str | Path, requirements: dict[str, Any] | None = None, *,
 
     ffmpeg = [
         "ffmpeg", "-hide_banner", "-nostats", "-v", "error",
-        "-i", str(media), "-map", "0", "-f", "null", "-",
+        "-i", str(media), "-map", "0:v?", "-map", "0:a?", "-f", "null", "-",
     ]
     try:
         decode = subprocess.run(ffmpeg, capture_output=True, text=True, timeout=timeout_seconds, check=False)
