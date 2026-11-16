@@ -197,3 +197,65 @@ def validate_srt_file(path: str | Path, *, duration_seconds: float) -> dict[str,
         if not any(line.strip() for line in lines[2:]):
             raise ProductionContractError("SRT cue has no text")
     return {"cue_count": len(blocks), "duration_seconds": duration_seconds, "encoding": "utf-8"}
+
+
+@dataclass(frozen=True)
+class FrameRenderSpec:
+    project_id: str
+    renderer_input: str
+    entrypoint: str
+    width: int
+    height: int
+    fps: float
+    duration_seconds: float
+    asset_inputs: tuple[str, ...]
+    params: Mapping[str, Any]
+    trusted_code_execution: bool
+    video_output: str = "shot-video"
+    receipt_output: str = "shot-render-receipt"
+
+    @classmethod
+    def from_dict(cls, raw: Mapping[str, Any]) -> "FrameRenderSpec":
+        if not isinstance(raw, Mapping) or str(raw.get("schema_version", "1.0")) != "1.0":
+            raise ProductionContractError("frame render spec must be an object with schema_version 1.0")
+        width, height = raw.get("width"), raw.get("height")
+        if isinstance(width, bool) or not isinstance(width, int) or width < 16:
+            raise ProductionContractError("frame render width must be an integer >= 16")
+        if isinstance(height, bool) or not isinstance(height, int) or height < 16:
+            raise ProductionContractError("frame render height must be an integer >= 16")
+        fps = _number(raw.get("fps"), "frame_render.fps", minimum=1)
+        duration = _number(raw.get("duration_seconds"), "frame_render.duration_seconds", minimum=0.1)
+        frames = duration * fps
+        if abs(frames - round(frames)) > 1e-6:
+            raise ProductionContractError("duration_seconds * fps must be an integer frame count")
+        entrypoint = _string(raw.get("entrypoint", "render_frame"), "entrypoint")
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", entrypoint):
+            raise ProductionContractError("entrypoint must be a simple Python identifier")
+        assets = raw.get("asset_inputs", [])
+        if not isinstance(assets, list) or not all(isinstance(item, str) and item.strip() for item in assets):
+            raise ProductionContractError("asset_inputs must be an array of non-empty artifact names")
+        params = raw.get("params", {})
+        if not isinstance(params, Mapping):
+            raise ProductionContractError("params must be an object")
+        return cls(
+            project_id=_string(raw.get("project_id"), "project_id"),
+            renderer_input=_string(raw.get("renderer_input"), "renderer_input"),
+            entrypoint=entrypoint,
+            width=width, height=height, fps=fps, duration_seconds=duration,
+            asset_inputs=tuple(assets), params=dict(params),
+            trusted_code_execution=_strict_bool(raw.get("trusted_code_execution", False), "trusted_code_execution"),
+            video_output=_string(raw.get("video_output", "shot-video"), "video_output"),
+            receipt_output=_string(raw.get("receipt_output", "shot-render-receipt"), "receipt_output"),
+        )
+
+    @property
+    def frame_count(self) -> int:
+        return int(round(self.duration_seconds * self.fps))
+
+    def validate_inputs(self, input_names: set[str]) -> None:
+        required = {self.renderer_input, *self.asset_inputs}
+        missing = sorted(required - input_names)
+        if missing:
+            raise ProductionContractError(f"frame render spec references undeclared task inputs: {missing}")
+        if not self.trusted_code_execution:
+            raise ProductionContractError("trusted_code_execution=true is required for project Python renderer code")
