@@ -8,6 +8,7 @@ Standalone, outcome-driven Video Studio for research, creative development, para
 - `docs/standalone_video_studio.md` — Video-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
 - `video_studio/data/studio_manifest.json` — canonical standalone runtime and governance contract; no CAOS runtime/API/Skill dependency.
 - `video_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFmpeg/FFprobe QA.
+- `video_studio/adapters.py` — explicit, task-bound adapters for EditorialPlan, ShotContract, IPOS, Timeline, continuity, shot routing, business metrics, supplementary audio QA and deterministic local graphic rendering.
 - `skills/video-growth-agent/SKILL.md` — self-contained Video-owned agent operating instructions.
 - `CAOS_VIDEO_ENTRY.md`, `domain_manifest.json` and `capabilities.json` — retained for 0.8 compatibility/history; not startup dependencies for new Studio work.
 - `docs/product_requirements.md` — historical 0.8 product-requirements baseline; new operating authority is the standalone contract.
