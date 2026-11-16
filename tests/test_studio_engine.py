@@ -457,3 +457,75 @@ def test_release_check_blocks_conflicting_review_outcomes_for_same_rubric(tmp_pa
     result = engine.release_check("demo", artifact["artifact_id"], required_rubrics=["craft"], evidence_refs=["platform-format-review"])
     assert result["pass"] is False
     assert any(item.startswith("required_review_missing_or_conflicting:craft") for item in result["failures"])
+
+def test_audit_detects_tampering_of_stale_historical_artifacts(tmp_path):
+    engine = make_engine(tmp_path)
+    engine.add_tasks("demo", [task("research"), task("edit", deps=["research"], inputs=["research-artifact"])])
+    research = complete(engine, tmp_path, "research", "researcher")
+    complete(engine, tmp_path, "edit", "editor")
+    engine.invalidate("demo", "research", "owner changed source interpretation")
+    Path(research["path"]).write_text("tampered historical evidence", encoding="utf-8")
+    report = engine.audit("demo")
+    assert report["pass"] is False
+    assert any(
+        item.startswith("artifact_digest_mismatch:")
+        and research["artifact_id"] in item
+        for item in report["failures"]
+    )
+
+
+def test_repeated_media_qa_uses_new_immutable_receipt_path(tmp_path):
+    import shutil
+    import subprocess
+
+    from video_studio.media import run_claimed_media_qa
+
+    if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
+        pytest.skip("FFmpeg/ffprobe are not installed")
+    engine = make_engine(tmp_path)
+    engine.add_tasks(
+        "demo",
+        [task("technical-qa", inputs=["final-candidate"], outputs=["technical-qa-receipt"])],
+    )
+    media = tmp_path / "repeat.mp4"
+    subprocess.run(
+        [
+            "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+            "color=c=blue:s=320x240:d=1:r=25", "-f", "lavfi", "-i",
+            "sine=frequency=1000:duration=1", "-c:v", "libx264", "-pix_fmt",
+            "yuv420p", "-c:a", "aac", "-shortest", "-y", str(media),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    engine.import_asset(
+        "demo", "final-candidate", media, kind="video",
+        media_type="video/mp4", rights_status="OWNED",
+    )
+    with engine._connect("demo") as connection:
+        connection.execute(
+            "UPDATE tasks SET kind='technical_measurement',requirements_json=? "
+            "WHERE project_id='demo' AND task_id='technical-qa'",
+            (json.dumps({
+                "tool": "ffprobe", "resolution": "320x240",
+                "frame_rate": 25, "audio_required": True,
+            }),),
+        )
+        connection.commit()
+    first_packet = engine.claim_next("demo", "qa-worker-1")
+    first = run_claimed_media_qa(
+        engine, "demo", "technical-qa", "qa-worker-1",
+        first_packet["claim"]["claim_token"], "final-candidate",
+    )
+    engine.invalidate("demo", "technical-qa", "re-run measurement after QA policy update")
+    engine.reopen("demo", "technical-qa", "measurement retry approved")
+    second_packet = engine.claim_next("demo", "qa-worker-2")
+    second = run_claimed_media_qa(
+        engine, "demo", "technical-qa", "qa-worker-2",
+        second_packet["claim"]["claim_token"], "final-candidate",
+    )
+    first_path = first["task_completion"]["artifacts"]["technical-qa-receipt"]["path"]
+    second_path = second["task_completion"]["artifacts"]["technical-qa-receipt"]["path"]
+    assert first_path != second_path
+    assert second["task_completion"]["status"] == "COMPLETED"
+    assert engine.audit("demo")["pass"] is True
