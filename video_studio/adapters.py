@@ -143,6 +143,13 @@ def validate_shot_against_editorial_plan(plan: EditorialPlan, shot: Any) -> None
         raise DomainAdapterError("ShotContract duration does not match the supplied EditorialPlan")
     if shot.truth_mode != planned.truth_mode or shot.risk != planned.risk:
         raise DomainAdapterError("ShotContract truth_mode/risk do not match the supplied EditorialPlan")
+    permitted_modes = set(planned.allowed_production_modes)
+    contract_modes = set(shot.allowed_modes)
+    if not contract_modes or not contract_modes.issubset(permitted_modes):
+        raise DomainAdapterError(
+            "ShotContract allowed_modes exceed the exact EditorialPlan permissions: "
+            f"contract={sorted(contract_modes)}, plan={sorted(permitted_modes)}"
+        )
 
 
 def timeline_spec_from_dict(payload: Mapping[str, Any]) -> TimelineSpec:
