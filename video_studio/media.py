@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import subprocess
+import uuid
 from typing import Any
 
 from .engine import ContractError, GateError, StudioEngine
@@ -141,7 +142,7 @@ def run_claimed_media_qa(
     report["task_id"] = task_id
     report["input_artifact_id"] = packet["input_artifacts"][selected]["artifact_id"]
     output_name = task["outputs"][0]
-    output_path = engine._project_dir(project_id) / "artifacts" / f"{task_id}-{report['media_sha256'][:12]}.qa.json"
+    output_path = engine._project_dir(project_id) / "artifacts" / f"{task_id}-{report['media_sha256'][:12]}-{uuid.uuid4().hex[:8]}.qa.json"
     output_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     completed = engine.complete_task(
         project_id, task_id, worker_id, claim_token,
