@@ -6,9 +6,9 @@ Standalone, outcome-driven Video Studio for research, creative development, para
 
 - `STUDIO_ENTRY.md` — current standalone startup and operating entry for new Video work.
 - `docs/standalone_video_studio.md` — Video-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
-- `video_growth_agent/data/studio_manifest.json` — standalone runtime and governance contract; no CAOS runtime/API/Skill dependency.
-- `video_growth_agent/studio_engine.py`, `studio_cli.py`, `studio_media.py` — standalone project state, concurrent task claims, artifact lineage and deterministic FFprobe QA.
-- `skills/video-growth-agent/SKILL.md` — complete Video-owned agent operating instructions.
+- `video_studio/data/studio_manifest.json` — canonical standalone runtime and governance contract; no CAOS runtime/API/Skill dependency.
+- `video_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFprobe QA.
+- `skills/video-growth-agent/SKILL.md` — self-contained Video-owned agent operating instructions.
 - `CAOS_VIDEO_ENTRY.md`, `domain_manifest.json` and `capabilities.json` — retained for 0.8 compatibility/history; not startup dependencies for new Studio work.
 - `docs/product_requirements.md` — current product requirements.
 - `docs/media_business_os.md` — primary media-business architecture.
@@ -21,7 +21,7 @@ Standalone, outcome-driven Video Studio for research, creative development, para
 - `video_growth_agent/data/` — versioned legacy/specialized episode workflow, specialists and coordination resources.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
 
-The new Studio owns its requirement interpretation, decision receipts, task graph, leases, artifact history, independent reviews, root-cause repair, recovery and learning admission. It has no parent task identity, no parent lease and no CAOS runtime/API/Skill dependency. The 0.8 compatibility surfaces below retain their historical governance records but are not loaded by `vga-studio`.
+The new `video_studio` package owns its requirement interpretation, decision receipts, task graph, leases, artifact history, review receipts, root-cause repair, recovery and learning admission. `vga-studio` and `python -m video_studio` both enter this package; legacy import paths are compatibility shims. It has no parent task identity, no parent lease and no CAOS runtime/API/Skill dependency. The 0.8 compatibility surfaces below retain their historical governance records but are not loaded by `vga-studio`.
 
 ## Legacy Media Business OS 0.8.0 compatibility layer
 
@@ -41,7 +41,7 @@ Linked state surfaces remain distinct:
 6. **Experiment/outcome state** — pre-registered tests and typed growth/production/commercial observations.
 7. **Operator projection** — recomputable current-Agent view of outcome, ready/blocking actions, stale evidence and recovery refs; never authority.
 
-The previous stage/work-order episode engine remains a historical 0.7/0.8 compatibility bundle. New projects use the dynamic task graph in `vga-studio`; do not treat the old fixed stage sequence as the new Studio controller.
+The previous stage/work-order episode engine remains a historical 0.7/0.8 compatibility bundle. New projects use the dynamic task graph in `video_studio`; do not treat the old fixed stage sequence as the new Studio controller.
 
 Core 0.8 runtime surfaces:
 
