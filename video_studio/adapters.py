@@ -556,16 +556,24 @@ def run_claimed_domain_adapter(
                 raise DomainAdapterError(f"rights evidence artifact itself is not rights-cleared: {rights_name}")
             input_names = set(packet["input_artifacts"])
             font_rights_refs = font_artifact.get("metadata", {}).get("rights_evidence_refs", [])
-            if rights_name not in font_rights_refs:
+            if not isinstance(font_rights_refs, list) or rights_name not in font_rights_refs:
                 raise DomainAdapterError(f"font metadata.rights_evidence_refs must include the exact rights evidence artifact: {rights_name}")
             for binding in shot.references:
                 rights_binding = packet["input_artifacts"].get(binding.rights_ref)
-                if rights_binding is None or rights_binding.get("kind") not in {"document", "evidence", "rights_record"}:
-                    raise DomainAdapterError(f"ShotContract rights_ref must resolve to a declared rights evidence artifact: {binding.rights_ref}")
+                if (
+                    rights_binding is None
+                    or rights_binding.get("kind") not in {"document", "evidence", "rights_record"}
+                    or rights_binding.get("rights_status") not in {"OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN"}
+                ):
+                    raise DomainAdapterError(f"ShotContract rights_ref must resolve to a rights-cleared evidence artifact: {binding.rights_ref}")
                 if binding.consent_ref:
                     consent_binding = packet["input_artifacts"].get(binding.consent_ref)
-                    if consent_binding is None or consent_binding.get("kind") not in {"document", "evidence", "rights_record"}:
-                        raise DomainAdapterError(f"ShotContract consent_ref must resolve to a declared consent evidence artifact: {binding.consent_ref}")
+                    if (
+                        consent_binding is None
+                        or consent_binding.get("kind") not in {"document", "evidence", "rights_record"}
+                        or consent_binding.get("rights_status") not in {"OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN"}
+                    ):
+                        raise DomainAdapterError(f"ShotContract consent_ref must resolve to a rights-cleared consent evidence artifact: {binding.consent_ref}")
             video_output = str(config["video_output"])
             receipt_output = str(config["receipt_output"])
             graph_input = str(config.get("media_graph_input", "")).strip()
