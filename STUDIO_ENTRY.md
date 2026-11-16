@@ -2,9 +2,9 @@
 
 Status: `ACTIVE`
 This file, `STUDIO_ENTRY.md`, is the standalone startup authority for new Video work.
-Runtime: `video_growth_agent.studio_engine.StudioEngine`
+Runtime: `video_studio.engine.StudioEngine`
 CLI: `vga-studio`
-Manifest: `video_growth_agent/data/studio_manifest.json`
+Manifest: `video_studio/data/studio_manifest.json`
 Operating manual: `docs/standalone_video_studio.md`
 
 ## Mission
@@ -46,7 +46,7 @@ A claim returns a bounded work packet, exact input asset digests and a lease tok
 vga-studio --root ./studio-work complete episode-001 research --worker researcher-01 --token CLAIM_TOKEN --outputs research.outputs.json
 ```
 
-Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-studio --help` for the complete command set. The existing `vga` command remains the 0.8 compatibility CLI; new standalone projects use `vga-studio`.
+Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-studio --help` for the complete command set. The existing `vga` command remains the 0.8 compatibility CLI; new standalone projects use `vga-studio` or `python -m video_studio`. The canonical implementation is the `video_studio` package; `video_growth_agent.studio_*` imports are compatibility shims only.
 
 ## Completion rule
 
