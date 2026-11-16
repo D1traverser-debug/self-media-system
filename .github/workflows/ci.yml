@@ -20,6 +20,24 @@ jobs:
         run: vga system-audit --repo-root .
       - name: Run tests
         run: pytest -q
+      - name: Smoke test standalone outcome-driven Video Studio
+        run: |
+          vga-studio --help > /tmp/vga-studio-help.txt
+          test -s /tmp/vga-studio-help.txt
+          studio_root="$(mktemp -d)"
+          vga-studio --root "$studio_root" init smoke-episode --title "Standalone Studio smoke" --brief examples/technology-explainer.brief.json > /tmp/studio-init.json
+          vga-studio --root "$studio_root" plan smoke-episode examples/technology-explainer.tasks.json > /tmp/studio-plan.json
+          vga-studio --root "$studio_root" status smoke-episode > /tmp/studio-status.json
+          vga-studio --root "$studio_root" audit smoke-episode > /tmp/studio-audit.json
+          python - <<'PY'
+          import json
+          status = json.load(open('/tmp/studio-status.json', encoding='utf-8'))
+          audit = json.load(open('/tmp/studio-audit.json', encoding='utf-8'))
+          assert set(status['ready_tasks']) == {'research', 'creative-directions'}, status
+          assert audit['pass'] is True, audit
+          assert audit['task_count'] == 9, audit
+          print('standalone-video-studio-smoke: PASS')
+          PY
       - name: Smoke test installed CLI outside repository
         run: |
           cd /tmp
