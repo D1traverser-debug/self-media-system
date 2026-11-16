@@ -113,16 +113,47 @@
     "priority": 90
   },
   {
-    "task_id": "ipos-video-identity-bundle-import",
-    "title": "Wait for and validate the owner-approved IPOS Video Identity Bundle",
-    "kind": "external_identity_handoff",
-    "executor": "external",
+    "task_id": "media-graph-bootstrap",
+    "title": "Initialize the Video-owned MediaGraph Program context",
+    "kind": "domain_adapter",
+    "executor": "tool",
     "depends_on": [],
+    "inputs": [],
+    "outputs": [
+      "media-graph"
+    ],
+    "requirements": {
+      "workstream": "PRODUCTION_SYSTEM",
+      "domain_adapter": {
+        "name": "media_graph_initialize",
+        "output_name": "media-graph",
+        "contexts": [
+          {
+            "context_id": "ai-self-media-commercialization",
+            "kind": "PROGRAM"
+          }
+        ]
+      }
+    },
+    "acceptance": {
+      "graph": "Create a Video-owned graph root; do not import or mutate IPOS canon."
+    },
+    "priority": 100
+  },
+  {
+    "task_id": "ipos-video-identity-bundle-import",
+    "title": "Import the exact owner-approved IPOS Video Identity Bundle into MediaGraph",
+    "kind": "domain_adapter",
+    "executor": "tool",
+    "depends_on": [
+      "media-graph-bootstrap"
+    ],
     "inputs": [
-      "ipos-ready-for-video-bundle"
+      "ipos-ready-for-video-bundle",
+      "media-graph"
     ],
     "outputs": [
-      "ipos-video-identity-bundle",
+      "media-graph-imported",
       "ipos-import-receipt"
     ],
     "requirements": {
@@ -130,10 +161,18 @@
       "external_authority": "IPOS",
       "readiness_contract": "OWNER_APPROVED__READY_FOR_VIDEO__G2_G7_G8_PASS",
       "exact_versions_and_rights_required": true,
-      "caos_runtime_dependency": false
+      "caos_runtime_dependency": false,
+      "domain_adapter": {
+        "name": "ipos_bundle_import",
+        "bundle_input": "ipos-ready-for-video-bundle",
+        "media_graph_input": "media-graph",
+        "program_context_id": "ai-self-media-commercialization",
+        "media_graph_output": "media-graph-imported",
+        "receipt_output": "ipos-import-receipt"
+      }
     },
     "acceptance": {
-      "bundle": "Import only the exact owner-approved bundle; no local canon reconstruction or inferred identity."
+      "bundle": "Import only the exact owner-approved bundle; no local canon reconstruction or inferred identity. The adapter must preserve exact versions, rights, provenance and continuity data."
     },
     "priority": 100
   },
@@ -146,8 +185,9 @@
       "ipos-video-identity-bundle-import"
     ],
     "inputs": [
-      "ipos-video-identity-bundle",
-      "ipos-import-receipt"
+      "media-graph-imported",
+      "ipos-import-receipt",
+      "ipos-ready-for-video-bundle"
     ],
     "outputs": [
       "ipos-shot-contract-bindings",
@@ -156,7 +196,7 @@
     "requirements": {
       "workstream": "PRODUCTION_SYSTEM",
       "external_authority": "IPOS",
-      "adapter_contract": "video_growth_agent.ip_identity",
+      "adapter_contract": "video_studio.adapters.ipos_bundle_import",
       "versioned_artifact_handoff": true
     },
     "acceptance": {
