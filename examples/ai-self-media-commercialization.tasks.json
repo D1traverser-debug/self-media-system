@@ -5,7 +5,12 @@
     "kind": "growth_research",
     "executor": "agent",
     "depends_on": [],
-    "inputs": [],
+    "inputs": [
+      "program-state",
+      "project-index",
+      "account-positioning",
+      "business-flywheel"
+    ],
     "outputs": [
       "growth-baseline",
       "topic-hypothesis-set"
@@ -33,7 +38,10 @@
     "kind": "commercial_research",
     "executor": "agent",
     "depends_on": [],
-    "inputs": [],
+    "inputs": [
+      "account-positioning",
+      "production-cost-strategy"
+    ],
     "outputs": [
       "advertiser-map",
       "commercial-fit-criteria"
@@ -59,7 +67,11 @@
     "kind": "production_economics",
     "executor": "agent",
     "depends_on": [],
-    "inputs": [],
+    "inputs": [
+      "program-state",
+      "production-cost-strategy",
+      "legacy-subtask-graph"
+    ],
     "outputs": [
       "production-economics-baseline"
     ],
@@ -91,7 +103,10 @@
     "kind": "provider_benchmark",
     "executor": "agent",
     "depends_on": [],
-    "inputs": [],
+    "inputs": [
+      "production-cost-strategy",
+      "provider-benchmark-protocol"
+    ],
     "outputs": [
       "provider-capability-benchmark"
     ],
@@ -150,7 +165,8 @@
     ],
     "inputs": [
       "ipos-ready-for-video-bundle",
-      "media-graph"
+      "media-graph",
+      "ipos-integration-state"
     ],
     "outputs": [
       "media-graph-imported",
@@ -520,7 +536,9 @@
     "kind": "editorial_fact_audit",
     "executor": "agent",
     "depends_on": [],
-    "inputs": [],
+    "inputs": [
+      "jensen-case"
+    ],
     "outputs": [
       "jensen-fact-map"
     ],
@@ -542,7 +560,8 @@
     "executor": "tool",
     "depends_on": [],
     "inputs": [
-      "jensen-source-video"
+      "jensen-source-video",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-visual-evidence-map"
@@ -566,7 +585,8 @@
     "executor": "human",
     "depends_on": [],
     "inputs": [
-      "jensen-source-video"
+      "jensen-source-video",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-rights-status"
@@ -591,7 +611,8 @@
       "jensen-case-fact-audit"
     ],
     "inputs": [
-      "jensen-fact-map"
+      "jensen-fact-map",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-platform-copy-candidate-audit"
@@ -619,7 +640,8 @@
     ],
     "inputs": [
       "jensen-fact-map",
-      "jensen-visual-evidence-map"
+      "jensen-visual-evidence-map",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-visual-semantic-review"
@@ -649,7 +671,8 @@
       "jensen-platform-copy-candidate-audit",
       "jensen-visual-evidence-map",
       "jensen-visual-semantic-review",
-      "jensen-rights-status"
+      "jensen-rights-status",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-editorial-plan"
@@ -676,7 +699,8 @@
     "inputs": [
       "jensen-editorial-plan",
       "jensen-visual-evidence-map",
-      "jensen-source-video"
+      "jensen-source-video",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-master-timeline"
@@ -703,7 +727,8 @@
     "inputs": [
       "jensen-editorial-plan",
       "jensen-platform-copy-candidate-audit",
-      "jensen-fact-map"
+      "jensen-fact-map",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-human-cold-read"
@@ -729,7 +754,8 @@
     ],
     "inputs": [
       "jensen-platform-copy-candidate-audit",
-      "jensen-editorial-plan"
+      "jensen-editorial-plan",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-platform-format-review",
@@ -762,7 +788,8 @@
       "jensen-master-timeline",
       "jensen-rights-status",
       "jensen-platform-format-review",
-      "jensen-synthetic-upload-disclosure"
+      "jensen-synthetic-upload-disclosure",
+      "jensen-case"
     ],
     "outputs": [
       "jensen-red-team-review"
@@ -882,7 +909,10 @@
       "production-strategy",
       "sponsor-integration-advice",
       "platform-performance-analysis",
-      "commercial-outcome-analysis"
+      "commercial-outcome-analysis",
+      "program-state",
+      "project-index",
+      "business-flywheel"
     ],
     "outputs": [
       "workstream-evidence-pack"
