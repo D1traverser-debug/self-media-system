@@ -11,7 +11,7 @@ Exact-head CI: [run 44006872263](https://github.com/D1traverser-debug/video-grow
 
 The standalone Video Studio is now the default generic Video execution entry. The new native `video_studio` package owns the standalone control plane and `vga-studio` CLI. The historical `vga` command remains a compatibility interface. The runtime has no CAOS runtime/API/Skill dependency and does not modify CAOS.
 
-The integrated Program is `ai-self-media-commercialization`, a 35-task graph spanning media growth, original digital IP, commercialization and production. It imports repository-owned context through immutable SHA-256-bound artifacts and leaves missing owner-controlled inputs explicitly blocked.
+The integrated Program is `ai-self-media-commercialization`, a 50-task graph spanning media growth, original digital IP, commercialization and production. It imports repository-owned context through immutable SHA-256-bound artifacts and leaves missing owner-controlled inputs explicitly blocked.
 
 ## 2. Root-cause findings addressed
 
@@ -39,7 +39,7 @@ A user needed to import several context files before planning. Repeated single-f
 
 A path in a brief or task authority reference did not itself guarantee that the worker received the exact bytes as a verified input.
 
-**Change:** the integrated context manifest imports the exact existing Video/IPOS reference files; the 35-task graph declares corresponding artifact names as actual inputs. Claim packets therefore bind immutable artifact IDs, versions and SHA-256 values. Contract tests reject missing manifest mappings or unbound authority references.
+**Change:** the integrated context manifest imports the exact existing Video/IPOS reference files; the 50-task graph declares corresponding artifact names as actual inputs. Claim packets therefore bind immutable artifact IDs, versions and SHA-256 values. Contract tests reject missing manifest mappings or unbound authority references.
 
 The context manifest intentionally does not fabricate the Jensen/Alice source video or an owner-approved IPOS bundle. IPOS remains the sole identity authority.
 
@@ -60,7 +60,7 @@ This is intentional fail-closed behavior, not a green production-release claim.
 
 ## 3. Default Program workflow
 
-The documented default entry now initializes the integrated Program, imports its context manifest, plans the 35-task graph and exposes task readiness:
+The documented default entry now initializes the integrated Program, imports its context manifest, plans the canonical 50-task graph and exposes task readiness:
 
 ```bash
 python -m pip install -e .

@@ -1438,12 +1438,12 @@
     "executor": "agent",
     "depends_on": [
       "business-flywheel-outcome-refresh",
-      "ipos-shot-binding-validation"
+      "ipos-bundle-readiness-validation"
     ],
     "inputs": [
       "workstream-outcome-refresh-pack",
-      "ipos-shot-contract-bindings",
-      "ipos-continuity-bindings"
+      "ipos-bundle-readiness",
+      "ipos-bundle-readiness"
     ],
     "outputs": [
       "ipos-performance-learning-candidate"

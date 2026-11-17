@@ -45,7 +45,7 @@ Current state:
 1. projects/PROJECT_INDEX.json
 2. projects/ai-self-media-commercialization/PROJECT_MANIFEST.json
 3. projects/ai-self-media-commercialization/PROGRAM_STATE.json
-4. projects/ai-self-media-commercialization/SUBTASK_GRAPH.json
+4. examples/ai-self-media-commercialization.tasks.json (canonical current 50-task Program DAG)
 5. projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json
 6. projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json
 7. projects/ai-self-media-commercialization/CURRENT_PROGRESS.md
@@ -62,7 +62,7 @@ Current state:
 
 ## Program invariants
 
-- Workstreams progress independently unless SUBTASK_GRAPH declares a dependency.
+- Workstreams progress independently unless the canonical Program DAG declares a dependency.
 - IPOS owns identity canon; Video owns shot usage, production, continuity assessment, media lineage, release and outcome evidence.
 - Performance signals may create an IPOS learning candidate but never directly mutate canon.
 - No CAOS runtime/API call is required for IPOS execution or the IPOS-to-Video handoff.
@@ -142,7 +142,7 @@ Outputs and MediaGraph registrations remain CANDIDATE only. No promotion/release
 
 Default generic Video entry is now `STUDIO_ENTRY.md`; canonical runtime is `video_studio/`; CLI is `vga-studio`. Continue from branch `refactor/video-production-integrated-20261117`, exact verified head `3e823be92de41d9642a40292863689a7a68a0fd6`.
 
-Exact-head CI run `44006872263` passed: 343 tests, standalone system audit, standalone CLI smoke, integrated 35-task Program context/readiness smoke and installed agentic CLI smoke. Structural status PASS; production readiness deliberately remains PARTIAL.
+Exact-head CI run `44006872263` passed: 343 tests, standalone system audit, standalone CLI smoke, integrated 50-task Program context/readiness and local-tool execution smoke and installed agentic CLI smoke. Structural status PASS; production readiness deliberately remains PARTIAL.
 
 Read these first:
 1. `STUDIO_ENTRY.md`

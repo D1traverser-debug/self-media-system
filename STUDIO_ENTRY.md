@@ -36,7 +36,7 @@ A video is not releasable until the exact final bytes pass digest-bound FFmpeg/F
 
 ## Default Program and quick start
 
-For generic Video business/system work, the default Program is `ai-self-media-commercialization` in `projects/PROJECT_INDEX.json`. Its standalone outcome brief and 35-task parallel work graph are the canonical current Program plan. The context manifest imports the existing Video-owned state and reference documents as immutable, digest-bound artifacts; it does not import the missing Jensen/Alice source video or fabricate an owner-approved IPOS bundle.
+For generic Video business/system work, the default Program is `ai-self-media-commercialization` in `projects/PROJECT_INDEX.json`. Its standalone outcome brief and 50-task parallel work graph are the canonical current Program plan. The context manifest imports the existing Video-owned state and reference documents as immutable, digest-bound artifacts; it does not import the missing Jensen/Alice source video or fabricate an owner-approved IPOS bundle.
 
 ```bash
 python -m pip install -e .
@@ -47,7 +47,7 @@ vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI
 # Import exact source/context files before planning; paths resolve from the manifest directory
 vga-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
 
-# Add the 35-task graph and inspect which independent lanes are ready
+# Add the canonical 50-task graph and inspect which independent lanes are ready
 vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
 vga-studio --root ./studio-work status ai-self-media-commercialization
 vga-studio --root ./studio-work tasks ai-self-media-commercialization

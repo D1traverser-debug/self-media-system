@@ -39,10 +39,13 @@ Cross-workstream influence never means hidden prompt context or authority duplic
 
 ## Program orchestration
 
-`SUBTASK_GRAPH.json` remains the current business-task dependency authority:
+../../examples/ai-self-media-commercialization.tasks.json is the canonical current 50-task Program DAG, referenced by PROJECT_MANIFEST.json::subtask_graph_ref. SUBTASK_GRAPH.json is a superseded 0.8-era reference retained for historical evidence only; it is not a current planning or execution authority.
 
 - independent work may proceed in parallel;
 - declared dependency edges block only affected nodes;
+- every consumed task-produced artifact must have a producer in the consumer's declared dependency ancestry;
+- tool tasks must resolve to a declared, implemented adapter or production executor;
+- cross-workstream handoff artifacts must be produced by tasks named in the corresponding BUSINESS_FLYWHEEL.json execution binding;
 - advisory consultation does not decide;
 - competing candidates require explicit criteria and owner adjudication;
 - negotiation uses bounded artifact rounds;

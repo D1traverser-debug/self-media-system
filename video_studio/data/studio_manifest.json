@@ -109,8 +109,8 @@
       "ipos_shot_bind": "video_growth_agent.ip_identity.bind_ipos_identity_to_shot",
       "ipos_continuity_snapshot": "video_growth_agent.ip_identity.build_ipos_continuity_snapshot",
       "ipos_continuity_link": "video_growth_agent.ip_identity.build_ipos_continuity_link",
-      "business_object_validate": "video_growth_agent.business_objects.TypedBusinessObject",
-      "episode_intent_validate": "video_growth_agent.editorial_planning.EpisodeIntent"
+      "business_object_validate": "video_studio.adapters.business_object_from_dict",
+      "episode_intent_validate": "video_studio.adapters.program_episode_handoff_to_intent"
     },
     "domain_adapter_execution": {
       "entrypoint": "vga-studio run-adapter",

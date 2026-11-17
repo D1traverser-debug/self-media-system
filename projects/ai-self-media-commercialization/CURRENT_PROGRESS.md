@@ -4,7 +4,8 @@ Updated: 2026-11-15
 Status: ACTIVE_INTEGRATED_PROGRAM
 Authority scope: PROGRAM_LOCAL_BUSINESS_AUTHORITY
 Program state: PROGRAM_STATE.json
-Subtask graph: SUBTASK_GRAPH.json
+Current Program DAG: ../../examples/ai-self-media-commercialization.tasks.json
+Legacy graph: SUBTASK_GRAPH.json (superseded 0.8 reference only)
 
 ## Current authority reset
 
@@ -181,7 +182,7 @@ Historical checkpoints that say PR #33 is open or under review describe earlier 
 The integrated standalone Video Studio is now the default generic Video execution entry. It is not a CAOS runtime and does not modify or require CAOS code.
 
 - Entry: `STUDIO_ENTRY.md`; implementation: `video_studio/`; CLI: `vga-studio`.
-- Default Program: `ai-self-media-commercialization`, with a 35-task graph spanning growth, original IP, commercialization and production.
+- Default Program: `ai-self-media-commercialization`, with a 50-task graph spanning growth, original IP, commercialization and production, including typed CommercialFit validation, digest-bound Program-to-Episode handoff validation and explicit IPOS bundle readiness/provenance validation.
 - Context import: `examples/ai-self-media-commercialization.context.json` imports exact existing Video/IPOS reference files as immutable SHA-256-bound artifacts. It does not fabricate the missing Jensen source video or an approved IPOS bundle.
 - The new `import-manifest` command preflights all paths/metadata before mutation. Identical imports are idempotent and preserve completed consumers.
 - Rights clearance now binds the reviewer to the artifact producer and a completed human review task, and checks exact source artifact IDs, digests, rights status and registered evidence references.

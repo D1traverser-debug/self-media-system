@@ -317,7 +317,7 @@
       "task_ids": [
         "episode-outcome-analysis",
         "business-flywheel-outcome-refresh",
-        "ipos-shot-binding-validation",
+        "ipos-bundle-readiness-validation",
         "ipos-performance-learning-handoff",
         "ipos-performance-handoff-owner-approval"
       ],
