@@ -66,6 +66,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project_id")
     p.add_argument("manifest", type=Path, help="JSON manifest; relative asset paths resolve from the manifest directory")
 
+    p = sub.add_parser("system-audit", help="audit the standalone Video Studio repository contract and example execution")
+    p.add_argument("--repo-root", type=Path, help="repository root to audit (default: inferred from the installed source package)")
+
     p = sub.add_parser("status", help="show project and task readiness")
     p.add_argument("project_id")
 
@@ -191,9 +194,14 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    engine = StudioEngine(args.root)
     try:
         command = args.command
+        if command == "system-audit":
+            from .system_audit import run_system_audit
+            report = run_system_audit(args.repo_root)
+            _emit(report)
+            return 0 if report["pass"] else 2
+        engine = StudioEngine(args.root)
         if command == "init":
             _emit(engine.create_project(args.project_id, args.title, _read_json(args.brief)))
         elif command == "revise-brief":
