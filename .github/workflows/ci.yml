@@ -20,11 +20,13 @@ jobs:
         run: vga system-audit --repo-root .
       - name: Run standalone Video Studio system audit
         run: |
-          vga-studio system-audit --repo-root . > /tmp/standalone-video-studio-system-audit.json
+          vga-studio system-audit --repo-root . > /tmp/standalone-video-studio-system-audit.json || true
           python - <<'PY'
           import json
           report = json.load(open('/tmp/standalone-video-studio-system-audit.json', encoding='utf-8'))
-          assert report['pass'] is True, report
+          if report['pass'] is not True:
+              print(json.dumps(report, indent=2, ensure_ascii=False))
+              raise SystemExit('standalone Video Studio system audit failed')
           assert report['structural_status'] == 'PASS', report
           assert report['production_readiness'] == 'PARTIAL', report
           assert report['boundary']['caos_runtime_dependency'] is False, report
@@ -67,7 +69,7 @@ jobs:
           tasks = json.load(open('/tmp/program-tasks.json', encoding='utf-8'))
           audit = json.load(open('/tmp/program-audit.json', encoding='utf-8'))
           task_map = {item['task_id']: item for item in tasks}
-          assert len(tasks) == 35, len(tasks)
+          assert len(tasks) == 50, len(tasks)
           assert task_map['growth-baseline-and-topic-hypotheses']['status'] == 'READY', task_map['growth-baseline-and-topic-hypotheses']
           assert task_map['commercial-advertiser-map']['status'] == 'READY', task_map['commercial-advertiser-map']
           assert task_map['production-economics-baseline']['status'] == 'READY', task_map['production-economics-baseline']
