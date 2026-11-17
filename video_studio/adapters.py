@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, is_dataclass
+from datetime import datetime
 import json
 from pathlib import Path
 import re
@@ -27,10 +28,12 @@ from video_growth_agent.editorial_planning import (
     ShotIntent,
     materialize_shot_contract,
 )
-from video_growth_agent.engine_routing import (
-    CostAwareShotRouter,
-    EngineProfile,
-    ShotRequest,
+from video_growth_agent.model_registry import (
+    EvidenceBoundModelRouter,
+    ModelObservation,
+    OperationProfile,
+    QualityObservation,
+    ShotRoutingRequest,
 )
 from video_growth_agent.ip_identity import (
     IPIdentityImportReceipt,
@@ -320,6 +323,51 @@ def outcome_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
         "derived_metrics": receipt.derived_metrics(),
         "objective_vector": _jsonable(receipt.objective_vector()),
     }
+
+
+
+
+def _model_routing_request(payload: Mapping[str, Any]) -> tuple[ShotRoutingRequest, tuple[ModelObservation, ...]]:
+    data = _mapping(payload, "evidence-bound model routing request")
+    request_data = dict(_mapping(data.get("request"), "routing request"))
+    request_data["required_capabilities"] = frozenset(request_data.get("required_capabilities", []))
+    request_data["quality_priorities"] = tuple(request_data.get("quality_priorities", []))
+    request_data["quality_weights"] = dict(request_data.get("quality_weights", {}))
+    request = ShotRoutingRequest(**request_data)
+
+    raw_engines = data.get("engines")
+    if not isinstance(raw_engines, list) or not raw_engines:
+        raise DomainAdapterError("shot routing requires a non-empty engines array")
+    engines = []
+    for raw_engine in raw_engines:
+        engine_data = dict(_mapping(raw_engine, "model observation"))
+        engine_data["capabilities"] = frozenset(engine_data.get("capabilities", []))
+        engine_data["resolutions"] = frozenset(engine_data.get("resolutions", []))
+        for field_name in (
+            "quality_evidence_refs", "pricing_evidence_refs", "terms_evidence_refs",
+            "availability_evidence_refs",
+        ):
+            engine_data[field_name] = tuple(engine_data.get(field_name, []))
+        profiles = []
+        for raw_profile in engine_data.get("operation_profiles", []):
+            profile_data = dict(_mapping(raw_profile, "operation profile"))
+            profile_data["capabilities"] = frozenset(profile_data.get("capabilities", []))
+            profile_data["allowed_durations_seconds"] = frozenset(profile_data.get("allowed_durations_seconds", []))
+            profile_data["resolutions"] = frozenset(profile_data.get("resolutions", []))
+            profile_data["allowed_source_origins"] = frozenset(profile_data.get("allowed_source_origins", []))
+            profile_data["conditions"] = tuple(profile_data.get("conditions", []))
+            profiles.append(OperationProfile(**profile_data))
+        engine_data["operation_profiles"] = tuple(profiles)
+        observations = {}
+        for dimension, raw_observation in _mapping(
+            engine_data.get("quality_observations", {}), "quality_observations"
+        ).items():
+            observation_data = dict(_mapping(raw_observation, f"quality observation {dimension}"))
+            observation_data["evidence_refs"] = tuple(observation_data.get("evidence_refs", []))
+            observations[str(dimension)] = QualityObservation(**observation_data)
+        engine_data["quality_observations"] = observations
+        engines.append(ModelObservation(**engine_data))
+    return request, tuple(engines)
 
 
 def ipos_import_receipt_from_dict(payload: Mapping[str, Any]) -> IPIdentityImportReceipt:
@@ -786,9 +834,20 @@ def run_claimed_domain_adapter(
             result = receipt
 
         elif name == "shot_route":
-            route = route_shot(_input_json(packet, str(config["routing_request_input"])))
-            if route.get("selected_engine_id") is None and config.get("block_if_no_engine", True):
-                raise DomainAdapterError("shot routing blocked: no supplied engine satisfies capability, quality, evidence, availability and cost policy")
+            request, engines = _model_routing_request(
+                _input_json(packet, str(config["routing_request_input"]))
+            )
+            now_value = str(config.get("now", "")).strip()
+            now = datetime.fromisoformat(now_value.replace("Z", "+00:00")) if now_value else None
+            decision = EvidenceBoundModelRouter().route(request, engines, now=now)
+            route = _jsonable(decision)
+            route["blocked"] = decision.blocked
+            if decision.blocked and config.get("block_if_no_engine", True):
+                raise DomainAdapterError(
+                    "shot routing blocked: no current model observation satisfies operation profile, "
+                    "commercial terms, provenance, calibrated quality, evidence freshness and budget policy: "
+                    + str(decision.blocked_reason)
+                )
             output_name = str(config.get("output_name", outputs[0]))
             path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
             _write_json(path, {"adapter": name, **route})
@@ -796,10 +855,18 @@ def run_claimed_domain_adapter(
                 output_name: {
                     "path": str(path), "kind": "decision", "media_type": "application/json",
                     "rights_status": "NOT_APPLICABLE",
-                    "metadata": {"adapter": name, "selected_engine_id": route.get("selected_engine_id"), "blocked": route.get("selected_engine_id") is None},
+                    "metadata": {
+                        "adapter": name, "selected_engine_id": decision.selected_engine_id,
+                        "blocked": decision.blocked, "blocked_reason": decision.blocked_reason,
+                        "pareto_front": list(decision.pareto_front),
+                    },
                 }
             }
-            result = {"adapter": name, "selected_engine_id": route.get("selected_engine_id"), "blocked": route.get("selected_engine_id") is None}
+            result = {
+                "adapter": name, "selected_engine_id": decision.selected_engine_id,
+                "blocked": decision.blocked, "blocked_reason": decision.blocked_reason,
+                "pareto_front": list(decision.pareto_front),
+            }
 
         elif name == "extended_media_qa":
             media_name = str(config["media_input"])

@@ -146,6 +146,75 @@ def test_business_metrics_adapter_preserves_objective_vector_without_global_scor
     assert "score" not in result["objective_vector"]
 
 
+def test_shot_route_adapter_uses_fresh_evidence_bound_model_registry(tmp_path):
+    from datetime import datetime, timezone
+
+    engine = StudioEngine(tmp_path)
+    engine.create_project("routing", "Evidence-bound shot routing", _brief())
+    observed_at = datetime.now(timezone.utc).isoformat()
+    routing_request = {
+        "request": {
+            "shot_id": "S001", "lane": "PRODUCTION", "risk": "HERO",
+            "duration_seconds": 5, "required_capabilities": ["I2V", "IMAGE_REFERENCES"],
+            "minimum_quality": {"identity": 3.5, "motion": 3.0},
+            "quality_priorities": ["identity", "motion"],
+            "quality_rubric_id": "video-quality-v1", "calibration_scope": "episode-pilot-v1",
+            "operation_mode": "I2V", "require_operation_profile": True,
+            "required_resolution": "1080p", "reference_images": 1,
+            "require_commercial_use": True, "require_provenance": True,
+            "max_cost_usd": 5.0, "evidence_max_age_days": 30,
+        },
+        "engines": [{
+            "engine_id": "provider-a", "observed_at": observed_at,
+            "capabilities": ["I2V", "IMAGE_REFERENCES"], "quality_scores": {},
+            "quality_observations": {
+                "identity": {"value": 4.7, "rubric_id": "video-quality-v1", "calibration_scope": "episode-pilot-v1", "uncertainty": 0.1, "evidence_class": "OWNER_BENCHMARK", "evidence_refs": ["provider-capability-benchmark"]},
+                "motion": {"value": 4.5, "rubric_id": "video-quality-v1", "calibration_scope": "episode-pilot-v1", "uncertainty": 0.1, "evidence_class": "OWNER_BENCHMARK", "evidence_refs": ["provider-capability-benchmark"]},
+            },
+            "available": True, "commercial_use_allowed": True, "provenance_supported": True,
+            "max_duration_seconds": 10, "max_reference_images": 3,
+            "resolutions": ["1080p"], "fixed_cost_usd": 0.1,
+            "output_cost_usd_per_second": 0.2, "input_cost_usd_per_second": 0.0,
+            "quality_evidence_refs": ["provider-capability-benchmark"],
+            "pricing_evidence_refs": ["production-economics-baseline"],
+            "terms_evidence_refs": ["provider-capability-benchmark"],
+            "availability_evidence_refs": ["provider-capability-benchmark"],
+            "operation_profiles": [{
+                "profile_id": "i2v-1080p-5s", "mode": "I2V",
+                "capabilities": ["I2V", "IMAGE_REFERENCES"],
+                "allowed_durations_seconds": [5], "resolutions": ["1080p"],
+                "max_reference_images": 3,
+            }],
+        }],
+    }
+    request_path = tmp_path / "routing-request.json"
+    request_path.write_text(json.dumps(routing_request), encoding="utf-8")
+    engine.import_asset(
+        "routing", "routing-request", request_path, kind="document",
+        media_type="application/json", rights_status="NOT_APPLICABLE",
+    )
+    engine.add_tasks("routing", [{
+        "task_id": "route-shot", "title": "Route shot with current evidence-bound provider observations",
+        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+        "inputs": ["routing-request"], "outputs": ["shot-route-decision"],
+        "requirements": {"domain_adapter": {
+            "name": "shot_route", "routing_request_input": "routing-request",
+            "output_name": "shot-route-decision",
+        }},
+        "acceptance": {"route": "The selected operation profile must meet the shot's current quality, terms, provenance and cost gates."},
+    }])
+    packet = engine.claim_next("routing", "router")
+    result = run_claimed_domain_adapter(
+        engine, "routing", "route-shot", "router", packet["claim"]["claim_token"],
+    )
+    output = result["completion"]["artifacts"]["shot-route-decision"]
+    payload = json.loads(Path(output["path"]).read_text(encoding="utf-8"))
+    assert payload["selected_engine_id"] == "provider-a"
+    assert payload["assessments"][0]["operation_profile_id"] == "i2v-1080p-5s"
+    assert payload["assessments"][0]["quality_lower_bounds"]["identity"] == 4.6
+    assert engine.audit("routing")["pass"] is True
+
+
 def test_cli_exposes_domain_adapter_execution_inside_standalone_runtime():
     args = build_parser().parse_args([
         "run-adapter", "demo", "render", "--worker", "renderer", "--token", "lease-token",
