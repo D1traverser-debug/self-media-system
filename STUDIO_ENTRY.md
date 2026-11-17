@@ -74,7 +74,7 @@ Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-stud
 
 The local tool registry does not directly call external generative-video providers. Agent tasks may use a currently connected session tool only after checking its exact operation, availability, rights, cost and output constraints; any paid generation requires explicit owner approval. A provider result is not complete until its actual file and receipt are imported and digest-registered. No provider capability is assumed permanent or silently inferred from a router profile.
 
-The existing `vga` command remains the 0.8 compatibility CLI; new standalone projects use `vga-studio` or `python -m video_studio`. The canonical implementation is the `video_studio` package; `video_growth_agent.studio_*` imports are compatibility shims only.
+Run `vga-studio system-audit --repo-root .` for the standalone repository audit. It separates structural integrity from production readiness: a structural PASS may still report missing provider execution, source media or owner approvals. The existing `vga` command remains the 0.8 compatibility CLI; new standalone projects use `vga-studio` or `python -m video_studio`. The canonical implementation is the `video_studio` package; `video_growth_agent.studio_*` imports are compatibility shims only.
 
 ## Completion rule
 
