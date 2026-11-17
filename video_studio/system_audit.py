@@ -52,6 +52,8 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         root / "examples" / "ai-self-media-commercialization.brief.json",
         root / "examples" / "ai-self-media-commercialization.tasks.json",
         root / "examples" / "ai-self-media-commercialization.context.json",
+        root / "examples" / "program-linked-episode.brief.json",
+        root / "examples" / "program-linked-episode.tasks.json",
         root / "projects" / "ai-self-media-commercialization" / "BUSINESS_FLYWHEEL.json",
         root / "examples" / "standalone-domain-adapters.brief.json",
         root / "examples" / "standalone-domain-adapters.tasks.json",
@@ -254,6 +256,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
             ("explainer", "technology-explainer.brief.json", "technology-explainer.tasks.json"),
             ("satire", "news-fictional-media.brief.json", "news-fictional-media.tasks.json"),
             ("adapter-demo", "standalone-domain-adapters.brief.json", "standalone-domain-adapters.tasks.json"),
+            ("program-linked-episode", "program-linked-episode.brief.json", "program-linked-episode.tasks.json"),
         ):
             try:
                 engine = StudioEngine(Path(temp_root) / project_id)
@@ -264,6 +267,10 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
                 audit = engine.audit(project_id)
                 if audit.get("pass") is not True:
                     graph_failures.append(f"{project_id}: {audit}")
+                if project_id == "program-linked-episode":
+                    task_map = {item["task_id"]: item for item in engine.list_tasks(project_id)}
+                    if task_map.get("validate-program-handoff", {}).get("status") != "WAITING_INPUT":
+                        graph_failures.append("program-linked-episode must fail closed until the validated Program handoff artifact is imported")
             except Exception as exc:
                 graph_failures.append(f"{project_id}: {type(exc).__name__}: {exc}")
         try:

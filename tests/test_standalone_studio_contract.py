@@ -38,13 +38,20 @@ def test_example_graphs_are_valid_dynamic_dags(tmp_path):
         ("satire", "news-fictional-media.brief.json", "news-fictional-media.tasks.json"),
         ("media-program", "ai-self-media-commercialization.brief.json", "ai-self-media-commercialization.tasks.json"),
         ("adapter-demo", "standalone-domain-adapters.brief.json", "standalone-domain-adapters.tasks.json"),
+        ("program-linked-episode", "program-linked-episode.brief.json", "program-linked-episode.tasks.json"),
     ):
         brief = json.loads((ROOT / "examples" / brief_name).read_text(encoding="utf-8"))
         tasks = json.loads((ROOT / "examples" / tasks_name).read_text(encoding="utf-8"))
         engine.create_project(project_id, project_id, brief)
         engine.add_tasks(project_id, tasks)
         assert engine.audit(project_id)["pass"] is True
-        assert engine.status(project_id)["task_counts"]["READY"] >= 1
+        status = engine.status(project_id)
+        if project_id == "program-linked-episode":
+            task_map = {item["task_id"]: item for item in engine.list_tasks(project_id)}
+            assert task_map["validate-program-handoff"]["status"] == "WAITING_INPUT"
+            assert status["task_counts"].get("READY", 0) == 0
+        else:
+            assert status["task_counts"]["READY"] >= 1
 
 
 def test_engine_uses_no_external_runtime_dependency():
