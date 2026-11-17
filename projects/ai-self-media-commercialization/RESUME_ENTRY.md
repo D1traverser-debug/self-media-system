@@ -136,3 +136,29 @@ Mainline CI run `43598791702` passed: 263 tests, repository system audit and ins
 The CLI `vga render-graphic REQUEST.json --output candidate.mp4 [--graph MediaGraph.json]` is available for explicitly admitted non-character title/quote/stat/chart graphics. Read `audits/VIDEO_LOCAL_PROGRAMMATIC_GRAPHICS_RENDERER_2026-11-14.md` for the full design, constraints and evidence.
 
 Outputs and MediaGraph registrations remain CANDIDATE only. No promotion/release authority, no IPOS identity rendering, no product-truth claim, no paid provider or network dependency. Human/editorial, rights, continuity, promotion and release gates remain mandatory. IPOS R39 remains the sole identity authority with no approved bundle yet. CAOS source remains untouched.
+
+
+## Standalone Video Studio — current continuation point (2026-11-17)
+
+Default generic Video entry is now `STUDIO_ENTRY.md`; canonical runtime is `video_studio/`; CLI is `vga-studio`. Continue from branch `refactor/video-production-integrated-20261117`, exact verified head `3e823be92de41d9642a40292863689a7a68a0fd6`.
+
+Exact-head CI run `44006872263` passed: 343 tests, standalone system audit, standalone CLI smoke, integrated 35-task Program context/readiness smoke and installed agentic CLI smoke. Structural status PASS; production readiness deliberately remains PARTIAL.
+
+Read these first:
+1. `STUDIO_ENTRY.md`
+2. `examples/ai-self-media-commercialization.brief.json`
+3. `examples/ai-self-media-commercialization.context.json`
+4. `examples/ai-self-media-commercialization.tasks.json`
+5. `video_studio/system_audit.py`
+6. `docs/standalone_video_studio.md`
+
+The default Program context is imported as immutable, digest-bound artifacts. The manifest preflights all entries and identical re-imports are idempotent. Task authority references are bound as actual task inputs. Rights clearance requires a completed human rights-review task and exact artifact/digest/evidence matches.
+
+Remaining external dependencies are explicit, not software defects to bypass:
+- owner-supplied Jensen/Alice source video;
+- owner-approved IPOS READY_FOR_VIDEO bundle (IPOS remains the sole identity authority);
+- a current provider capability handshake before any generative-video call; no repository-registered provider executor is currently assumed.
+
+Next: execute independent growth, advertiser, production-economics, provider-benchmark and Jensen fact-research lanes; then acquire the missing owner-controlled assets and continue the real episode through editorial, rights, technical QA, human cold-read, Red Team, disclosure and release. Do not mark a render candidate as published or release-authorized. No paid generation or publication occurred in this integration pass.
+
+PR #37 consolidates and supersedes PR #36. CAOS repository/source/Skills/PRs were not modified; IPOS canon was not modified.
