@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import shutil
 import subprocess
 import time
@@ -471,3 +473,119 @@ def test_completed_task_persists_exact_input_lineage_for_resume_and_release(tmp_
     assert bindings[0]["sha256"] == imported["sha256"]
     assert engine.resume("lineage-complete")["project_status"] == "TASK_GRAPH_COMPLETE"
     assert engine.audit("lineage-complete")["pass"] is True
+
+
+
+def _rights_clearance_fixture(
+    tmp_path: Path,
+    *,
+    producer_executor: str = "human",
+    producer_id: str = "reviewer-01",
+    reviewer_id: str = "reviewer-01",
+    asset_rights_status: str = "OWNED",
+    clearance_digest_override: str | None = None,
+    clearance_artifact_override: str | None = None,
+    clearance_rights_override: str | None = None,
+    evidence_refs: list[str] | None = None,
+):
+    from video_studio.production.contracts import RenderSpec
+
+    source_names = ("shot-01", "audio-mix")
+    inputs = {}
+    clearance_assets = []
+    for name in source_names:
+        source_path = tmp_path / f"{name}.bin"
+        source_path.write_bytes(f"verified bytes for {name}".encode("utf-8"))
+        digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+        artifact_id = f"artifact-{name}"
+        rights_status = asset_rights_status
+        inputs[name] = {
+            "artifact_id": artifact_id,
+            "version": 1,
+            "path": str(source_path),
+            "sha256": digest,
+            "kind": "video" if name == "shot-01" else "audio",
+            "media_type": "video/mp4" if name == "shot-01" else "audio/wav",
+            "rights_status": rights_status,
+            "metadata": {"rights_evidence_refs": ["rights-evidence"]},
+        }
+        clearance_assets.append({
+            "input_name": name,
+            "artifact_id": clearance_artifact_override if name == "shot-01" and clearance_artifact_override else artifact_id,
+            "sha256": clearance_digest_override if name == "shot-01" and clearance_digest_override else digest,
+            "rights_status": clearance_rights_override if name == "shot-01" and clearance_rights_override else rights_status,
+            "evidence_refs": evidence_refs if evidence_refs is not None else ["rights-evidence"],
+        })
+
+    clearance_path = tmp_path / "rights-clearance.json"
+    clearance_path.write_text(json.dumps({
+        "schema_version": "1.0",
+        "status": "PASS",
+        "reviewer_id": reviewer_id,
+        "assets": clearance_assets,
+    }), encoding="utf-8")
+    inputs["rights-clearance"] = {
+        "artifact_id": "clearance-artifact",
+        "version": 1,
+        "path": str(clearance_path),
+        "sha256": hashlib.sha256(clearance_path.read_bytes()).hexdigest(),
+        "kind": "evidence",
+        "media_type": "application/json",
+        "rights_status": "NOT_APPLICABLE",
+        "producer_id": producer_id,
+        "produced_by_task": "rights-review",
+        "metadata": {},
+    }
+    task = {
+        "task_id": "rights-review",
+        "executor": producer_executor,
+        "status": "COMPLETED",
+        "result": {"outputs": {"rights-clearance": "clearance-artifact"}},
+    }
+    context = SimpleNamespace(
+        inputs=inputs,
+        project_id="rights-demo",
+        engine=SimpleNamespace(list_tasks=lambda project_id: [task]),
+    )
+    spec = RenderSpec.from_dict({
+        "schema_version": "1.0",
+        "project_id": "rights-demo",
+        "archetype": "CINEMATIC_EXPLAINER",
+        "width": 320,
+        "height": 568,
+        "fps": 30,
+        "duration_seconds": 2,
+        "clips": [{"input_name": "shot-01", "source_start_seconds": 0, "duration_seconds": 2, "fit": "cover"}],
+        "audio_tracks": [{"input_name": "audio-mix", "start_seconds": 0, "duration_seconds": 2, "gain_db": 0, "role": "MIX"}],
+        "audio_required": True,
+    })
+    return context, spec
+
+
+def test_render_rights_clearance_requires_exact_assets_and_completed_human_review(tmp_path):
+    from video_studio.production.handlers import _validate_render_rights_clearance
+
+    context, spec = _rights_clearance_fixture(tmp_path)
+    assert _validate_render_rights_clearance(context, spec, "rights-clearance") == "AUTHORIZED"
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        ({"producer_executor": "agent"}, "completed human rights review task"),
+        ({"reviewer_id": "different-reviewer"}, "reviewer_id must match"),
+        ({"producer_id": "different-producer"}, "reviewer_id must match"),
+        ({"clearance_digest_override": "0" * 64}, "exact source artifact"),
+        ({"clearance_artifact_override": "different-artifact"}, "exact source artifact"),
+        ({"clearance_rights_override": "UNKNOWN"}, "exact source artifact"),
+        ({"asset_rights_status": "UNKNOWN"}, "source asset rights are not cleared"),
+        ({"evidence_refs": ["unregistered-evidence"]}, "matching rights evidence refs"),
+    ],
+)
+def test_render_rights_clearance_rejects_unproven_or_mismatched_clearance(tmp_path, overrides, message):
+    from video_studio.production.contracts import ProductionContractError
+    from video_studio.production.handlers import _validate_render_rights_clearance
+
+    context, spec = _rights_clearance_fixture(tmp_path, **overrides)
+    with pytest.raises(ProductionContractError, match=message):
+        _validate_render_rights_clearance(context, spec, "rights-clearance")
