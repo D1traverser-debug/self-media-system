@@ -835,9 +835,111 @@ class StudioEngine:
                 )
                 self._event(connection, project_id, "TASK", task_id, "TASK_READINESS_CHANGED", {"from": status, "to": new_status})
 
+    def _refresh_cross_project_transfers_in_tx(self, connection: sqlite3.Connection, project_id: str) -> None:
+        """Invalidate imported snapshots when their exact source artifact is no longer current."""
+        rows = connection.execute(
+            "SELECT * FROM artifacts WHERE project_id=? AND status IN ('CURRENT','ACCEPTED')",
+            (project_id,),
+        ).fetchall()
+        for row in rows:
+            metadata = _loads(row["metadata_json"], {})
+            transfer = metadata.get("cross_project_transfer") if isinstance(metadata, dict) else None
+            if not isinstance(transfer, dict):
+                continue
+            source_project_id = str(transfer.get("source_project_id") or "").strip()
+            source_artifact_id = str(transfer.get("source_artifact_id") or "").strip()
+            source_name = str(transfer.get("source_artifact_name") or "").strip()
+            source_version = transfer.get("source_artifact_version")
+            source_digest = str(transfer.get("source_sha256") or "").strip().lower()
+            valid = (
+                transfer.get("schema_version") == "1.0"
+                and transfer.get("transfer_mode") == "IMMUTABLE_COPY"
+                and transfer.get("target_project_id") == project_id
+                and transfer.get("target_artifact_name") == row["name"]
+                and bool(source_project_id) and bool(source_artifact_id) and bool(source_name)
+                and isinstance(source_version, int) and source_version >= 1
+                and bool(re.fullmatch(r"[0-9a-f]{64}", source_digest))
+                and row["sha256"].lower() == source_digest
+            )
+            if valid:
+                try:
+                    with closing(self._connect(source_project_id)) as source_connection:
+                        source = source_connection.execute(
+                            "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                            (source_project_id, source_artifact_id),
+                        ).fetchone()
+                        valid = bool(
+                            source is not None
+                            and source["name"] == source_name
+                            and int(source["version"]) == source_version
+                            and source["sha256"].lower() == source_digest
+                            and source["status"] in {"CURRENT", "ACCEPTED"}
+                        )
+                        if valid:
+                            source_root = self._project_dir(source_project_id).resolve()
+                            source_path = (source_root / source["relative_path"]).resolve(strict=True)
+                            valid = source_path.is_relative_to(source_root) and source_path.is_file() and _sha256(source_path) == source_digest
+                except (ProjectNotFound, OSError, sqlite3.Error):
+                    valid = False
+            if valid:
+                continue
+
+            connection.execute(
+                "UPDATE artifacts SET status='STALE' WHERE project_id=? AND artifact_id=?",
+                (project_id, row["artifact_id"]),
+            )
+            task_rows = connection.execute(
+                "SELECT task_id,depends_on_json,inputs_json FROM tasks WHERE project_id=?",
+                (project_id,),
+            ).fetchall()
+            task_map = {item["task_id"]: item for item in task_rows}
+            affected = {
+                item["task_id"] for item in task_rows
+                if row["name"] in _loads(item["inputs_json"], [])
+            }
+            changed = True
+            while changed:
+                changed = False
+                for candidate, task in task_map.items():
+                    if candidate not in affected and any(
+                        dependency in affected for dependency in _loads(task["depends_on_json"], [])
+                    ):
+                        affected.add(candidate)
+                        changed = True
+            now = _iso()
+            for task_id in sorted(affected):
+                connection.execute(
+                    """UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,
+                       claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=?
+                       WHERE project_id=? AND task_id=?""",
+                    (_json({
+                        "reason": "cross-project source artifact is missing, superseded, or digest-invalid",
+                        "source_project_id": source_project_id,
+                        "source_artifact_id": source_artifact_id,
+                        "source_sha256": source_digest,
+                    }), now, project_id, task_id),
+                )
+                connection.execute(
+                    "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
+                    (project_id, task_id),
+                )
+                self._event(connection, project_id, "TASK", task_id, "TASK_INVALIDATED_BY_CROSS_PROJECT_SOURCE", {
+                    "source_project_id": source_project_id,
+                    "source_artifact_id": source_artifact_id,
+                    "transferred_artifact_id": row["artifact_id"],
+                })
+            self._event(connection, project_id, "ARTIFACT", row["artifact_id"], "CROSS_PROJECT_SOURCE_STALE", {
+                "source_project_id": source_project_id,
+                "source_artifact_id": source_artifact_id,
+                "source_artifact_version": source_version,
+                "source_sha256": source_digest,
+                "invalidated_tasks": sorted(affected),
+            })
+
     def refresh(self, project_id: str) -> None:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            self._refresh_cross_project_transfers_in_tx(connection, project_id)
             self._refresh_in_tx(connection, project_id)
             connection.commit()
 

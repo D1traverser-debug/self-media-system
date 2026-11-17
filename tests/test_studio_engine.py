@@ -186,6 +186,32 @@ def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path
             expected_sha256="0" * 64,
         )
 
+    replacement = tmp_path / "validated-episode-intent-v2.json"
+    replacement.write_text('{"schema_version":"1.0","status":"PASS","revision":2}', encoding="utf-8")
+    latest = engine.import_asset(
+        "program", "validated-episode-intent", replacement,
+        kind="episode_intent", media_type="application/json", rights_status="NOT_APPLICABLE",
+    )
+    assert latest["version"] == 2
+    engine.refresh("episode")
+    assert engine.list_tasks("episode")[0]["status"] == "STALE"
+    with engine._connect("episode") as connection:
+        stale_target = connection.execute(
+            "SELECT status FROM artifacts WHERE project_id='episode' AND artifact_id=?",
+            (target["artifact_id"],),
+        ).fetchone()
+    assert stale_target["status"] == "STALE"
+
+    refreshed = engine.transfer_artifact(
+        "program", "validated-episode-intent", "episode", "validated-episode-intent",
+        expected_artifact_id=latest["artifact_id"], expected_version=latest["version"],
+        expected_sha256=latest["sha256"],
+    )
+    assert refreshed["target"]["version"] == 2
+    reopened = engine.reopen("episode", "validate-handoff", "new exact Program handoff was transferred")
+    assert reopened == ["validate-handoff"]
+    assert engine.list_tasks("episode")[0]["status"] == "READY"
+
 
 def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(tmp_path, capsys):
     from video_studio.cli import main
