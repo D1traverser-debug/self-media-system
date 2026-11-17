@@ -18,6 +18,20 @@ jobs:
         run: pip install -e . pytest==9.1.1
       - name: Run system hygiene audit
         run: vga system-audit --repo-root .
+      - name: Run standalone Video Studio system audit
+        run: |
+          vga-studio system-audit --repo-root . > /tmp/standalone-video-studio-system-audit.json
+          python - <<'PY'
+          import json
+          report = json.load(open('/tmp/standalone-video-studio-system-audit.json', encoding='utf-8'))
+          assert report['pass'] is True, report
+          assert report['structural_status'] == 'PASS', report
+          assert report['production_readiness'] == 'PARTIAL', report
+          assert report['boundary']['caos_runtime_dependency'] is False, report
+          assert report['boundary']['paid_provider_calls_made'] is False, report
+          assert report['capability_gaps'], report
+          print('standalone-video-studio-system-audit: PASS')
+          PY
       - name: Run tests
         run: pytest -q
       - name: Smoke test standalone outcome-driven Video Studio
