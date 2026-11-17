@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any
 
@@ -228,8 +229,8 @@ def main(argv: list[str] | None = None) -> int:
                 media_type = entry.get("media_type", "application/octet-stream")
                 rights_status = entry.get("rights_status", "UNKNOWN")
                 metadata = entry.get("metadata", {})
-                if not isinstance(name, str) or not name.strip():
-                    raise StudioError(f"asset import manifest entry {index} requires a non-empty name")
+                if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", name):
+                    raise StudioError(f"asset import manifest entry {index} has an invalid artifact name")
                 if name in seen_names:
                     raise StudioError(f"asset import manifest contains duplicate name: {name}")
                 seen_names.add(name)
@@ -237,7 +238,7 @@ def main(argv: list[str] | None = None) -> int:
                     raise StudioError(f"asset import manifest entry {index} requires a path")
                 if not isinstance(kind, str) or not kind.strip() or not isinstance(media_type, str) or not media_type.strip():
                     raise StudioError(f"asset import manifest entry {index} has invalid kind/media_type")
-                if not isinstance(rights_status, str) or not isinstance(metadata, dict):
+                if rights_status not in {"OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN", "UNKNOWN", "NOT_APPLICABLE"} or not isinstance(metadata, dict):
                     raise StudioError(f"asset import manifest entry {index} has invalid rights_status/metadata")
                 source = Path(relative_path).expanduser()
                 if not source.is_absolute():
