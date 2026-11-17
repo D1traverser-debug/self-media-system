@@ -455,7 +455,7 @@ def test_completed_task_persists_exact_input_lineage_for_resume_and_release(tmp_
         "lineage-complete", "source-evidence", source, kind="evidence",
         media_type="text/plain", rights_status="NOT_APPLICABLE",
     )
-    engine.add_tasks("lineage-complete", [task("consume-source", inputs=["source-evidence"])])
+    engine.add_tasks("lineage-complete", [_simple_task("consume-source", inputs=["source-evidence"])])
     packet = engine.claim_next("lineage-complete", "lineage-worker")
     output = engine._project_dir("lineage-complete") / "artifacts" / "output.txt"
     output.write_text("derived result", encoding="utf-8")
