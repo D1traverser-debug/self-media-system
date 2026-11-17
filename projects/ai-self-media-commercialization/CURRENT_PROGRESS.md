@@ -196,3 +196,22 @@ The expanded audit verifies 17/17 adapter declarations/implementations, 6/6 Prog
 **Assurance boundary:** this is a branch-level structural and executable-contract PASS, not a claim that an episode has been produced or that production readiness is complete. The system audit correctly reports `PARTIAL`: no repository-registered generative-video executor exists; the exact owner-supplied Jensen/Alice source video and an owner-approved IPOS READY_FOR_VIDEO bundle are still missing. Paid provider execution, media generation, promotion and publication were not performed. All release gates remain in force.
 
 PR #37 is OPEN and supersedes PR #36. No merge or mainline verification is claimed. CAOS source and IPOS canon remain untouched.
+
+
+## NVIDIA / CNN X satirical illustration task — owner correction recorded (2026-11-17)
+
+A separate non-character editorial illustration task has been opened from the owner's latest corrections. Canonical task brief:
+- `cases/nvidia-cnn-visual-satire-20261117.md`
+- Task ID: `V-20261117-01-NVIDIA-CNN-X-ILLUSTRATION-SERIES`
+- Workstreams: MEDIA_GROWTH + PRODUCTION_SYSTEM.
+- Status: `OPEN__PRIOR_8_IMAGE_BATCH_REJECTED__RESEARCH_AND_REDESIGN_REQUIRED`.
+
+The previous eight images are rejected as a set, not approved artwork or generation references. The owner requires eight standalone English X illustrations, each with its own distinct thesis, joke mechanism, art direction, composition, prompt, actual generation and direct visual QA. Complete one image's full workflow before proceeding to the next. A viewer with no conversation history must understand the visual joke without explanation. Include one X-native copy per accepted image.
+
+Owner corrections now retained: the first composition had faulty spatial logic; the second had a more promising idea but weak route/national symbolism; the remaining images did not communicate their jokes independently; earlier iterations also included duplicate-person/Jensen and basic visual-logic defects. The assistant must discover additional errors without asking the owner to enumerate them.
+
+The case brief also records strict factual boundaries around unverified intelligence allegations, alleged chip diversion, Megaspeed's denial, the separate Super Micro case, US export-control bureaucracy and AI circular financing. Do not conflate entities or present allegations as proven facts.
+
+The eight concepts, art directions and prompts have **not** been reselected or completed. No new image was generated in this recovery step. The next action is source reconciliation and art-method research, followed by a ranked concept slate and sequential per-image execution. No publication is authorized.
+
+This is a non-character editorial task. It does not wait for or modify the unfinished personal avatar. IPOS remains the sole authority for personal-IP identity; CAOS source remains read-only. This record is on the isolated branch `task/nvidia-cnn-visual-satire-20261117`; it does not alter the open standalone Video Studio integration branch or claim a merge to main.
