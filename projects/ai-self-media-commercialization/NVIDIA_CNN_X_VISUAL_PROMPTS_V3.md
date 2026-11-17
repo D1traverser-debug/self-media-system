@@ -55,7 +55,7 @@ The scene is an airport cargo customs inspection bay, not a passenger airport te
 
 One customs inspector stands on the right side of the table, fully outside the crate. The inspector has two normal arms and two normal hands; one hand holds one magnifying glass close to a GPU card, while the other rests on the table edge. A single red quarantine ribbon crosses the front opening of the crate. The inspector looks intensely serious, as if examining endangered wildlife.
 
-Behind the table, show one closed industrial cargo roller door. On the far left, show one parked pallet jack. Keep the background sparse. Use one clear floor plane, one consistent eye-level three-quarter view, and a single coherent perspective. The crate must visibly sit on the table; the inspector must stand on the floor; nothing floats.
+Behind the table, show one open airport freight loading-bay doorway. Through it, show part of one parked cargo aircraft on the apron, with its open cargo hatch aligned to the loading bay so the location reads unmistakably as an airport freight terminal. On the far left, show one parked pallet jack. Keep the background sparse. Use one clear floor plane, one consistent eye-level three-quarter view, and a single coherent perspective. The crate must visibly sit on the table; the inspector must stand on the floor; nothing floats.
 
 Render it as a Chinese manhua-inspired brush-and-ink editorial cartoon: economical expressive linework, bold silhouette, confident dry-brush contours, simplified shapes, slightly exaggerated gesture, restrained jade green, warm paper cream, black ink and one vermilion accent. The humor should come from the absurdly solemn wildlife-conservation treatment of GPU hardware.
 
@@ -278,7 +278,7 @@ Show one judge's desk from a slightly elevated frontal angle. On the desk lie ex
 
 Above the left folder, place one large magnifying glass, symbolizing an ongoing investigation. Above the right folder, place one small separate sheet containing exactly three simple anonymous human silhouettes, symbolizing charges against individuals. Do not place the company itself in a defendant's dock; the company is not the charged party in this case.
 
-A single oversized black office stapler hangs above the gap between the two folders, angled as if it is about to staple them together. The red divider physically blocks the stapler's downward path. The stapler must not touch either folder. The visual joke is that two different legal matters are being carelessly stapled into one story, and the divider refuses to let them merge.
+One oversized black office stapler rests flat on the desk at the top center, with its nose aimed toward the gap between the two folders. The red divider stands directly in front of the stapler's nose and physically blocks it from reaching either folder. The stapler must rest on the desk; it must not float or touch either folder. The visual joke is that two different legal matters are being carelessly stapled into one story, and the divider refuses to let them merge.
 
 Keep the composition simple and almost diagrammatic but still a single editorial scene, not an infographic. Use flat geometric shapes, clean vector edges, cream paper, charcoal black, muted gray and one strong vermilion divider. Make the two folders, magnifying glass, three-person sheet and blocked stapler readable at thumbnail size.
 
