@@ -225,7 +225,7 @@ Verification of the new files:
 - Prompt headings: 8.
 - Self-contained image prompts: 8.
 - Prompt pack contains no DIL-only wrapper tags.
-- Prompt compilation is complete, but generation-time prompt preflight, image generation, cold reads, visual QA and acceptance have not occurred.
+- Static prompt preflight: PASS for 8/8 structural checks (eight prompts, eight distinct art directions, square-output contract, one-prompt-per-image, corrected airport cargo geometry, Merlion/panda route, physical-vs-remote distinction, one-Jensen constraint, grounded stapler staging, and estimate attribution). Exact generation-surface preflight, image generation, cold reads, visual QA and acceptance have not occurred.
 
 Current state:
 - Workflow protocol: CREATED AND READ BACK.
