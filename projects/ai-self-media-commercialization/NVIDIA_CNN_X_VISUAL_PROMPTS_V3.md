@@ -46,7 +46,7 @@ All text named below is post-production text to be added after the image is acce
 
 ### Scene plan
 
-A real airport cargo customs inspection bay, not a passenger terminal. One metal inspection table sits in the center. One open wooden freight crate rests fully on the table, with its lid hinged upward at the back. Exactly three generic green GPU cards stand upright inside the crate in individual slots, arranged like rare birds on perches; their cooling fans may suggest bird eyes, but each object must remain unmistakably a circuit board. One customs inspector stands to the right of the table, feet on the same floor plane, examining one GPU with one magnifying glass. A single red quarantine ribbon crosses the front opening of the crate. In the background, show one closed roll-up cargo door and one parked pallet jack. The crate, table and inspector must have clear physical contact and consistent perspective.
+A real airport cargo customs inspection bay, not a passenger terminal. One metal inspection table sits in the center. One open wooden freight crate rests fully on the table, with its lid hinged upward at the back. Exactly three generic green GPU cards stand upright inside the crate in individual slots, arranged like rare birds on perches; their cooling fans may suggest bird eyes, but each object must remain unmistakably a circuit board. One customs inspector stands to the right of the table, feet on the same floor plane, examining one GPU with one magnifying glass. A single red quarantine ribbon crosses the front opening of the crate. Behind the table, show one open airport freight-bay doorway with one cargo aircraft parked outside and its cargo hold door visibly open. On the far left, show one parked pallet jack. The crate, table and inspector must have clear physical contact and consistent perspective.
 
 ### Generation prompt
 
@@ -214,7 +214,7 @@ Exactly four agency folders, one document, one pen, one hand and one sleeve. No 
 **Decision**
 
 - Previous seed: The Shovel Bank.
-- Status: RETAINED, with one Jensen only and a clearer money path.
+- Status: RETAINED, with one Jensen only and the finance-versus-supply relationship redesigned to avoid a misleading direct cash-flow metaphor.
 - Source anchor: CNN reports Nvidia joined major financial institutions in lending more than $500 billion for AI infrastructure and separately committed $105 billion toward an OpenAI data-center project.
 - Thesis: Nvidia participates in financing the AI buildout while also supplying the GPUs that buildout buys.
 - Joke mechanism: Gold Rush analogy / circular incentive.
@@ -269,14 +269,14 @@ Exactly one Jensen Huang, one infrastructure builder, one financing document, on
 
 ### Scene plan
 
-One judge's desk seen from a slightly elevated front view. Two separate case folders sit far apart, with a broad red divider between them. The left folder has one magnifying glass above it, signifying investigation. The right folder has exactly three small generic human silhouettes on a separate sheet, signifying individuals charged; the company folder itself remains outside any dock or handcuffs. One oversized office stapler rests flat on the desk at the top center, its nose aimed toward the gap between the two folders. The red divider blocks the stapler from reaching either folder. No people are physically in court.
+One judge's desk seen from a slightly elevated front view. Two separate case folders sit far apart, with a broad red divider between them. Each folder has one clean blank label strip for post-production text: MEGASPEED on the left and SUPERMICRO on the right. The left folder has one magnifying glass above it, signifying investigation. The right folder has exactly three small generic human silhouettes on a separate sheet, signifying individuals charged; the company folder itself remains outside any dock or handcuffs. One oversized office stapler rests flat on the desk at the top center, its nose aimed toward the gap between the two folders. The red divider blocks the stapler from reaching either folder. No people are physically in court.
 
 ### Generation prompt
 
 
 Create exactly one square 1:1 minimalist geometric editorial cartoon for an English-language X post.
 
-Show one judge's desk from a slightly elevated frontal angle. On the desk lie exactly two separate manila case folders, one on the left and one on the right, with a wide bright vermilion divider standing vertically between them. The folders must remain visibly separate with a clear gap.
+Show one judge's desk from a slightly elevated frontal angle. On the desk lie exactly two separate manila case folders, one on the left and one on the right, with a wide bright vermilion divider standing vertically between them. The folders must remain visibly separate with a clear gap. Each folder has one clean blank label strip: the left strip is for the post-production word MEGASPEED; the right strip is for SUPERMICRO.
 
 Above the left folder, place one large magnifying glass, symbolizing an ongoing investigation. Above the right folder, place one small separate sheet containing exactly three simple anonymous human silhouettes, symbolizing charges against individuals. Do not place the company itself in a defendant's dock; the company is not the charged party in this case.
 
@@ -291,6 +291,8 @@ Exactly two folders, one magnifying glass, one separate sheet with exactly three
 
 ### Post-production and QA
 
+- Add the left folder label: MEGASPEED.
+- Add the right folder label: SUPERMICRO.
 - Overlay caption: TWO CASES. DON'T STAPLE THEM TOGETHER.
 - X copy must state the distinction precisely: Megaspeed is under investigation; three individuals were charged in the separate Super Micro matter; Super Micro itself was not charged.
 - Critical checks: exactly two files; exactly three silhouettes only on the separate individual sheet; magnifying glass on Megaspeed-side file; no handcuffs or defendant depiction for Megaspeed; no corporate Super Micro defendant.
