@@ -243,7 +243,12 @@ vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI
 vga-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
 vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
 vga-studio --root ./studio-work status ai-self-media-commercialization
+
+# audit the repository contract without relying on the legacy vga controller
+vga-studio system-audit --repo-root .
 ```
+
+The standalone repository audit reports structural integrity separately from production readiness. A structural PASS does not imply provider generation, a finished media deliverable or owner approvals have been completed.
 
 The context manifest imports only existing Video/IPOS state and reference documents. It deliberately does not invent or import the missing `jensen-source-video` or `ipos-ready-for-video-bundle`; dependent tasks remain `WAITING_INPUT` while independent Program work can proceed. The legacy subtask graph is labelled as historical context, not as the active scheduler.
 
