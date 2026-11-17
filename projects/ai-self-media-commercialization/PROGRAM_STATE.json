@@ -82,10 +82,10 @@
     "IPOS is the sole authority for character canon; only outputs that claim stable character identity require an approved imported IPOS bundle, while unrelated topic research, audience analysis, provider benchmarking and advertiser research continue.",
     "IPOS runs independently and exports a versioned artifact; the Video runtime validates/imports it locally and has no CAOS runtime/API dependency for this handoff."
   ],
-  "current_focus": "STANDALONE_VIDEO_STUDIO_PROGRAM_CONTROL_PLANE",
-  "current_next_action": "Use the integrated standalone Program as the default controller. Run independent growth, advertiser, production-economics, provider-benchmark and Jensen fact-research lanes; collect owner-controlled Jensen source media and an approved IPOS READY_FOR_VIDEO bundle before dependent tasks. Verify current external provider capabilities and cost/rights before any generation. Keep all render outputs candidate-only until exact rights, human review, technical QA, Red Team, platform disclosure and release evidence are complete.",
-  "system_next_action": "Continue the standalone Video Studio Program on the integrated branch. Structural system audit and exact-head CI are green (343 tests, run 44006872263), but production readiness is PARTIAL, not READY. Do not claim a finished episode or publish. The next operational work is parallel growth/commercial/provider/fact research, then source-media and IPOS bundle acquisition, provider capability handshake, and a real episode through rights, editorial, technical QA, human cold-read, Red Team, disclosure and release gates. CAOS source repository/code/PRs remain untouched; IPOS canon remains externally authoritative and unchanged.",
-  "updated_at": "2026-11-17T03:05:00+08:00",
+  "current_focus": "ORIGINAL_DIGITAL_IP/IPOS_CANONICAL_HANDOFF_V1",
+  "current_next_action": "Do not resume the superseded Video-local H1/S1+S3/A2 face-shell route. IPOS continues its R39 G1 research and later G2 design/approval independently; Video waits for a READY_FOR_VIDEO bundle and validates the import/shot-binding path. The news-first editorial packaging v1.2 contract is merged and mainline-verified. Next, inspect the actual media file and resolve its digest, identity/likeness and rights; then obtain independent human cold-read, platform format/disclosure, EditorialPlan and master-timeline evidence before any promotion or publication.",
+  "system_next_action": "Continue IPOS R39 G1 research independently; do not create or assume an identity bundle. Maintain IPOS as the sole external identity authority and keep identity-dependent shots blocked until an owner-approved READY_FOR_VIDEO bundle with G2/G7/G8 PASS and rights/provenance arrives. The news-first editorial packaging v1.2 code is merged and mainline-verified, but its media case remains candidate-only. Next resolve exact media inspection/digest, identity/likeness, rights, independent human cold-read, platform format and upload disclosure, EditorialPlan, master timeline and Video release evidence. Continue non-character growth and commercialization work. CAOS source repository/code/PRs remain untouched.",
+  "updated_at": "2026-11-17T03:06:00+08:00",
   "governance_ref": "../../CAOS_VIDEO_ENTRY.md",
   "governance_mode": "CHAT_GOVERNED_EXTERNAL",
   "caos_runtime_dependency": false,
@@ -188,6 +188,7 @@
       "CAOS repository, source files, code, Skills and PRs untouched.",
       "IPOS identity canon not changed; IPOS remains sole creative authority.",
       "No paid provider call, media generation or publication performed by this integration work."
-    ]
+    ],
+    "status": "INTEGRATED_BRANCH_CI_VERIFIED__PROGRAM_READINESS_PARTIAL"
   }
 }
