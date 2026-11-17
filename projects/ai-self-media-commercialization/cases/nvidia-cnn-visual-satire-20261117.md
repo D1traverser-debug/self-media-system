@@ -122,14 +122,14 @@ Study the method and visual grammar, not merely artist names or surface style. D
 ## 9. Current checkpoint and next action
 
 - Eight prior candidates: `REJECTED_AS_A_SET`; no image is accepted.
-- New concepts: `NOT_YET_REDERIVED`.
-- Eight independent art directions: `NOT_YET_RESEARCHED_OR_SELECTED`.
-- Eight final prompts: `NOT_YET_COMPILED`.
-- New image generation: `NOT_STARTED_IN_THIS_RECOVERY_STEP`.
-- X copy: `NOT_YET_DRAFTED`.
+- New concepts: V3 portfolio re-ranked and documented in NVIDIA_CNN_X_VISUAL_PROMPTS_V3.md.
+- Eight art directions: researched and selected as distinct visual grammars; image-level references and outcomes remain untested.
+- Eight final prompts: V3 compiled; execution-surface preflight remains due at generation time.
+- New image generation: NOT STARTED.
+- X copy: draft candidates included in the V3 prompt pack; not approved or published.
 - Release/publication: `NOT_AUTHORIZED`.
 
-**Next action:** re-read and fact-check the CNN report and relevant primary/independent sources; then build a diverse, ranked concept slate. For each selected concept, run the complete per-image protocol above, one image at a time. Do not ask the owner to supply the ideas or repeat the corrections already recorded here.
+**Next action:** use NVIDIA_CNN_X_VISUAL_PRODUCTION_PROTOCOL_V3.md and NVIDIA_CNN_X_VISUAL_PROMPTS_V3.md. Generate image 01 only, inspect and record its result, then proceed sequentially. Do not ask the owner to supply ideas or repeat corrections already recorded here.
 
 
 ## 10. Owner correction — diagnosis of the failure (2026-11-17, supersedes any contrary assistant summary)
@@ -208,3 +208,30 @@ Before any new generation, audit the eight supplied images individually and reco
 For each image, trace the earliest failed layer, challenge that diagnosis with a counterexample, and decide whether to revise the editorial idea, visual metaphor, staging, prompt, generation route or QA. Rebuild only the failed part when evidence supports a local repair; escalate only when evidence shows a higher-level defect. Each image must complete its own recursive decision and execution cycle before the next image advances.
 
 No new image generation, subsystem rebuild, CAOS-parent modification or publication is authorized by this governance correction. The eight-image task remains open.
+
+
+## 14. V3 workflow and prompt completion (2026-11-18)
+
+The owner requested that the workflow and prompts be improved, not merely that the governance correction be recorded. Two task-local artifacts have now been created on this task branch:
+
+1. NVIDIA_CNN_X_VISUAL_PRODUCTION_PROTOCOL_V3.md — a concrete CAOS-governed assistant workflow covering source/fact separation, competing concept selection, art-direction research, visual-sentence design, scene-graph staging, prompt compilation/preflight, sequential generation, image-only cold read, direct craft QA, root-cause localization and acceptance evidence.
+2. NVIDIA_CNN_X_VISUAL_PROMPTS_V3.md — eight standalone English prompts with concept rationale, source anchors, exact scene staging, art direction, object/character counts, post-production text and per-image QA checks.
+
+The V3 slate retains and materially redesigns the strongest parts of concepts 01, 02 and 05; replaces the ambiguous Airport X-Ray and AI Honeypot concepts; replaces the overlapping AI Ouroboros with the legally important distinction between the Megaspeed investigation and the separate Super Micro individual-charges case; replaces the vague Unpatchable CEO and Social Engineering concepts with the article's headline-distraction thesis and the $50B China-market estimate versus export-control constraint.
+
+The source model was updated against the November 17 DOJ/Commerce joint statement. It records that Commerce began its investigation in 2024, requested Nvidia records in May 2025, Nvidia put Megaspeed on its no-sell list in June 2025, and Commerce/Singapore authorities conducted an on-site end-use check and interviewed Megaspeed's CEO in June 2025 before DOJ took the lead in the criminal investigation. This prevents the image set from repeating an unqualified "Commerce did nothing" claim. The prompt pack also distinguishes physical diversion from remote cloud access and keeps the $500B infrastructure lending separate from the $105B OpenAI data-center commitment.
+
+Verification of the new files:
+- Prompt headings: 8.
+- Self-contained image prompts: 8.
+- Prompt pack contains no DIL-only wrapper tags.
+- Prompt compilation is complete, but generation-time prompt preflight, image generation, cold reads, visual QA and acceptance have not occurred.
+
+Current state:
+- Workflow protocol: CREATED AND READ BACK.
+- Eight prompt candidates: CREATED AND READ BACK.
+- Image generation: NOT STARTED.
+- Accepted images: 0 / 8.
+- Publication: NOT AUTHORIZED.
+
+Next action: generate only image 01, then perform image-only cold read and direct visual QA before any decision to proceed to image 02. The task remains open.
