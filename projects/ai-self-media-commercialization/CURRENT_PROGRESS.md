@@ -235,3 +235,18 @@ The NVIDIA/CNN eight-image child task is governed by CAOS for **every substantiv
 The prior assistant's categorical diagnosis that the issue was solely execution quality and not a subsystem defect is withdrawn as unvalidated. Current status: ROOT_CAUSE_OPEN. The owner's direct report that prompts and preparation were poor is important evidence, but not a complete causal proof. The task-specific Library prompt pack "X MEME VISUAL PROMPT PACK V2" has been recovered and contains eight candidate prompts; it is not yet bound to exact image-generation calls/results. The existing task brief already had a per-image A–J workflow, but the task record weakened CAOS to optional wording. Candidate causes still include assistant execution lapse, CAOS governance propagation gap, concept/art-direction defects, prompt-compilation defects, generation-route/model limits and visual-QA failure.
 
 Before new generation, audit the eight supplied images individually and recover each image's source fact, concept decision, research/reference notes, visual brief, exact prompt, tool call receipt, output and QA. Missing provenance remains UNKNOWN. Do not infer prompt-to-image mapping from similar themes or filenames. No subsystem rebuild, CAOS-parent modification, new image generation or publication is authorized by this correction.
+
+
+## 2026-11-18 — NVIDIA/CNN X illustration V3 workflow and prompts
+
+Owner request: improve the workflow and prepare the actual prompts, not merely record the governance correction.
+
+Created and read back:
+- NVIDIA_CNN_X_VISUAL_PRODUCTION_PROTOCOL_V3.md: CAOS-governed workflow for fact separation, concept competition, art research, visual-sentence and scene-graph design, prompt compilation/preflight, one-at-a-time generation, image-only cold read, direct visual QA, failure localization and acceptance.
+- NVIDIA_CNN_X_VISUAL_PROMPTS_V3.md: eight self-contained English prompts, each with a distinct art direction, precise scene staging, object/character counts, factual boundary, post-production text and QA checks.
+
+The eight concepts now cover: endangered export-controlled silicon; the Singapore-to-China route with Merlion and panda landmarks; remote cloud access to chips physically located abroad; the Entity List decision pen; overlapping AI infrastructure financing and GPU sales; the separate Megaspeed and Super Micro legal matters; sensational headline distraction from the larger story; and the $50B China AI-chip market estimate versus export controls.
+
+The source ledger incorporates the November 17 DOJ/Commerce update and distinguishes investigation from conviction, physical diversion from remote access, the $500B infrastructure lending from the separate $105B OpenAI commitment, and the Super Micro individual charges from the company itself. No unsupported criminal implication is authorized.
+
+Current state: workflow and eight prompts are compiled and read back; image generation has not started; accepted images remain 0/8; publication remains unauthorized. Next action is image 01 only, followed by image-only cold read and direct visual QA before advancing.
