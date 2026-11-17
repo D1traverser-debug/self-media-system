@@ -1442,7 +1442,6 @@
     ],
     "inputs": [
       "workstream-outcome-refresh-pack",
-      "ipos-bundle-readiness",
       "ipos-bundle-readiness"
     ],
     "outputs": [
