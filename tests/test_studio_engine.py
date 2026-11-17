@@ -200,6 +200,22 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
         ).fetchone()
     assert absent is None
 
+    invalid_rights = examples / "invalid-rights.json"
+    invalid_rights.write_text(json.dumps({
+        "schema_version": "1.0",
+        "assets": [
+            {"name": "new-valid-2", "path": "../projects/program-state.json"},
+            {"name": "bad-rights", "path": "../projects/business-flywheel.md", "rights_status": "NOT_A_REAL_STATUS"},
+        ],
+    }), encoding="utf-8")
+    assert main(["--root", str(workspace), "import-manifest", "demo", str(invalid_rights)]) == 2
+    capsys.readouterr()
+    with engine._connect("demo") as connection:
+        absent = connection.execute(
+            "SELECT 1 FROM artifacts WHERE project_id='demo' AND name='new-valid-2' LIMIT 1"
+        ).fetchone()
+    assert absent is None
+
 
 def test_claim_token_and_lease_prevent_stale_worker_completion(tmp_path, monkeypatch):
     engine = make_engine(tmp_path)
