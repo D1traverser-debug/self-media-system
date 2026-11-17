@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import shutil
 import sqlite3
+import tempfile
 import uuid
 from typing import Any, Iterable
 
@@ -1228,6 +1229,99 @@ class StudioEngine:
                 connection.rollback()
                 if destination is not None:
                     destination.unlink(missing_ok=True)
+                raise
+
+    def transfer_artifact(
+        self,
+        source_project_id: str,
+        source_name: str,
+        target_project_id: str,
+        target_name: str | None = None,
+        *,
+        expected_artifact_id: str,
+        expected_version: int,
+        expected_sha256: str,
+    ) -> dict[str, Any]:
+        """Copy one exact current source artifact into another project with pinned provenance.
+
+        The source DB is write-locked while its immutable bytes are snapshotted and
+        imported. Repeating the same transfer is idempotent. A later source revision
+        is a distinct transfer and therefore a new target artifact version.
+        """
+        source_project_id = _safe_id(source_project_id, "source_project_id")
+        target_project_id = _safe_id(target_project_id, "target_project_id")
+        source_name = _safe_id(source_name, "source artifact name")
+        target_name = _safe_id(target_name or source_name, "target artifact name")
+        if source_project_id == target_project_id:
+            raise ContractError("cross-project transfer requires different source and target projects")
+        if not isinstance(expected_artifact_id, str) or not expected_artifact_id.strip():
+            raise ContractError("expected_artifact_id is required to pin a cross-project transfer")
+        if isinstance(expected_version, bool) or not isinstance(expected_version, int) or expected_version < 1:
+            raise ContractError("expected_version must be a positive integer")
+        expected_digest = str(expected_sha256 or "").strip().lower()
+        if not re.fullmatch(r"[0-9a-f]{64}", expected_digest):
+            raise ContractError("expected_sha256 must be a 64-character hexadecimal digest")
+
+        with closing(self._connect(source_project_id)) as source_connection:
+            source_connection.execute("BEGIN IMMEDIATE")
+            try:
+                source_row = self._artifact_by_name(source_connection, source_project_id, source_name)
+                if source_row is None:
+                    raise ContractError(f"current source artifact does not exist: {source_project_id}/{source_name}")
+                if source_row["artifact_id"] != expected_artifact_id:
+                    raise ContractError("source artifact ID changed; inspect the latest source artifact before transferring")
+                if int(source_row["version"]) != expected_version:
+                    raise ContractError("source artifact version changed; inspect the latest source artifact before transferring")
+                if source_row["sha256"].lower() != expected_digest:
+                    raise ContractError("source artifact digest changed; inspect the latest source artifact before transferring")
+
+                source_root = self._project_dir(source_project_id).resolve()
+                source_path = (source_root / source_row["relative_path"]).resolve(strict=True)
+                if not source_path.is_relative_to(source_root) or not source_path.is_file():
+                    raise ContractError("source artifact path is missing or escapes its project workspace")
+                if _sha256(source_path) != expected_digest:
+                    raise ContractError("source artifact bytes no longer match the registered digest")
+
+                transfer = {
+                    "schema_version": "1.0",
+                    "transfer_mode": "IMMUTABLE_COPY",
+                    "source_project_id": source_project_id,
+                    "source_artifact_id": source_row["artifact_id"],
+                    "source_artifact_name": source_name,
+                    "source_artifact_version": int(source_row["version"]),
+                    "source_sha256": expected_digest,
+                    "source_produced_by_task": source_row["produced_by_task"],
+                    "target_project_id": target_project_id,
+                    "target_artifact_name": target_name,
+                }
+                metadata = {
+                    "cross_project_transfer": transfer,
+                    "source_metadata": _loads(source_row["metadata_json"], {}),
+                }
+                with tempfile.TemporaryDirectory(prefix="vga-cross-project-transfer-") as temp_dir:
+                    snapshot = Path(temp_dir) / source_path.name
+                    shutil.copy2(source_path, snapshot)
+                    if _sha256(snapshot) != expected_digest or _sha256(source_path) != expected_digest:
+                        raise ContractError("source artifact changed while its immutable transfer snapshot was being prepared")
+                    target_artifact = self.import_asset(
+                        target_project_id, target_name, snapshot,
+                        kind=source_row["kind"], media_type=source_row["media_type"],
+                        rights_status=source_row["rights_status"], metadata=metadata,
+                    )
+                source_connection.commit()
+                return {
+                    "source": {
+                        "project_id": source_project_id,
+                        "artifact_id": source_row["artifact_id"],
+                        "name": source_name,
+                        "version": int(source_row["version"]),
+                        "sha256": expected_digest,
+                    },
+                    "target": target_artifact,
+                    "transfer": transfer,
+                }
+            except Exception:
+                source_connection.rollback()
                 raise
 
     def complete_task(

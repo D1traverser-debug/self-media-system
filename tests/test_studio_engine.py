@@ -139,6 +139,54 @@ def test_identical_asset_reimport_is_idempotent_and_preserves_completed_consumer
     assert engine.list_tasks("demo")[0]["status"] == "COMPLETED"
 
 
+def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path, capsys):
+    from video_studio.cli import main
+
+    workspace = tmp_path / "workspace"
+    engine = StudioEngine(workspace)
+    engine.create_project("program", "Program", brief())
+    engine.create_project("episode", "Episode", brief())
+    engine.add_tasks("episode", [task("validate-handoff", inputs=["validated-episode-intent"])])
+    assert engine.list_tasks("episode")[0]["status"] == "WAITING_INPUT"
+
+    source = tmp_path / "validated-episode-intent.json"
+    source.write_text('{"schema_version":"1.0","status":"PASS"}', encoding="utf-8")
+    source_artifact = engine.import_asset(
+        "program", "validated-episode-intent", source,
+        kind="episode_intent", media_type="application/json", rights_status="NOT_APPLICABLE",
+    )
+
+    command = [
+        "--root", str(workspace), "transfer-asset",
+        "program", "validated-episode-intent", "episode", "validated-episode-intent",
+        "--expected-artifact-id", source_artifact["artifact_id"],
+        "--expected-version", str(source_artifact["version"]),
+        "--expected-sha256", source_artifact["sha256"],
+    ]
+    assert main(command) == 0
+    first = json.loads(capsys.readouterr().out)
+    target = first["target"]
+    assert first["source"]["artifact_id"] == source_artifact["artifact_id"]
+    assert target["sha256"] == source_artifact["sha256"]
+    assert target["metadata"]["cross_project_transfer"] == first["transfer"]
+    assert first["transfer"]["source_project_id"] == "program"
+    assert first["transfer"]["target_project_id"] == "episode"
+    assert engine.list_tasks("episode")[0]["status"] == "READY"
+
+    assert main(command) == 0
+    repeated = json.loads(capsys.readouterr().out)
+    assert repeated["target"]["artifact_id"] == target["artifact_id"]
+    assert repeated["target"]["version"] == target["version"] == 1
+
+    with pytest.raises(ContractError, match="digest changed"):
+        engine.transfer_artifact(
+            "program", "validated-episode-intent", "episode", "validated-episode-intent",
+            expected_artifact_id=source_artifact["artifact_id"],
+            expected_version=source_artifact["version"],
+            expected_sha256="0" * 64,
+        )
+
+
 def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(tmp_path, capsys):
     from video_studio.cli import main
 

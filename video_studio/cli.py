@@ -66,6 +66,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project_id")
     p.add_argument("manifest", type=Path, help="JSON manifest; relative asset paths resolve from the manifest directory")
 
+    p = sub.add_parser("transfer-asset", help="transfer one exact immutable artifact between Studio projects")
+    p.add_argument("source_project_id")
+    p.add_argument("source_name")
+    p.add_argument("target_project_id")
+    p.add_argument("target_name")
+    p.add_argument("--expected-artifact-id", required=True)
+    p.add_argument("--expected-version", type=int, required=True)
+    p.add_argument("--expected-sha256", required=True)
+
     p = sub.add_parser("system-audit", help="audit the standalone Video Studio repository contract and example execution")
     p.add_argument("--repo-root", type=Path, help="repository root to audit (default: inferred from the installed source package)")
 
@@ -284,6 +293,14 @@ def main(argv: list[str] | None = None) -> int:
                 "asset_count": len(imported),
                 "artifacts": imported,
             })
+        elif command == "transfer-asset":
+            _emit(engine.transfer_artifact(
+                args.source_project_id, args.source_name,
+                args.target_project_id, args.target_name,
+                expected_artifact_id=args.expected_artifact_id,
+                expected_version=args.expected_version,
+                expected_sha256=args.expected_sha256,
+            ))
         elif command == "status":
             _emit(engine.status(args.project_id))
         elif command == "resume":
