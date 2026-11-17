@@ -30,45 +30,50 @@ All text named below is post-production text to be added after the image is acce
 
 ---
 
-## 01 — ENDANGERED SILICON
+## 01 — ENDANGERED HARDWARE
 
 **Decision**
 
 - Previous seed: GPU Wildlife Smuggling Zoo.
-- Status: RETAINED, with the airport/cargo spatial logic redesigned.
+- Status: RETAINED, with the wildlife-cage metaphor made the unmistakable visual joke.
 - Source anchor: CNN report on advanced-chip export controls and concerns about possible diversion; DOJ/Commerce update confirms an investigation, not a conviction.
-- Thesis: export-controlled GPUs are treated like rare protected wildlife.
-- Joke mechanism: absurd analogy / conservation caricature.
-- First read: a customs inspector is treating GPU cards as endangered creatures that need protection.
-- Art direction: concise Chinese single-panel ink cartoon; Hua Junwu's one-scene social-wit logic supported by Feng Zikai's line economy and negative-space discipline. Do not imitate either artist or reuse a known composition.
-- Post-production caption: **ENDANGERED SILICON**
-- Suggested X copy: “When the world's most valuable chips need a wildlife-protection program.”
+- Thesis: export-controlled GPUs are treated like endangered wildlife specimens.
+- Joke mechanism: visual analogy — computer hardware is literally caged, tagged and inspected like a protected species.
+- First read: three GPU cards sit behind locked cage bars while a customs inspector examines them with conservation-level care.
+- Art direction: concise Chinese single-panel editorial ink cartoon; Hua Junwu's one-scene social-wit logic, Feng Zikai's line economy and negative-space discipline, with a restrained hand-coloured woodblock palette. Transfer methods only; do not imitate either artist or reuse a known composition.
+- Post-production caption: **ENDANGERED HARDWARE**
+- Suggested X copy: “When advanced GPUs need the handling protocol of an endangered species.”
 
 ### Scene plan
 
-A real airport cargo customs inspection bay, not a passenger terminal. One metal inspection table sits in the center. One open wooden freight crate rests fully on the table, with its lid hinged upward at the back. Exactly three generic green GPU cards stand upright inside the crate in individual slots, arranged like rare birds on perches; their cooling fans may suggest bird eyes, but each object must remain unmistakably a circuit board. One customs inspector stands to the right of the table, feet on the same floor plane, examining one GPU with one magnifying glass. A single red quarantine ribbon crosses the front opening of the crate. Behind the table, show one open airport freight-bay doorway with one cargo aircraft parked outside and its cargo hold door visibly open. On the far left, show one parked pallet jack. The crate, table and inspector must have clear physical contact and consistent perspective.
+One square, single-panel scene. In the foreground, one large rectangular wooden-and-metal specimen crate rests flat on one inspection table. Its front is divided into exactly three narrow barred compartments, each with one generic green GPU card mounted vertically like a rare specimen and one small brass padlock. A small blank conservation tag with a leaf-and-shield emblem is fixed to the crate. One customs inspector stands to the right of the table, leaning in with an intensely serious expression; one hand holds a magnifying glass near the middle GPU, the other rests on the table edge. In the background, one open cargo-bay doorway frames the subdued silhouette of one cargo aircraft on the apron. The title occupies the upper-left negative space. No real animals: the joke is that the hardware itself has become the caged endangered species.
 
 ### Generation prompt
 
+Create exactly one square 1:1 editorial cartoon for an English-language X post. The image must communicate the joke without relying on a separate caption.
 
-Create exactly one square 1:1 editorial cartoon for an English-language X post.
+**Composition and scene:** A sparse airport cargo customs inspection bay, viewed at eye level from a three-quarter angle. In the lower-left and center foreground, one large rectangular wooden-and-metal specimen crate rests flat on one sturdy metal inspection table. The crate occupies roughly 55% of the image width and 55% of its height. Its front face has exactly three equal, clearly separated barred compartments. Inside each compartment, one generic green GPU circuit card is mounted vertically and fully visible, with its cooling fans facing the viewer. Each compartment has exactly one small brass padlock on its front. The three cards must look unmistakably like computer hardware, but the bars, individual mounting and locks make the crate read instantly as a wildlife specimen cage.
 
-The scene is an airport cargo customs inspection bay, not a passenger airport terminal. In the center foreground, place one sturdy metal inspection table. On top of it sits one open rectangular wooden freight crate, resting flat on the tabletop. Its lid is hinged upward at the back. Inside the crate are exactly three upright green GPU circuit cards, each in its own slot like a rare bird perched on a branch. Their circular cooling fans can subtly resemble bird eyes, but the cards must remain clearly recognizable as advanced computer hardware.
+**Inspector:** On the right side of the table, one customs inspector leans forward to examine the middle GPU. The inspector has exactly two arms and two hands. One hand holds one magnifying glass close to the middle GPU; the other hand rests naturally on the table edge. The inspector's face is intensely serious and careful, as if examining a rare protected species. Keep the magnifying glass, hand and GPU separated clearly; no hand may merge with the bars or crate.
 
-One customs inspector stands on the right side of the table, fully outside the crate. The inspector has two normal arms and two normal hands; one hand holds one magnifying glass close to a GPU card, while the other rests on the table edge. A single red quarantine ribbon crosses the front opening of the crate. The inspector looks intensely serious, as if examining endangered wildlife.
+**Conservation cue:** Attach one small blank cream tag to the upper front corner of the crate. The tag contains only one simple leaf-and-shield emblem, no words. The three brass padlocks and the conservation tag make the wildlife-protection analogy explicit. Do not add any real bird or animal.
 
-Behind the table, show one open airport freight-bay doorway. Through it, show the unmistakable side silhouette of one cargo aircraft parked on the apron, with its cargo hold door visibly open. The aircraft is outside the building; do not force its hatch to align physically with the inspection table. On the far left, show one parked pallet jack. Keep the background sparse. Use one clear floor plane, one consistent eye-level three-quarter view, and a single coherent perspective. The crate must visibly sit on the table; the inspector must stand on the floor; nothing floats.
+**Airport context:** In the upper background, one wide open cargo-bay doorway frames the subdued side silhouette of exactly one cargo aircraft parked outside on the apron. The aircraft is clearly outside the building. Keep the rest of the background nearly empty: no forklift, no pallet jack, no extra cargo, no other people, no passenger-terminal equipment.
 
-Render it as a concise Chinese single-panel ink cartoon: a few decisive brush lines, a clean inspector silhouette, a clearly separated crate-and-GPU mass, generous warm-paper negative space, controlled black line weight and one vermilion quarantine accent. Use a slightly exaggerated but readable inspection gesture. The humor comes from treating ordinary computer hardware with the solemnity of protected wildlife. Keep every object necessary to identify an airport cargo inspection, but omit decorative background detail.
+**Title typography:** In the upper-left negative space, render exactly this title, spelled correctly and on two lines: “ENDANGERED” on the first line and “HARDWARE” on the second. Use large, bold, condensed vintage editorial lettering. “ENDANGERED” is charcoal black; “HARDWARE” is restrained vermilion red. The title must be fully inside the frame, with generous margins. Do not add any other words, numbers, labels or pseudo-text.
 
-Make the crate and three GPU cards the dominant focal point. No actual birds, no animals, no Jensen Huang, no other people, no airport passenger check-in desks, no baggage carousel, no X-ray machine, no second crate, no extra tools, no readable text, no logos, no collage, no watermark.
+**Visual language:** A concise Chinese single-panel editorial ink cartoon, not a photograph and not 3D. Use economical but confident black brush contours, simplified readable masses, deliberate negative space, selective cross-hatching and a restrained hand-coloured woodblock-print finish. Warm aged-paper cream, charcoal ink, muted jade green on the GPUs, natural weathered wood, small brass highlights and one vermilion accent. Slightly exaggerate the inspector's careful posture, not the anatomy. Soft warm daylight enters through the cargo doorway and gives the crate a clear edge; keep the background low-contrast so the caged GPUs and inspector dominate.
 
+**Physical and anatomy constraints:** One table; one crate resting on that table; exactly three barred compartments; exactly three GPU cards; exactly three brass padlocks; one magnifying glass; one inspector with exactly two arms and two hands; one conservation tag; one aircraft outside one cargo doorway. All objects must share one coherent perspective and physically touch the surfaces that support them. No floating objects, duplicated props, fused fingers, extra limbs, impossible hinges or intersecting geometry.
+
+**Exclude:** real birds or animals, extra people, photographer, binoculars, second inspector, extra GPU cards, open laptop, loose circuit boards, extra locks, extra magnifying glasses, forklift, pallet jack, passenger terminal, baggage carousel, X-ray scanner, busy machinery, logos, watermarks, additional text or decorative clutter.
 
 ### Post-production and QA
 
-- Overlay only: ENDANGERED SILICON.
-- Keep the caption outside the illustration if the image is already readable without it.
-- Critical checks: cargo-bay setting is unmistakable; crate sits on table; exactly three GPU cards; one inspector; one magnifying glass; no passenger-terminal geometry; no floating or duplicated objects.
+- Title is generated in-image exactly as “ENDANGERED HARDWARE”; no additional text.
+- Critical checks: the three GPUs are visibly behind bars, not merely sitting in an open crate; each compartment has one lock; conservation tag is visible; magnifying glass is directed at the middle GPU; crate rests on table; aircraft remains outside the cargo doorway.
+- Cold-read test: at phone-thumbnail size, the viewer should first see the title, then three locked GPU “specimens,” then the inspector treating them with conservation-level care. The joke must not depend on a long X caption.
+- Reject if the image reads as an ordinary customs inspection, if the bars/locks are missing, or if the GPU cards are obscured.
 - Factual boundary: do not label the crate as Megaspeed cargo or depict a named person committing smuggling.
 
 ---
