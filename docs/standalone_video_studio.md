@@ -232,6 +232,23 @@ The attestation JSON should identify `reviewer_kind`, `execution_mode`, `blind_r
 
 ## 13. Operational commands
 
+### 13.1 Import digest-bound Program context
+
+A task's `requirements.authority_refs` are descriptive references, not automatically verified inputs. When a worker must rely on a repository document or source file, import it as a Studio artifact and declare its artifact name in the task's `inputs`. The engine then binds the exact artifact ID, version and SHA-256 at claim time and verifies the same bytes at completion.
+
+`import-manifest` preflights every listed file before importing any of them. Relative `path` values resolve from the manifest's directory. Re-importing identical bytes with identical type, rights and metadata is a no-op; a changed source or metadata creates a new immutable version and invalidates its consumers.
+
+```bash
+vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI Self-Media Commercialization" --brief examples/ai-self-media-commercialization.brief.json
+vga-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
+vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
+vga-studio --root ./studio-work status ai-self-media-commercialization
+```
+
+The context manifest imports only existing Video/IPOS state and reference documents. It deliberately does not invent or import the missing `jensen-source-video` or `ipos-ready-for-video-bundle`; dependent tasks remain `WAITING_INPUT` while independent Program work can proceed. The legacy subtask graph is labelled as historical context, not as the active scheduler.
+
+### 13.2 Episode-specific example
+
 ```bash
 # create a project from an outcome brief
 vga-studio --root ./studio-work init episode-001 --title "Episode 001" --brief examples/technology-explainer.brief.json
