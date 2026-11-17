@@ -72,6 +72,16 @@ Draw one square 1:1, two-dimensional editorial cartoon. In a sparse airport carg
 - Do not use any previous rejected image as a reference. Do not proceed to image 02 until image 01 receives a documented PASS.
 - Generation trace limitation: the current ChatGPT image tool does not expose its internal revised prompt or a controllable seed in this session. Record the exact visible instruction supplied to the tool and the returned image; mark backend-revised prompt and seed as NOT_EXPOSED rather than claiming deterministic execution.
 
+### Execution receipt — 2026-11-18
+
+- Native ChatGPT image-generation attempt: `REJECTED_CONTEXT_DRIFT`.
+- Observed output: three GPUs in a wooden crate, vintage woodblock rendering, in-image title. It did not follow the approved one-GPU birdcage composition or no-text rule.
+- Native tool metadata exposed an empty prompt and no seed. The short instruction used for that call also diverged from the approved prompt file. This was an execution-routing failure, not evidence that the approved prompt was executed and failed.
+- Isolated route identified: Higgsfield image generation using the OpenAI model `gpt_image_2_6` (GPT Image 2.6), with an explicit prompt field, 1:1 aspect ratio, and no reference media. Model metadata confirms support for `quality=high` and `resolution=2k`.
+- Cost estimate for one high-quality 2K square image: `2.75 credits`. No generation job has been submitted and no credits have been spent.
+- State: `PROMPT_READY / NATIVE_EXECUTOR_REJECTED / GPT_IMAGE_2_6_ROUTE_QUOTED / WAITING_FOR_CREDIT_APPROVAL`.
+- Owner action: none for prompt transfer or chat setup. Only credit authorization is pending.
+
 ---
 
 ## 02 — THE LONG WAY ROUND?
