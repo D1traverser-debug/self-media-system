@@ -116,6 +116,15 @@ def test_program_example_keeps_independent_workstreams_parallel_and_ipos_fail_cl
     project_brief = json.loads(brief_path.read_text(encoding="utf-8"))
     tasks = json.loads(tasks_path.read_text(encoding="utf-8"))
     engine.create_project("program", "Integrated media program", project_brief)
+    context_manifest_path = ROOT / "examples" / "ai-self-media-commercialization.context.json"
+    context_manifest = json.loads(context_manifest_path.read_text(encoding="utf-8"))
+    for asset in context_manifest["assets"]:
+        source_path = (context_manifest_path.parent / asset["path"]).resolve(strict=True)
+        engine.import_asset(
+            "program", asset["name"], source_path,
+            kind=asset["kind"], media_type=asset["media_type"],
+            rights_status=asset["rights_status"], metadata=asset.get("metadata", {}),
+        )
     engine.add_tasks("program", tasks)
     status = engine.status("program")
     task_map = {item["task_id"]: item for item in engine.list_tasks("program")}
@@ -144,3 +153,36 @@ def test_standalone_adapter_demo_wires_editorial_to_real_local_render_and_qa(tmp
     assert task_map["render-programmatic-graphic"]["requirements"]["domain_adapter"]["name"] == "programmatic_graphic_render"
     assert task_map["technical-qa"]["kind"] == "technical_measurement"
     assert engine.audit("adapter-demo")["pass"] is True
+
+
+
+def test_integrated_program_authority_refs_are_digest_bound_task_inputs():
+    manifest_path = ROOT / "examples" / "ai-self-media-commercialization.context.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    tasks = json.loads((ROOT / "examples" / "ai-self-media-commercialization.tasks.json").read_text(encoding="utf-8"))
+    brief = json.loads((ROOT / "examples" / "ai-self-media-commercialization.brief.json").read_text(encoding="utf-8"))
+
+    names_by_repo_path = {
+        str((manifest_path.parent / item["path"]).resolve()): item["name"]
+        for item in manifest["assets"]
+    }
+    for key, reference in brief["program_context"].items():
+        if key.endswith("_ref") and isinstance(reference, str) and reference.startswith(("projects/", "docs/")):
+            resolved = str((ROOT / reference).resolve())
+            assert resolved in names_by_repo_path, f"program context ref is not imported: {reference}"
+
+    for task_item in tasks:
+        requirements = task_item.get("requirements", {})
+        refs = list(requirements.get("authority_refs", []))
+        if requirements.get("authority_ref"):
+            refs.append(requirements["authority_ref"])
+        for reference in refs:
+            resolved = str((ROOT / reference).resolve())
+            assert resolved in names_by_repo_path, f"task authority ref is not imported: {task_item['task_id']} -> {reference}"
+            assert names_by_repo_path[resolved] in task_item.get("inputs", []), (
+                f"task {task_item['task_id']} does not bind authority ref as an input: {reference}"
+            )
+
+    imported_names = {item["name"] for item in manifest["assets"]}
+    assert "jensen-source-video" not in imported_names
+    assert "ipos-ready-for-video-bundle" not in imported_names
