@@ -194,7 +194,11 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
     }), encoding="utf-8")
     assert main(["--root", str(workspace), "import-manifest", "demo", str(broken)]) == 2
     capsys.readouterr()
-    assert all(item["name"] != "new-valid" for item in engine.list_artifacts("demo"))
+    with engine._connect("demo") as connection:
+        absent = connection.execute(
+            "SELECT 1 FROM artifacts WHERE project_id='demo' AND name='new-valid' LIMIT 1"
+        ).fetchone()
+    assert absent is None
 
 
 def test_claim_token_and_lease_prevent_stale_worker_completion(tmp_path, monkeypatch):
