@@ -1088,6 +1088,9 @@ class StudioEngine:
         directory = self._project_dir(project_id) / "assets"
         directory.mkdir(parents=True, exist_ok=True)
         safe_name = _safe_id(name, "artifact name")
+        source_digest = _sha256(source)
+        metadata_payload = metadata or {}
+        metadata_json = _json(metadata_payload)
         destination: Path | None = None
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
@@ -1102,6 +1105,27 @@ class StudioEngine:
                     "SELECT * FROM artifacts WHERE project_id=? AND name=? AND status IN ('CURRENT','ACCEPTED')",
                     (project_id, safe_name),
                 ).fetchall()
+                for previous in previous_rows:
+                    previous_path = self._project_dir(project_id) / previous["relative_path"]
+                    if (
+                        previous["sha256"] == source_digest
+                        and previous["kind"] == kind
+                        and previous["media_type"] == media_type
+                        and previous["rights_status"] == rights_status
+                        and previous["metadata_json"] == metadata_json
+                        and previous_path.is_file()
+                        and _sha256(previous_path) == source_digest
+                    ):
+                        connection.commit()
+                        return {
+                            "artifact_id": previous["artifact_id"], "name": previous["name"],
+                            "version": previous["version"], "path": str(previous_path),
+                            "sha256": previous["sha256"], "size_bytes": previous["size_bytes"],
+                            "media_type": previous["media_type"], "kind": previous["kind"],
+                            "rights_status": previous["rights_status"], "producer_id": previous["producer_id"],
+                            "produced_by_task": previous["produced_by_task"],
+                            "metadata": _loads(previous["metadata_json"], {}),
+                        }
                 if previous_rows:
                     # A new source version revokes every task that declared or actually
                     # consumed the old version, including RUNNING leases and descendants.
@@ -1173,7 +1197,7 @@ class StudioEngine:
                     connection, project_id, safe_name, destination, kind=kind,
                     media_type=media_type, rights_status=rights_status,
                     producer_id="owner-import", produced_by_task=None,
-                    metadata=metadata or {},
+                    metadata=metadata_payload,
                 )
                 self._event(connection, project_id, "ARTIFACT", artifact["artifact_id"], "ASSET_IMPORTED", artifact)
                 self._refresh_in_tx(connection, project_id)
