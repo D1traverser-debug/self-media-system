@@ -995,6 +995,7 @@ class StudioEngine:
                     "path": str(self._project_dir(project_id) / row["relative_path"]),
                     "sha256": row["sha256"], "kind": row["kind"], "media_type": row["media_type"],
                     "rights_status": row["rights_status"], "metadata": _loads(row["metadata_json"], {}),
+                    "producer_id": row["producer_id"], "produced_by_task": row["produced_by_task"],
                 }
                 for row in rows
             }
