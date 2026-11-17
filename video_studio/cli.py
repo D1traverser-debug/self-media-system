@@ -61,6 +61,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--rights-status", choices=["OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN", "UNKNOWN", "NOT_APPLICABLE"], default="UNKNOWN")
     p.add_argument("--metadata", type=Path)
 
+    p = sub.add_parser("import-manifest", help="preflight and import a set of source/context assets from a JSON manifest")
+    p.add_argument("project_id")
+    p.add_argument("manifest", type=Path, help="JSON manifest; relative asset paths resolve from the manifest directory")
+
     p = sub.add_parser("status", help="show project and task readiness")
     p.add_argument("project_id")
 
@@ -205,6 +209,68 @@ def main(argv: list[str] | None = None) -> int:
             _emit(engine.import_asset(args.project_id, args.name, args.source_path,
                                       kind=args.kind, media_type=args.media_type,
                                       rights_status=args.rights_status, metadata=metadata))
+        elif command == "import-manifest":
+            manifest_path = args.manifest.expanduser().resolve(strict=True)
+            manifest = _read_json(manifest_path)
+            if not isinstance(manifest, dict) or manifest.get("schema_version") != "1.0":
+                raise StudioError("asset import manifest must be an object with schema_version 1.0")
+            entries = manifest.get("assets")
+            if not isinstance(entries, list) or not entries:
+                raise StudioError("asset import manifest must contain a non-empty assets array")
+            prepared = []
+            seen_names: set[str] = set()
+            for index, entry in enumerate(entries):
+                if not isinstance(entry, dict):
+                    raise StudioError(f"asset import manifest entry {index} must be an object")
+                name = entry.get("name")
+                relative_path = entry.get("path")
+                kind = entry.get("kind", "source")
+                media_type = entry.get("media_type", "application/octet-stream")
+                rights_status = entry.get("rights_status", "UNKNOWN")
+                metadata = entry.get("metadata", {})
+                if not isinstance(name, str) or not name.strip():
+                    raise StudioError(f"asset import manifest entry {index} requires a non-empty name")
+                if name in seen_names:
+                    raise StudioError(f"asset import manifest contains duplicate name: {name}")
+                seen_names.add(name)
+                if not isinstance(relative_path, str) or not relative_path.strip():
+                    raise StudioError(f"asset import manifest entry {index} requires a path")
+                if not isinstance(kind, str) or not kind.strip() or not isinstance(media_type, str) or not media_type.strip():
+                    raise StudioError(f"asset import manifest entry {index} has invalid kind/media_type")
+                if not isinstance(rights_status, str) or not isinstance(metadata, dict):
+                    raise StudioError(f"asset import manifest entry {index} has invalid rights_status/metadata")
+                source = Path(relative_path).expanduser()
+                if not source.is_absolute():
+                    source = manifest_path.parent / source
+                source = source.resolve(strict=True)
+                if not source.is_file():
+                    raise StudioError(f"asset import source is not a regular file: {source}")
+                prepared.append({
+                    "name": name, "source": source, "kind": kind,
+                    "media_type": media_type, "rights_status": rights_status,
+                    "metadata": metadata,
+                })
+            reserved_outputs = {
+                output_name
+                for task in engine.list_tasks(args.project_id)
+                for output_name in task.get("outputs", [])
+            }
+            collisions = sorted(seen_names & reserved_outputs)
+            if collisions:
+                raise StudioError(f"manifest asset names are reserved as task outputs: {collisions}")
+            imported = [
+                engine.import_asset(
+                    args.project_id, item["name"], item["source"],
+                    kind=item["kind"], media_type=item["media_type"],
+                    rights_status=item["rights_status"], metadata=item["metadata"],
+                )
+                for item in prepared
+            ]
+            _emit({
+                "manifest": str(manifest_path),
+                "asset_count": len(imported),
+                "artifacts": imported,
+            })
         elif command == "status":
             _emit(engine.status(args.project_id))
         elif command == "resume":
