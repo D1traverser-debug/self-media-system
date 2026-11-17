@@ -234,7 +234,7 @@ Create exactly one square 1:1 editorial illustration for an English-language X p
 
 Show one dusty Gold Rush-era storefront with one service counter. Behind the counter stands exactly one recognizable editorial caricature of Jensen Huang: swept-back dark hair, round face, black leather jacket. He appears only once in the entire image. Do not show his portrait, reflection, mirror image, poster or duplicate.
 
-In front of the counter stands exactly one AI infrastructure builder dressed as a gold miner, seen in three-quarter view. Jensen presents two distinct objects to this same builder: in his left hand, one rolled financing document; in his right hand, one shovel whose blade is clearly shaped like a generic green GPU circuit card. The builder reaches toward both offers, making the two roles visible in one glance: capital for the AI buildout and hardware for the buildout.
+In front of the counter stands exactly one AI infrastructure builder dressed as a gold miner, seen in three-quarter view. Jensen presents two distinct objects to this same builder: in his left hand, one rolled financing document; in his right hand, one shovel whose blade is clearly shaped like a generic green GPU circuit card. The builder's left hand reaches toward the financing document; the builder's right hand reaches toward the GPU shovel. Keep both pairs of hands separate and fully visible. The two offers make the overlapping roles visible in one glance: capital for the AI buildout and hardware for the buildout.
 
 Behind Jensen, place exactly three simple stone bank columns as a background architectural motif. They suggest that the financing environment includes a wider lender consortium; they are not additional people or separate banks. The counter is one continuous solid structure. The financing document and GPU shovel are held clearly apart, with no overlap that obscures either silhouette.
 
@@ -263,7 +263,7 @@ Exactly one Jensen Huang, one infrastructure builder, one financing document, on
 - Thesis: two semiconductor-related stories in one article are not one legal case.
 - Joke mechanism: visual pun / bureaucratic absurdity.
 - First read: a giant stapler is trying to merge two separate case files, but a red divider physically prevents it.
-- Art direction: concise Chinese one-panel social-cartoon logic associated with Hua Junwu's dry visual reversal, rendered with disciplined Ding Cong-like contour hierarchy; clean forms and one red accent, without copying either artist.
+- Art direction: minimalist geometric legal editorial print; Hua Junwu's concise one-panel reversal informs the joke structure, while the visual surface uses hard-edged vector shapes, strict alignment and one vermilion divider.
 - Post-production caption: **TWO CASES. DON'T STAPLE THEM TOGETHER.**
 - Suggested X copy: “Megaspeed is under investigation. Individuals were charged in the separate Super Micro case; Super Micro itself was not charged.”
 
@@ -282,7 +282,7 @@ Above the left folder, place one large magnifying glass, symbolizing an ongoing 
 
 One oversized black office stapler rests flat on the desk at the top center, with its nose aimed toward the gap between the two folders. The red divider stands directly in front of the stapler's nose and physically blocks it from reaching either folder. The stapler must rest on the desk; it must not float or touch either folder. The visual joke is that two different legal matters are being carelessly stapled into one story, and the divider refuses to let them merge.
 
-Keep the composition simple and almost diagrammatic but still a single editorial scene, not an infographic. Use a concise Chinese editorial ink-cartoon language: clean economical contours, clear black-white-gray separation, one dry visual reversal, generous paper space and one strong vermilion divider. Keep the folders as simple recognizable masses; reserve the strongest line contrast for the stapler nose and the divider that blocks it. Make the two files, magnifying glass, three-person sheet and grounded stapler readable at thumbnail size.
+Keep the composition simple and almost diagrammatic but still a single editorial scene, not an infographic. Use a minimalist geometric editorial-print language: hard-edged vector shapes, clean flat planes, precise alignment, generous cream negative space, charcoal and muted gray, with one strong vermilion divider. Keep the folders as simple recognizable masses; reserve the strongest contrast for the stapler nose and the divider that blocks it. Make the two files, magnifying glass, three-person sheet and grounded stapler readable at thumbnail size.
 
 Reserve a small blank area above the desk for post-production caption text. Generate no lettering.
 
