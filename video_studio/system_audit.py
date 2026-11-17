@@ -79,6 +79,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         studio_manifest = _read_json(root / "video_studio" / "data" / "studio_manifest.json")
         program_brief = _read_json(root / "examples" / "ai-self-media-commercialization.brief.json")
         program_tasks = _read_json(root / "examples" / "ai-self-media-commercialization.tasks.json")
+        episode_tasks = _read_json(root / "examples" / "program-linked-episode.tasks.json")
         context_path = root / "examples" / "ai-self-media-commercialization.context.json"
         context_manifest = _read_json(context_path)
         business_flywheel = _read_json(root / "projects" / "ai-self-media-commercialization" / "BUSINESS_FLYWHEEL.json")
@@ -119,7 +120,11 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
 
     scripts = pyproject.get("project", {}).get("scripts", {})
     cli_source = (root / "video_studio" / "cli.py").read_text(encoding="utf-8")
-    cli_registered = scripts.get("vga-studio") == "video_studio.cli:main" and "system-audit" in cli_source and "import-manifest" in cli_source
+    cli_registered = (
+        scripts.get("vga-studio") == "video_studio.cli:main"
+        and "system-audit" in cli_source and "import-manifest" in cli_source
+        and "transfer-asset" in cli_source and hasattr(StudioEngine, "transfer_artifact")
+    )
     _check(checks, "standalone_cli_registration", cli_registered, scripts)
 
     import_failures: list[str] = []
@@ -220,6 +225,42 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
             elif producer not in loop_task_ids:
                 flywheel_failures.append(f"{loop_name}: producer {producer} for {artifact_name} is not in the loop task set")
     _check(checks, "cross_workstream_flywheel_handoffs_resolve", not flywheel_failures, flywheel_failures)
+
+    program_handoff_validator = next(
+        (task for task in program_tasks if task.get("task_id") == "validate-episode-production-handoff"), {}
+    )
+    episode_handoff_validator = next(
+        (task for task in episode_tasks if task.get("task_id") == "validate-program-handoff"), {}
+    )
+    program_handoff_outputs = set(program_handoff_validator.get("outputs", []))
+    episode_handoff_inputs = set(episode_handoff_validator.get("inputs", []))
+    source_artifact_inputs = set(
+        program_handoff_validator.get("requirements", {}).get("domain_adapter", {}).get("source_artifact_inputs", [])
+    )
+    expected_source_artifact_inputs = {
+        "portfolio-allocation-decision", "pilot-topic-slate-decision",
+        "production-strategy", "commercial-production-constraints", "growth-baseline",
+    }
+    cross_project_handoff_failures = []
+    if program_handoff_outputs != {"validated-episode-intent"}:
+        cross_project_handoff_failures.append(f"Program validator must emit validated-episode-intent: {sorted(program_handoff_outputs)}")
+    if episode_handoff_inputs != program_handoff_outputs:
+        cross_project_handoff_failures.append(
+            f"Episode input names must exactly match Program output names: {sorted(episode_handoff_inputs)} != {sorted(program_handoff_outputs)}"
+        )
+    if source_artifact_inputs != expected_source_artifact_inputs:
+        cross_project_handoff_failures.append(f"Program source artifact binding set is incomplete: {sorted(source_artifact_inputs)}")
+    episode_adapter = episode_handoff_validator.get("requirements", {}).get("domain_adapter", {})
+    if episode_adapter.get("require_validated_transfer") is not True:
+        cross_project_handoff_failures.append("Episode validator must require immutable validated cross-project transfer metadata")
+    if episode_adapter.get("handoff_input") != "validated-episode-intent":
+        cross_project_handoff_failures.append("Episode validator input binding does not match the canonical Program handoff")
+    _check(checks, "cross_project_program_episode_handoff_contract", not cross_project_handoff_failures, {
+        "program_outputs": sorted(program_handoff_outputs),
+        "episode_inputs": sorted(episode_handoff_inputs),
+        "source_artifact_inputs": sorted(source_artifact_inputs),
+        "failures": cross_project_handoff_failures,
+    })
 
     from .production.registry import PRODUCTION_EXECUTORS
 

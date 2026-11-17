@@ -381,7 +381,7 @@ def test_episode_intent_validate_adapter_checks_real_source_bindings_and_cross_p
     assert validated["episode_id"] == "E001"
     assert validated["identity_usage"]["mode"] == "NON_CHARACTER"
     assert validated["source_validation"]["status"] == "PASS"
-    assert validated["source_validation"]["source_artifact_bindings"] == bindings
+    assert validated["source_validation"]["source_artifact_bindings"] == sorted(bindings, key=lambda item: item["name"])
     assert validated["handoff_type"] == "VIDEO_PROGRAM_TO_EPISODE"
     assert engine.audit("program")["pass"] is True
 

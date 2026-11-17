@@ -112,6 +112,18 @@ def test_program_task_graph_and_cross_workstream_handoffs_share_one_current_auth
             assert producers[artifact] in loop["task_ids"], (loop_name, artifact, producers[artifact])
     assert "episode-outcome-analysis" in flywheel["execution_bindings"]["AUDIENCE_TO_PORTFOLIO"]["task_ids"]
     assert "validated-episode-intent" in flywheel["execution_bindings"]["COMMERCIAL_TO_PRODUCTION"]["handoff_artifacts"]
+    program_validator = next(item for item in tasks if item["task_id"] == "validate-episode-production-handoff")
+    episode_tasks = json.loads((ROOT / "examples/program-linked-episode.tasks.json").read_text(encoding="utf-8"))
+    episode_validator = next(item for item in episode_tasks if item["task_id"] == "validate-program-handoff")
+    program_output = program_validator["outputs"][0]
+    assert program_output == "validated-episode-intent"
+    assert episode_validator["inputs"] == [program_output]
+    assert episode_validator["requirements"]["domain_adapter"]["require_validated_transfer"] is True
+    assert set(program_validator["requirements"]["domain_adapter"]["source_artifact_inputs"]) == {
+        "portfolio-allocation-decision", "pilot-topic-slate-decision", "production-strategy",
+        "commercial-production-constraints", "growth-baseline",
+    }
+    assert flywheel["execution_bindings"]["IP_TO_PRODUCTION"]["mode"].endswith("SHOT_BINDING_REMAINS_EPISODE_SCOPED")
 
 
 def test_example_briefs_preserve_nonnegotiable_video_release_gates():

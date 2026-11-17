@@ -47,6 +47,9 @@ vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI
 # Import exact source/context files before planning; paths resolve from the manifest directory
 vga-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
 
+# Transfer the exact validated Program handoff into an Episode project:
+vga-studio --root ./studio-work transfer-asset ai-self-media-commercialization validated-episode-intent episode-001 validated-episode-intent --expected-artifact-id ARTIFACT_ID --expected-version 1 --expected-sha256 SHA256
+
 # Add the canonical 50-task graph and inspect which independent lanes are ready
 vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
 vga-studio --root ./studio-work status ai-self-media-commercialization
