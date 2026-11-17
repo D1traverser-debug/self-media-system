@@ -118,6 +118,85 @@ def test_missing_input_waits_until_asset_is_imported(tmp_path):
     assert engine.list_tasks("demo")[0]["status"] == "READY"
 
 
+def test_identical_asset_reimport_is_idempotent_and_preserves_completed_consumers(tmp_path):
+    engine = make_engine(tmp_path)
+    source = tmp_path / "source.txt"
+    source.write_text("same source bytes", encoding="utf-8")
+    metadata = {"rights_evidence_refs": ["https://rights.example/license/1"]}
+    first = engine.import_asset(
+        "demo", "source-evidence", source, kind="evidence",
+        media_type="text/plain", rights_status="NOT_APPLICABLE", metadata=metadata,
+    )
+    engine.add_tasks("demo", [task("consume-source", inputs=["source-evidence"])])
+    complete(engine, tmp_path, "consume-source", "worker-a")
+
+    repeated = engine.import_asset(
+        "demo", "source-evidence", source, kind="evidence",
+        media_type="text/plain", rights_status="NOT_APPLICABLE", metadata=metadata,
+    )
+    assert repeated["artifact_id"] == first["artifact_id"]
+    assert repeated["version"] == first["version"] == 1
+    assert engine.list_tasks("demo")[0]["status"] == "COMPLETED"
+
+
+def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(tmp_path, capsys):
+    from video_studio.cli import main
+
+    workspace = tmp_path / "workspace"
+    engine = StudioEngine(workspace)
+    engine.create_project("demo", "Manifest import", brief())
+    repo = tmp_path / "repo"
+    examples = repo / "examples"
+    projects = repo / "projects"
+    examples.mkdir(parents=True)
+    projects.mkdir(parents=True)
+    (projects / "program-state.json").write_text('{"revision": 3}', encoding="utf-8")
+    (projects / "business-flywheel.md").write_text("# Business flywheel", encoding="utf-8")
+    manifest = examples / "context.json"
+    manifest.write_text(json.dumps({
+        "schema_version": "1.0",
+        "assets": [
+            {
+                "name": "program-state", "path": "../projects/program-state.json",
+                "kind": "document", "media_type": "application/json",
+                "rights_status": "NOT_APPLICABLE",
+            },
+            {
+                "name": "business-flywheel", "path": "../projects/business-flywheel.md",
+                "kind": "document", "media_type": "text/markdown",
+                "rights_status": "NOT_APPLICABLE",
+            },
+        ],
+    }), encoding="utf-8")
+
+    assert main(["--root", str(workspace), "import-manifest", "demo", str(manifest)]) == 0
+    first_output = json.loads(capsys.readouterr().out)
+    assert first_output["asset_count"] == 2
+    first_ids = {item["name"]: item["artifact_id"] for item in first_output["artifacts"]}
+
+    engine.add_tasks("demo", [task("read-context", inputs=["program-state", "business-flywheel"])])
+    assert engine.list_tasks("demo")[0]["status"] == "READY"
+
+    assert main(["--root", str(workspace), "import-manifest", "demo", str(manifest)]) == 0
+    second_output = json.loads(capsys.readouterr().out)
+    second_ids = {item["name"]: item["artifact_id"] for item in second_output["artifacts"]}
+    assert second_ids == first_ids
+    assert {item["version"] for item in second_output["artifacts"]} == {1}
+    assert engine.list_tasks("demo")[0]["status"] == "READY"
+
+    broken = examples / "broken-context.json"
+    broken.write_text(json.dumps({
+        "schema_version": "1.0",
+        "assets": [
+            {"name": "new-valid", "path": "../projects/program-state.json"},
+            {"name": "missing", "path": "../projects/missing.json"},
+        ],
+    }), encoding="utf-8")
+    assert main(["--root", str(workspace), "import-manifest", "demo", str(broken)]) == 2
+    capsys.readouterr()
+    assert all(item["name"] != "new-valid" for item in engine.list_artifacts("demo"))
+
+
 def test_claim_token_and_lease_prevent_stale_worker_completion(tmp_path, monkeypatch):
     engine = make_engine(tmp_path)
     engine.add_tasks("demo", [task("render")])
