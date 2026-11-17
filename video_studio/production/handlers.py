@@ -42,6 +42,31 @@ def _validate_render_rights_clearance(
     reviewer_id = payload.get("reviewer_id")
     if not isinstance(reviewer_id, str) or not reviewer_id.strip():
         raise ProductionContractError("rights clearance must identify the human reviewer")
+    if reviewer_id != clearance.get("producer_id"):
+        raise ProductionContractError("rights clearance reviewer_id must match the clearance artifact producer_id")
+    clearance_task_id = clearance.get("produced_by_task")
+    clearance_artifact_id = clearance.get("artifact_id")
+    if not isinstance(clearance_task_id, str) or not clearance_task_id.strip():
+        raise ProductionContractError("rights clearance must be produced by a completed human rights review task")
+    if not isinstance(clearance_artifact_id, str) or not clearance_artifact_id.strip():
+        raise ProductionContractError("rights clearance artifact identity is missing")
+    task_rows = context.engine.list_tasks(context.project_id)
+    clearance_task = next(
+        (item for item in task_rows if item.get("task_id") == clearance_task_id),
+        None,
+    )
+    task_outputs = (
+        clearance_task.get("result", {}).get("outputs", {})
+        if isinstance(clearance_task, Mapping) and isinstance(clearance_task.get("result"), Mapping)
+        else {}
+    )
+    if (
+        not isinstance(clearance_task, Mapping)
+        or clearance_task.get("executor") != "human"
+        or clearance_task.get("status") != "COMPLETED"
+        or clearance_artifact_id not in (task_outputs.values() if isinstance(task_outputs, Mapping) else [])
+    ):
+        raise ProductionContractError("rights clearance must be produced by a completed human rights review task")
     used_names = list(dict.fromkeys(
         [clip.input_name for clip in spec.clips] + [track.input_name for track in spec.audio_tracks]
     ))
