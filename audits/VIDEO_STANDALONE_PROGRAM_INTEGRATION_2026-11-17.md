@@ -4,8 +4,8 @@ Date: 2026-11-17
 Owner: DOMAIN:video
 Candidate: V-20261117-01-STANDALONE-VIDEO-STUDIO-INTEGRATED-PROGRAM
 Branch: `refactor/video-production-integrated-20261117`
-Verified code head before continuation-record updates: `3e823be92de41d9642a40292863689a7a68a0fd6`
-Exact-head CI: [run 44006872263](https://github.com/D1traverser-debug/video-growth-agent/actions/runs/44006872263)
+Verified implementation head: `1893dfc911e4673ef2c7d01f34c502d39ffcad09`
+Exact-head CI: [PR run 44034062243](https://github.com/D1traverser-debug/video-growth-agent/actions/runs/44034062243) and [push run 44034068441](https://github.com/D1traverser-debug/video-growth-agent/actions/runs/44034068441)
 
 ## 1. Decision
 
@@ -49,6 +49,10 @@ Individual tests and smoke commands did not provide one stable command distingui
 
 **Change:** `vga-studio system-audit --repo-root .` checks standalone entry/governance, runtime dependency boundaries, adapter registration, local production executors, digest-bound Program authority inputs, example graph execution/readiness and hard release gates. It performs no paid provider call and mutates no user workspace.
 
+The audit now also checks exact equality across the 17 supported, implemented and manifest-declared domain adapters; all 6 Program tool tasks resolve to registered executors; all 10 Business Flywheel loops reference existing tasks and producer-owned handoff artifacts; and the 50-task DAG has 85 valid dependency edges with no cycles or unbound task-produced inputs. The only three unresolved inputs are intentional owner/external inputs: the IPOS READY_FOR_VIDEO bundle, Jensen/Alice source video and episode outcome receipt.
+
+The audit executes the local MediaGraph bootstrap adapter in a temporary workspace and confirms the downstream IPOS import remains WAITING_INPUT until the approved bundle exists. The Program-to-Episode handoff now has a deterministic typed EpisodeIntent validator, and IPOS readiness validation checks the exact import receipt, bundle digest and promoted MediaGraph versions. Program-level tasks no longer claim shot-specific bindings without an actual ShotContract.
+
 The audit returns:
 - structural status: PASS;
 - production readiness: PARTIAL;
@@ -76,12 +80,13 @@ Independent growth, advertiser, production-economics, provider-benchmark and Jen
 
 ## 4. Exact verification
 
-CI run `44006872263`, exact tested head `3e823be92de41d9642a40292863689a7a68a0fd6`:
+Exact code head `1893dfc911e4673ef2c7d01f34c502d39ffcad09`, PR CI run `44034062243` and push CI run `44034068441`:
 
-- pytest: **343 passed**;
+- pytest: **347 passed**;
 - standalone Video Studio system audit: PASS;
 - standalone Video Studio CLI smoke: PASS;
-- integrated Program context/readiness smoke: PASS;
+- integrated 50-task Program context/readiness smoke: PASS;
+- Program local tool-execution smoke: PASS;
 - installed agentic CLI smoke: PASS.
 
 The system-audit regression also verifies that production readiness is PARTIAL and that no CAOS dependency, paid provider call or automatic publication is asserted.
@@ -107,4 +112,4 @@ The system-audit regression also verifies that production readiness is PARTIAL a
 
 ## 7. PR status
 
-The integrated branch contains the prior standalone hard-gate work plus 42 additional commits that close the context, provenance, default Program and system-audit gaps. It is intended to supersede the earlier PR #36, not to merge around its hard gates. The consolidated PR is #37. Mainline merge and post-merge verification remain separate from the branch CI evidence above.
+The integrated branch consolidates the standalone control plane, digest-bound context import, immutable artifact provenance, the 50-task Program DAG, exact adapter/tool executor registry, cross-workstream flywheel validation, IPOS readiness/provenance validation and typed Program-to-Episode handoff. PR #37 remains OPEN and supersedes PR #36. Mainline merge and post-merge verification remain separate from the exact-head branch CI evidence above.

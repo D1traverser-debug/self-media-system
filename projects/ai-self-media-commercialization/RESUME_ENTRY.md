@@ -140,9 +140,9 @@ Outputs and MediaGraph registrations remain CANDIDATE only. No promotion/release
 
 ## Standalone Video Studio — current continuation point (2026-11-17)
 
-Default generic Video entry is now `STUDIO_ENTRY.md`; canonical runtime is `video_studio/`; CLI is `vga-studio`. Continue from branch `refactor/video-production-integrated-20261117`, exact verified head `3e823be92de41d9642a40292863689a7a68a0fd6`.
+Default generic Video entry is now `STUDIO_ENTRY.md`; canonical runtime is `video_studio/`; CLI is `vga-studio`. Continue from branch `refactor/video-production-integrated-20261117`, verified implementation head `1893dfc911e4673ef2c7d01f34c502d39ffcad09`.
 
-Exact-head CI run `44006872263` passed: 343 tests, standalone system audit, standalone CLI smoke, integrated 50-task Program context/readiness and local-tool execution smoke and installed agentic CLI smoke. Structural status PASS; production readiness deliberately remains PARTIAL.
+Exact-head PR CI run `44034062243` and push CI run `44034068441` passed: 347 tests, standalone system audit, standalone CLI smoke, integrated 50-task Program context/readiness smoke, local tool-execution smoke and installed agentic CLI smoke. Structural status PASS; production readiness deliberately remains PARTIAL.
 
 Read these first:
 1. `STUDIO_ENTRY.md`
@@ -152,7 +152,7 @@ Read these first:
 5. `video_studio/system_audit.py`
 6. `docs/standalone_video_studio.md`
 
-The default Program context is imported as immutable, digest-bound artifacts. The manifest preflights all entries and identical re-imports are idempotent. Task authority references are bound as actual task inputs. Rights clearance requires a completed human rights-review task and exact artifact/digest/evidence matches.
+The default Program context is imported as immutable, digest-bound artifacts. The manifest preflights all entries and identical re-imports are idempotent. Task authority references are bound as actual task inputs. Rights clearance requires a completed human rights-review task and exact artifact/digest/evidence matches. The current DAG also verifies typed CommercialFit, exact IPOS bundle/import provenance, and the Program-to-Episode EpisodeIntent handoff. Cross-workstream feedback artifacts are checked against their actual producer tasks.
 
 Remaining external dependencies are explicit, not software defects to bypass:
 - owner-supplied Jensen/Alice source video;

@@ -2,25 +2,25 @@
   "schema_version": "1.2",
   "owner": "DOMAIN:video",
   "revision": "2.1",
-  "updated_at": "2026-11-17T03:09:00+08:00",
+  "updated_at": "2026-11-17",
   "current_open_items": [],
   "current_problem_refs": {},
   "current_resume_ref": "projects/ai-self-media-commercialization/RESUME_ENTRY.md",
   "current_candidate": {
     "id": "V-20261117-01-STANDALONE-VIDEO-STUDIO-INTEGRATED-PROGRAM",
     "ref": "audits/VIDEO_STANDALONE_PROGRAM_INTEGRATION_2026-11-17.md",
-    "status": "PR_OPEN__FINAL_HEAD_CI_PASS__PRODUCTION_READINESS_PARTIAL",
-    "failure_class": "FC-ARTIFACT-PROVENANCE-UNDERBOUND__FC-CONTEXT-IMPORT-NONIDEMPOTENT__FC-AUTHORITY-REFS-DESCRIPTIVE__FC-STANDALONE-READINESS-AUDIT-MISSING",
-    "selected_architecture": "NATIVE_STANDALONE_VIDEO_STUDIO__DIGEST_BOUND_CONTEXT__IDEMPOTENT_IMPORT__HUMAN_REVIEW_PROVENANCE__EXECUTABLE_SYSTEM_AUDIT__35_TASK_INTEGRATED_PROGRAM",
+    "status": "PR_OPEN__EXACT_IMPLEMENTATION_HEAD_CI_PASS__347_TESTS__PRODUCTION_READINESS_PARTIAL",
+    "failure_class": "FC-ARTIFACT-PROVENANCE-UNDERBOUND__FC-CONTEXT-IMPORT-NONIDEMPOTENT__FC-AUTHORITY-REFS-DESCRIPTIVE__FC-STANDALONE-READINESS-AUDIT-MISSING__FC_PROGRAM_TOOL_EXECUTOR_BINDINGS__FC_CROSS_WORKSTREAM_HANDOFF_DRIFT__FC_IPOS_SHOT_BINDING_OVERCLAIM",
+    "selected_architecture": "NATIVE_STANDALONE_VIDEO_STUDIO__DIGEST_BOUND_CONTEXT__IDEMPOTENT_IMPORT__HUMAN_REVIEW_PROVENANCE__EXECUTABLE_SYSTEM_AUDIT__50_TASK_INTEGRATED_PROGRAM",
     "candidate_pr": 37,
     "candidate_branch": "refactor/video-production-integrated-20261117",
-    "candidate_head": "bd40a7c2774e0c1e3bf80a29e913b513b954942f",
-    "last_verified_code_head": "3e823be92de41d9642a40292863689a7a68a0fd6",
-    "last_verified_ci_run": 44006872263,
-    "last_verified_test_count": 343,
-    "last_verified_assurance": "PASS__343_TESTS__SYSTEM_AUDIT_PASS__STANDALONE_CLI_SMOKE_PASS__PROGRAM_CONTEXT_SMOKE_PASS__INSTALLED_AGENTIC_CLI_SMOKE_PASS",
-    "final_head_ci_run": 44007828911,
-    "final_head_ci_status": "PASS__343_TESTS__SYSTEM_AUDIT_PASS__STANDALONE_CLI_SMOKE_PASS__PROGRAM_CONTEXT_SMOKE_PASS__INSTALLED_AGENTIC_CLI_SMOKE_PASS",
+    "candidate_head": "1893dfc911e4673ef2c7d01f34c502d39ffcad09",
+    "last_verified_code_head": "1893dfc911e4673ef2c7d01f34c502d39ffcad09",
+    "last_verified_ci_run": 44034068441,
+    "last_verified_test_count": 347,
+    "last_verified_assurance": "PASS__347_TESTS__SYSTEM_AUDIT_PASS__50_TASK_PROGRAM_SMOKE_PASS__LOCAL_TOOL_EXECUTION_PASS__INSTALLED_CLI_SMOKE_PASS__PRODUCTION_READINESS_PARTIAL",
+    "final_head_ci_run": 44034068441,
+    "final_head_ci_status": "PASS__347_TESTS__SYSTEM_AUDIT_PASS__50_TASK_PROGRAM_SMOKE_PASS__LOCAL_TOOL_EXECUTION_PASS__INSTALLED_CLI_SMOKE_PASS__PRODUCTION_READINESS_PARTIAL",
     "structural_status": "PASS",
     "production_readiness": "PARTIAL",
     "resolved_findings": [
@@ -29,17 +29,24 @@
       "identical asset imports are idempotent and preserve valid downstream consumers",
       "manifest import preflights all files and metadata before any mutation",
       "Program authority references are imported and bound as digest-verified task inputs",
-      "default generic Video entry selects the integrated 35-task Program",
       "repository system audit separates structural integrity from actual production readiness",
-      "missing Jensen/Alice source media and approved IPOS bundle remain fail-closed inputs"
+      "missing Jensen/Alice source media and approved IPOS bundle remain fail-closed inputs",
+      "default Program uses the canonical 50-task DAG rather than the superseded 0.8 SUBTASK_GRAPH reference",
+      "all 17 supported domain adapters exactly match manifest declarations and executable implementations",
+      "all 6 Program tool tasks resolve to registered local adapters/executors",
+      "all 10 cross-workstream flywheel loops resolve their task IDs and producer-owned handoff artifacts",
+      "Program DAG has 85 dependency edges, no cycles, and no task-produced input without a declared producer ancestor",
+      "IPOS bundle readiness verifies the exact import receipt, bundle digest and promoted MediaGraph reference versions",
+      "Program-to-Episode handoff is validated through a deterministic typed EpisodeIntent adapter",
+      "Program local MediaGraph bootstrap is executed in the temporary system-audit smoke"
     ],
     "pending_findings": [
-      "current provider capability handshake and real media execution",
-      "owner-supplied Jensen/Alice source video and approved IPOS READY_FOR_VIDEO bundle",
-      "real episode acceptance through editorial, rights, technical QA, human cold-read, Red Team, platform disclosure and release"
+      "current provider capability handshake and real generative-video/media execution",
+      "owner-supplied Jensen/Alice source video and owner-approved IPOS READY_FOR_VIDEO bundle",
+      "actual episode outcome receipt and end-to-end episode acceptance through editorial, rights, technical QA, human cold-read, Red Team, platform disclosure and release"
     ],
-    "result": "PASS_BRANCH_CI__PRODUCTION_READINESS_PARTIAL",
-    "next_action": "Run independent Program research lanes and acquire the missing owner-controlled source media and IPOS bundle. Verify provider capability, rights and cost before generation. Do not bypass human review or release gates.",
+    "result": "PASS_EXACT_IMPLEMENTATION_HEAD_CI__347_TESTS__50_TASK_PROGRAM__PRODUCTION_READINESS_PARTIAL",
+    "next_action": "Continue independent growth, advertiser, production-economics and provider-benchmark lanes. Acquire the owner-controlled Jensen/Alice source media and IPOS READY_FOR_VIDEO bundle; execute a real episode only after provider capability, rights and cost admission.",
     "hard_boundaries": [
       "CAOS repository/source/Skills/configuration/PRs untouched",
       "IPOS remains sole identity authority and its canon is not modified",
@@ -49,8 +56,11 @@
     "ci_runs": [
       44006872263,
       44007736058,
-      44007828911
-    ]
+      44007828911,
+      44034062243,
+      44034068441
+    ],
+    "assurance": "PASS__347_TESTS__SYSTEM_AUDIT_PASS__50_TASK_PROGRAM_SMOKE_PASS__LOCAL_TOOL_EXECUTION_PASS__INSTALLED_CLI_SMOKE_PASS__PRODUCTION_READINESS_PARTIAL"
   },
   "recent_resolved_or_promoted": [
     {
@@ -233,7 +243,7 @@
     "audits/VIDEO_DOMAIN_PRODUCT_ORCHESTRATION_AUDIT_2026-10-15.md",
     "projects/pilot-002/PROGRAM_STATE.json"
   ],
-  "assurance": "STANDALONE_VIDEO_STUDIO_INTEGRATED_PROGRAM_PR37__FINAL_HEAD_CI_PASS_343_TESTS_AND_SYSTEM_AUDIT_PASS__PRODUCTION_READINESS_PARTIAL__CAOS_UNTOUCHED__IPOS_CANON_UNCHANGED",
+  "assurance": "STANDALONE_VIDEO_STUDIO_50_TASK_PROGRAM__EXACT_IMPLEMENTATION_HEAD_CI_PASS_347_TESTS__SYSTEM_AUDIT_AND_SMOKES_PASS__PRODUCTION_READINESS_PARTIAL",
   "governance_binding": {
     "system": "CAOS",
     "source_repository": "D1traverser-debug/cognition-agent-os",
