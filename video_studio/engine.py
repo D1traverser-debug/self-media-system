@@ -863,7 +863,10 @@ class StudioEngine:
             "instructions": "Produce only the declared outputs. Preserve source truth, provenance and rights. If the task cannot meet its acceptance contract, return a structured failure instead of claiming completion.",
         }
 
-    def claim_next(self, project_id: str, worker_id: str, lease_seconds: int = 900) -> dict[str, Any] | None:
+    def claim_next(
+        self, project_id: str, worker_id: str, lease_seconds: int = 900, *,
+        executor: str | None = None, task_id: str | None = None,
+    ) -> dict[str, Any] | None:
         worker_id = _safe_id(worker_id, "worker_id")
         if lease_seconds < 30 or lease_seconds > 86400:
             raise ContractError("lease_seconds must be 30..86400")
@@ -884,10 +887,19 @@ class StudioEngine:
                     )
                     self._event(connection, project_id, "TASK", row["task_id"], "TASK_LEASE_EXPIRED", {"worker_id": row["worker_id"], "attempt": row["attempts"], "next_status": next_status})
                 self._refresh_in_tx(connection, project_id)
-                row = connection.execute(
-                    "SELECT * FROM tasks WHERE project_id=? AND status='READY' ORDER BY priority DESC,created_at,task_id LIMIT 1",
-                    (project_id,),
-                ).fetchone()
+                query = "SELECT * FROM tasks WHERE project_id=? AND status='READY'"
+                query_params: list[Any] = [project_id]
+                if executor is not None:
+                    if executor not in {"agent", "tool", "human", "external"}:
+                        raise ContractError(f"unsupported executor filter: {executor}")
+                    query += " AND executor=?"
+                    query_params.append(executor)
+                if task_id is not None:
+                    task_id = _safe_id(task_id, "task_id")
+                    query += " AND task_id=?"
+                    query_params.append(task_id)
+                query += " ORDER BY priority DESC,created_at,task_id LIMIT 1"
+                row = connection.execute(query, query_params).fetchone()
                 if row is None:
                     connection.commit()
                     return None
@@ -1495,28 +1507,29 @@ class StudioEngine:
                         except (KeyError, TypeError, ValueError, ZeroDivisionError):
                             failures.append(f"review_scorecard_incomplete:{rubric}:{review['review_id']}")
                     min_findings = int(contract.get("min_findings", 0))
-                    if min_findings:
-                        findings = dimensions.get("findings", []) if isinstance(dimensions, dict) else []
-                        if not isinstance(findings, list) or len(findings) < min_findings:
-                            failures.append(f"review_findings_below_minimum:{rubric}:{len(findings) if isinstance(findings, list) else 0}<{min_findings}")
-                        else:
-                            for index, finding in enumerate(findings):
-                                if not isinstance(finding, dict) or not finding.get("finding"):
-                                    failures.append(f"review_finding_incomplete:{rubric}:{index}")
-                                    continue
-                                if contract.get("require_evidence_per_finding") and not finding.get("evidence_ref"):
-                                    failures.append(f"review_finding_evidence_missing:{rubric}:{index}")
-                                if contract.get("require_resolvable_evidence_refs") and finding.get("evidence_ref"):
-                                    if not evidence_artifact_resolves(finding["evidence_ref"]):
-                                        failures.append(f"review_finding_evidence_unresolved:{rubric}:{index}:{finding['evidence_ref']}")
-                                if contract.get("require_disposition_per_finding") and finding.get("disposition") not in {
-                                    "UNRESOLVED", "MITIGATED", "ACCEPTED", "NOT_APPLICABLE",
-                                }:
-                                    failures.append(f"review_finding_disposition_missing:{rubric}:{index}")
-                                severity = str(finding.get("severity", "MEDIUM")).upper()
-                                disposition = finding.get("disposition")
-                                if disposition == "UNRESOLVED" and severity in {"CRITICAL", "HIGH"} and review["outcome"] == "PASS":
-                                    failures.append(f"red_team_unresolved_high_risk:{rubric}:{index}")
+                    findings = dimensions.get("findings", []) if isinstance(dimensions, dict) else []
+                    if min_findings and (not isinstance(findings, list) or len(findings) < min_findings):
+                        failures.append(f"review_findings_below_minimum:{rubric}:{len(findings) if isinstance(findings, list) else 0}<{min_findings}")
+                    # Validate every supplied finding even when the minimum count is not met.
+                    # A short Red Team report must not hide unresolved or untraceable evidence.
+                    if isinstance(findings, list):
+                        for index, finding in enumerate(findings):
+                            if not isinstance(finding, dict) or not finding.get("finding"):
+                                failures.append(f"review_finding_incomplete:{rubric}:{index}")
+                                continue
+                            if contract.get("require_evidence_per_finding") and not finding.get("evidence_ref"):
+                                failures.append(f"review_finding_evidence_missing:{rubric}:{index}")
+                            if contract.get("require_resolvable_evidence_refs") and finding.get("evidence_ref"):
+                                if not evidence_artifact_resolves(finding["evidence_ref"]):
+                                    failures.append(f"review_finding_evidence_unresolved:{rubric}:{index}:{finding['evidence_ref']}")
+                            if contract.get("require_disposition_per_finding") and finding.get("disposition") not in {
+                                "UNRESOLVED", "MITIGATED", "ACCEPTED", "NOT_APPLICABLE",
+                            }:
+                                failures.append(f"review_finding_disposition_missing:{rubric}:{index}")
+                            severity = str(finding.get("severity", "MEDIUM")).upper()
+                            disposition = finding.get("disposition")
+                            if disposition == "UNRESOLVED" and severity in {"CRITICAL", "HIGH"} and review["outcome"] == "PASS":
+                                failures.append(f"red_team_unresolved_high_risk:{rubric}:{index}")
                 if contract.get("min_reviewers", 0) and len(reviewer_ids) < int(contract["min_reviewers"]):
                     failures.append(f"reviewer_quorum_missing:{rubric}:{len(reviewer_ids)}<{int(contract['min_reviewers'])}")
                 if contract.get("distinct_contexts") and len(context_ids) < len(rows):
@@ -1743,6 +1756,84 @@ class StudioEngine:
             events = connection.execute("SELECT COUNT(*) AS count FROM events WHERE project_id=?", (project_id,)).fetchone()["count"]
             open_failures = connection.execute("SELECT COUNT(*) AS count FROM failures WHERE project_id=? AND status='OPEN'", (project_id,)).fetchone()["count"]
         return {"project": project, "task_counts": counts, "ready_tasks": ready, "open_failures": open_failures, "event_count": events}
+
+    def resume(self, project_id: str, *, event_limit: int = 40) -> dict[str, Any]:
+        """Reconstruct an actionable project handoff from durable Video state only."""
+        self.refresh(project_id)
+        status = self.status(project_id)
+        tasks = self.list_tasks(project_id)
+        with closing(self._connect(project_id)) as connection:
+            artifact_rows = connection.execute(
+                "SELECT * FROM artifacts WHERE project_id=? AND status IN ('CURRENT','ACCEPTED') ORDER BY created_at DESC",
+                (project_id,),
+            ).fetchall()
+            decision_rows = connection.execute(
+                "SELECT * FROM decisions WHERE project_id=? ORDER BY created_at DESC",
+                (project_id,),
+            ).fetchall()
+            failure_rows = connection.execute(
+                "SELECT * FROM failures WHERE project_id=? AND status='OPEN' ORDER BY created_at",
+                (project_id,),
+            ).fetchall()
+            learning_rows = connection.execute(
+                "SELECT * FROM learning WHERE project_id=? ORDER BY updated_at DESC",
+                (project_id,),
+            ).fetchall()
+        ready_by_executor: dict[str, list[str]] = {}
+        for task in tasks:
+            if task["status"] == "READY":
+                ready_by_executor.setdefault(task["executor"], []).append(task["task_id"])
+        unfinished = [task for task in tasks if task["status"] not in {"COMPLETED", "CANCELLED"}]
+        if failure_rows:
+            next_action = "Resolve the open root-cause records with artifact-backed verification and regression evidence."
+        elif ready_by_executor.get("tool"):
+            next_action = "Run the registered local tool workers; independent READY tool tasks can execute concurrently."
+        elif ready_by_executor.get("agent"):
+            next_action = "Dispatch the READY agent work packets; do not treat the declared executor as proof of execution."
+        elif ready_by_executor.get("human"):
+            next_action = "Obtain the required owner/human decision or review; do not synthesize an approval."
+        elif ready_by_executor.get("external"):
+            next_action = "Verify the external capability, rights, availability and cost; obtain owner authorization before any paid operation."
+        elif any(task["status"] == "WAITING_INPUT" for task in tasks):
+            next_action = "Import or produce the missing declared inputs, then refresh the task graph."
+        elif unfinished:
+            next_action = "Inspect dependency blockers and task failures; revise only the affected descendants."
+        else:
+            next_action = "All declared tasks are complete; run the exact-digest release check and verify the delivery package."
+        return {
+            "project": status["project"],
+            "project_status": "TASK_GRAPH_COMPLETE" if not unfinished else "IN_PROGRESS",
+            "task_counts": status["task_counts"],
+            "ready_by_executor": ready_by_executor,
+            "unfinished_tasks": [
+                {"task_id": task["task_id"], "executor": task["executor"], "status": task["status"],
+                 "depends_on": task["depends_on"], "inputs": task["inputs"], "outputs": task["outputs"]}
+                for task in unfinished
+            ],
+            "current_artifacts": [
+                {"artifact_id": row["artifact_id"], "name": row["name"], "version": row["version"],
+                 "sha256": row["sha256"], "kind": row["kind"], "media_type": row["media_type"],
+                 "rights_status": row["rights_status"], "status": row["status"]}
+                for row in artifact_rows
+            ],
+            "decisions": [
+                {"decision_id": row["decision_id"], "question": row["question"], "status": row["status"],
+                 "payload": _loads(row["payload_json"], {})}
+                for row in decision_rows
+            ],
+            "open_failures": [
+                {"failure_id": row["failure_id"], "task_id": row["task_id"], "payload": _loads(row["payload_json"], {})}
+                for row in failure_rows
+            ],
+            "learning": [
+                {"learning_id": row["learning_id"], "status": row["status"], "payload": _loads(row["payload_json"], {})}
+                for row in learning_rows
+            ],
+            "recent_events": self.events(project_id, event_limit),
+            "open_failure_count": status["open_failures"],
+            "next_action": next_action,
+            "release_authorized": False,
+        }
 
     def events(self, project_id: str, limit: int = 100) -> list[dict[str, Any]]:
         with closing(self._connect(project_id)) as connection:
