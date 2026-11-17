@@ -116,6 +116,19 @@
       "immutable_output_registration": true,
       "candidate_promotion_authorized": false,
       "external_provider_generation": "NOT_CONNECTED__REQUIRES_CURRENT_SESSION_CAPABILITY_HANDSHAKE"
+    },
+    "repository_system_audit": {
+      "entrypoint": "vga-studio system-audit",
+      "checks": [
+        "standalone_entry_and_governance",
+        "runtime_dependency_boundary",
+        "domain_adapter_registry_matches_manifest",
+        "program_authority_refs_are_digest_bound_inputs",
+        "example_graphs_and_default_program_execution",
+        "hard_release_gates"
+      ],
+      "separates_structural_integrity_from_production_readiness": true,
+      "no_provider_calls_or_workspace_mutation": true
     }
   },
   "release_status": "ACTIVE_CANDIDATE",
@@ -157,5 +170,6 @@
     "legacy_specialized_modules": "OPTIONAL_VERIFIED_ADAPTERS",
     "legacy_fixed_stage_orchestrator": "NOT_A_CONTROLLER",
     "require_artifact_receipts": true
-  }
+  },
+  "system_audit": "video_studio.system_audit.run_system_audit"
 }
