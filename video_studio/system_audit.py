@@ -157,6 +157,8 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         "implemented_without_support_registration": sorted(implemented_adapters - supported_adapters),
     })
 
+    from .production.executors import tool_executor_for_task
+
     tool_binding_failures = []
     for task in program_tasks:
         if task.get("executor") != "tool":
@@ -167,11 +169,36 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
             name = str(adapter.get("name") or "").strip()
             if not name or name not in declared_adapters or not supports_domain_adapter(name):
                 tool_binding_failures.append(f"{task.get('task_id')}: domain adapter is not declared and executable: {name!r}")
-        else:
-            from .production.executors import tool_executor_for_task
-            if not tool_executor_for_task(task):
-                tool_binding_failures.append(f"{task.get('task_id')}: no registered production/domain executor")
+        elif not tool_executor_for_task(task):
+            tool_binding_failures.append(f"{task.get('task_id')}: no registered production/domain executor")
     _check(checks, "program_tool_tasks_have_registered_executors", not tool_binding_failures, tool_binding_failures)
+
+    all_example_tool_failures = []
+    all_example_tool_count = 0
+    for task_path in sorted((root / "examples").glob("*.tasks.json")):
+        for task in _read_json(task_path):
+            if task.get("executor") != "tool":
+                continue
+            all_example_tool_count += 1
+            executor_ref = tool_executor_for_task(task)
+            if not executor_ref:
+                all_example_tool_failures.append(
+                    f"{task_path.name}:{task.get('task_id')}: no registered executor"
+                )
+                continue
+            requirements = task.get("requirements", {})
+            adapter = requirements.get("domain_adapter") if isinstance(requirements, dict) else None
+            if isinstance(adapter, dict):
+                name = str(adapter.get("name") or "").strip()
+                if name not in declared_adapters or not supports_domain_adapter(name):
+                    all_example_tool_failures.append(
+                        f"{task_path.name}:{task.get('task_id')}: undeclared domain adapter {name!r}"
+                    )
+    _check(checks, "all_example_tool_tasks_have_registered_executors", not all_example_tool_failures, {
+        "example_task_graph_count": len(list((root / "examples").glob("*.tasks.json"))),
+        "tool_task_count": all_example_tool_count,
+        "failures": all_example_tool_failures,
+    })
 
     task_ids = {str(task.get("task_id")) for task in program_tasks}
     output_producers = {
