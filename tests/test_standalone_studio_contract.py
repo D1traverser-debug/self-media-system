@@ -138,6 +138,21 @@ def test_program_example_keeps_independent_workstreams_parallel_and_ipos_fail_cl
     assert engine.audit("program")["pass"] is True
 
 
+def test_standalone_system_audit_passes_structure_and_reports_unfinished_media_capabilities():
+    from video_studio.system_audit import run_system_audit
+
+    report = run_system_audit(ROOT)
+    assert report["pass"] is True, report
+    assert report["structural_status"] == "PASS"
+    assert report["production_readiness"] == "PARTIAL"
+    assert report["boundary"]["caos_runtime_dependency"] is False
+    assert report["boundary"]["paid_provider_calls_made"] is False
+    assert report["boundary"]["automatic_publication"] is False
+    assert report["owner_inputs_required"] == ["ipos-ready-for-video-bundle", "jensen-source-video"]
+    assert any("No repository-registered generative-video executor" in item for item in report["capability_gaps"])
+    assert all(item["pass"] for item in report["checks"])
+
+
 def test_standalone_adapter_demo_wires_editorial_to_real_local_render_and_qa(tmp_path):
     engine = StudioEngine(tmp_path)
     brief_path = ROOT / "examples" / "standalone-domain-adapters.brief.json"
