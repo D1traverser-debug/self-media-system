@@ -70,7 +70,7 @@
     "inputs": [
       "program-state",
       "production-cost-strategy",
-      "legacy-subtask-graph"
+      "current-program-task-graph"
     ],
     "outputs": [
       "production-economics-baseline"
@@ -81,7 +81,8 @@
         "pattern": "INDEPENDENT_PARALLEL"
       },
       "authority_refs": [
-        "projects/ai-self-media-commercialization/PRODUCTION_AND_COST_STRATEGY.md"
+        "projects/ai-self-media-commercialization/PRODUCTION_AND_COST_STRATEGY.md",
+        "examples/ai-self-media-commercialization.tasks.json"
       ],
       "metrics": [
         "cost_per_accepted_take",
@@ -253,11 +254,12 @@
     "kind": "commercial_offer_candidate",
     "executor": "agent",
     "depends_on": [
-      "commercial-advertiser-map"
+      "validate-commercial-portfolio-fit"
     ],
     "inputs": [
       "advertiser-map",
-      "commercial-fit-criteria"
+      "commercial-fit-criteria",
+      "topic-commercial-fit"
     ],
     "outputs": [
       "commercial-offer-native-integration"
@@ -287,11 +289,12 @@
     "kind": "commercial_offer_candidate",
     "executor": "agent",
     "depends_on": [
-      "commercial-advertiser-map"
+      "validate-commercial-portfolio-fit"
     ],
     "inputs": [
       "advertiser-map",
-      "commercial-fit-criteria"
+      "commercial-fit-criteria",
+      "topic-commercial-fit"
     ],
     "outputs": [
       "commercial-offer-series-package"
@@ -383,11 +386,13 @@
     "executor": "agent",
     "depends_on": [
       "commercial-offer-adjudication",
-      "growth-baseline-and-topic-hypotheses"
+      "growth-baseline-and-topic-hypotheses",
+      "pilot-topic-slate-adjudication"
     ],
     "inputs": [
       "commercial-offer-decision",
-      "growth-baseline"
+      "growth-baseline",
+      "pilot-topic-slate-decision"
     ],
     "outputs": [
       "sponsor-integration-advice"
@@ -517,7 +522,7 @@
       "provider-capability-benchmark"
     ],
     "outputs": [
-      "production-strategy"
+      "production-strategy-base"
     ],
     "requirements": {
       "workstream": "PRODUCTION_SYSTEM",
@@ -557,7 +562,7 @@
     "task_id": "jensen-source-media-inspection",
     "title": "Inspect the exact Jensen/Alice source media and bind claims to its digest",
     "kind": "media_inspection",
-    "executor": "tool",
+    "executor": "agent",
     "depends_on": [],
     "inputs": [
       "jensen-source-video",
@@ -750,7 +755,8 @@
     "kind": "platform_compliance",
     "executor": "human",
     "depends_on": [
-      "jensen-copy-structure-audit"
+      "jensen-copy-structure-audit",
+      "jensen-editorial-plan"
     ],
     "inputs": [
       "jensen-platform-copy-candidate-audit",
@@ -841,50 +847,6 @@
     "priority": 100
   },
   {
-    "task_id": "platform-performance-import",
-    "title": "Wait for actual platform performance receipts before drawing growth conclusions",
-    "kind": "performance_import",
-    "executor": "external",
-    "depends_on": [],
-    "inputs": [
-      "platform-performance-receipt"
-    ],
-    "outputs": [
-      "platform-performance-analysis"
-    ],
-    "requirements": {
-      "workstream": "MEDIA_GROWTH",
-      "views_not_a_sufficient_objective": true,
-      "segment_and_cohort_context_required": true
-    },
-    "acceptance": {
-      "performance": "Analyze retention, saves/shares, audience quality, returning viewers and qualified outcomes; do not invent absent data."
-    },
-    "priority": 70
-  },
-  {
-    "task_id": "commercial-outcome-import",
-    "title": "Wait for actual deal, margin and advertiser outcome receipts",
-    "kind": "commercial_outcome_import",
-    "executor": "external",
-    "depends_on": [],
-    "inputs": [
-      "commercial-outcome-receipt"
-    ],
-    "outputs": [
-      "commercial-outcome-analysis"
-    ],
-    "requirements": {
-      "workstream": "COMMERCIALIZATION",
-      "revenue_and_margin_separate": true,
-      "repeat_buy_and_brand_outcome_required": true
-    },
-    "acceptance": {
-      "commercial": "Distinguish impressions, leads, conversions, gross margin, rights value and repeat-buy evidence."
-    },
-    "priority": 70
-  },
-  {
     "task_id": "business-flywheel-review",
     "title": "Synthesize cross-workstream evidence and expose trade-offs for owner portfolio allocation",
     "kind": "business_flywheel_synthesis",
@@ -894,10 +856,8 @@
       "commercial-advertiser-map",
       "commercial-offer-adjudication",
       "pilot-topic-slate-adjudication",
-      "production-strategy-synthesis",
       "sponsor-integration-consultation",
-      "platform-performance-import",
-      "commercial-outcome-import"
+      "production-strategy-commercial-integration"
     ],
     "inputs": [
       "growth-baseline",
@@ -908,8 +868,6 @@
       "pilot-topic-slate-decision",
       "production-strategy",
       "sponsor-integration-advice",
-      "platform-performance-analysis",
-      "commercial-outcome-analysis",
       "program-state",
       "project-index",
       "business-flywheel"
@@ -921,7 +879,9 @@
       "workstream": "CROSS_WORKSTREAM",
       "business_flywheel_ref": "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json",
       "no_single_global_metric": true,
-      "ip_performance_never_mutates_canon": true
+      "ip_performance_never_mutates_canon": true,
+      "evidence_mode": "PROVISIONAL_INITIAL_CYCLE__NO_UNVERIFIED_OUTCOME_DATA",
+      "missing_outcomes_must_be_explicit": true
     },
     "acceptance": {
       "synthesis": "Show audience, IP, commercial and production loops with evidence, conflicts, missing inputs and at least two allocation alternatives."
@@ -1031,15 +991,17 @@
     "executor": "agent",
     "depends_on": [
       "owner-portfolio-adjudication",
-      "platform-performance-import",
-      "commercial-outcome-import",
-      "production-strategy-synthesis"
+      "business-flywheel-outcome-refresh",
+      "production-strategy-commercial-integration",
+      "portfolio-next-cycle-adjudication",
+      "commercial-offer-outcome-adjudication"
     ],
     "inputs": [
       "portfolio-allocation-decision",
-      "platform-performance-analysis",
-      "commercial-outcome-analysis",
-      "production-strategy"
+      "workstream-outcome-refresh-pack",
+      "production-strategy",
+      "next-cycle-portfolio-decision",
+      "commercial-offer-revised-decision"
     ],
     "outputs": [
       "learning-candidate"
@@ -1055,5 +1017,439 @@
       "learning": "Keep hypotheses as candidates until replay and counterexample trials; no single outcome becomes a universal method."
     },
     "priority": 75
+  },
+  {
+    "task_id": "commercial-portfolio-fit",
+    "title": "commercial portfolio fit",
+    "kind": "commercial_portfolio_fit",
+    "executor": "agent",
+    "depends_on": [
+      "commercial-advertiser-map",
+      "pilot-topic-slate-adjudication"
+    ],
+    "inputs": [
+      "advertiser-map",
+      "commercial-fit-criteria",
+      "pilot-topic-slate-decision",
+      "growth-baseline"
+    ],
+    "outputs": [
+      "commercial-fit-draft"
+    ],
+    "requirements": {
+      "workstream": "COMMERCIALIZATION",
+      "portfolio_to_commercial": true,
+      "editorial_independence_required": true
+    },
+    "acceptance": {
+      "fit": "Produce evidence-backed CommercialFit for the selected topic/series; include advertiser categories, integration surfaces, product truth, prohibited forms and measurement refs. Sponsor not required."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "validate-commercial-portfolio-fit",
+    "title": "validate commercial portfolio fit",
+    "kind": "business_object_validation",
+    "executor": "tool",
+    "depends_on": [
+      "commercial-portfolio-fit"
+    ],
+    "inputs": [
+      "commercial-fit-draft"
+    ],
+    "outputs": [
+      "topic-commercial-fit"
+    ],
+    "requirements": {
+      "workstream": "COMMERCIALIZATION",
+      "domain_adapter": {
+        "name": "business_object_validate",
+        "object_type": "CommercialFit",
+        "input_name": "commercial-fit-draft",
+        "output_name": "topic-commercial-fit"
+      }
+    },
+    "acceptance": {
+      "contract": "Validate shared CommercialFit schema before offer candidates consume it."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "commercial-production-constraints",
+    "title": "commercial production constraints",
+    "kind": "commercial_to_production_handoff",
+    "executor": "agent",
+    "depends_on": [
+      "commercial-offer-adjudication",
+      "sponsor-integration-consultation"
+    ],
+    "inputs": [
+      "commercial-offer-decision",
+      "sponsor-integration-advice"
+    ],
+    "outputs": [
+      "commercial-production-constraints"
+    ],
+    "requirements": {
+      "workstream": "COMMERCIALIZATION",
+      "no_sponsor_is_valid_outcome": true,
+      "product_truth_and_rights_are_hard_constraints": true
+    },
+    "acceptance": {
+      "constraints": "State selected or absent sponsor obligations, deliverables, product truth, rights, platform variants, disclosure and measurement. No sponsor must yield explicit NO_SPONSOR constraints."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "production-strategy-commercial-integration",
+    "title": "production strategy commercial integration",
+    "kind": "production_strategy_integration",
+    "executor": "agent",
+    "depends_on": [
+      "production-strategy-synthesis",
+      "commercial-production-constraints"
+    ],
+    "inputs": [
+      "production-strategy-base",
+      "commercial-production-constraints"
+    ],
+    "outputs": [
+      "production-strategy"
+    ],
+    "requirements": {
+      "workstream": "PRODUCTION_SYSTEM",
+      "commercial_to_production_handoff_required": true,
+      "editorial_truth_cannot_be_traded": true
+    },
+    "acceptance": {
+      "strategy": "Integrate production economics/provider strategy with commercial obligations, shot/asset/platform/cost requirements and no-sponsor route."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "episode-production-handoff",
+    "title": "episode production handoff",
+    "kind": "cross_project_episode_handoff",
+    "executor": "agent",
+    "depends_on": [
+      "owner-portfolio-adjudication",
+      "production-strategy-commercial-integration",
+      "commercial-production-constraints",
+      "pilot-topic-slate-adjudication"
+    ],
+    "inputs": [
+      "portfolio-allocation-decision",
+      "pilot-topic-slate-decision",
+      "production-strategy",
+      "commercial-production-constraints",
+      "growth-baseline",
+      "business-flywheel"
+    ],
+    "outputs": [
+      "episode-production-handoff"
+    ],
+    "requirements": {
+      "workstream": "CROSS_WORKSTREAM",
+      "handoff_schema": "VIDEO_PROGRAM_TO_EPISODE/1.0",
+      "source_artifact_ids_and_sha256_required": true,
+      "episode_intent_schema": "video_growth_agent.editorial_planning.EpisodeIntent",
+      "ip_identity_optional_until_ipos_ready": true,
+      "no_character_canon_invention": true
+    },
+    "acceptance": {
+      "handoff": "Emit schema 1.0 typed EpisodeIntent, selected topic/series, platform, duration, success semantics, constraints and exact source artifact IDs/versions/SHA-256. Use NON_CHARACTER unless owner-approved IPOS bundle is bound."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "episode-outcome-analysis",
+    "title": "episode outcome analysis",
+    "kind": "episode_outcome_metrics",
+    "executor": "tool",
+    "depends_on": [],
+    "inputs": [
+      "episode-outcome-receipt"
+    ],
+    "outputs": [
+      "episode-outcome-analysis"
+    ],
+    "requirements": {
+      "workstream": "CROSS_WORKSTREAM",
+      "domain_adapter": {
+        "name": "business_outcome_metrics",
+        "outcome_receipt_input": "episode-outcome-receipt",
+        "output_name": "episode-outcome-analysis"
+      },
+      "single_global_score_forbidden": true,
+      "actual_receipt_required": true
+    },
+    "acceptance": {
+      "outcomes": "Validate exact EpisodeOutcomeReceipt; preserve separate platform, production-economics and commercial vectors. Never invent absent metrics."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "business-flywheel-outcome-refresh",
+    "title": "business flywheel outcome refresh",
+    "kind": "business_flywheel_outcome_refresh",
+    "executor": "agent",
+    "depends_on": [
+      "business-flywheel-review",
+      "episode-outcome-analysis"
+    ],
+    "inputs": [
+      "workstream-evidence-pack",
+      "episode-outcome-analysis",
+      "business-flywheel",
+      "program-state"
+    ],
+    "outputs": [
+      "workstream-outcome-refresh-pack"
+    ],
+    "requirements": {
+      "workstream": "CROSS_WORKSTREAM",
+      "cycle_feedback": true,
+      "actual_outcomes_only": true,
+      "no_single_global_metric": true
+    },
+    "acceptance": {
+      "refresh": "Update audience, IP, commercial and production loops from actual receipt; preserve cohort limits, missing fields, uncertainty, conflicts and counterevidence."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "portfolio-performance-refresh",
+    "title": "portfolio performance refresh",
+    "kind": "portfolio_performance_refresh",
+    "executor": "agent",
+    "depends_on": [
+      "business-flywheel-outcome-refresh",
+      "pilot-topic-slate-adjudication"
+    ],
+    "inputs": [
+      "workstream-outcome-refresh-pack",
+      "pilot-topic-slate-decision",
+      "topic-hypothesis-set"
+    ],
+    "outputs": [
+      "portfolio-performance-refresh-candidate"
+    ],
+    "requirements": {
+      "workstream": "MEDIA_GROWTH",
+      "audience_to_portfolio_feedback": true,
+      "views_not_a_sufficient_objective": true
+    },
+    "acceptance": {
+      "portfolio": "Propose next-cycle allocation using retention, qualified audience, returning viewers, saves/shares, production cost, accepted quality and reuse; state uncertainty and counterexamples."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "portfolio-next-cycle-adjudication",
+    "title": "portfolio next cycle adjudication",
+    "kind": "owner_decision",
+    "executor": "human",
+    "depends_on": [
+      "portfolio-performance-refresh"
+    ],
+    "inputs": [
+      "portfolio-performance-refresh-candidate"
+    ],
+    "outputs": [
+      "next-cycle-portfolio-decision"
+    ],
+    "requirements": {
+      "workstream": "MEDIA_GROWTH",
+      "decision_receipt_required": true,
+      "cycle_boundary": "NEXT_PROGRAM_REVISION"
+    },
+    "acceptance": {
+      "decision": "Record selected/deferred topics, budget, capacity, trade-offs, falsifier and rollback."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "commercial-offer-outcome-review",
+    "title": "commercial offer outcome review",
+    "kind": "commercial_outcome_offer_review",
+    "executor": "agent",
+    "depends_on": [
+      "business-flywheel-outcome-refresh",
+      "commercial-offer-adjudication"
+    ],
+    "inputs": [
+      "workstream-outcome-refresh-pack",
+      "commercial-offer-decision"
+    ],
+    "outputs": [
+      "commercial-offer-revision-candidate"
+    ],
+    "requirements": {
+      "workstream": "COMMERCIALIZATION",
+      "revenue_margin_repeat_buy_rights_evidence_required": true
+    },
+    "acceptance": {
+      "revision": "Compare offer against gross margin, repeat-buy, brand outcome, audience trust and rights use. Recommend retain/revise/reject with counterevidence."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "commercial-offer-outcome-adjudication",
+    "title": "commercial offer outcome adjudication",
+    "kind": "owner_decision",
+    "executor": "human",
+    "depends_on": [
+      "commercial-offer-outcome-review"
+    ],
+    "inputs": [
+      "commercial-offer-revision-candidate"
+    ],
+    "outputs": [
+      "commercial-offer-revised-decision"
+    ],
+    "requirements": {
+      "workstream": "COMMERCIALIZATION",
+      "decision_receipt_required": true
+    },
+    "acceptance": {
+      "decision": "Record retain/revise/reject, pricing/rights changes, evidence, falsifier and rollback."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "ipos-portfolio-research-handoff",
+    "title": "ipos portfolio research handoff",
+    "kind": "external_ipos_research_handoff",
+    "executor": "agent",
+    "depends_on": [
+      "growth-baseline-and-topic-hypotheses",
+      "pilot-topic-slate-adjudication"
+    ],
+    "inputs": [
+      "growth-baseline",
+      "topic-hypothesis-set",
+      "pilot-topic-slate-decision",
+      "ipos-integration-state"
+    ],
+    "outputs": [
+      "ipos-portfolio-research-handoff"
+    ],
+    "requirements": {
+      "workstream": "ORIGINAL_DIGITAL_IP",
+      "external_authority": "IPOS",
+      "handoff_only": true,
+      "canon_mutation": false,
+      "owner_approval_required_before_transfer": true
+    },
+    "acceptance": {
+      "handoff": "Summarize audience/topic opportunities, recognition needs, distinctive asset opportunities and research questions for IPOS. Research input only, never canon decision."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "ipos-portfolio-handoff-owner-approval",
+    "title": "ipos portfolio handoff owner approval",
+    "kind": "external_handoff_approval",
+    "executor": "human",
+    "depends_on": [
+      "ipos-portfolio-research-handoff"
+    ],
+    "inputs": [
+      "ipos-portfolio-research-handoff"
+    ],
+    "outputs": [
+      "ipos-portfolio-handoff-approved"
+    ],
+    "requirements": {
+      "workstream": "ORIGINAL_DIGITAL_IP",
+      "external_authority": "IPOS",
+      "approval_is_transfer_only": true,
+      "canon_mutation": false
+    },
+    "acceptance": {
+      "approval": "Approve/reject transfer to IPOS; approval does not approve identity or canon."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "ip-recognition-packaging-hypotheses",
+    "title": "ip recognition packaging hypotheses",
+    "kind": "ip_to_growth_handoff",
+    "executor": "agent",
+    "depends_on": [
+      "brand-identity-system",
+      "growth-baseline-and-topic-hypotheses"
+    ],
+    "inputs": [
+      "brand-identity-system",
+      "growth-baseline"
+    ],
+    "outputs": [
+      "ip-recognition-packaging-hypotheses"
+    ],
+    "requirements": {
+      "workstream": "MEDIA_GROWTH",
+      "ip_canon_owner": "IPOS",
+      "canon_mutation": false,
+      "recognition_measurement_required": true
+    },
+    "acceptance": {
+      "hypotheses": "Create cover/series recognition and returning-audience hypotheses tied to exact approved IPOS versions. Separate preference from measured recognition."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "ipos-performance-learning-handoff",
+    "title": "ipos performance learning handoff",
+    "kind": "performance_to_ipos_handoff",
+    "executor": "agent",
+    "depends_on": [
+      "business-flywheel-outcome-refresh",
+      "ipos-shot-binding-validation"
+    ],
+    "inputs": [
+      "workstream-outcome-refresh-pack",
+      "ipos-shot-contract-bindings",
+      "ipos-continuity-bindings"
+    ],
+    "outputs": [
+      "ipos-performance-learning-candidate"
+    ],
+    "requirements": {
+      "workstream": "ORIGINAL_DIGITAL_IP",
+      "external_authority": "IPOS",
+      "candidate_only": true,
+      "canon_mutation": false,
+      "exact_canon_version_binding": true
+    },
+    "acceptance": {
+      "learning": "Separate recognition/performance by exact IPOS asset/canon version, usage frequency and platform. Candidate only; never mutate canon."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "ipos-performance-handoff-owner-approval",
+    "title": "ipos performance handoff owner approval",
+    "kind": "external_handoff_approval",
+    "executor": "human",
+    "depends_on": [
+      "ipos-performance-learning-handoff"
+    ],
+    "inputs": [
+      "ipos-performance-learning-candidate"
+    ],
+    "outputs": [
+      "ipos-performance-learning-handoff-approved"
+    ],
+    "requirements": {
+      "workstream": "ORIGINAL_DIGITAL_IP",
+      "external_authority": "IPOS",
+      "approval_is_transfer_only": true,
+      "canon_mutation": false
+    },
+    "acceptance": {
+      "approval": "Approve/reject transfer to IPOS. Only IPOS may adjudicate canon changes."
+    },
+    "priority": 80
   }
 ]

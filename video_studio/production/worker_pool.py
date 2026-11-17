@@ -5,7 +5,7 @@ from threading import Event, Thread
 from typing import Any
 
 from ..engine import StudioEngine
-from .executors import run_claimed_tool_task
+from .executors import run_claimed_tool_task, tool_executor_for_task
 from .registry import PRODUCTION_EXECUTORS
 
 
@@ -70,9 +70,9 @@ def run_ready_tool_tasks(
         rounds = round_number
         tasks = engine.list_tasks(project_id)
         ready_tools = [item for item in tasks if item.get("status") == "READY" and item.get("executor") == "tool"]
-        candidates = [item for item in ready_tools if PRODUCTION_EXECUTORS.operation_for_task(item)]
+        candidates = [item for item in ready_tools if tool_executor_for_task(item)]
         for item in ready_tools:
-            if not PRODUCTION_EXECUTORS.operation_for_task(item):
+            if not tool_executor_for_task(item):
                 unregistered_by_id[item["task_id"]] = {
                     "task_id": item["task_id"], "title": item.get("title"),
                     "kind": item.get("kind"), "requirements": item.get("requirements", {}),
@@ -120,7 +120,7 @@ def run_ready_tool_tasks(
         {"task_id": item["task_id"], "title": item.get("title")}
         for item in remaining_tasks
         if item.get("status") == "READY" and item.get("executor") == "tool"
-        and PRODUCTION_EXECUTORS.operation_for_task(item)
+        and tool_executor_for_task(item)
     ]
     all_tasks_complete = bool(remaining_tasks) and all(item["status"] == "COMPLETED" for item in remaining_tasks)
     project_status = "TASK_GRAPH_COMPLETE" if all_tasks_complete else "IN_PROGRESS"

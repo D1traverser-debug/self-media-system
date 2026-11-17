@@ -32,7 +32,7 @@
     "task_id": "media-inspection",
     "title": "Inspect the exact supplied clip and bind every visual claim to observed frames",
     "kind": "media_inspection",
-    "executor": "tool",
+    "executor": "agent",
     "depends_on": [],
     "inputs": [
       "source-video"

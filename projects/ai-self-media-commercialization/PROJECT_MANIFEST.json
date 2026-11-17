@@ -11,7 +11,7 @@
   "agent_operability_scenarios_ref": "../../docs/agent_operability_scenarios.md",
   "provider_benchmark_ref": "../../docs/provider_benchmark_protocol.md",
   "program_state_ref": "PROGRAM_STATE.json",
-  "subtask_graph_ref": "SUBTASK_GRAPH.json",
+  "subtask_graph_ref": "../../examples/ai-self-media-commercialization.tasks.json",
   "business_flywheel_ref": "BUSINESS_FLYWHEEL.json",
   "scan": {
     "discoverable": true,
@@ -178,5 +178,7 @@
     "source_mutation": "FORBIDDEN"
   },
   "current_editorial_case_ref": "cases/jensen-alice-20261114.json",
-  "current_editorial_case_schema_version": "1.2"
+  "current_editorial_case_schema_version": "1.2",
+  "legacy_subtask_graph_ref": "SUBTASK_GRAPH.json",
+  "cross_workstream_execution_ref": "BUSINESS_FLYWHEEL.json#execution_bindings"
 }

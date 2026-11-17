@@ -565,6 +565,25 @@ class StudioEngine:
                 pass
             else:
                 raise ContractError(f"{task_id}: unknown coordination pattern {pattern!r}")
+        ancestor_cache: dict[str, set[str]] = {}
+
+        def ancestors(task_id: str) -> set[str]:
+            cached = ancestor_cache.get(task_id)
+            if cached is not None:
+                return cached
+            result: set[str] = set()
+            for dependency in all_tasks[task_id].get("depends_on", []):
+                result.add(dependency)
+                result.update(ancestors(dependency))
+            ancestor_cache[task_id] = result
+            return result
+
+        for task_id, task in all_tasks.items():
+            for input_name in task.get("inputs", []):
+                producer = output_owners.get(input_name)
+                if producer is not None and producer not in ancestors(task_id):
+                    raise ContractError(f"{task_id}: input artifact {input_name!r} is produced by {producer!r} but its producer is not a declared dependency")
+
         for group, candidates in candidate_groups.items():
             if len(candidates) < 2:
                 raise ContractError(f"decision group {group!r} requires at least two independent candidates")
@@ -597,6 +616,7 @@ class StudioEngine:
                 graph: dict[str, dict[str, Any]] = {
                     row["task_id"]: {
                         "depends_on": _loads(row["depends_on_json"], []),
+                        "inputs": _loads(row["inputs_json"], []),
                         "outputs": _loads(row["outputs_json"], []),
                         "requirements": _loads(row["requirements_json"], {}),
                         "executor": row["executor"],
@@ -730,6 +750,7 @@ class StudioEngine:
                 graph = {
                     key: {
                         "depends_on": _loads(value["depends_on_json"], []),
+                        "inputs": _loads(value["inputs_json"], []),
                         "outputs": _loads(value["outputs_json"], []),
                         "requirements": _loads(value["requirements_json"], {}),
                         "executor": value["executor"],
@@ -737,7 +758,7 @@ class StudioEngine:
                     for key, value in rows.items()
                 }
                 graph[task_id] = {
-                    "depends_on": revised["depends_on"], "outputs": revised["outputs"],
+                    "depends_on": revised["depends_on"], "inputs": revised["inputs"], "outputs": revised["outputs"],
                     "requirements": revised["requirements"], "executor": revised["executor"],
                 }
                 existing_artifact_names = {

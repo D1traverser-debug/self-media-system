@@ -18,6 +18,7 @@ from video_growth_agent.business_metrics import (
     PlatformPerformanceReceipt,
     ProductionEconomics,
 )
+from video_growth_agent.business_objects import BusinessHypothesisDecision, CommercialFit, CommercialOfferCandidate, ContentPortfolioItem, DistinctiveAssetObservation, RightsPackage
 from video_growth_agent.editorial_planning import (
     BeatSpec,
     ClaimSpec,
@@ -62,6 +63,70 @@ from .engine import ContractError, StudioEngine, StudioError
 
 class DomainAdapterError(StudioError):
     """A deterministic Video-domain capability adapter rejected its input."""
+
+
+SUPPORTED_DOMAIN_ADAPTERS = frozenset({"editorial_plan_validate","shot_contract_materialize","shot_contract_validate","ipos_bundle_inspect","ipos_bundle_import","ipos_shot_bind","ipos_continuity_snapshot","ipos_continuity_link","timeline_validate","shot_route","extended_media_qa","continuity_assess","business_outcome_metrics","programmatic_graphic_render","media_graph_initialize","business_object_validate","episode_intent_validate"})
+
+
+def supports_domain_adapter(name: str) -> bool:
+    return name in SUPPORTED_DOMAIN_ADAPTERS
+
+
+def business_object_from_dict(object_type: str, payload: Mapping[str, Any]) -> Any:
+    classes = {
+        "ContentPortfolioItem": (ContentPortfolioItem, ("topic_evidence_refs","commercial_adjacency_categories","distinctive_asset_opportunities")),
+        "DistinctiveAssetObservation": (DistinctiveAssetObservation, ("evidence_refs","qualitative_refs")),
+        "CommercialFit": (CommercialFit, ("advertiser_categories","integration_surfaces","product_truth_requirements","prohibited_integration_forms","measurement_plan_refs","evidence_refs")),
+        "RightsPackage": (RightsPackage, ("territories","exclusivity_categories","usage_constraints","evidence_refs")),
+        "CommercialOfferCandidate": (CommercialOfferCandidate, ("deliverables","pricing_evidence_refs")),
+        "BusinessHypothesisDecision": (BusinessHypothesisDecision, ("subject_ids","evidence_refs","counterexample_refs","followup_measurement_refs")),
+    }
+    selected=classes.get(object_type)
+    if selected is None: raise DomainAdapterError(f"unsupported shared business object type: {object_type}")
+    cls, tuple_fields=selected; data=dict(_mapping(payload,object_type))
+    for field_name in tuple_fields:
+        raw=data.get(field_name,())
+        if not isinstance(raw,(list,tuple)): raise DomainAdapterError(f"{object_type}.{field_name} must be an array")
+        data[field_name]=tuple(raw)
+    try: return cls(**data)
+    except (TypeError,ValueError) as exc: raise DomainAdapterError(f"invalid {object_type}: {exc}") from exc
+
+
+def program_episode_handoff_to_intent(payload: Mapping[str, Any], *, expected_program_id: str | None = None) -> dict[str, Any]:
+    data=_mapping(payload,"Program -> Episode handoff")
+    if data.get("schema_version")!="1.0" or data.get("handoff_type")!="VIDEO_PROGRAM_TO_EPISODE": raise DomainAdapterError("Program -> Episode handoff must use schema_version 1.0 and VIDEO_PROGRAM_TO_EPISODE")
+    program_id=str(data.get("program_id") or "").strip()
+    if not program_id or (expected_program_id and program_id!=expected_program_id): raise DomainAdapterError("Program -> Episode handoff has the wrong or missing program_id")
+    if str(data.get("source_project_id") or "").strip()!=program_id: raise DomainAdapterError("handoff source_project_id must match program_id")
+    bindings=data.get("source_artifact_bindings")
+    if not isinstance(bindings,list) or not bindings: raise DomainAdapterError("handoff requires source_artifact_bindings")
+    by_name={}
+    for raw in bindings:
+        item=_mapping(raw,"source_artifact_binding"); name=str(item.get("name") or "").strip(); aid=str(item.get("artifact_id") or "").strip(); digest=str(item.get("sha256") or "").strip().lower(); version=item.get("version")
+        if not name or not aid or not isinstance(version,int) or version<1: raise DomainAdapterError("each source artifact binding requires name, artifact_id and positive version")
+        if not re.fullmatch(r"[0-9a-f]{64}",digest): raise DomainAdapterError(f"source artifact binding has an invalid SHA-256 digest: {name}")
+        if name in by_name: raise DomainAdapterError(f"duplicate source artifact binding: {name}")
+        by_name[name]=item
+    required={"portfolio-allocation-decision","pilot-topic-slate-decision","production-strategy","commercial-production-constraints","growth-baseline"}
+    missing=sorted(required-set(by_name))
+    if missing: raise DomainAdapterError(f"handoff is missing required source artifact bindings: {missing}")
+    raw_intent=dict(_mapping(data.get("episode_intent"),"episode_intent"))
+    for field_name in ("evidence_refs","desired_outcomes","commercial_context_refs","constraints"):
+        value=raw_intent.get(field_name,())
+        if not isinstance(value,(list,tuple)): raise DomainAdapterError(f"episode_intent.{field_name} must be an array")
+        raw_intent[field_name]=tuple(value)
+    try: intent=EpisodeIntent(**raw_intent)
+    except (TypeError,ValueError) as exc: raise DomainAdapterError(f"invalid EpisodeIntent in Program handoff: {exc}") from exc
+    if str(data.get("episode_id") or "").strip()!=intent.episode_id or str(data.get("series_id") or "").strip()!=intent.series_id: raise DomainAdapterError("handoff episode_id/series_id must match EpisodeIntent")
+    identity=_mapping(data.get("identity_usage",{}),"identity_usage"); mode=identity.get("mode")
+    if mode=="NON_CHARACTER":
+        if not str(identity.get("reason") or "").strip(): raise DomainAdapterError("NON_CHARACTER handoff must explain why identity usage is excluded")
+        if any(identity.get(k) for k in ("bundle_ref","canon_ref","approval_ref")): raise DomainAdapterError("NON_CHARACTER handoff cannot claim IPOS identity approvals")
+    elif mode=="IPOS_APPROVED":
+        missing_identity=[k for k in ("bundle_ref","canon_ref","approval_ref","rights_evidence_refs") if not identity.get(k)]
+        if missing_identity: raise DomainAdapterError(f"IPOS_APPROVED handoff is missing identity evidence: {missing_identity}")
+    else: raise DomainAdapterError("identity_usage.mode must be NON_CHARACTER or IPOS_APPROVED")
+    return {"schema_version":"1.0","program_id":program_id,"episode_id":intent.episode_id,"series_id":intent.series_id,"episode_intent":_jsonable(intent),"identity_usage":dict(identity),"source_artifact_bindings":[dict(by_name[n]) for n in sorted(by_name)],"portfolio_decision_ref":dict(by_name["portfolio-allocation-decision"]),"topic_decision_ref":dict(by_name["pilot-topic-slate-decision"]),"production_strategy_ref":dict(by_name["production-strategy"]),"commercial_constraints_ref":dict(by_name["commercial-production-constraints"])}
 
 
 def _jsonable(value: Any) -> Any:
@@ -336,7 +401,19 @@ def run_claimed_domain_adapter(
     result: dict[str, Any]
 
     try:
-        if name == "editorial_plan_validate":
+        if name == "business_object_validate":
+            object_type=str(config.get("object_type","")).strip(); input_name=str(config.get("input_name","")).strip()
+            obj=business_object_from_dict(object_type,_input_json(packet,input_name)); output_name=str(config.get("output_name",outputs[0]))
+            path=output_dir/f"{_safe_filename(output_name)}-attempt-{attempt}.json"; _write_json(path,{"schema_version":"1.0","adapter":name,"object_type":object_type,"object":_jsonable(obj)})
+            identity_field={"ContentPortfolioItem":"item_id","DistinctiveAssetObservation":"asset_id","CommercialFit":"fit_id","RightsPackage":"package_id","CommercialOfferCandidate":"offer_id","BusinessHypothesisDecision":"decision_id"}[object_type]
+            artifact_outputs={output_name:{"path":str(path),"kind":"business_object","media_type":"application/json","rights_status":"NOT_APPLICABLE","metadata":{"adapter":name,"object_type":object_type,"object_id":getattr(obj,identity_field)}}}
+            result={"adapter":name,"object_type":object_type,"object_id":getattr(obj,identity_field)}
+        elif name == "episode_intent_validate":
+            handoff=program_episode_handoff_to_intent(_input_json(packet,str(config.get("handoff_input","")).strip()),expected_program_id=str(config.get("program_id") or "").strip() or None)
+            output_name=str(config.get("output_name",outputs[0])); path=output_dir/f"{_safe_filename(output_name)}-attempt-{attempt}.json"; _write_json(path,handoff)
+            artifact_outputs={output_name:{"path":str(path),"kind":"episode_intent","media_type":"application/json","rights_status":"NOT_APPLICABLE","metadata":{"adapter":name,"program_id":handoff["program_id"],"episode_id":handoff["episode_id"],"series_id":handoff["series_id"],"identity_usage_mode":handoff["identity_usage"]["mode"]}}}
+            result={"adapter":name,"program_id":handoff["program_id"],"episode_id":handoff["episode_id"],"series_id":handoff["series_id"],"identity_usage_mode":handoff["identity_usage"]["mode"]}
+        elif name == "editorial_plan_validate":
             input_name = str(config["editorial_plan_input"])
             plan = editorial_plan_from_dict(_input_json(packet, input_name))
             output_name = str(config.get("output_name", outputs[0]))

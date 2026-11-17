@@ -103,6 +103,18 @@
         "authority": "VIDEO_GROWTH_AGENT",
         "context_role": "provider_capability_benchmark_protocol"
       }
+    },
+    {
+      "name": "current-program-task-graph",
+      "path": "ai-self-media-commercialization.tasks.json",
+      "kind": "document",
+      "media_type": "application/json",
+      "rights_status": "NOT_APPLICABLE",
+      "metadata": {
+        "authority": "VIDEO_GROWTH_AGENT",
+        "context_role": "active_standalone_program_planning_authority",
+        "graph_version": "49_TASKS"
+      }
     }
   ]
 }

@@ -9,14 +9,17 @@
     "commercial-offer-decision.json",
     "production-strategy.json",
     "jensen-release-evidence-pack.json",
-    "learning-candidate.json"
+    "learning-candidate.json",
+    "episode-production-handoff.json",
+    "workstream-outcome-refresh-pack.json",
+    "ipos-portfolio-research-handoff.json"
   ],
   "program_context": {
     "authority": "VIDEO_GROWTH_AGENT",
     "current_program_state_ref": "projects/ai-self-media-commercialization/PROGRAM_STATE.json",
     "project_index_ref": "projects/PROJECT_INDEX.json",
     "business_flywheel_ref": "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json",
-    "current_subtask_graph_ref": "projects/ai-self-media-commercialization/SUBTASK_GRAPH.json",
+    "current_subtask_graph_ref": "examples/ai-self-media-commercialization.tasks.json",
     "production_cost_strategy_ref": "projects/ai-self-media-commercialization/PRODUCTION_AND_COST_STRATEGY.md",
     "jensen_case_ref": "projects/ai-self-media-commercialization/cases/jensen-alice-20261114.json",
     "ip_identity_authority": "IPOS",
@@ -24,7 +27,8 @@
     "ipos_current_state": "R39_G1_RESEARCH_OPEN__NO_APPROVED_IDENTITY_BUNDLE__G2_G7_G8_NOT_PASSED",
     "current_media_case_status": "CANDIDATE_ONLY__SOURCE_MEDIA_DIGEST_RIGHTS_HUMAN_COLD_READ_PLATFORM_DISCLOSURE_EDITORIAL_PLAN_AND_MASTER_TIMELINE_OPEN",
     "caos_runtime_dependency": false,
-    "refresh_before_decision": true
+    "refresh_before_decision": true,
+    "legacy_subtask_graph_ref": "projects/ai-self-media-commercialization/SUBTASK_GRAPH.json"
   },
   "workstreams": {
     "MEDIA_GROWTH": {
