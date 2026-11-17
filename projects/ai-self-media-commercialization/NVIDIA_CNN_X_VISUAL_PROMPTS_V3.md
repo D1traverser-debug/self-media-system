@@ -48,7 +48,7 @@ A real airport cargo customs inspection bay, not a passenger terminal. One metal
 
 ### Generation prompt
 
-<escape>
+
 Create exactly one square 1:1 editorial cartoon for an English-language X post.
 
 The scene is an airport cargo customs inspection bay, not a passenger airport terminal. In the center foreground, place one sturdy metal inspection table. On top of it sits one open rectangular wooden freight crate, resting flat on the tabletop. Its lid is hinged upward at the back. Inside the crate are exactly three upright green GPU circuit cards, each in its own slot like a rare bird perched on a branch. Their circular cooling fans can subtly resemble bird eyes, but the cards must remain clearly recognizable as advanced computer hardware.
@@ -60,7 +60,7 @@ Behind the table, show one closed industrial cargo roller door. On the far left,
 Render it as a Chinese manhua-inspired brush-and-ink editorial cartoon: economical expressive linework, bold silhouette, confident dry-brush contours, simplified shapes, slightly exaggerated gesture, restrained jade green, warm paper cream, black ink and one vermilion accent. The humor should come from the absurdly solemn wildlife-conservation treatment of GPU hardware.
 
 Make the crate and three GPU cards the dominant focal point. No actual birds, no animals, no Jensen Huang, no other people, no airport passenger check-in desks, no baggage carousel, no X-ray machine, no second crate, no extra tools, no readable text, no logos, no collage, no watermark.
-</escape>
+
 
 ### Post-production and QA
 
@@ -91,7 +91,7 @@ Show a simplified but geographically coherent map of the South China Sea region 
 
 ### Generation prompt
 
-<escape>
+
 Create exactly one square 1:1 editorial illustration for an English-language X post. This is one coherent three-dimensional paper-map scene, not a collage or infographic.
 
 Show a simplified, geographically coherent cut-paper relief map of the South China Sea region from a high three-quarter isometric view. China must occupy the upper part of the image. The Malay Peninsula must extend downward toward Singapore, which is a small island at the southern end of the peninsula near the bottom of the composition. Keep the relative geography clear: China is north of Singapore; Singapore is not placed beside or above China.
@@ -105,7 +105,7 @@ Reserve two clean blank map-label spaces: one next to the Merlion for the post-p
 Use a refined layered paper-cut atlas style with visible paper edges and shallow relief. Deep teal sea, warm ivory land, muted green peninsula, vermilion route, and one bright green GPU accent. Strong simple silhouettes, uncluttered negative space, crisp geographic hierarchy. The map and the two landmarks must be understandable at thumbnail size.
 
 Exactly one Merlion landmark, one panda landmark, one cargo boat, one crate and one GPU card. No other animals, no human smugglers, no flags, no extra boats, no arrows, no inaccurate map orientation, no fictional port names, no logos, no readable text, no collage, no watermark.
-</escape>
+
 
 ### Post-production and QA
 
@@ -136,7 +136,7 @@ One continuous isometric cutaway, not two panels. On the left is a compact Singa
 
 ### Generation prompt
 
-<escape>
+
 Create exactly one square 1:1 editorial illustration for an English-language X post. Show one continuous isometric architectural cutaway, not split panels.
 
 On the left side of one continuous coastal landscape is a compact Singapore data-center room. Inside it stands exactly one tall server rack, firmly bolted to the floor. Through the open front of the rack, one clearly visible green GPU card is installed in a server. The GPU remains physically inside this rack.
@@ -150,7 +150,7 @@ Reserve two small blank location plaques, one beside the server room and one bes
 Render as a precise isometric 3D architectural miniature: clean geometry, controlled perspective, matte surfaces, cool blue-gray sea, warm amber server-room light, cyan data pulses, and a single bright green GPU accent. One dominant visual relationship: the stationary chip versus the traveling compute signal.
 
 Exactly one server rack, one GPU card, one fiber cable, one cloud canopy, one remote terminal and one anonymous operator. No physical chip crossing the sea, no cargo ship, no crate, no panda, no Merlion, no extra cables, no arrows, no extra people, no readable text, no logos, no collage, no watermark.
-</escape>
+
 
 ### Post-production and QA
 
@@ -181,7 +181,7 @@ A single official desk viewed from a slightly elevated frontal angle. One large 
 
 ### Generation prompt
 
-<escape>
+
 Create exactly one square 1:1 editorial newspaper cartoon for an English-language X post.
 
 Show one official government desk from a slightly elevated frontal angle. The main focal object is one oversized black fountain pen held above a single official document. The pen is held by one large but anatomically normal right hand emerging from a dark suit sleeve at the right edge of the frame. The pen tip hovers just above the document's signature line.
@@ -195,7 +195,7 @@ The joke is institutional rather than personal: several agencies can submit thei
 Use a traditional editorial pen-and-ink cartoon language: confident black contour lines, expressive scale exaggeration, restrained hatching, warm newspaper cream, charcoal black and one vermilion accent. Strong negative space and a single clear focal hierarchy.
 
 Exactly four agency folders, one document, one pen, one hand and one sleeve. No faces, no extra hands, no duplicate pens, no rubber stamp, no tug-of-war, no readable text, no logos, no collage, no watermark.
-</escape>
+
 
 ### Post-production and QA
 
@@ -227,21 +227,21 @@ One gold-rush storefront, one counter, one miner and exactly one Jensen Huang ca
 
 ### Generation prompt
 
-<escape>
+
 Create exactly one square 1:1 editorial illustration for an English-language X post, in the visual language of a nineteenth-century American Gold Rush woodcut engraving.
 
 Show one dusty mining-town storefront with one service counter. Behind the counter stands exactly one recognizable editorial caricature of Jensen Huang: swept-back dark hair, round face, black leather jacket. He appears only once in the entire image. Do not show his portrait, reflection, mirror image, poster or duplicate.
 
 At the counter stands exactly one gold miner, seen in three-quarter view. Jensen is handing the miner one shovel whose blade is clearly shaped like a generic green GPU circuit card. The miner is paying for it with banknotes.
 
-Behind the miner on the left side of the scene, show one open stone bank vault. A short row of simple classical bank columns frames the vault entrance, suggesting a consortium of financiers rather than one named bank. From the vault, one continuous ribbon of banknotes travels into the miner's left hand. The miner's other hand passes those same banknotes across the counter into Jensen's open cash drawer. The money path must be physically continuous and readable from left to right: financing source, miner, GPU-shovel seller. Do not use arrows.
+Behind the miner on the left side of the scene, show one open stone bank vault. A short row of simple classical bank columns frames the vault entrance, suggesting a consortium of financiers rather than one named bank. From the vault, one short, clearly visible money chute feeds a single open money pouch held by the miner. The miner takes one bundle of banknotes from that pouch and places it on the counter in front of Jensen. Make the transaction physically readable from left to right: financing source, miner, GPU-shovel seller. Show the same bundle at the point of payment; do not create a second stream of money. Do not use arrows.
 
 Keep the scene to one miner, one Jensen, one storefront, one counter, one shovel, one open vault and one continuous stream of banknotes. The visual point is the overlap between financing the AI infrastructure buildout and selling the hardware that buildout purchases. It is an economic metaphor, not an accusation of fraud or a claim that one specific loan directly funded one specific GPU purchase.
 
 Use hand-carved woodcut texture, strong cross-hatching, expressive but controlled caricature, aged paper, dusty sepia, muted ochre, black ink and restrained green on the GPU shovel. The composition should read clearly at thumbnail size, with Jensen and the GPU shovel as the main focal point and the banknote path as the secondary read.
 
 Exactly one Jensen Huang, one miner, one GPU-shaped shovel, one storefront counter, one bank vault and one continuous banknote stream. No second Jensen, no duplicate face, no mirrors, no second shop window, no extra miners, no extra shovels, no floating money, no readable text, no corporate logos, no collage, no watermark.
-</escape>
+
 
 ### Post-production and QA
 
@@ -271,7 +271,7 @@ One judge's desk seen from a slightly elevated front view. Two separate case fol
 
 ### Generation prompt
 
-<escape>
+
 Create exactly one square 1:1 minimalist geometric editorial cartoon for an English-language X post.
 
 Show one judge's desk from a slightly elevated frontal angle. On the desk lie exactly two separate manila case folders, one on the left and one on the right, with a wide bright vermilion divider standing vertically between them. The folders must remain visibly separate with a clear gap.
@@ -285,7 +285,7 @@ Keep the composition simple and almost diagrammatic but still a single editorial
 Reserve a small blank area above the desk for post-production caption text. Generate no lettering.
 
 Exactly two folders, one magnifying glass, one separate sheet with exactly three anonymous silhouettes, one stapler and one red divider. No handcuffs, no company defendant, no police officers, no extra people, no extra folders, no arrows, no logos, no readable text, no collage, no watermark.
-</escape>
+
 
 ### Post-production and QA
 
@@ -316,7 +316,7 @@ One theater stage. In the foreground, one small closed tabloid newspaper sits on
 
 ### Generation prompt
 
-<escape>
+
 Create exactly one square 1:1 editorial illustration for an English-language X post.
 
 Show one theatrical stage viewed from the audience. In the center foreground, place one small closed tabloid newspaper on a short pedestal. A single intense circular spotlight shines directly onto this tiny newspaper, making it the brightest object in the foreground.
@@ -328,7 +328,7 @@ The visual joke is theatrical misdirection: the audience is staring at a tiny se
 Use a mid-century circus broadside screenprint aesthetic: bold cutout shapes, strong spotlight geometry, limited scarlet red, warm cream and deep charcoal, subtle halftone and aged print texture. Use a dramatic scale contrast and clean negative space. The newspaper is the small bright decoy; the server rack is the massive hidden reality.
 
 Exactly one newspaper, one pedestal, one spotlight, one curtain, one server rack and one gloved hand. No identifiable people, no Jensen Huang, no Alice Huang, no spy silhouette, no hearts, no bedroom imagery, no extra server racks, no readable text, no logos, no collage, no watermark.
-</escape>
+
 
 ### Post-production and QA
 
@@ -358,23 +358,24 @@ One formal Washington-style boardroom. A gigantic elephant made entirely from st
 
 ### Generation prompt
 
-<escape>
+
 Create exactly one square 1:1 surrealist editorial painting for an English-language X post.
 
 Show one formal, quiet boardroom with a long conference table and a narrow doorway at the far end. The dominant subject is one enormous elephant whose entire body is constructed from layered generic GPU circuit boards: recognizable green printed circuit boards form the ears, legs and torso, while cooling fans create the texture of its broad sides. It must still read instantly as one elephant, not a pile of hardware.
 
-The elephant is trying to pass through the narrow doorway. Its trunk reaches through the opening, but its massive body is visibly too wide to fit. A simple export-control barrier blocks the doorway. Beyond the doorway, show a distant abstract East Asian city skyline as a geographic market cue, not a flag or political caricature. The elephant remains inside the boardroom; it has not crossed the gate.
+The elephant is trying to pass through the narrow doorway. Its trunk reaches through the opening, but its massive body is visibly too wide to fit. A simple export-control barrier blocks the doorway. Beyond the doorway, show a distant abstract Chinese city skyline as a geographic market cue, not a flag or political caricature. Reserve one small blank sign beside the doorway for the post-production words CHINA MARKET. The elephant remains inside the boardroom; it has not crossed the gate.
 
 The visual joke is the enormous potential China AI-chip market occupying the room while export controls make the doorway too narrow. Hang one small blank price-tag shape from the elephant's side for post-production wording. Do not generate numbers or letters.
 
 Use a surrealist oil-painting language: dramatic but controlled chiaroscuro, deep midnight blue, dark emerald, antique gold highlights, rich painterly surface and an impossible scale relationship rendered with coherent perspective. Keep the boardroom sparse. The elephant is the single dominant focal point; the narrow gate is the clear secondary obstacle.
 
 Exactly one elephant, one doorway, one export-control barrier, one conference table and one blank price tag. No other animals, no panda, no Merlion, no human officials, no extra doors, no extra gates, no readable text, no logos, no collage, no watermark.
-</escape>
+
 
 ### Post-production and QA
 
 - Add tag text: $50B — 2025 ESTIMATE.
+- Add the small doorway sign: CHINA MARKET.
 - Overlay caption: THE ELEPHANT IN THE EXPORT ROOM.
 - X copy must explicitly say this was Jensen Huang's 2025 estimate of the eventual China AI-chip market, not realized revenue.
 - Critical checks: one elephant made of GPU cards; one narrow gate; trunk crosses but body does not; one blank price tag; the market remains an estimate.
