@@ -238,7 +238,11 @@ def main(argv: list[str] | None = None) -> int:
                     raise StudioError(f"asset import manifest entry {index} requires a path")
                 if not isinstance(kind, str) or not kind.strip() or not isinstance(media_type, str) or not media_type.strip():
                     raise StudioError(f"asset import manifest entry {index} has invalid kind/media_type")
-                if rights_status not in {"OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN", "UNKNOWN", "NOT_APPLICABLE"} or not isinstance(metadata, dict):
+                if (
+                    not isinstance(rights_status, str)
+                    or rights_status not in {"OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN", "UNKNOWN", "NOT_APPLICABLE"}
+                    or not isinstance(metadata, dict)
+                ):
                     raise StudioError(f"asset import manifest entry {index} has invalid rights_status/metadata")
                 source = Path(relative_path).expanduser()
                 if not source.is_absolute():
