@@ -318,20 +318,31 @@ def test_business_object_validate_adapter_emits_typed_commercial_fit_artifact(tm
     assert engine.audit("commercial")["pass"] is True
 
 
-def test_episode_intent_validate_adapter_checks_program_identity_and_digest_bindings(tmp_path):
+def test_episode_intent_validate_adapter_checks_real_source_bindings_and_cross_project_transfer(tmp_path):
     engine = StudioEngine(tmp_path)
     engine.create_project("program", "Program handoff adapter", _brief())
+    source_names = [
+        "portfolio-allocation-decision", "pilot-topic-slate-decision",
+        "production-strategy", "commercial-production-constraints", "growth-baseline",
+    ]
+    source_artifacts = {}
+    for name in source_names:
+        source_path = tmp_path / f"{name}.json"
+        source_path.write_text(json.dumps({"source": name}), encoding="utf-8")
+        source_artifacts[name] = engine.import_asset(
+            "program", name, source_path, kind="evidence",
+            media_type="application/json", rights_status="NOT_APPLICABLE",
+        )
+    bindings = [
+        {"name": name, "artifact_id": source_artifacts[name]["artifact_id"],
+         "version": source_artifacts[name]["version"], "sha256": source_artifacts[name]["sha256"]}
+        for name in source_names
+    ]
     handoff = {
         "schema_version": "1.0", "handoff_type": "VIDEO_PROGRAM_TO_EPISODE",
         "program_id": "program", "source_project_id": "program",
         "episode_id": "E001", "series_id": "S001",
-        "source_artifact_bindings": [
-            {"name": name, "artifact_id": f"artifact-{index}", "version": 1, "sha256": "a" * 64}
-            for index, name in enumerate([
-                "portfolio-allocation-decision", "pilot-topic-slate-decision",
-                "production-strategy", "commercial-production-constraints", "growth-baseline",
-            ], start=1)
-        ],
+        "source_artifact_bindings": bindings,
         "episode_intent": {
             "episode_id": "E001", "series_id": "S001",
             "audience_contract": "Explain one system to technology-curious viewers.",
@@ -346,25 +357,65 @@ def test_episode_intent_validate_adapter_checks_program_identity_and_digest_bind
     }
     handoff_path = tmp_path / "episode-handoff.json"
     handoff_path.write_text(json.dumps(handoff), encoding="utf-8")
-    engine.import_asset("program", "episode-production-handoff", handoff_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+    engine.import_asset(
+        "program", "episode-production-handoff", handoff_path,
+        kind="document", media_type="application/json", rights_status="NOT_APPLICABLE",
+    )
     engine.add_tasks("program", [{
         "task_id": "validate-handoff", "title": "Validate Program-to-Episode handoff",
         "kind": "domain_adapter", "executor": "tool", "depends_on": [],
-        "inputs": ["episode-production-handoff"], "outputs": ["validated-episode-intent"],
+        "inputs": ["episode-production-handoff", *source_names], "outputs": ["validated-episode-intent"],
         "requirements": {"domain_adapter": {
             "name": "episode_intent_validate", "handoff_input": "episode-production-handoff",
+            "source_artifact_inputs": source_names,
             "program_id": "program", "output_name": "validated-episode-intent",
         }},
-        "acceptance": {"contract": "The handoff must be a valid, digest-bound typed EpisodeIntent."},
+        "acceptance": {"contract": "Every handoff source binding must match the exact current Program artifact ID, version and digest."},
     }])
     packet = engine.claim_next("program", "handoff-validator")
-    result = run_claimed_domain_adapter(engine, "program", "validate-handoff", "handoff-validator", packet["claim"]["claim_token"])
+    result = run_claimed_domain_adapter(
+        engine, "program", "validate-handoff", "handoff-validator", packet["claim"]["claim_token"],
+    )
     output = result["completion"]["artifacts"]["validated-episode-intent"]
-    payload = json.loads(Path(output["path"]).read_text(encoding="utf-8"))
-    assert payload["episode_id"] == "E001"
-    assert payload["identity_usage"]["mode"] == "NON_CHARACTER"
-    assert len(payload["source_artifact_bindings"]) == 5
+    validated = json.loads(Path(output["path"]).read_text(encoding="utf-8"))
+    assert validated["episode_id"] == "E001"
+    assert validated["identity_usage"]["mode"] == "NON_CHARACTER"
+    assert validated["source_validation"]["status"] == "PASS"
+    assert validated["source_validation"]["source_artifact_bindings"] == bindings
+    assert validated["handoff_type"] == "VIDEO_PROGRAM_TO_EPISODE"
     assert engine.audit("program")["pass"] is True
+
+    engine.create_project("episode", "Receiving Episode", _brief())
+    engine.add_tasks("episode", [{
+        "task_id": "validate-program-handoff", "title": "Validate transferred Program handoff",
+        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+        "inputs": ["validated-episode-intent"], "outputs": ["episode-intent"],
+        "requirements": {"domain_adapter": {
+            "name": "episode_intent_validate", "handoff_input": "validated-episode-intent",
+            "program_id": "program", "require_validated_transfer": True,
+            "source_artifact_name": "validated-episode-intent", "output_name": "episode-intent",
+        }},
+        "acceptance": {"contract": "Only the exact validated Program artifact may start Episode work."},
+    }])
+    assert engine.list_tasks("episode")[0]["status"] == "WAITING_INPUT"
+    transferred = engine.transfer_artifact(
+        "program", "validated-episode-intent", "episode", "validated-episode-intent",
+        expected_artifact_id=output["artifact_id"], expected_version=output["version"],
+        expected_sha256=output["sha256"],
+    )
+    assert transferred["target"]["metadata"]["cross_project_transfer"] == transferred["transfer"]
+    assert engine.list_tasks("episode")[0]["status"] == "READY"
+    episode_packet = engine.claim_next("episode", "episode-validator")
+    episode_result = run_claimed_domain_adapter(
+        engine, "episode", "validate-program-handoff", "episode-validator",
+        episode_packet["claim"]["claim_token"],
+    )
+    episode_output = episode_result["completion"]["artifacts"]["episode-intent"]
+    episode_payload = json.loads(Path(episode_output["path"]).read_text(encoding="utf-8"))
+    assert episode_payload["source_validation"]["status"] == "PASS"
+    assert episode_payload["cross_project_transfer"]["source_artifact_id"] == output["artifact_id"]
+    assert episode_payload["identity_usage"]["mode"] == "NON_CHARACTER"
+    assert engine.audit("episode")["pass"] is True
 
 
 def _ipos_bundle():

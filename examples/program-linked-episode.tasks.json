@@ -6,7 +6,7 @@
     "executor": "tool",
     "depends_on": [],
     "inputs": [
-      "program-episode-handoff"
+      "validated-episode-intent"
     ],
     "outputs": [
       "episode-intent"
@@ -14,9 +14,11 @@
     "requirements": {
       "domain_adapter": {
         "name": "episode_intent_validate",
-        "handoff_input": "program-episode-handoff",
+        "handoff_input": "validated-episode-intent",
         "program_id": "ai-self-media-commercialization",
-        "output_name": "episode-intent"
+        "output_name": "episode-intent",
+        "require_validated_transfer": true,
+        "source_artifact_name": "validated-episode-intent"
       }
     },
     "acceptance": {

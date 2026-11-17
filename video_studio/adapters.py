@@ -126,7 +126,7 @@ def program_episode_handoff_to_intent(payload: Mapping[str, Any], *, expected_pr
         missing_identity=[k for k in ("bundle_ref","canon_ref","approval_ref","rights_evidence_refs") if not identity.get(k)]
         if missing_identity: raise DomainAdapterError(f"IPOS_APPROVED handoff is missing identity evidence: {missing_identity}")
     else: raise DomainAdapterError("identity_usage.mode must be NON_CHARACTER or IPOS_APPROVED")
-    return {"schema_version":"1.0","program_id":program_id,"episode_id":intent.episode_id,"series_id":intent.series_id,"episode_intent":_jsonable(intent),"identity_usage":dict(identity),"source_artifact_bindings":[dict(by_name[n]) for n in sorted(by_name)],"portfolio_decision_ref":dict(by_name["portfolio-allocation-decision"]),"topic_decision_ref":dict(by_name["pilot-topic-slate-decision"]),"production_strategy_ref":dict(by_name["production-strategy"]),"commercial_constraints_ref":dict(by_name["commercial-production-constraints"])}
+    return {"schema_version":"1.0","handoff_type":"VIDEO_PROGRAM_TO_EPISODE","program_id":program_id,"source_project_id":program_id,"episode_id":intent.episode_id,"series_id":intent.series_id,"episode_intent":_jsonable(intent),"identity_usage":dict(identity),"source_artifact_bindings":[dict(by_name[n]) for n in sorted(by_name)],"portfolio_decision_ref":dict(by_name["portfolio-allocation-decision"]),"topic_decision_ref":dict(by_name["pilot-topic-slate-decision"]),"production_strategy_ref":dict(by_name["production-strategy"]),"commercial_constraints_ref":dict(by_name["commercial-production-constraints"])}
 
 
 def _jsonable(value: Any) -> Any:
@@ -409,10 +409,92 @@ def run_claimed_domain_adapter(
             artifact_outputs={output_name:{"path":str(path),"kind":"business_object","media_type":"application/json","rights_status":"NOT_APPLICABLE","metadata":{"adapter":name,"object_type":object_type,"object_id":getattr(obj,identity_field)}}}
             result={"adapter":name,"object_type":object_type,"object_id":getattr(obj,identity_field)}
         elif name == "episode_intent_validate":
-            handoff=program_episode_handoff_to_intent(_input_json(packet,str(config.get("handoff_input","")).strip()),expected_program_id=str(config.get("program_id") or "").strip() or None)
-            output_name=str(config.get("output_name",outputs[0])); path=output_dir/f"{_safe_filename(output_name)}-attempt-{attempt}.json"; _write_json(path,handoff)
-            artifact_outputs={output_name:{"path":str(path),"kind":"episode_intent","media_type":"application/json","rights_status":"NOT_APPLICABLE","metadata":{"adapter":name,"program_id":handoff["program_id"],"episode_id":handoff["episode_id"],"series_id":handoff["series_id"],"identity_usage_mode":handoff["identity_usage"]["mode"]}}}
-            result={"adapter":name,"program_id":handoff["program_id"],"episode_id":handoff["episode_id"],"series_id":handoff["series_id"],"identity_usage_mode":handoff["identity_usage"]["mode"]}
+            handoff_input = str(config.get("handoff_input", "")).strip()
+            expected_program_id = str(config.get("program_id") or "").strip() or None
+            raw_handoff = _input_json(packet, handoff_input)
+            if config.get("require_validated_transfer") is True:
+                imported = packet["input_artifacts"].get(handoff_input)
+                if imported is None:
+                    raise DomainAdapterError(f"validated Program handoff input is unavailable: {handoff_input}")
+                transfer = _mapping(imported.get("metadata", {}).get("cross_project_transfer"), "cross_project_transfer")
+                target_project_id = engine.project(project_id)["project_id"]
+                if transfer.get("schema_version") != "1.0" or transfer.get("transfer_mode") != "IMMUTABLE_COPY":
+                    raise DomainAdapterError("Episode handoff must arrive through a schema 1.0 immutable cross-project transfer")
+                if transfer.get("source_project_id") != expected_program_id:
+                    raise DomainAdapterError("transferred Episode handoff has the wrong source Program")
+                if transfer.get("target_project_id") != target_project_id or transfer.get("target_artifact_name") != handoff_input:
+                    raise DomainAdapterError("transferred Episode handoff target identity does not match this Episode project/input")
+                if transfer.get("source_artifact_name") != str(config.get("source_artifact_name", "validated-episode-intent")):
+                    raise DomainAdapterError("transferred Episode handoff is not the validated Program artifact")
+                if transfer.get("source_sha256") != imported.get("sha256"):
+                    raise DomainAdapterError("transferred Episode handoff digest does not match its source transfer receipt")
+                if not str(transfer.get("source_artifact_id") or "").strip() or not isinstance(transfer.get("source_artifact_version"), int):
+                    raise DomainAdapterError("transferred Episode handoff is missing exact source artifact identity")
+                source_validation = _mapping(raw_handoff.get("source_validation"), "source_validation")
+                if source_validation.get("schema_version") != "1.0" or source_validation.get("status") != "PASS":
+                    raise DomainAdapterError("Episode handoff lacks a passing source Program validation receipt")
+                if source_validation.get("validator") != "video_studio.adapters.episode_intent_validate":
+                    raise DomainAdapterError("Episode handoff source validation was not produced by the registered Program validator")
+                if source_validation.get("source_project_id") != expected_program_id:
+                    raise DomainAdapterError("Episode handoff source validation belongs to a different Program")
+                if source_validation.get("source_artifact_bindings") != raw_handoff.get("source_artifact_bindings"):
+                    raise DomainAdapterError("Episode handoff source validation does not match the embedded artifact bindings")
+                handoff = program_episode_handoff_to_intent(raw_handoff, expected_program_id=expected_program_id)
+                handoff["source_validation"] = source_validation
+                handoff["cross_project_transfer"] = transfer
+            else:
+                handoff = program_episode_handoff_to_intent(raw_handoff, expected_program_id=expected_program_id)
+                source_names = config.get("source_artifact_inputs")
+                if not isinstance(source_names, list) or not source_names or len(source_names) != len(set(source_names)):
+                    raise DomainAdapterError("Program handoff validation requires unique source_artifact_inputs")
+                bindings = {item["name"]: item for item in handoff["source_artifact_bindings"]}
+                if set(source_names) != set(bindings):
+                    raise DomainAdapterError("source_artifact_inputs must exactly match the handoff's source_artifact_bindings")
+                verified = []
+                for source_name in sorted(source_names):
+                    actual = packet["input_artifacts"].get(source_name)
+                    binding = bindings[source_name]
+                    if actual is None:
+                        raise DomainAdapterError(f"Program source artifact is not bound as a declared input: {source_name}")
+                    if (
+                        binding["artifact_id"] != actual.get("artifact_id")
+                        or binding["version"] != actual.get("version")
+                        or binding["sha256"].lower() != str(actual.get("sha256", "")).lower()
+                    ):
+                        raise DomainAdapterError(f"Program handoff source binding does not match the exact current artifact: {source_name}")
+                    verified.append({
+                        "name": source_name, "artifact_id": actual["artifact_id"],
+                        "version": actual["version"], "sha256": actual["sha256"],
+                    })
+                handoff["source_validation"] = {
+                    "schema_version": "1.0", "status": "PASS",
+                    "validator": "video_studio.adapters.episode_intent_validate",
+                    "source_project_id": handoff["program_id"],
+                    "source_artifact_bindings": verified,
+                }
+            output_name = str(config.get("output_name", outputs[0]))
+            path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
+            _write_json(path, handoff)
+            artifact_outputs = {
+                output_name: {
+                    "path": str(path), "kind": "episode_intent", "media_type": "application/json",
+                    "rights_status": "NOT_APPLICABLE",
+                    "metadata": {
+                        "adapter": name, "program_id": handoff["program_id"],
+                        "episode_id": handoff["episode_id"], "series_id": handoff["series_id"],
+                        "identity_usage_mode": handoff["identity_usage"]["mode"],
+                        "source_validation_status": handoff["source_validation"]["status"],
+                        "cross_project_transfer_verified": bool(handoff.get("cross_project_transfer")),
+                    },
+                }
+            }
+            result = {
+                "adapter": name, "program_id": handoff["program_id"],
+                "episode_id": handoff["episode_id"], "series_id": handoff["series_id"],
+                "identity_usage_mode": handoff["identity_usage"]["mode"],
+                "source_validation_status": handoff["source_validation"]["status"],
+                "cross_project_transfer_verified": bool(handoff.get("cross_project_transfer")),
+            }
         elif name == "editorial_plan_validate":
             input_name = str(config["editorial_plan_input"])
             plan = editorial_plan_from_dict(_input_json(packet, input_name))

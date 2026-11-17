@@ -163,12 +163,14 @@
   },
   "program_handoff": {
     "required": true,
-    "artifact_name": "program-episode-handoff",
+    "artifact_name": "validated-episode-intent",
     "schema_version": "1.0",
     "handoff_type": "VIDEO_PROGRAM_TO_EPISODE",
     "source_program_id": "ai-self-media-commercialization",
     "identity_authority": "IPOS",
     "identity_policy": "NON_CHARACTER_WHEN_NO_APPROVED_IPOS_BUNDLE",
-    "source_artifact_digests_required": true
+    "source_artifact_digests_required": true,
+    "source_task_id": "validate-episode-production-handoff",
+    "transfer_mode": "IMMUTABLE_COPY"
   }
 }

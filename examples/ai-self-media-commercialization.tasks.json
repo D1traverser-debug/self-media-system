@@ -1175,7 +1175,12 @@
       "episode-production-handoff"
     ],
     "inputs": [
-      "episode-production-handoff"
+      "episode-production-handoff",
+      "portfolio-allocation-decision",
+      "pilot-topic-slate-decision",
+      "production-strategy",
+      "commercial-production-constraints",
+      "growth-baseline"
     ],
     "outputs": [
       "validated-episode-intent"
@@ -1186,7 +1191,14 @@
         "name": "episode_intent_validate",
         "handoff_input": "episode-production-handoff",
         "program_id": "ai-self-media-commercialization",
-        "output_name": "validated-episode-intent"
+        "output_name": "validated-episode-intent",
+        "source_artifact_inputs": [
+          "portfolio-allocation-decision",
+          "pilot-topic-slate-decision",
+          "production-strategy",
+          "commercial-production-constraints",
+          "growth-baseline"
+        ]
       }
     },
     "acceptance": {

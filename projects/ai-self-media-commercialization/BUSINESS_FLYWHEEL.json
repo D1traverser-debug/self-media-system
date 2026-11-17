@@ -294,7 +294,7 @@
         "ipos-import-receipt",
         "ipos-bundle-readiness"
       ],
-      "mode": "EXACT_VERSIONED_IPOS_BUNDLE_TO_SHOT_AND_CONTINUITY_BINDINGS",
+      "mode": "EXACT_VERSIONED_IPOS_BUNDLE_TO_PROGRAM_READINESS__SHOT_BINDING_REMAINS_EPISODE_SCOPED",
       "decision_owner": "IP_STUDIO_OS_FOR_CANON__VIDEO_DIRECTOR_FOR_SHOT_USAGE"
     },
     "PRODUCTION_TO_PORTFOLIO": {
