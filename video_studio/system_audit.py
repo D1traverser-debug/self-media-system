@@ -136,7 +136,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     _check(checks, "runtime_dependency_boundary", not import_failures, import_failures)
 
     adapter_source = (root / "video_studio" / "adapters.py").read_text(encoding="utf-8")
-    implemented_adapters = set(re.findall(r'(?:if|elif) name == ["\\']([^"\\']+)["\\']', adapter_source))
+    implemented_adapters = set(re.findall(r"(?:if|elif) name == ['\\"]([^'\\"]+)['\\"]", adapter_source))
     declared_adapters = set(studio_manifest.get("capabilities", {}).get("domain_adapters", {}))
     missing_adapters = sorted(declared_adapters - implemented_adapters)
     _check(checks, "domain_adapter_registry_matches_manifest", not missing_adapters, {
