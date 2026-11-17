@@ -160,14 +160,14 @@ If the visual sentence cannot be staged in one still frame, change the concept b
 
 ### Node E — Research and choose the art grammar
 
-Research only what changes the design decision. Inspect relevant examples and extract:
+Research only what changes the design decision. For this task, consult NVIDIA_CNN_EDITORIAL_ART_RESEARCH_V1.md, which records inspected Chinese cartoon and international satire examples. Do not treat an artist name as a prompt style. Inspect relevant examples and extract:
 - line / shape / silhouette;
 - composition and focal hierarchy;
 - visual metaphor or caricature mechanism;
 - print / material / texture behavior;
 - how the style supports the joke.
 
-Do not add style names as decoration. Each of the eight must have a distinct medium, palette and composition for a reason.
+Select one primary visual grammar and, at most, one supporting method. Feng Zikai's line economy is not the same thing as political satire; Zhang Guangyu's allegory is not a license to distort geography; Daumier's institutional caricature is not a reason to invent guilt; Gillray's metaphorical density is not a reason to overcrowd a phone-feed image. Do not add style names as decoration. Each of the eight must have a distinct medium, palette and composition for a reason.
 
 ### Node F — Build a scene graph before prose
 
