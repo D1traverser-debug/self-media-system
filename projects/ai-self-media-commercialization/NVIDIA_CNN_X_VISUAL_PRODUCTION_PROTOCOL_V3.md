@@ -185,42 +185,60 @@ Draw or describe a simple spatial layout before prompt compilation. Do not rely 
 
 ### Node G — Compile one prompt for one image
 
-The prompt must be a self-contained execution specification, not a research essay. Use:
-1. task and output format;
-2. one-sentence visual thesis;
-3. exact scene and camera;
-4. object/character counts and spatial relations;
-5. focal hierarchy and gesture/action;
-6. concept-specific art direction;
-7. lighting, palette and materials;
-8. typography contract;
-9. only the few exclusions needed to prevent known catastrophic errors.
+Keep three artifacts separate; never collapse them into one prompt.
 
-Prefer positive observable instructions. Do not paste the whole article, a design Bible, generic style bundles, or long negative-prompt dumps into the generator.
+**A. Internal editorial brief — not sent to the image model**
+- Owner goal and intended audience.
+- Article-specific thesis, joke mechanism and intended audience effect.
+- Factual/ethical boundaries and why the image belongs in the series.
+- Competing concepts, score and selection rationale.
+
+**B. Model-facing visual prompt — sent to the image model**
+- Only instructions that determine visible pixels: scene/backdrop, subject/action, key object details, composition/viewpoint, style/medium, lighting/palette/materials, and essential visual constraints.
+- Translate the thesis into visible objects, gestures, relationships and spatial staging. Do not ask the model to explain the goal.
+- Do not include internal reasoning, audience comprehension tests, editorial rationale, factual caveats, acceptance criteria, X copy, or instructions such as “the viewer should understand”, “make the joke clear”, “show the absurdity”, or “without relying on a caption”. Those belong in the brief or QA contract.
+- Abstract descriptors such as “funny”, “satirical”, “powerful”, “premium” or “clear” are not substitutes for visible implementation. Use them only when paired with concrete visual instructions; otherwise remove them.
+- Use the OpenAI image-generation prompt structure: scene/backdrop → subject/action → key details → composition/framing → style/medium → constraints/output. Use short labeled sections only when the scene genuinely needs them.
+- Prefer positive, observable instructions. Do not use Stable-Diffusion-style keyword soup, giant negative-prompt dumps, generic bundles of artist names, or unnecessary exactness that does not affect the image.
+
+**C. Acceptance contract — not sent as creative prose**
+- Image-only cold-read criteria.
+- Physical/anatomy/spatial checks.
+- Factual and ethical boundary.
+- Typography/post-production requirements.
+- PASS / REWORK / REJECT criteria.
+
+The prompt compiler may translate approved design decisions into visual instructions, but may not invent new story beats, characters, props, slogans or brand elements.
 
 ### Node H — Prompt preflight
 
-Before generation, challenge the exact prompt:
-- Does the first sentence describe the intended joke, not merely the topic?
-- Is there exactly one main action and one focal relationship?
-- Can every noun be located in the scene?
-- Are object and character counts explicit?
-- Is the physical action possible and visually readable?
+Before generation, challenge the exact model-facing prompt and its source brief:
+- Does the prompt contain visible instructions rather than user-goal prose, audience tests or QA language?
+- Does every abstract design decision resolve into a visible object, gesture, relationship, composition or rendering choice?
+- Is there one dominant action and one focal relationship?
+- Can every noun be located in the scene, with explicit support, attachment, orientation and occlusion where needed?
+- Are object and character counts explicit only where they materially reduce ambiguity?
+- Are hinges, latches, locks, handles, supports and contact surfaces physically defined rather than merely named?
+- Are hand ownership, gaze, pose and weight-bearing posture unambiguous?
 - Are route, map, arrows, cables and money-flow directions unambiguous?
-- Are there any duplicated people, reflections, extra limbs or accidental extra props?
-- Does the prompt accidentally turn an allegation into fact?
-- Does the chosen style conflict with the composition or the X thumbnail use?
-- Is the requested text actually necessary, and should it be added in post instead?
+- Are there contradictions between text/no-text, title placement, object counts, style, setting or exclusions?
+- Does the prompt add any prop, character, logo, slogan or story beat not supported by the approved concept?
+- Does the visual metaphor imply an allegation as established fact?
+- Is the art grammar singular and compatible with the scene and X thumbnail?
+- Is text genuinely part of the illustration, or should it be a post-production overlay?
+- Is the prompt concise enough that the important visual relationships remain dominant?
 
-If any answer is unresolved, do not generate.
+If any material answer is unresolved, return to the earliest affected design node. Do not generate.
 
 ### Node I — Generate sequentially
 
 - Generate exactly one image for the active concept.
-- Do not generate the next image until the active one has a documented PASS, REWORK or REJECT decision.
-- Bind the exact prompt version and generation call/result to the image.
+- The assistant owns prompt preparation, tool invocation, generation and first-pass QA. Never ask the owner to copy a prompt into a new chat or move artifacts between conversations.
+- The exact approved model-facing prompt must be the instruction supplied to the generation tool. Never replace it at execution time with a shortened summary or improvised paraphrase.
 - Do not silently change the prompt after generation; create a new prompt version for a new attempt.
-- Do not feed rejected candidates back as references.
+- Do not feed rejected candidates back as references. Explicitly mark prior rejected images as non-reference inputs when the tool supports that distinction.
+- Bind the visible prompt text, tool call/result, output asset and version. If the current interface does not expose the backend-revised prompt, seed, model variant or generation controls, record each as NOT_EXPOSED; do not fabricate an exact execution trace or promise deterministic one-shot success.
+- Use one controlled generation, inspect the result, and then make a targeted edit or return to the earliest failed design node. Do not blind-batch or random-retry.
 
 ### Node J — Image-only cold read
 
