@@ -368,7 +368,7 @@ def test_ipos_bundle_import_adapter_preserves_external_canon_and_graph_lineage(t
 
     engine.add_tasks("ipos", [{
         "task_id": "bind-ipos-shot", "title": "Bind the exact imported IPOS canon to a shot contract",
-        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+        "kind": "domain_adapter", "executor": "tool", "depends_on": ["import-ipos"],
         "inputs": ["ipos-bundle", "ipos-import-receipt", "media-graph-imported", "shot-contract"],
         "outputs": ["shot-contract-ipos-bound", "ipos-continuity-rules"],
         "requirements": {"domain_adapter": {

@@ -406,6 +406,21 @@ def test_graph_rejects_cycles_and_multiple_output_producers(tmp_path):
         engine.add_tasks("demo", [task("a", outputs=["shared"]), task("b", outputs=["shared"])])
 
 
+def test_input_artifact_requires_declared_transitive_producer_dependency(tmp_path):
+    engine = make_engine(tmp_path)
+    with pytest.raises(ContractError, match="input artifact.*producer.*not a declared dependency"):
+        engine.add_tasks("demo", [
+            task("produce", outputs=["shared-artifact"]),
+            task("consume", inputs=["shared-artifact"]),
+        ])
+
+    engine.add_tasks("demo", [
+        task("produce", outputs=["shared-artifact"]),
+        task("consume", deps=["produce"], inputs=["shared-artifact"]),
+    ])
+    assert engine.task_graph("demo")["consume"]["depends_on"] == ["produce"]
+
+
 def test_failure_retry_is_bounded_by_declared_attempt_budget(tmp_path):
     engine = make_engine(tmp_path)
     spec = task("unstable")
