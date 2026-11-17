@@ -44,6 +44,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         root / "STUDIO_ENTRY.md",
         root / "pyproject.toml",
         root / "video_studio" / "data" / "studio_manifest.json",
+        root / "video_studio" / "system_audit.py",
         root / "examples" / "technology-explainer.brief.json",
         root / "examples" / "technology-explainer.tasks.json",
         root / "examples" / "news-fictional-media.brief.json",
@@ -97,6 +98,8 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         and "vga-studio" in entry
         and "ai-self-media-commercialization" in entry
         and "import-manifest" in entry
+        and "system-audit" in entry
+        and studio_manifest.get("system_audit") == "video_studio.system_audit.run_system_audit"
         and governance.get("system") == "VIDEO_STUDIO_NATIVE"
         and governance.get("mode") == "STANDALONE"
         and governance.get("caos_runtime_dependency") is False
@@ -111,7 +114,9 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     })
 
     scripts = pyproject.get("project", {}).get("scripts", {})
-    _check(checks, "standalone_cli_registration", scripts.get("vga-studio") == "video_studio.cli:main", scripts)
+    cli_source = (root / "video_studio" / "cli.py").read_text(encoding="utf-8")
+    cli_registered = scripts.get("vga-studio") == "video_studio.cli:main" and "system-audit" in cli_source and "import-manifest" in cli_source
+    _check(checks, "standalone_cli_registration", cli_registered, scripts)
 
     import_failures: list[str] = []
     scanned_files = sorted((root / "video_studio").rglob("*.py"))
