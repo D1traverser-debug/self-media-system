@@ -174,3 +174,22 @@ This section supersedes older status statements below when they conflict.
 - **Current parallel work:** IPOS G1 continues independently. MEDIA_GROWTH and COMMERCIALIZATION research remain available without an IPOS identity bundle. Identity-dependent shots remain blocked until an owner-approved READY_FOR_VIDEO bundle with G2/G7/G8 PASS and rights/provenance arrives.
 
 Historical checkpoints that say PR #33 is open or under review describe earlier states only; the merged mainline evidence above is authoritative.
+
+
+## Standalone Video Studio integration — exact-head verified (2026-11-17)
+
+The integrated standalone Video Studio is now the default generic Video execution entry. It is not a CAOS runtime and does not modify or require CAOS code.
+
+- Entry: `STUDIO_ENTRY.md`; implementation: `video_studio/`; CLI: `vga-studio`.
+- Default Program: `ai-self-media-commercialization`, with a 35-task graph spanning growth, original IP, commercialization and production.
+- Context import: `examples/ai-self-media-commercialization.context.json` imports exact existing Video/IPOS reference files as immutable SHA-256-bound artifacts. It does not fabricate the missing Jensen source video or an approved IPOS bundle.
+- The new `import-manifest` command preflights all paths/metadata before mutation. Identical imports are idempotent and preserve completed consumers.
+- Rights clearance now binds the reviewer to the artifact producer and a completed human review task, and checks exact source artifact IDs, digests, rights status and registered evidence references.
+- `vga-studio system-audit --repo-root .` audits standalone governance, dependency boundaries, adapter registration, Program authority bindings, example graph execution and hard release gates.
+
+Exact branch head: `3e823be92de41d9642a40292863689a7a68a0fd6`.
+Exact-head CI run: `44006872263` — **343 tests passed**, standalone system audit PASS, standalone CLI smoke PASS, integrated Program context/readiness smoke PASS, installed agentic CLI smoke PASS.
+
+**Assurance boundary:** this is a branch-level structural and executable-contract PASS, not a claim that an episode has been produced or that production readiness is complete. The system audit correctly reports `PARTIAL`: no repository-registered generative-video executor exists; the exact owner-supplied Jensen/Alice source video and an owner-approved IPOS READY_FOR_VIDEO bundle are still missing. Paid provider execution, media generation, promotion and publication were not performed. All release gates remain in force.
+
+PR #36's original standalone hard-gate branch is superseded by the integrated branch; the consolidated change is submitted as PR #37. CAOS source and IPOS canon remain untouched.
