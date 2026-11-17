@@ -211,7 +211,8 @@
         "pilot-topic-slate-adjudication",
         "business-flywheel-outcome-refresh",
         "portfolio-performance-refresh",
-        "portfolio-next-cycle-adjudication"
+        "portfolio-next-cycle-adjudication",
+        "episode-outcome-analysis"
       ],
       "handoff_artifacts": [
         "growth-baseline",
@@ -239,12 +240,12 @@
     "IP_TO_GROWTH": {
       "task_ids": [
         "ipos-video-identity-bundle-import",
-        "ipos-shot-binding-validation",
+        "ipos-bundle-readiness-validation",
         "brand-identity-system",
         "ip-recognition-packaging-hypotheses"
       ],
       "handoff_artifacts": [
-        "ipos-shot-contract-bindings",
+        "ipos-bundle-readiness",
         "brand-identity-system"
       ],
       "mode": "EXACT_APPROVED_CANON_TO_MEASURABLE_PACKAGING_HYPOTHESES",
@@ -271,13 +272,15 @@
         "sponsor-integration-consultation",
         "commercial-production-constraints",
         "production-strategy-commercial-integration",
-        "episode-production-handoff"
+        "episode-production-handoff",
+        "validate-episode-production-handoff"
       ],
       "handoff_artifacts": [
         "commercial-offer-decision",
         "sponsor-integration-advice",
         "commercial-production-constraints",
-        "production-strategy"
+        "production-strategy",
+        "validated-episode-intent"
       ],
       "mode": "ADJUDICATED_OFFER_TO_PRODUCTION_CONSTRAINTS",
       "decision_owner": "executive_producer"
@@ -285,11 +288,11 @@
     "IP_TO_PRODUCTION": {
       "task_ids": [
         "ipos-video-identity-bundle-import",
-        "ipos-shot-binding-validation"
+        "ipos-bundle-readiness-validation"
       ],
       "handoff_artifacts": [
         "ipos-import-receipt",
-        "ipos-shot-contract-bindings"
+        "ipos-bundle-readiness"
       ],
       "mode": "EXACT_VERSIONED_IPOS_BUNDLE_TO_SHOT_AND_CONTINUITY_BINDINGS",
       "decision_owner": "IP_STUDIO_OS_FOR_CANON__VIDEO_DIRECTOR_FOR_SHOT_USAGE"

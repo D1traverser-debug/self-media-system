@@ -283,6 +283,90 @@ def test_extended_media_qa_adapter_records_loudness_and_silence_analysis(tmp_pat
     assert report["metadata"]["checker"] == "ffmpeg-ffprobe-v0.2"
 
 
+def test_business_object_validate_adapter_emits_typed_commercial_fit_artifact(tmp_path):
+    engine = StudioEngine(tmp_path)
+    engine.create_project("commercial", "Commercial adapter", _brief())
+    fit_path = tmp_path / "commercial-fit.json"
+    fit_path.write_text(json.dumps({
+        "fit_id": "fit-001", "context_id": "series-001",
+        "advertiser_categories": ["cloud"],
+        "integration_surfaces": ["verified product workflow"],
+        "product_truth_requirements": ["claims require primary evidence"],
+        "prohibited_integration_forms": ["guaranteed outcome"],
+        "measurement_plan_refs": ["measurement://fit-001"],
+        "evidence_refs": ["research://advertiser-map"],
+        "editorial_independence_required": True,
+    }), encoding="utf-8")
+    engine.import_asset("commercial", "commercial-fit-draft", fit_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+    engine.add_tasks("commercial", [{
+        "task_id": "validate-fit", "title": "Validate typed CommercialFit",
+        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+        "inputs": ["commercial-fit-draft"], "outputs": ["topic-commercial-fit"],
+        "requirements": {"domain_adapter": {
+            "name": "business_object_validate", "object_type": "CommercialFit",
+            "input_name": "commercial-fit-draft", "output_name": "topic-commercial-fit",
+        }},
+        "acceptance": {"contract": "The typed commercial fit must pass domain validation."},
+    }])
+    packet = engine.claim_next("commercial", "commercial-validator")
+    result = run_claimed_domain_adapter(engine, "commercial", "validate-fit", "commercial-validator", packet["claim"]["claim_token"])
+    output = result["completion"]["artifacts"]["topic-commercial-fit"]
+    payload = json.loads(Path(output["path"]).read_text(encoding="utf-8"))
+    assert payload["object_type"] == "CommercialFit"
+    assert payload["object"]["fit_id"] == "fit-001"
+    assert payload["object"]["editorial_independence_required"] is True
+    assert engine.audit("commercial")["pass"] is True
+
+
+def test_episode_intent_validate_adapter_checks_program_identity_and_digest_bindings(tmp_path):
+    engine = StudioEngine(tmp_path)
+    engine.create_project("program", "Program handoff adapter", _brief())
+    handoff = {
+        "schema_version": "1.0", "handoff_type": "VIDEO_PROGRAM_TO_EPISODE",
+        "program_id": "program", "source_project_id": "program",
+        "episode_id": "E001", "series_id": "S001",
+        "source_artifact_bindings": [
+            {"name": name, "artifact_id": f"artifact-{index}", "version": 1, "sha256": "a" * 64}
+            for index, name in enumerate([
+                "portfolio-allocation-decision", "pilot-topic-slate-decision",
+                "production-strategy", "commercial-production-constraints", "growth-baseline",
+            ], start=1)
+        ],
+        "episode_intent": {
+            "episode_id": "E001", "series_id": "S001",
+            "audience_contract": "Explain one system to technology-curious viewers.",
+            "editorial_question": "What is the central mechanism?",
+            "primary_platform": "BILIBILI", "target_duration_seconds": 180,
+            "evidence_refs": ["artifact://growth-baseline"],
+            "desired_outcomes": ["qualified_watch_time"],
+            "success_metric_semantics": {"qualified_watch_time": "minutes from target viewers"},
+            "commercial_context_refs": [], "constraints": ["Do not invent IPOS identity canon."],
+        },
+        "identity_usage": {"mode": "NON_CHARACTER", "reason": "No approved IPOS identity bundle is available."},
+    }
+    handoff_path = tmp_path / "episode-handoff.json"
+    handoff_path.write_text(json.dumps(handoff), encoding="utf-8")
+    engine.import_asset("program", "episode-production-handoff", handoff_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+    engine.add_tasks("program", [{
+        "task_id": "validate-handoff", "title": "Validate Program-to-Episode handoff",
+        "kind": "domain_adapter", "executor": "tool", "depends_on": [],
+        "inputs": ["episode-production-handoff"], "outputs": ["validated-episode-intent"],
+        "requirements": {"domain_adapter": {
+            "name": "episode_intent_validate", "handoff_input": "episode-production-handoff",
+            "program_id": "program", "output_name": "validated-episode-intent",
+        }},
+        "acceptance": {"contract": "The handoff must be a valid, digest-bound typed EpisodeIntent."},
+    }])
+    packet = engine.claim_next("program", "handoff-validator")
+    result = run_claimed_domain_adapter(engine, "program", "validate-handoff", "handoff-validator", packet["claim"]["claim_token"])
+    output = result["completion"]["artifacts"]["validated-episode-intent"]
+    payload = json.loads(Path(output["path"]).read_text(encoding="utf-8"))
+    assert payload["episode_id"] == "E001"
+    assert payload["identity_usage"]["mode"] == "NON_CHARACTER"
+    assert len(payload["source_artifact_bindings"]) == 5
+    assert engine.audit("program")["pass"] is True
+
+
 def _ipos_bundle():
     return {
         "schema_version": "1.0", "issuer": "IP_STUDIO_OS",
@@ -365,6 +449,29 @@ def test_ipos_bundle_import_adapter_preserves_external_canon_and_graph_lineage(t
     assert receipt["canon_ref"].endswith("@v1")
     assert len(receipt["imported_asset_refs"]) == 2
     assert any(item["kind"] == "IPOS_IDENTITY_BUNDLE" for item in graph_result["assets"])
+
+    engine.add_tasks("ipos", [{
+        "task_id": "inspect-ipos-import", "title": "Verify exact imported IPOS bundle provenance",
+        "kind": "domain_adapter", "executor": "tool", "depends_on": ["import-ipos"],
+        "inputs": ["ipos-bundle", "ipos-import-receipt", "media-graph-imported"],
+        "outputs": ["ipos-bundle-readiness"],
+        "requirements": {"domain_adapter": {
+            "name": "ipos_bundle_inspect", "bundle_input": "ipos-bundle",
+            "import_receipt_input": "ipos-import-receipt", "media_graph_input": "media-graph-imported",
+            "output_name": "ipos-bundle-readiness",
+        }},
+        "acceptance": {"provenance": "The inspected bundle, receipt and promoted MediaGraph digests must match exactly."},
+    }])
+    inspect_packet = engine.claim_next("ipos", "ipos-inspector")
+    assert inspect_packet["task"]["task_id"] == "inspect-ipos-import"
+    inspect_result = run_claimed_domain_adapter(
+        engine, "ipos", "inspect-ipos-import", "ipos-inspector", inspect_packet["claim"]["claim_token"],
+    )
+    readiness_path = inspect_result["completion"]["artifacts"]["ipos-bundle-readiness"]["path"]
+    readiness_payload = json.loads(Path(readiness_path).read_text(encoding="utf-8"))
+    assert readiness_payload["readiness"]["ready"] is True
+    assert readiness_payload["import_validation"]["imported_asset_count"] == 2
+    assert readiness_payload["import_validation"]["reference_binding_count"] >= 1
 
     engine.add_tasks("ipos", [{
         "task_id": "bind-ipos-shot", "title": "Bind the exact imported IPOS canon to a shot contract",

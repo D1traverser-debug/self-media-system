@@ -499,18 +499,59 @@ def run_claimed_domain_adapter(
             readiness = inspect_ipos_bundle(_input_json(packet, input_name))
             if not readiness.ready:
                 raise DomainAdapterError("IPOS bundle is not video-ready: " + "; ".join(readiness.reasons))
+            import_validation = None
+            receipt_input = str(config.get("import_receipt_input", "")).strip()
+            graph_input = str(config.get("media_graph_input", "")).strip()
+            if bool(receipt_input) != bool(graph_input):
+                raise DomainAdapterError("IPOS import verification requires both import_receipt_input and media_graph_input")
+            if receipt_input and graph_input:
+                receipt = ipos_import_receipt_from_dict(_input_json(packet, receipt_input))
+                graph = MediaGraph.from_dict(_input_json(packet, graph_input))
+                if receipt.bundle_ref != readiness.bundle_ref or receipt.canon_ref != readiness.canon_ref:
+                    raise DomainAdapterError("IPOS import receipt does not match the inspected bundle/canon")
+                bundle_asset = graph.assets.get(receipt.bundle_asset_ref)
+                if bundle_asset is None or graph.asset_state(receipt.bundle_asset_ref) != "PROMOTED":
+                    raise DomainAdapterError("IPOS bundle asset is missing or not promoted in MediaGraph")
+                if bundle_asset.digest != receipt.bundle_digest:
+                    raise DomainAdapterError("IPOS bundle asset digest does not match the import receipt")
+                verified_refs = 0
+                for ref in receipt.imported_asset_refs:
+                    asset = graph.assets.get(ref)
+                    if asset is None or graph.asset_state(ref) != "PROMOTED":
+                        raise DomainAdapterError(f"IPOS imported asset is missing or not promoted: {ref.key()}")
+                    verified_refs += 1
+                for binding in receipt.reference_bindings:
+                    ref = AssetRef(binding.asset_id, binding.version_id)
+                    asset = graph.assets.get(ref)
+                    if asset is None or graph.asset_state(ref) != "PROMOTED" or asset.digest != binding.digest:
+                        raise DomainAdapterError(f"IPOS reference binding does not match the exact promoted digest: {ref.key()}")
+                import_validation = {
+                    "bundle_asset_ref": receipt.bundle_asset_ref.key(),
+                    "bundle_digest": receipt.bundle_digest,
+                    "imported_asset_count": verified_refs,
+                    "reference_binding_count": len(receipt.reference_bindings),
+                    "media_graph_context_id": bundle_asset.context_id,
+                }
             output_name = str(config.get("output_name", outputs[0]))
             path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
-            payload = {"adapter": name, "readiness": _jsonable(readiness)}
+            payload = {"adapter": name, "readiness": _jsonable(readiness), "import_validation": import_validation}
             _write_json(path, payload)
             artifact_outputs = {
                 output_name: {
                     "path": str(path), "kind": "evidence", "media_type": "application/json",
                     "rights_status": "NOT_APPLICABLE",
-                    "metadata": {"adapter": name, "ipos_ready": True, "bundle_ref": readiness.bundle_ref},
+                    "metadata": {
+                        "adapter": name, "ipos_ready": True, "bundle_ref": readiness.bundle_ref,
+                        "import_verified": import_validation is not None,
+                        "imported_asset_count": import_validation["imported_asset_count"] if import_validation else 0,
+                    },
                 }
             }
-            result = {"adapter": name, "ipos_ready": True, "bundle_ref": readiness.bundle_ref}
+            result = {
+                "adapter": name, "ipos_ready": True, "bundle_ref": readiness.bundle_ref,
+                "import_verified": import_validation is not None,
+                "imported_asset_count": import_validation["imported_asset_count"] if import_validation else 0,
+            }
 
         elif name == "media_graph_initialize":
             contexts = config.get("contexts", [])

@@ -84,10 +84,27 @@ def test_standalone_manifest_registers_explicit_domain_adapters_and_font_rights_
         "ipos_shot_bind", "ipos_continuity_snapshot", "ipos_continuity_link",
         "media_graph_initialize", "timeline_validate", "continuity_assess",
         "shot_route", "business_outcome_metrics", "extended_media_qa",
-        "programmatic_graphic_render",
+        "programmatic_graphic_render", "business_object_validate", "episode_intent_validate",
     }.issubset(adapters)
     font_metadata = json.loads((ROOT / "examples" / "adapter-demo-font.metadata.json").read_text(encoding="utf-8"))
     assert font_metadata["rights_evidence_refs"] == ["rights-clearance"]
+
+
+def test_program_task_graph_and_cross_workstream_handoffs_share_one_current_authority():
+    manifest = json.loads((ROOT / "projects/ai-self-media-commercialization/PROJECT_MANIFEST.json").read_text(encoding="utf-8"))
+    tasks = json.loads((ROOT / "examples/ai-self-media-commercialization.tasks.json").read_text(encoding="utf-8"))
+    flywheel = json.loads((ROOT / "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json").read_text(encoding="utf-8"))
+    assert manifest["subtask_graph_ref"] == "../../examples/ai-self-media-commercialization.tasks.json"
+    assert len(tasks) == 50
+    task_ids = {item["task_id"] for item in tasks}
+    producers = {output: item["task_id"] for item in tasks for output in item["outputs"]}
+    for loop_name, loop in flywheel["execution_bindings"].items():
+        assert set(loop["task_ids"]).issubset(task_ids), loop_name
+        for artifact in loop["handoff_artifacts"]:
+            assert artifact in producers, (loop_name, artifact)
+            assert producers[artifact] in loop["task_ids"], (loop_name, artifact, producers[artifact])
+    assert "episode-outcome-analysis" in flywheel["execution_bindings"]["AUDIENCE_TO_PORTFOLIO"]["task_ids"]
+    assert "validated-episode-intent" in flywheel["execution_bindings"]["COMMERCIAL_TO_PRODUCTION"]["handoff_artifacts"]
 
 
 def test_example_briefs_preserve_nonnegotiable_video_release_gates():

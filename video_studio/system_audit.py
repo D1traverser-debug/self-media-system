@@ -52,6 +52,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         root / "examples" / "ai-self-media-commercialization.brief.json",
         root / "examples" / "ai-self-media-commercialization.tasks.json",
         root / "examples" / "ai-self-media-commercialization.context.json",
+        root / "projects" / "ai-self-media-commercialization" / "BUSINESS_FLYWHEEL.json",
         root / "examples" / "standalone-domain-adapters.brief.json",
         root / "examples" / "standalone-domain-adapters.tasks.json",
     ]
@@ -78,6 +79,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         program_tasks = _read_json(root / "examples" / "ai-self-media-commercialization.tasks.json")
         context_path = root / "examples" / "ai-self-media-commercialization.context.json"
         context_manifest = _read_json(context_path)
+        business_flywheel = _read_json(root / "projects" / "ai-self-media-commercialization" / "BUSINESS_FLYWHEEL.json")
     except (OSError, json.JSONDecodeError, tomllib.TOMLDecodeError, TypeError, KeyError) as exc:
         _check(checks, "repository_contract_parse", False, f"{type(exc).__name__}: {exc}")
         return {
@@ -143,12 +145,52 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     adapter_source = (root / "video_studio" / "adapters.py").read_text(encoding="utf-8")
     implemented_adapters = set(re.findall(r"""(?:if|elif) name == ["']([^"']+)["']""", adapter_source))
     declared_adapters = set(studio_manifest.get("capabilities", {}).get("domain_adapters", {}))
-    missing_adapters = sorted(declared_adapters - implemented_adapters)
-    _check(checks, "domain_adapter_registry_matches_manifest", not missing_adapters, {
+    from .adapters import SUPPORTED_DOMAIN_ADAPTERS, supports_domain_adapter
+    supported_adapters = set(SUPPORTED_DOMAIN_ADAPTERS)
+    adapter_registry_ok = declared_adapters == implemented_adapters == supported_adapters
+    _check(checks, "domain_adapter_registry_matches_manifest", adapter_registry_ok, {
         "declared_count": len(declared_adapters),
         "implemented_count": len(implemented_adapters),
-        "missing_implementations": missing_adapters,
+        "supported_count": len(supported_adapters),
+        "undeclared_supported": sorted(supported_adapters - declared_adapters),
+        "declared_without_implementation": sorted(declared_adapters - implemented_adapters),
+        "implemented_without_support_registration": sorted(implemented_adapters - supported_adapters),
     })
+
+    tool_binding_failures = []
+    for task in program_tasks:
+        if task.get("executor") != "tool":
+            continue
+        requirements = task.get("requirements", {})
+        adapter = requirements.get("domain_adapter") if isinstance(requirements, dict) else None
+        if isinstance(adapter, dict):
+            name = str(adapter.get("name") or "").strip()
+            if not name or name not in declared_adapters or not supports_domain_adapter(name):
+                tool_binding_failures.append(f"{task.get('task_id')}: domain adapter is not declared and executable: {name!r}")
+        else:
+            from .production.executors import tool_executor_for_task
+            if not tool_executor_for_task(task):
+                tool_binding_failures.append(f"{task.get('task_id')}: no registered production/domain executor")
+    _check(checks, "program_tool_tasks_have_registered_executors", not tool_binding_failures, tool_binding_failures)
+
+    task_ids = {str(task.get("task_id")) for task in program_tasks}
+    output_producers = {
+        output: str(task.get("task_id"))
+        for task in program_tasks
+        for output in task.get("outputs", [])
+    }
+    flywheel_failures = []
+    for loop_name, loop in business_flywheel.get("execution_bindings", {}).items():
+        loop_task_ids = set(loop.get("task_ids", []))
+        for task_id in sorted(loop_task_ids - task_ids):
+            flywheel_failures.append(f"{loop_name}: unknown task {task_id}")
+        for artifact_name in loop.get("handoff_artifacts", []):
+            producer = output_producers.get(artifact_name)
+            if producer is None:
+                flywheel_failures.append(f"{loop_name}: handoff artifact has no producer: {artifact_name}")
+            elif producer not in loop_task_ids:
+                flywheel_failures.append(f"{loop_name}: producer {producer} for {artifact_name} is not in the loop task set")
+    _check(checks, "cross_workstream_flywheel_handoffs_resolve", not flywheel_failures, flywheel_failures)
 
     from .production.registry import PRODUCTION_EXECUTORS
 
@@ -228,6 +270,20 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
                 graph_failures.append("IPOS import must remain dependency-pending until MediaGraph bootstrap is completed")
             if program_audit.get("pass") is not True:
                 graph_failures.append(f"program graph audit failed: {program_audit}")
+            from .production.worker_pool import run_ready_tool_tasks
+            tool_smoke = run_ready_tool_tasks(engine, "program", worker_prefix="system-audit", max_workers=2, max_rounds=10)
+            completed_tool_ids = {item["task_id"] for item in tool_smoke.get("completed", [])}
+            if "media-graph-bootstrap" not in completed_tool_ids:
+                graph_failures.append(f"Program local tool smoke did not execute media-graph-bootstrap: {tool_smoke}")
+            if tool_smoke.get("failed") or tool_smoke.get("ready_tool_tasks_without_registered_executor"):
+                graph_failures.append(f"Program local tool smoke found execution failures or unregistered tools: {tool_smoke}")
+            post_smoke_tasks = {item["task_id"]: item for item in engine.list_tasks("program")}
+            if post_smoke_tasks.get("media-graph-bootstrap", {}).get("status") != "COMPLETED":
+                graph_failures.append("media-graph-bootstrap must complete through the registered local tool executor")
+            if post_smoke_tasks.get("ipos-video-identity-bundle-import", {}).get("status") != "WAITING_INPUT":
+                graph_failures.append("IPOS import must wait for the missing owner-approved bundle after MediaGraph bootstrap")
+            if engine.audit("program").get("pass") is not True:
+                graph_failures.append("Program graph audit failed after the real local tool execution smoke")
         except Exception as exc:
             graph_failures.append(f"program: {type(exc).__name__}: {exc}")
     _check(checks, "example_graphs_and_default_program_execution", not graph_failures, graph_failures)

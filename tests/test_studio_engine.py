@@ -416,9 +416,12 @@ def test_input_artifact_requires_declared_transitive_producer_dependency(tmp_pat
 
     engine.add_tasks("demo", [
         task("produce", outputs=["shared-artifact"]),
-        task("consume", deps=["produce"], inputs=["shared-artifact"]),
+        task("bridge", deps=["produce"]),
+        task("consume", deps=["bridge"], inputs=["shared-artifact"]),
     ])
-    assert engine.task_graph("demo")["consume"]["depends_on"] == ["produce"]
+    task_map = {item["task_id"]: item for item in engine.list_tasks("demo")}
+    assert task_map["consume"]["depends_on"] == ["bridge"]
+    assert "produce" not in task_map["consume"]["depends_on"]
 
 
 def test_failure_retry_is_bounded_by_declared_attempt_budget(tmp_path):

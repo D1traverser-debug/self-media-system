@@ -194,30 +194,36 @@
     "priority": 100
   },
   {
-    "task_id": "ipos-shot-binding-validation",
-    "title": "Validate IPOS bundle import, shot bindings and continuity bindings",
-    "kind": "identity_adapter_validation",
-    "executor": "agent",
+    "task_id": "ipos-bundle-readiness-validation",
+    "title": "Validate the imported IPOS bundle readiness and exact MediaGraph provenance",
+    "kind": "domain_adapter",
+    "executor": "tool",
     "depends_on": [
       "ipos-video-identity-bundle-import"
     ],
     "inputs": [
-      "media-graph-imported",
+      "ipos-ready-for-video-bundle",
       "ipos-import-receipt",
-      "ipos-ready-for-video-bundle"
+      "media-graph-imported"
     ],
     "outputs": [
-      "ipos-shot-contract-bindings",
-      "ipos-continuity-bindings"
+      "ipos-bundle-readiness"
     ],
     "requirements": {
-      "workstream": "PRODUCTION_SYSTEM",
+      "workstream": "ORIGINAL_DIGITAL_IP",
       "external_authority": "IPOS",
-      "adapter_contract": "video_studio.adapters.ipos_bundle_import",
-      "versioned_artifact_handoff": true
+      "readiness_contract": "OWNER_APPROVED__READY_FOR_VIDEO__G2_G7_G8_PASS",
+      "exact_versions_and_rights_required": true,
+      "domain_adapter": {
+        "name": "ipos_bundle_inspect",
+        "bundle_input": "ipos-ready-for-video-bundle",
+        "import_receipt_input": "ipos-import-receipt",
+        "media_graph_input": "media-graph-imported",
+        "output_name": "ipos-bundle-readiness"
+      }
     },
     "acceptance": {
-      "bindings": "Exact promoted asset versions, rights and continuity rules are preserved in local Video artifacts."
+      "readiness": "The exact imported bundle is video-ready, its receipt matches the bundle/canon identity, and every imported reference remains present as the exact promoted MediaGraph version. No shot-specific binding is fabricated at Program level."
     },
     "priority": 95
   },
@@ -228,12 +234,11 @@
     "executor": "agent",
     "depends_on": [
       "growth-baseline-and-topic-hypotheses",
-      "ipos-shot-binding-validation"
+      "ipos-bundle-readiness-validation"
     ],
     "inputs": [
       "growth-baseline",
-      "ipos-shot-contract-bindings",
-      "ipos-continuity-bindings"
+      "ipos-bundle-readiness"
     ],
     "outputs": [
       "brand-identity-system"
@@ -1158,6 +1163,34 @@
     },
     "acceptance": {
       "handoff": "Emit schema 1.0 typed EpisodeIntent, selected topic/series, platform, duration, success semantics, constraints and exact source artifact IDs/versions/SHA-256. Use NON_CHARACTER unless owner-approved IPOS bundle is bound."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "validate-episode-production-handoff",
+    "title": "Validate the Program-to-Episode handoff and typed EpisodeIntent",
+    "kind": "domain_adapter",
+    "executor": "tool",
+    "depends_on": [
+      "episode-production-handoff"
+    ],
+    "inputs": [
+      "episode-production-handoff"
+    ],
+    "outputs": [
+      "validated-episode-intent"
+    ],
+    "requirements": {
+      "workstream": "CROSS_WORKSTREAM",
+      "domain_adapter": {
+        "name": "episode_intent_validate",
+        "handoff_input": "episode-production-handoff",
+        "program_id": "ai-self-media-commercialization",
+        "output_name": "validated-episode-intent"
+      }
+    },
+    "acceptance": {
+      "contract": "Validate schema version, Program identity, exact source artifact IDs/versions/SHA-256, typed EpisodeIntent and explicit IPOS identity usage mode before the handoff can be consumed."
     },
     "priority": 80
   },
