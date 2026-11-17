@@ -363,9 +363,9 @@ Create exactly one square 1:1 surrealist editorial painting for an English-langu
 
 Show one formal, quiet boardroom with a long conference table and a narrow doorway at the far end. The dominant subject is one enormous elephant whose entire body is constructed from layered generic GPU circuit boards: recognizable green printed circuit boards form the ears, legs and torso, while cooling fans create the texture of its broad sides. It must still read instantly as one elephant, not a pile of hardware.
 
-The elephant is trying to pass through the narrow doorway. Its trunk reaches through the opening, but its massive body is visibly too wide to fit. A simple export-control barrier blocks the doorway. Beyond the doorway, show a distant abstract Chinese city skyline as a geographic market cue, not a flag or political caricature. Reserve one small blank sign beside the doorway for the post-production words CHINA MARKET. The elephant remains inside the boardroom; it has not crossed the gate.
+The elephant is trying to pass through the narrow doorway. Its trunk reaches through the opening, but its massive body is visibly too wide to fit. A simple export-control barrier blocks the doorway. Beyond the doorway, show a distant abstract Chinese city skyline as a geographic market cue, not a flag or political caricature. The elephant remains inside the boardroom; it has not crossed the gate.
 
-The visual joke is the enormous potential China AI-chip market occupying the room while export controls make the doorway too narrow. Hang one small blank price-tag shape from the elephant's side for post-production wording. Do not generate numbers or letters.
+The visual joke is the enormous potential China AI-chip market occupying the room while export controls make the doorway too narrow. Hang one small blank price-tag shape from the elephant's side for the post-production wording CHINA AI MARKET — $50B EST. Do not generate numbers or letters.
 
 Use a surrealist oil-painting language: dramatic but controlled chiaroscuro, deep midnight blue, dark emerald, antique gold highlights, rich painterly surface and an impossible scale relationship rendered with coherent perspective. Keep the boardroom sparse. The elephant is the single dominant focal point; the narrow gate is the clear secondary obstacle.
 
@@ -374,9 +374,9 @@ Exactly one elephant, one doorway, one export-control barrier, one conference ta
 
 ### Post-production and QA
 
-- Add tag text: $50B — 2025 ESTIMATE.
-- Add the small doorway sign: CHINA MARKET.
+- Add tag text: CHINA AI MARKET — $50B EST.
 - Overlay caption: THE ELEPHANT IN THE EXPORT ROOM.
+- In the X copy, attribute the estimate to Jensen Huang's 2025 Milken Institute remarks.
 - X copy must explicitly say this was Jensen Huang's 2025 estimate of the eventual China AI-chip market, not realized revenue.
 - Critical checks: one elephant made of GPU cards; one narrow gate; trunk crosses but body does not; one blank price tag; the market remains an estimate.
 - Factual boundary: never present $50B as actual sales, current revenue, a guaranteed market size or a confirmed Nvidia order book.
