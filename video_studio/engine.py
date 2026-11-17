@@ -158,6 +158,13 @@ class StudioEngine:
                 BEGIN SELECT RAISE(ABORT, 'artifact lineage is immutable'); END;
             """
         )
+        task_columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(tasks)").fetchall()
+        }
+        if "claim_inputs_json" not in task_columns:
+            connection.execute(
+                "ALTER TABLE tasks ADD COLUMN claim_inputs_json TEXT NOT NULL DEFAULT '[]'"
+            )
 
     @staticmethod
     def _schema(connection: sqlite3.Connection) -> None:
@@ -194,6 +201,7 @@ class StudioEngine:
                 status TEXT NOT NULL,
                 worker_id TEXT,
                 claim_token TEXT,
+                claim_inputs_json TEXT NOT NULL DEFAULT '[]',
                 lease_until TEXT,
                 result_json TEXT,
                 error_json TEXT,
@@ -464,7 +472,7 @@ class StudioEngine:
                 )
                 for task_id in invalidated:
                     connection.execute(
-                        "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
+                        "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": reason, "brief_revision": int(project["revision"]) + 1}), now, project_id, task_id),
                     )
                     connection.execute(
@@ -746,7 +754,7 @@ class StudioEngine:
                 connection.execute(
                     """UPDATE tasks SET title=?,kind=?,executor=?,depends_on_json=?,inputs_json=?,outputs_json=?,
                        acceptance_json=?,requirements_json=?,priority=?,max_attempts=?,status='PENDING',
-                       attempts=0,worker_id=NULL,claim_token=NULL,lease_until=NULL,result_json=NULL,error_json=?,updated_at=?
+                       attempts=0,worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,result_json=NULL,error_json=?,updated_at=?
                        WHERE project_id=? AND task_id=?""",
                     (revised["title"], revised["kind"], revised["executor"], _json(revised["depends_on"]),
                      _json(revised["inputs"]), _json(revised["outputs"]), _json(revised["acceptance"]),
@@ -755,7 +763,7 @@ class StudioEngine:
                 )
                 for descendant in descendants:
                     connection.execute(
-                        "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
+                        "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": f"upstream task {task_id} contract changed"}), now, project_id, descendant),
                     )
                     connection.execute(
@@ -882,7 +890,7 @@ class StudioEngine:
                 for row in expired:
                     next_status = "PENDING" if row["attempts"] < row["max_attempts"] else "FAILED"
                     connection.execute(
-                        "UPDATE tasks SET status=?,worker_id=NULL,claim_token=NULL,lease_until=NULL,updated_at=? WHERE project_id=? AND task_id=?",
+                        "UPDATE tasks SET status=?,worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,updated_at=? WHERE project_id=? AND task_id=?",
                         (next_status, _iso(now), project_id, row["task_id"]),
                     )
                     self._event(connection, project_id, "TASK", row["task_id"], "TASK_LEASE_EXPIRED", {"worker_id": row["worker_id"], "attempt": row["attempts"], "next_status": next_status})
@@ -915,6 +923,22 @@ class StudioEngine:
                 ).fetchone()
                 self._event(connection, project_id, "TASK", row["task_id"], "TASK_CLAIMED", {"worker_id": worker_id, "lease_until": lease_until, "attempt": claimed["attempts"]})
                 packet = self._work_packet(connection, project_id, claimed)
+                input_bindings = [
+                    {
+                        "artifact_id": artifact["artifact_id"], "name": name,
+                        "version": artifact["version"], "sha256": artifact["sha256"],
+                        "kind": artifact["kind"], "media_type": artifact["media_type"],
+                        "rights_status": artifact["rights_status"],
+                    }
+                    for name, artifact in packet["input_artifacts"].items()
+                ]
+                connection.execute(
+                    "UPDATE tasks SET claim_inputs_json=? WHERE project_id=? AND task_id=?",
+                    (_json(input_bindings), project_id, row["task_id"]),
+                )
+                self._event(connection, project_id, "TASK", row["task_id"], "TASK_INPUTS_BOUND", {
+                    "worker_id": worker_id, "input_bindings": input_bindings,
+                })
                 connection.commit()
                 packet["claim"] = asdict(TaskClaim(project_id, row["task_id"], worker_id, token, lease_until, claimed["attempts"]))
                 return packet
@@ -922,10 +946,60 @@ class StudioEngine:
                 connection.rollback()
                 raise
 
+    def _verify_claimed_inputs(
+        self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row,
+    ) -> tuple[list[dict[str, Any]], list[sqlite3.Row]]:
+        bindings = _loads(task["claim_inputs_json"], [])
+        declared_names = _loads(task["inputs_json"], [])
+        if not isinstance(bindings, list) or not isinstance(declared_names, list):
+            raise ContractError("claimed input lineage is malformed")
+        names: list[str] = []
+        rows: list[sqlite3.Row] = []
+        for binding in bindings:
+            if not isinstance(binding, dict):
+                raise ContractError("claimed input lineage contains a non-object binding")
+            name = binding.get("name")
+            artifact_id = binding.get("artifact_id")
+            digest = binding.get("sha256")
+            version = binding.get("version")
+            if not isinstance(name, str) or not isinstance(artifact_id, str) or not isinstance(digest, str):
+                raise ContractError("claimed input lineage contains an invalid artifact binding")
+            names.append(name)
+            source = connection.execute(
+                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                (project_id, artifact_id),
+            ).fetchone()
+            if (
+                source is None or source["name"] != name or source["sha256"] != digest
+                or source["version"] != version or source["status"] not in {"CURRENT", "ACCEPTED"}
+            ):
+                raise GateError(f"claimed input artifact changed or became stale before completion: {name}")
+            source_path = self._project_dir(project_id) / source["relative_path"]
+            if not source_path.is_file() or _sha256(source_path) != digest:
+                raise GateError(f"claimed input artifact bytes changed before completion: {name}")
+            rows.append(source)
+        if names != declared_names:
+            raise GateError(
+                f"claimed input lineage does not match declared inputs: expected {declared_names}, got {names}"
+            )
+        return bindings, rows
+
     def claimed_packet(self, project_id: str, task_id: str, worker_id: str, claim_token: str) -> dict[str, Any]:
         with closing(self._connect(project_id)) as connection:
             task = self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
-            return self._work_packet(connection, project_id, task)
+            packet = self._work_packet(connection, project_id, task)
+            _, rows = self._verify_claimed_inputs(connection, project_id, task)
+            packet["input_artifacts"] = {
+                row["name"]: {
+                    "artifact_id": row["artifact_id"], "version": row["version"],
+                    "path": str(self._project_dir(project_id) / row["relative_path"]),
+                    "sha256": row["sha256"], "kind": row["kind"], "media_type": row["media_type"],
+                    "rights_status": row["rights_status"], "metadata": _loads(row["metadata_json"], {}),
+                }
+                for row in rows
+            }
+            packet["missing_inputs"] = []
+            return packet
 
     def heartbeat(self, project_id: str, task_id: str, worker_id: str, claim_token: str, lease_seconds: int = 900) -> str:
         if lease_seconds < 30 or lease_seconds > 86400:
@@ -1121,15 +1195,7 @@ class StudioEngine:
                 expected = set(_loads(task["outputs_json"], []))
                 if set(outputs) != expected:
                     raise ContractError(f"expected outputs {sorted(expected)}, got {sorted(outputs)}")
-                input_rows: list[sqlite3.Row] = []
-                for input_name in _loads(task["inputs_json"], []):
-                    input_row = self._artifact_by_name(connection, project_id, input_name)
-                    if input_row is None:
-                        raise GateError(f"declared input is no longer current: {input_name}")
-                    input_path = self._project_dir(project_id) / input_row["relative_path"]
-                    if not input_path.is_file() or _sha256(input_path) != input_row["sha256"]:
-                        raise GateError(f"declared input changed during execution: {input_name}")
-                    input_rows.append(input_row)
+                input_bindings, input_rows = self._verify_claimed_inputs(connection, project_id, task)
                 registered: dict[str, Any] = {}
                 for name, payload in outputs.items():
                     if not isinstance(payload, dict) or not payload.get("path"):
@@ -1152,12 +1218,19 @@ class StudioEngine:
                              input_row["sha256"], "DERIVED_FROM", _iso()),
                         )
                     self._event(connection, project_id, "ARTIFACT", registered[name]["artifact_id"], "ARTIFACT_CREATED", registered[name])
-                result_payload = {"outputs": {key: value["artifact_id"] for key, value in registered.items()}, **(result or {})}
+                result_payload = {
+                    **(result or {}),
+                    "outputs": {key: value["artifact_id"] for key, value in registered.items()},
+                    "input_bindings": input_bindings,
+                }
                 connection.execute(
-                    "UPDATE tasks SET status='COMPLETED',worker_id=NULL,claim_token=NULL,lease_until=NULL,result_json=?,error_json=NULL,updated_at=? WHERE project_id=? AND task_id=?",
+                    "UPDATE tasks SET status='COMPLETED',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,result_json=?,error_json=NULL,updated_at=? WHERE project_id=? AND task_id=?",
                     (_json(result_payload), _iso(), project_id, task_id),
                 )
-                self._event(connection, project_id, "TASK", task_id, "TASK_COMPLETED", {"worker_id": worker_id, "outputs": result_payload["outputs"], "result": result or {}})
+                self._event(connection, project_id, "TASK", task_id, "TASK_COMPLETED", {
+                    "worker_id": worker_id, "outputs": result_payload["outputs"],
+                    "input_bindings": input_bindings, "result": result or {},
+                })
                 self._refresh_in_tx(connection, project_id)
                 connection.commit()
                 return {"task_id": task_id, "status": "COMPLETED", "artifacts": registered, "result": result_payload}
@@ -1175,7 +1248,7 @@ class StudioEngine:
             retry = bool(retryable and task["attempts"] < task["max_attempts"])
             status = "PENDING" if retry else "FAILED"
             connection.execute(
-                "UPDATE tasks SET status=?,worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
+                "UPDATE tasks SET status=?,worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                 (status, _json(error), _iso(), project_id, task_id),
             )
             self._event(connection, project_id, "TASK", task_id, "TASK_FAILED", {"error": error, "retryable": retryable, "next_status": status})
@@ -1191,7 +1264,7 @@ class StudioEngine:
             connection.execute("BEGIN IMMEDIATE")
             self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
             connection.execute(
-                "UPDATE tasks SET status='WAITING_INPUT',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
+                "UPDATE tasks SET status='WAITING_INPUT',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                 (_json({"reason": reason}), _iso(), project_id, task_id),
             )
             self._event(connection, project_id, "TASK", task_id, "TASK_WAITING_INPUT", {"reason": reason})
@@ -1686,7 +1759,7 @@ class StudioEngine:
             now = _iso()
             for affected in descendants:
                 connection.execute(
-                    "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
+                    "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                     (_json({"reason": reason}), now, project_id, affected),
                 )
                 connection.execute(
@@ -1715,7 +1788,7 @@ class StudioEngine:
                             changed = True
             for affected in descendants:
                 connection.execute(
-                    "UPDATE tasks SET status='PENDING',worker_id=NULL,claim_token=NULL,lease_until=NULL,error_json=NULL,updated_at=? WHERE project_id=? AND task_id=? AND status IN ('STALE','BLOCKED','FAILED','WAITING_INPUT')",
+                    "UPDATE tasks SET status='PENDING',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=NULL,updated_at=? WHERE project_id=? AND task_id=? AND status IN ('STALE','BLOCKED','FAILED','WAITING_INPUT')",
                     (_iso(), project_id, affected),
                 )
                 self._event(connection, project_id, "TASK", affected, "TASK_REOPENED", {"reason": reason})
