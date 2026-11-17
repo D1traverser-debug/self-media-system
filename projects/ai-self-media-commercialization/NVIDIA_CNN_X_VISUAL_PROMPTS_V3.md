@@ -8,6 +8,8 @@ Generation status: NOT_GENERATED. These are compiled prompts, not accepted image
 
 ## 0. Prompt pack contract
 
+Art-direction decisions are grounded in NVIDIA_CNN_EDITORIAL_ART_RESEARCH_V1.md. The research informs transferable methods only; no prompt requests an exact copy of a named artist or a specific artwork.
+
 The eight concepts below were re-ranked from the earlier A-grade slate. Concepts 01, 02 and 05 retain their strongest core idea but have materially corrected staging. Concepts 03, 04, 06, 07 and 08 replace the earlier ambiguous or overlapping metaphors.
 
 Generate each prompt separately. Do not batch all eight. Do not use any rejected image as a reference.
@@ -38,7 +40,7 @@ All text named below is post-production text to be added after the image is acce
 - Thesis: export-controlled GPUs are treated like rare protected wildlife.
 - Joke mechanism: absurd analogy / conservation caricature.
 - First read: a customs inspector is treating GPU cards as endangered creatures that need protection.
-- Art direction: Chinese manhua-inspired brush-and-ink editorial cartoon; economical line, strong gesture, bold silhouette, restrained color. This uses a visual tradition as a method reference, not an imitation of a named artist.
+- Art direction: concise Chinese single-panel ink cartoon; Hua Junwu's one-scene social-wit logic supported by Feng Zikai's line economy and negative-space discipline. Do not imitate either artist or reuse a known composition.
 - Post-production caption: **ENDANGERED SILICON**
 - Suggested X copy: “When the world's most valuable chips need a wildlife-protection program.”
 
@@ -55,9 +57,9 @@ The scene is an airport cargo customs inspection bay, not a passenger airport te
 
 One customs inspector stands on the right side of the table, fully outside the crate. The inspector has two normal arms and two normal hands; one hand holds one magnifying glass close to a GPU card, while the other rests on the table edge. A single red quarantine ribbon crosses the front opening of the crate. The inspector looks intensely serious, as if examining endangered wildlife.
 
-Behind the table, show one open airport freight loading-bay doorway. Through it, show part of one parked cargo aircraft on the apron, with its open cargo hatch aligned to the loading bay so the location reads unmistakably as an airport freight terminal. On the far left, show one parked pallet jack. Keep the background sparse. Use one clear floor plane, one consistent eye-level three-quarter view, and a single coherent perspective. The crate must visibly sit on the table; the inspector must stand on the floor; nothing floats.
+Behind the table, show one open airport freight-bay doorway. Through it, show the unmistakable side silhouette of one cargo aircraft parked on the apron, with its cargo hold door visibly open. The aircraft is outside the building; do not force its hatch to align physically with the inspection table. On the far left, show one parked pallet jack. Keep the background sparse. Use one clear floor plane, one consistent eye-level three-quarter view, and a single coherent perspective. The crate must visibly sit on the table; the inspector must stand on the floor; nothing floats.
 
-Render it as a Chinese manhua-inspired brush-and-ink editorial cartoon: economical expressive linework, bold silhouette, confident dry-brush contours, simplified shapes, slightly exaggerated gesture, restrained jade green, warm paper cream, black ink and one vermilion accent. The humor should come from the absurdly solemn wildlife-conservation treatment of GPU hardware.
+Render it as a concise Chinese single-panel ink cartoon: a few decisive brush lines, a clean inspector silhouette, a clearly separated crate-and-GPU mass, generous warm-paper negative space, controlled black line weight and one vermilion quarantine accent. Use a slightly exaggerated but readable inspection gesture. The humor comes from treating ordinary computer hardware with the solemnity of protected wildlife. Keep every object necessary to identify an airport cargo inspection, but omit decorative background detail.
 
 Make the crate and three GPU cards the dominant focal point. No actual birds, no animals, no Jensen Huang, no other people, no airport passenger check-in desks, no baggage carousel, no X-ray machine, no second crate, no extra tools, no readable text, no logos, no collage, no watermark.
 
@@ -81,7 +83,7 @@ Make the crate and three GPU cards the dominant focal point. No actual birds, no
 - Thesis: the suspected Singapore-to-China route is a conspicuous detour that deserves scrutiny.
 - Joke mechanism: geographic visual pun / scale contrast.
 - First read: a tiny cargo boat carrying one GPU crate travels from the Merlion in Singapore toward a panda landmark in China.
-- Art direction: layered cut-paper atlas / tactile paper-relief diorama.
+- Art direction: modern Chinese folk-print / cut-paper atlas, using Zhang Guangyu's transferable principles of bold contour, expressive flat color and decorative geometry while preserving real map geography.
 - Post-production caption: **THE LONG WAY ROUND?**
 - Suggested X copy: “A route that deserves more than a passing glance.”
 
@@ -102,7 +104,7 @@ The boat is on the sea route between Singapore and southern China, facing north 
 
 Reserve two clean blank map-label spaces: one next to the Merlion for the post-production word SINGAPORE, and one next to the panda for CHINA. Generate no other lettering.
 
-Use a refined layered paper-cut atlas style with visible paper edges and shallow relief. Deep teal sea, warm ivory land, muted green peninsula, vermilion route, and one bright green GPU accent. Strong simple silhouettes, uncluttered negative space, crisp geographic hierarchy. The map and the two landmarks must be understandable at thumbnail size.
+Use a modern Chinese folk-print atlas language: bold confident black contours, flat cut-paper land masses, geometric landmark silhouettes, expressive but controlled folk-art color, and a stable horizontal map baseline. Deep teal sea, warm ivory land, muted green peninsula, vermilion route, and one bright green GPU accent. Use a balanced triangular composition linking the Merlion, boat and panda, but do not distort the actual north-south geography. The map and both landmarks must be understandable at thumbnail size.
 
 Exactly one Merlion landmark, one panda landmark, one cargo boat, one crate and one GPU card. No other animals, no human smugglers, no flags, no extra boats, no arrows, no inaccurate map orientation, no fictional port names, no logos, no readable text, no collage, no watermark.
 
@@ -171,7 +173,7 @@ Exactly one server rack, one GPU card, one fiber cable, one cloud canopy, one re
 - Thesis: several agencies may want action, but one department controls the final pen.
 - Joke mechanism: institutional role reversal / visual literalization of a quoted phrase.
 - First read: four agency files converge on one giant pen held by Commerce above the Entity List document.
-- Art direction: classic newspaper editorial pen-and-ink cartoon with one vermilion accent.
+- Art direction: political editorial print drawing, applying Thomas Nast's picture-first symbolic clarity and Daumier's institutional focus; restrained cross-hatching and one vermilion accent.
 - Post-production caption: **COMMERCE HAS THE PEN**
 - Suggested X copy: “Four agencies can make the recommendation. One department holds the pen.”
 
@@ -192,7 +194,7 @@ The document lies flat on the desk, directly beneath the pen. Reserve a clean bl
 
 The joke is institutional rather than personal: several agencies can submit their views, but one department controls the pen that makes the final list decision. Show no villain, no bribe, no secret meeting and no evidence of deliberate corruption. A small stack of dated process folders may sit in the far background, but keep it secondary and do not make the desk cluttered.
 
-Use a traditional editorial pen-and-ink cartoon language: confident black contour lines, expressive scale exaggeration, restrained hatching, warm newspaper cream, charcoal black and one vermilion accent. Strong negative space and a single clear focal hierarchy.
+Use a nineteenth-century political-print drawing language without copying a specific artist: firm black contours, selective cross-hatching, restrained paper grain, and one deliberately oversized symbolic pen. The hand and pen receive the darkest contrast; the folders remain secondary masses. Warm newspaper cream, charcoal black and one vermilion accent. Keep the document, pen tip and hand in one readable physical relationship.
 
 Exactly four agency folders, one document, one pen, one hand and one sleeve. No faces, no extra hands, no duplicate pens, no rubber stamp, no tug-of-war, no readable text, no logos, no collage, no watermark.
 
@@ -216,37 +218,37 @@ Exactly four agency folders, one document, one pen, one hand and one sleeve. No 
 - Source anchor: CNN reports Nvidia joined major financial institutions in lending more than $500 billion for AI infrastructure and separately committed $105 billion toward an OpenAI data-center project.
 - Thesis: Nvidia participates in financing the AI buildout while also supplying the GPUs that buildout buys.
 - Joke mechanism: Gold Rush analogy / circular incentive.
-- First read: financiers fund a miner, who spends that money buying a GPU shovel from one Jensen.
-- Art direction: nineteenth-century American woodcut engraving; sepia cross-hatching and strong carved silhouettes.
+- First read: one Jensen caricature offers the same AI builder both an infrastructure-financing document and a GPU shovel, making the overlapping finance-and-supply roles visible without depicting one proven cash transaction.
+- Art direction: hand-coloured political etching with Gillray's transferable method of turning an abstract economic incentive into one physical visual contradiction; controlled grotesque caricature, not a copy of a specific print.
 - Post-production caption: **SELLING THE SHOVELS. FUNDING THE RUSH.**
 - Suggested X copy: “The AI gold rush has an unusual business model: help finance the rush, then sell the shovels.”
 
 ### Scene plan
 
-One gold-rush storefront, one counter, one miner and exactly one Jensen Huang caricature. Jensen stands once behind the counter in his recognizable black leather jacket and swept-back hair, selling one shovel whose blade is shaped like a generic GPU card. Behind the miner on the left, a single open bank vault with several generic financial-institution columns dispenses one continuous stream of banknotes into the miner's hand. The miner passes those same notes across the counter to Jensen. The cash path is left-to-right and physically continuous. Do not duplicate Jensen in a second window, mirror, portrait or reflection.
+One gold-rush storefront, one counter, one AI infrastructure builder dressed as a miner and exactly one Jensen Huang caricature. Jensen stands once behind the counter in his recognizable black leather jacket and swept-back hair. He presents two distinct things to the same builder: one financing document in his left hand and one shovel whose blade is shaped like a generic GPU circuit card in his right hand. Behind Jensen, three simple classical bank columns suggest a wider lender consortium; they are architectural symbols, not additional banks or people. The builder reaches toward the financing document and the GPU shovel at the same time. Do not show banknotes, a money stream or a direct transfer from a bank vault to Jensen. Do not duplicate Jensen in a second window, mirror, portrait or reflection.
 
 ### Generation prompt
 
 
-Create exactly one square 1:1 editorial illustration for an English-language X post, in the visual language of a nineteenth-century American Gold Rush woodcut engraving.
+Create exactly one square 1:1 editorial illustration for an English-language X post, using the visual language of a hand-coloured political etching: controlled cross-hatching, expressive but economical caricature, and one dominant economic metaphor. Do not reproduce a specific historical print.
 
-Show one dusty mining-town storefront with one service counter. Behind the counter stands exactly one recognizable editorial caricature of Jensen Huang: swept-back dark hair, round face, black leather jacket. He appears only once in the entire image. Do not show his portrait, reflection, mirror image, poster or duplicate.
+Show one dusty Gold Rush-era storefront with one service counter. Behind the counter stands exactly one recognizable editorial caricature of Jensen Huang: swept-back dark hair, round face, black leather jacket. He appears only once in the entire image. Do not show his portrait, reflection, mirror image, poster or duplicate.
 
-At the counter stands exactly one gold miner, seen in three-quarter view. Jensen is handing the miner one shovel whose blade is clearly shaped like a generic green GPU circuit card. The miner is paying for it with banknotes.
+In front of the counter stands exactly one AI infrastructure builder dressed as a gold miner, seen in three-quarter view. Jensen presents two distinct objects to this same builder: in his left hand, one rolled financing document; in his right hand, one shovel whose blade is clearly shaped like a generic green GPU circuit card. The builder reaches toward both offers, making the two roles visible in one glance: capital for the AI buildout and hardware for the buildout.
 
-Behind the miner on the left side of the scene, show one open stone bank vault. A short row of simple classical bank columns frames the vault entrance, suggesting a consortium of financiers rather than one named bank. From the vault, one short, clearly visible money chute feeds a single open money pouch held by the miner. The miner takes one bundle of banknotes from that pouch and places it on the counter in front of Jensen. Make the transaction physically readable from left to right: financing source, miner, GPU-shovel seller. Show the same bundle at the point of payment; do not create a second stream of money. Do not use arrows.
+Behind Jensen, place exactly three simple stone bank columns as a background architectural motif. They suggest that the financing environment includes a wider lender consortium; they are not additional people or separate banks. The counter is one continuous solid structure. The financing document and GPU shovel are held clearly apart, with no overlap that obscures either silhouette.
 
-Keep the scene to one miner, one Jensen, one storefront, one counter, one shovel, one open vault and one continuous stream of banknotes. The visual point is the overlap between financing the AI infrastructure buildout and selling the hardware that buildout purchases. It is an economic metaphor, not an accusation of fraud or a claim that one specific loan directly funded one specific GPU purchase.
+The visual point is the overlap between participation in financing AI infrastructure and supplying the GPUs that infrastructure needs. This is a broad economic-role metaphor, not a claim that one specific loan directly funded one specific GPU purchase. Do not depict a literal cash loop, banknotes, a bank vault, or a direct money transfer.
 
-Use hand-carved woodcut texture, strong cross-hatching, expressive but controlled caricature, aged paper, dusty sepia, muted ochre, black ink and restrained green on the GPU shovel. The composition should read clearly at thumbnail size, with Jensen and the GPU shovel as the main focal point and the banknote path as the secondary read.
+Use hand-coloured etching texture, controlled cross-hatching, expressive but restrained caricature, aged warm paper, charcoal ink, muted ochre and one restrained green accent on the GPU shovel. Keep the background quiet. Jensen, the financing document and the GPU shovel form one clear focal group; the three columns are secondary.
 
-Exactly one Jensen Huang, one miner, one GPU-shaped shovel, one storefront counter, one bank vault and one continuous banknote stream. No second Jensen, no duplicate face, no mirrors, no second shop window, no extra miners, no extra shovels, no floating money, no readable text, no corporate logos, no collage, no watermark.
+Exactly one Jensen Huang, one infrastructure builder, one financing document, one GPU-shaped shovel, one storefront counter and three background columns. No second Jensen, no duplicate face, no mirrors, no extra miners, no extra shovels, no bank vault, no money stream, no floating money, no readable text, no corporate logos, no collage, no watermark.
 
 
 ### Post-production and QA
 
 - Overlay caption: SELLING THE SHOVELS. FUNDING THE RUSH.
-- Critical checks: exactly one Jensen; exactly one miner; one counter; one shovel; one continuous banknote path; the miner is between funding source and seller; no duplicated person or reflection.
+- Critical checks: exactly one Jensen; exactly one builder; exactly one financing document and one GPU shovel, held apart and visible; exactly three background columns; no banknotes or implied direct cash flow; no duplicated person or reflection.
 - Factual boundary: do not depict the reported $500B lending and separate $105B commitment as one literal transaction. Do not imply fraud or a proven improper arrangement.
 
 ---
@@ -261,7 +263,7 @@ Exactly one Jensen Huang, one miner, one GPU-shaped shovel, one storefront count
 - Thesis: two semiconductor-related stories in one article are not one legal case.
 - Joke mechanism: visual pun / bureaucratic absurdity.
 - First read: a giant stapler is trying to merge two separate case files, but a red divider physically prevents it.
-- Art direction: minimalist geometric legal editorial cartoon; clean vector forms, strong separation and one red accent.
+- Art direction: concise Chinese one-panel social-cartoon logic associated with Hua Junwu's dry visual reversal, rendered with disciplined Ding Cong-like contour hierarchy; clean forms and one red accent, without copying either artist.
 - Post-production caption: **TWO CASES. DON'T STAPLE THEM TOGETHER.**
 - Suggested X copy: “Megaspeed is under investigation. Individuals were charged in the separate Super Micro case; Super Micro itself was not charged.”
 
@@ -280,7 +282,7 @@ Above the left folder, place one large magnifying glass, symbolizing an ongoing 
 
 One oversized black office stapler rests flat on the desk at the top center, with its nose aimed toward the gap between the two folders. The red divider stands directly in front of the stapler's nose and physically blocks it from reaching either folder. The stapler must rest on the desk; it must not float or touch either folder. The visual joke is that two different legal matters are being carelessly stapled into one story, and the divider refuses to let them merge.
 
-Keep the composition simple and almost diagrammatic but still a single editorial scene, not an infographic. Use flat geometric shapes, clean vector edges, cream paper, charcoal black, muted gray and one strong vermilion divider. Make the two folders, magnifying glass, three-person sheet and blocked stapler readable at thumbnail size.
+Keep the composition simple and almost diagrammatic but still a single editorial scene, not an infographic. Use a concise Chinese editorial ink-cartoon language: clean economical contours, clear black-white-gray separation, one dry visual reversal, generous paper space and one strong vermilion divider. Keep the folders as simple recognizable masses; reserve the strongest line contrast for the stapler nose and the divider that blocks it. Make the two files, magnifying glass, three-person sheet and grounded stapler readable at thumbnail size.
 
 Reserve a small blank area above the desk for post-production caption text. Generate no lettering.
 
@@ -306,7 +308,7 @@ Exactly two folders, one magnifying glass, one separate sheet with exactly three
 - Thesis: the tabloid spotlight distracts from the much larger technology and policy machinery backstage.
 - Joke mechanism: theatrical misdirection / scale contrast.
 - First read: a tiny tabloid is brightly spotlighted while a huge GPU infrastructure machine is hidden behind the curtain.
-- Art direction: mid-century circus broadside screenprint; bold shapes, halftone texture and dramatic spotlight.
+- Art direction: theatrical editorial screenprint using Gillray's transferable method of misdirection and scale contrast; bold stage geometry, halftone texture and one dramatic spotlight.
 - Post-production caption: **LOOK OVER HERE**
 - Suggested X copy: “The scandal gets the spotlight. The export-control and AI-financing machinery is still backstage.”
 
@@ -348,7 +350,7 @@ Exactly one newspaper, one pedestal, one spotlight, one curtain, one server rack
 - Thesis: a huge potential market and a restrictive export-control gate occupy the same room.
 - Joke mechanism: elephant-in-the-room metaphor / scale inversion.
 - First read: a gigantic GPU elephant cannot fit through a narrow export-control gate.
-- Art direction: surrealist oil painting / impossible but coherent architectural scene.
+- Art direction: surrealist architectural allegory with one controlled scale inversion; painterly chiaroscuro supports the metaphor but must not obscure the gate geometry.
 - Post-production caption: **THE ELEPHANT IN THE EXPORT ROOM**
 - Suggested X copy: “Jensen's 2025 estimate put China's eventual AI-chip market at $50B. The export-control question is still standing in the doorway.”
 
@@ -367,7 +369,7 @@ The elephant is trying to pass through the narrow doorway. Its trunk reaches thr
 
 The visual joke is the enormous potential China AI-chip market occupying the room while export controls make the doorway too narrow. Hang one small blank price-tag shape from the elephant's side for the post-production wording CHINA AI MARKET — $50B EST. Do not generate numbers or letters.
 
-Use a surrealist oil-painting language: dramatic but controlled chiaroscuro, deep midnight blue, dark emerald, antique gold highlights, rich painterly surface and an impossible scale relationship rendered with coherent perspective. Keep the boardroom sparse. The elephant is the single dominant focal point; the narrow gate is the clear secondary obstacle.
+Use a surrealist oil-painting language with controlled chiaroscuro, deep midnight blue, dark emerald and restrained antique-gold highlights. Let the elephant's GPU-board construction remain readable through clear large shapes rather than tiny circuitry. Keep the boardroom sparse and perspective coherent. The elephant is the single dominant focal point; the narrow export-control gate is the clear secondary obstacle.
 
 Exactly one elephant, one doorway, one export-control barrier, one conference table and one blank price tag. No other animals, no panda, no Merlion, no human officials, no extra doors, no extra gates, no readable text, no logos, no collage, no watermark.
 
