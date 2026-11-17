@@ -238,6 +238,8 @@ If any material answer is unresolved, return to the earliest affected design nod
 - Do not silently change the prompt after generation; create a new prompt version for a new attempt.
 - Do not feed rejected candidates back as references. Explicitly mark prior rejected images as non-reference inputs when the tool supports that distinction.
 - Bind the visible prompt text, tool call/result, output asset and version. If the current interface does not expose the backend-revised prompt, seed, model variant or generation controls, record each as NOT_EXPOSED; do not fabricate an exact execution trace or promise deterministic one-shot success.
+- If the built-in ChatGPT image tool cannot accept the exact prompt and the long conversation contains competing legacy image instructions, do not summarize the prompt and hope for the best. Route to a connected prompt-controlled image endpoint that accepts an explicit prompt and no reference media. For this project, GPT Image 2.6 through Higgsfield is an available OpenAI-model route; verify the current model ID and parameters, read generation preferences, estimate cost, and obtain approval before spending credits. This keeps the requested GPT image model while avoiding dependence on the contaminated chat-image context.
+- Never ask the owner to copy a prompt into a new chat as a workaround. The assistant owns the routing and execution; if no supported isolated route is available, report the exact limitation and pause.
 - Use one controlled generation, inspect the result, and then make a targeted edit or return to the earliest failed design node. Do not blind-batch or random-retry.
 
 ### Node J — Image-only cold read
