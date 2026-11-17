@@ -267,7 +267,7 @@ Exactly one Jensen Huang, one miner, one GPU-shaped shovel, one storefront count
 
 ### Scene plan
 
-One judge's desk seen from a slightly elevated front view. Two separate case folders sit far apart, with a broad red divider between them. The left folder has one magnifying glass above it, signifying investigation. The right folder has exactly three small generic human silhouettes on a separate sheet, signifying individuals charged; the company folder itself remains outside any dock or handcuffs. One oversized office stapler hangs above the two folders, about to staple them together, but the red divider blocks its path. No people are physically in court.
+One judge's desk seen from a slightly elevated front view. Two separate case folders sit far apart, with a broad red divider between them. The left folder has one magnifying glass above it, signifying investigation. The right folder has exactly three small generic human silhouettes on a separate sheet, signifying individuals charged; the company folder itself remains outside any dock or handcuffs. One oversized office stapler rests flat on the desk at the top center, its nose aimed toward the gap between the two folders. The red divider blocks the stapler from reaching either folder. No people are physically in court.
 
 ### Generation prompt
 
