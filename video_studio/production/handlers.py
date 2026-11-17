@@ -12,13 +12,79 @@ from .ffmpeg_assembler import FfmpegAssembler
 from .python_frame_renderer import PythonFrameRenderer
 
 
-def _output_payload(path: Path, *, kind: str, media_type: str, metadata: Mapping[str, Any] | None = None) -> dict[str, Any]:
+def _output_payload(
+    path: Path, *, kind: str, media_type: str,
+    metadata: Mapping[str, Any] | None = None,
+    rights_status: str = "NOT_APPLICABLE",
+) -> dict[str, Any]:
     if not path.is_file() or path.stat().st_size <= 0:
         raise ProductionContractError(f"production executor output is missing or empty: {path.name}")
+    if rights_status not in {"OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN", "NOT_APPLICABLE"}:
+        raise ProductionContractError(f"unsupported production output rights status: {rights_status}")
     return {
         "path": str(path), "kind": kind, "media_type": media_type,
-        "rights_status": "NOT_APPLICABLE", "metadata": dict(metadata or {}),
+        "rights_status": rights_status, "metadata": dict(metadata or {}),
     }
+
+
+def _validate_render_rights_clearance(
+    context: ProductionTaskContext, spec: RenderSpec, clearance_input: str,
+) -> str:
+    clearance = context.inputs.get(clearance_input)
+    if not clearance:
+        raise ProductionContractError(f"rights clearance is not a declared task input: {clearance_input}")
+    try:
+        payload = json.loads(Path(str(clearance["path"])).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ProductionContractError(f"cannot read structured rights clearance: {exc}") from exc
+    if not isinstance(payload, dict) or payload.get("schema_version") != "1.0" or payload.get("status") != "PASS":
+        raise ProductionContractError("rights clearance must be schema_version 1.0 with status PASS")
+    reviewer_id = payload.get("reviewer_id")
+    if not isinstance(reviewer_id, str) or not reviewer_id.strip():
+        raise ProductionContractError("rights clearance must identify the human reviewer")
+    used_names = list(dict.fromkeys(
+        [clip.input_name for clip in spec.clips] + [track.input_name for track in spec.audio_tracks]
+    ))
+    records = payload.get("assets")
+    if not isinstance(records, list):
+        raise ProductionContractError("rights clearance assets must be an array")
+    by_name: dict[str, Mapping[str, Any]] = {}
+    for record in records:
+        if not isinstance(record, Mapping):
+            raise ProductionContractError("rights clearance contains a malformed asset record")
+        name = record.get("input_name")
+        if not isinstance(name, str) or name in by_name:
+            raise ProductionContractError("rights clearance asset input_name must be unique")
+        by_name[name] = record
+    if set(by_name) != set(used_names):
+        raise ProductionContractError(
+            f"rights clearance must cover exactly the rendered source assets: expected {sorted(used_names)}, got {sorted(by_name)}"
+        )
+    allowed = {"OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN"}
+    for name in used_names:
+        source = context.inputs.get(name)
+        record = by_name[name]
+        if not source:
+            raise ProductionContractError(f"rendered source asset is not a declared task input: {name}")
+        if (
+            record.get("artifact_id") != source.get("artifact_id")
+            or record.get("sha256") != source.get("sha256")
+            or record.get("rights_status") != source.get("rights_status")
+        ):
+            raise ProductionContractError(f"rights clearance does not bind the exact source artifact: {name}")
+        if source.get("rights_status") not in allowed:
+            raise ProductionContractError(f"source asset rights are not cleared: {name}")
+        evidence_refs = record.get("evidence_refs")
+        metadata = source.get("metadata", {})
+        source_refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, Mapping) else []
+        if (
+            not isinstance(evidence_refs, list) or not evidence_refs
+            or not all(isinstance(item, str) and item.strip() for item in evidence_refs)
+            or not isinstance(source_refs, list) or not source_refs
+            or not set(evidence_refs).issubset(set(source_refs))
+        ):
+            raise ProductionContractError(f"source asset lacks matching rights evidence refs: {name}")
+    return "AUTHORIZED"
 
 
 def execute_python_frame_render(context: ProductionTaskContext) -> dict[str, Any]:
@@ -56,16 +122,23 @@ def execute_ffmpeg_assemble(context: ProductionTaskContext) -> dict[str, Any]:
     if not spec_artifact:
         raise ProductionContractError(f"render spec is not a declared task input: {spec_name}")
     spec = RenderSpec.from_dict(json.loads(Path(str(spec_artifact["path"])).read_text(encoding="utf-8")))
+    clearance_input = str(context.config.get("rights_clearance_input", "")).strip()
+    output_rights_status = (
+        _validate_render_rights_clearance(context, spec, clearance_input)
+        if clearance_input else "NOT_APPLICABLE"
+    )
     result = FfmpegAssembler().render(
         spec, input_artifacts=context.inputs, output_dir=context.output_dir, expected_outputs=context.outputs,
     )
     outputs = {
         spec.video_output: _output_payload(
             Path(result["video_path"]), kind="video", media_type="video/mp4",
+            rights_status=output_rights_status,
             metadata={"production_executor": "ffmpeg_assemble", "candidate_only": True, "render_receipt_ref": spec.receipt_output},
         ),
         spec.audio_output: _output_payload(
             Path(result["audio_path"]), kind="audio", media_type="audio/wav",
+            rights_status=output_rights_status,
             metadata={"production_executor": "ffmpeg_assemble", "master_mix": True, "sample_rate": 48000, "bit_depth": 24},
         ),
         spec.receipt_output: _output_payload(
