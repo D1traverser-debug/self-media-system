@@ -12,7 +12,7 @@ The parent recovers goal and corrections, researches primary sources, compares c
 
 The receipt must bind brief_sha256 (canonical JSON, sorted keys and compact separators, UTF-8 SHA-256), owner_goal_ref, exact brief goal, corrections, sources, competing hypotheses with discriminators, alternatives and selected option, falsifier, rollback, allowed effects within the brief's scope, outcome/evidence conditions, and unknowns.
 
-The native StudioEngine rejects any task claim without current admission for CAOS_PARENT projects. A changed brief digest stales the receipt. Brief revision cannot silently downgrade CAOS_PARENT into standalone. release-check fails on missing/stale handoff. The ledger retains exact accepted receipts; re-admission of identical current receipt is idempotent.
+The native StudioEngine rejects any task claim without current admission for CAOS_PARENT projects. Each governed task must declare a requirements.effect_class that is present in the admitted parent allowed_effects; a higher-priority unadmitted task cannot starve another independently ready permitted task. Importing a source into Video storage requires ISOLATED_LOCAL_WRITE in the admitted scope. Active leases bind the exact brief and parent receipt SHA, so changed goals/decisions invalidate ongoing completion and heartbeat authority. A changed brief digest stales the receipt. Brief revision cannot silently downgrade CAOS_PARENT into standalone. release-check fails on missing/stale handoff. The ledger retains exact accepted receipts; re-admission of identical current receipt is idempotent.
 
 ## What remains unproven
 
