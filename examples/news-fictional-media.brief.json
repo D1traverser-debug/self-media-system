@@ -2,17 +2,37 @@
   "goal": "Create a platform-native news × fictional-video satire package from a verified current event and an owner-supplied fictional clip.",
   "audience": "Technology and internet-culture viewers who follow current events but dislike generic news recaps and forced meme copy.",
   "deliverables": [
-    "editorial-reading.md",
-    "platform-copies.json",
     {
-      "name": "cover-candidates.zip",
-      "artifact_name": "cover-candidates.zip",
-      "kind": "image_set",
-      "required": true,
-      "media_type": "application/zip",
-      "description": "ZIP package containing the approved cover candidates and their image-set manifest."
+      "name": "editorial-reading.md",
+      "artifact_name": "editorial-reading",
+      "kind": "document",
+      "media_type": "text/markdown",
+      "description": "Evidence-bound editorial decision and fiction boundary."
     },
-    "release-evidence-pack.json"
+    {
+      "name": "platform-copies.json",
+      "artifact_name": "platform-copies",
+      "kind": "social_copy",
+      "media_type": "application/json",
+      "description": "Platform-native copy variants."
+    },
+    {
+      "name": {
+        "name": "cover-candidates.zip",
+        "artifact_name": "cover-candidates.zip",
+        "kind": "image_set",
+        "required": true,
+        "media_type": "application/zip",
+        "description": "ZIP package containing the approved cover candidates and their image-set manifest."
+      }
+    },
+    {
+      "name": "release-evidence-pack.json",
+      "artifact_name": "release-evidence-pack",
+      "kind": "evidence",
+      "media_type": "application/json",
+      "description": "Release evidence and remaining-blocker receipt; does not publish."
+    }
   ],
   "format": {
     "platforms": [
