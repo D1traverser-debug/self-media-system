@@ -102,6 +102,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--token", required=True)
     p.add_argument("--reason", required=True)
 
+    p = sub.add_parser("admit-parent-handoff", help="admit a CAOS-governed brief-bound parent decision before task claims")
+    p.add_argument("project_id")
+    p.add_argument("receipt", type=Path)
+
     p = sub.add_parser("decision", help="persist a decision receipt with competing causes, alternatives and falsifier")
     p.add_argument("project_id")
     p.add_argument("payload", type=Path)
@@ -204,6 +208,8 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "wait-input":
             engine.wait_for_input(args.project_id, args.task_id, args.worker, args.token, args.reason)
             _emit({"task_id": args.task_id, "status": "WAITING_INPUT"})
+        elif command == "admit-parent-handoff":
+            _emit(engine.admit_parent_handoff(args.project_id, _read_json(args.receipt)))
         elif command == "decision":
             _emit(engine.record_decision(args.project_id, _read_json(args.payload)))
         elif command == "failure":
