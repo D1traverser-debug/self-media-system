@@ -1,0 +1,188 @@
+[
+  {
+    "task_id": "recover_source_state",
+    "title": "Recover and lock the approved v3 source and owner scope",
+    "kind": "source_recovery",
+    "executor": "agent",
+    "depends_on": [],
+    "inputs": [
+      "source-decision-v3",
+      "source-readback-v3"
+    ],
+    "outputs": [
+      "source-recovery-receipt"
+    ],
+    "requirements": {
+      "source_version": "v3",
+      "owner_scope": "Bigfoot keyword only"
+    },
+    "acceptance": {
+      "identity": "Exact article title and v3 source files are confirmed.",
+      "scope": "No new Bigfoot topic or unrelated writing task is introduced."
+    },
+    "priority": 100
+  },
+  {
+    "task_id": "integrate_keyword",
+    "title": "Integrate Bigfoot once into the existing EN/ZH manuscripts",
+    "kind": "editorial_revision",
+    "executor": "agent",
+    "depends_on": [
+      "recover_source_state"
+    ],
+    "inputs": [
+      "source-article-en-v3",
+      "source-article-zh-v3",
+      "source-docx-en-v3",
+      "source-docx-zh-v3"
+    ],
+    "outputs": [
+      "article-en-v3-1",
+      "article-zh-v3-1",
+      "article-en-docx-v3-1",
+      "article-zh-docx-v3-1",
+      "revision-record-v3-1"
+    ],
+    "requirements": {
+      "scope": "one existing paragraph per language",
+      "preserve": "title, subtitle, thesis, seven sections, five source URLs"
+    },
+    "acceptance": {
+      "keyword": "Exactly one Bigfoot mention in each language.",
+      "change": "Exactly one existing paragraph changes per language.",
+      "alignment": "EN/ZH meaning remains aligned."
+    },
+    "priority": 100
+  },
+  {
+    "task_id": "sync_assets_to_branch",
+    "title": "Package and verify the current article assets on the authorized branch",
+    "kind": "repository_sync",
+    "executor": "agent",
+    "depends_on": [
+      "integrate_keyword"
+    ],
+    "inputs": [
+      "article-en-v3-1",
+      "article-zh-v3-1",
+      "article-en-docx-v3-1",
+      "article-zh-docx-v3-1",
+      "visual-prompt-pack-v3",
+      "distribution-pack-v3"
+    ],
+    "outputs": [
+      "asset-readback-v3-1",
+      "github-sync-receipt"
+    ],
+    "requirements": {
+      "repository": "D1traverser-debug/video-growth-agent",
+      "branch": "work/meme-x-article-bigfoot-2026-11",
+      "base": "main"
+    },
+    "acceptance": {
+      "sync": "Exact files are fetched back from the authorized branch.",
+      "isolation": "main remains unchanged; no merge or publication occurs."
+    },
+    "priority": 100
+  },
+  {
+    "task_id": "independent_editor_review",
+    "title": "Independent editorial review of the exact v3.1 manuscripts",
+    "kind": "independent_review",
+    "executor": "human",
+    "depends_on": [
+      "sync_assets_to_branch"
+    ],
+    "inputs": [
+      "article-en-v3-1",
+      "article-zh-v3-1"
+    ],
+    "outputs": [
+      "independent-editor-review-receipt"
+    ],
+    "requirements": {
+      "reviewer_must_not_be_producer": true,
+      "digest_bound": true
+    },
+    "acceptance": {
+      "review": "A non-author reviewer checks argument, evidence, clarity, tone and keyword naturalness against exact artifact digests."
+    },
+    "priority": 90
+  },
+  {
+    "task_id": "trench_reader_review",
+    "title": "Obtain a real target-reader cold read",
+    "kind": "target_reader_review",
+    "executor": "human",
+    "depends_on": [
+      "sync_assets_to_branch"
+    ],
+    "inputs": [
+      "article-en-v3-1"
+    ],
+    "outputs": [
+      "trench-reader-review-receipt"
+    ],
+    "requirements": {
+      "real_target_reader_required": true
+    },
+    "acceptance": {
+      "review": "Actual crypto-native target-reader feedback is recorded; no simulated response."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "x_native_preview",
+    "title": "Inspect the article in X native composer and mobile layout",
+    "kind": "platform_preview",
+    "executor": "human",
+    "depends_on": [
+      "sync_assets_to_branch"
+    ],
+    "inputs": [
+      "article-en-v3-1",
+      "visual-prompt-pack-v3",
+      "distribution-pack-v3"
+    ],
+    "outputs": [
+      "x-native-preview-receipt"
+    ],
+    "requirements": {
+      "native_composer_required": true,
+      "mobile_preview_required": true
+    },
+    "acceptance": {
+      "preview": "Actual X composer/mobile layout is checked; Word/PDF rendering is not a substitute."
+    },
+    "priority": 80
+  },
+  {
+    "task_id": "release_acceptance",
+    "title": "Independent release gate for the exact candidate package",
+    "kind": "release_acceptance",
+    "executor": "human",
+    "depends_on": [
+      "independent_editor_review",
+      "trench_reader_review",
+      "x_native_preview"
+    ],
+    "inputs": [
+      "asset-readback-v3-1",
+      "github-sync-receipt",
+      "independent-editor-review-receipt",
+      "trench-reader-review-receipt",
+      "x-native-preview-receipt"
+    ],
+    "outputs": [
+      "release-decision-receipt"
+    ],
+    "requirements": {
+      "owner_authorization_required": true,
+      "no_auto_publish": true
+    },
+    "acceptance": {
+      "release": "All independent review, target-reader, native preview, rights and owner authorization gates pass for exact current digests."
+    },
+    "priority": 100
+  }
+]

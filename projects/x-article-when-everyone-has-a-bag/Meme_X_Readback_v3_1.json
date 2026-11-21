@@ -1,0 +1,97 @@
+{
+  "version": "v3.1",
+  "parent_version": "v3",
+  "title_en": "When Everyone Has a Bag, Who Do You Believe?",
+  "title_zh": "当所有人都有仓位，你还能相信谁？",
+  "change_scope": "One existing Section 01 paragraph refined in EN and ZH; keyword-only metaphor integration.",
+  "keyword": "Bigfoot",
+  "keyword_occurrences": {
+    "english": 1,
+    "chinese": 1
+  },
+  "section_counts": {
+    "english": 7,
+    "chinese": 7
+  },
+  "source_links": {
+    "english": 5,
+    "chinese": 5,
+    "sets_match": true
+  },
+  "word_count_method": "whitespace-delimited tokens",
+  "english_word_count_v3_same_method": 1512,
+  "english_word_count_v3_1_same_method": 1518,
+  "chinese_han_characters_v3_1": 2400,
+  "paragraph_integrity": {
+    "english_v3": 56,
+    "english_v3_1": 56,
+    "english_paragraphs_changed": 1,
+    "chinese_v3": 56,
+    "chinese_v3_1": 56,
+    "chinese_paragraphs_changed": 1
+  },
+  "docx": {
+    "english": {
+      "paragraphs": 56,
+      "external_hyperlinks": 5,
+      "hyperlink_urls": [
+        "https://pump.fun/docs/fees",
+        "https://www.bitquery.io/investigations/pump-fun-snipers-bundles",
+        "https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok",
+        "https://www.pbs.org/newshour/world/jamaican-bobsled-team-raises-30000-in-dogecoin-for-trip-to-sochi",
+        "https://www.sciencedirect.com/science/article/pii/S0275531926003491"
+      ],
+      "bigfoot_occurrences": 1,
+      "footer_version": "v3.1",
+      "page_field_present": true,
+      "rendered_pages": 3
+    },
+    "chinese": {
+      "paragraphs": 56,
+      "external_hyperlinks": 5,
+      "hyperlink_urls": [
+        "https://pump.fun/docs/fees",
+        "https://www.bitquery.io/investigations/pump-fun-snipers-bundles",
+        "https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok",
+        "https://www.pbs.org/newshour/world/jamaican-bobsled-team-raises-30000-in-dogecoin-for-trip-to-sochi",
+        "https://www.sciencedirect.com/science/article/pii/S0275531926003491"
+      ],
+      "bigfoot_occurrences": 1,
+      "footer_version": "v3.1",
+      "page_field_present": true,
+      "rendered_pages": 3
+    },
+    "page_layout_review": "PASS: 3 pages each; all 6 rendered pages visually inspected; no blank page, clipping or split section heading."
+  },
+  "visual_prompts": 4,
+  "visual_prompt_pack_changed": false,
+  "distribution_pack_changed": false,
+  "images_generated": 0,
+  "x_published": false,
+  "independent_editor_review": "OPEN",
+  "trench_reader_review": "OPEN",
+  "x_native_mobile_preview": "OPEN",
+  "publication_authorization": "NOT_GRANTED",
+  "source_claims_changed": false,
+  "caos_parent_modified": false,
+  "ipos_modified": false,
+  "package": {
+    "zip_integrity": "PASS",
+    "member_count": 13,
+    "members": [
+      "Meme_X_Package_README_v3_1.md",
+      "Meme_X_CAOS_Decision_Source_v3.md",
+      "Meme_X_Article_EN_v3_1.md",
+      "Meme_X_Article_ZH_v3_1.md",
+      "Meme_X_Article_EN_v3_1.docx",
+      "Meme_X_Article_ZH_v3_1.docx",
+      "Meme_X_Visual_Prompt_Pack_v3.md",
+      "Meme_X_Distribution_Pack_v3.md",
+      "Meme_X_Editorial_Revision_Record_v3_1.md",
+      "Meme_X_CAOS_Audit_v3_1.md",
+      "Meme_X_Asset_Manifest_v3_1.md",
+      "Meme_X_Legacy_Asset_Inventory_v3_1.md",
+      "Meme_X_Readback_v3_1.json"
+    ]
+  }
+}

@@ -53,6 +53,27 @@
       "state_refs": [
         "projects/pilot-001/README.md"
       ]
+    },
+    {
+      "project_id": "x-article-when-everyone-has-a-bag",
+      "kind": "X_ARTICLE_EDITORIAL_PROJECT",
+      "status": "ACTIVE_CANDIDATE",
+      "default_for_generic_domain_intent": false,
+      "aliases": [
+        "When Everyone Has a Bag, Who Do You Believe?",
+        "Meme X Article"
+      ],
+      "state_refs": [
+        "projects/x-article-when-everyone-has-a-bag/PROJECT_MANIFEST.json",
+        "projects/x-article-when-everyone-has-a-bag/OUTCOME_BRIEF.json",
+        "projects/x-article-when-everyone-has-a-bag/TASK_GRAPH.json",
+        "projects/x-article-when-everyone-has-a-bag/CURRENT_PROGRESS.md",
+        "projects/x-article-when-everyone-has-a-bag/ASSET_SHA256.json"
+      ],
+      "resume_ref": "projects/x-article-when-everyone-has-a-bag/RESUME_ENTRY.md",
+      "runtime_mode": "STANDALONE_VIDEO_STUDIO",
+      "authority": "VIDEO_GROWTH_AGENT",
+      "caos_runtime_dependency": false
     }
   ],
   "resolution_rules": [
@@ -61,7 +82,7 @@
     "Repository search rank, newest file and chat memory do not select a project.",
     "CAOS governance does not recreate these Video project identities as parent tasks."
   ],
-  "updated_at": "2026-11-14T16:20:00+08:00",
+  "updated_at": "2026-11-22",
   "governance": {
     "system": "CAOS",
     "mode": "CHAT_GOVERNED_EXTERNAL",

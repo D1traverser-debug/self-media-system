@@ -1,0 +1,71 @@
+{
+  "goal": "Continue the existing X Article from v3 to v3.1 by integrating the keyword Bigfoot once as a natural metaphor, preserving the article's approved thesis, structure and publishing assets.",
+  "audience": "Crypto-native X readers and Solana/memecoin market participants who value a nuanced argument about cultural contribution, token ownership and cash-flow rights.",
+  "deliverables": [
+    "Meme_X_Article_EN_v3_1.md",
+    "Meme_X_Article_ZH_v3_1.md",
+    "Meme_X_Article_EN_v3_1.docx",
+    "Meme_X_Article_ZH_v3_1.docx",
+    "Meme_X_Visual_Prompt_Pack_v3.md",
+    "Meme_X_Distribution_Pack_v3.md",
+    "Meme_X_Editorial_Revision_Record_v3_1.md",
+    "Meme_X_CAOS_Audit_v3_1.md",
+    "Meme_X_Asset_Manifest_v3_1.md",
+    "Meme_X_Readback_v3_1.json",
+    "Meme_X_Article_Complete_Package_v3_1.zip"
+  ],
+  "format": {
+    "platform": "X Articles",
+    "languages": [
+      "en",
+      "zh"
+    ],
+    "article_sections": 7
+  },
+  "content_contract": {
+    "title_en": "When Everyone Has a Bag, Who Do You Believe?",
+    "title_zh": "当所有人都有仓位，你还能相信谁？",
+    "approved_thesis": "Financial incentives make public conviction an ambiguous signal.",
+    "argument_frame": [
+      "cultural contribution",
+      "token ownership",
+      "cash-flow rights"
+    ],
+    "keyword": "Bigfoot",
+    "keyword_rule": "Use Bigfoot once in the existing article as a metaphor/abstract phrase. Do not explain Bigfoot, create a new topic, case study, news event, token discussion or section.",
+    "revision_rule": "Only the existing Section 01 paragraph may be refined for the keyword insertion; keep all other argument and evidence unchanged."
+  },
+  "hard_constraints": [
+    "Do not create a new article.",
+    "Do not turn Bigfoot into an article topic or factual case.",
+    "Do not change the title, subtitle, approved thesis, seven-section structure or five source URLs.",
+    "Do not rewrite the X distribution pack or visual prompt pack for this keyword-only request.",
+    "Do not modify the CAOS parent system or IPOS.",
+    "Do not modify main, merge a branch or publish to X.",
+    "Do not claim independent review, target-reader validation or X-native preview unless evidenced."
+  ],
+  "success_criteria": [
+    "Bigfoot appears exactly once in each language.",
+    "Only one existing paragraph changes in each manuscript.",
+    "English and Chinese remain semantically aligned.",
+    "Five source URLs remain identical across languages.",
+    "Both Word files retain formatting, five hyperlinks and three-page layout.",
+    "The 13-member package passes ZIP integrity.",
+    "The Video Studio runtime accepts the brief and dynamic task graph."
+  ],
+  "release_policy": {
+    "no_auto_publish": true,
+    "required_review_rubrics": [
+      "independent-editor",
+      "trench-reader",
+      "x-native-preview"
+    ],
+    "owner_publication_authorization_required": true,
+    "required_rights_statuses": [
+      "OWNED",
+      "AUTHORIZED",
+      "LICENSED",
+      "PUBLIC_DOMAIN"
+    ]
+  }
+}

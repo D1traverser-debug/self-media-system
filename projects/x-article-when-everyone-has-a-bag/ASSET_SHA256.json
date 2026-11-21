@@ -1,0 +1,122 @@
+{
+  "algorithm": "SHA-256",
+  "scope": "All project-root files except this manifest itself.",
+  "files": {
+    "CURRENT_PROGRESS.md": {
+      "sha256": "e0433d18b8c7c19a9c2757330b7c3f130f9372a745875a55e578d5bca71b5bdd",
+      "size_bytes": 1901
+    },
+    "Meme_X_Article_Complete_Package_v3_1.zip": {
+      "sha256": "371833f33f3964d8dc1ee4e270a4e9afbdb900c1d80bcab271764e492270d0ec",
+      "size_bytes": 106331
+    },
+    "Meme_X_Article_EN_v3_1.docx": {
+      "sha256": "3d1be2a52a8e4292dd243a4d577f8a1962e7821016ee89e5f6b93db7d7a11a1b",
+      "size_bytes": 42036
+    },
+    "Meme_X_Article_EN_v3_1.md": {
+      "sha256": "1bb4f847b103f4d29af46b1c4da50b160cf06ee670d011526339200fc4bf58dd",
+      "size_bytes": 9467
+    },
+    "Meme_X_Article_ZH_v3_1.docx": {
+      "sha256": "0574be1ee9727676894fb90a8b9a7feb478269e7d2ccfe7ebe9486f68ba95379",
+      "size_bytes": 42832
+    },
+    "Meme_X_Article_ZH_v3_1.md": {
+      "sha256": "e5b9fdc0ebf0eb113614686e69a9b3d93017bbd5179056cda18e74527175a2df",
+      "size_bytes": 9083
+    },
+    "Meme_X_Asset_Manifest_v3_1.md": {
+      "sha256": "50545d3b035b0f503ac6d59aa8d058e80750b275d10924f524651e3956939684",
+      "size_bytes": 1350
+    },
+    "Meme_X_CAOS_Audit_v3_1.md": {
+      "sha256": "b7f8276295d661f9cd638bae36a835dcacff76ac030d7dbb580e018b8f854ff5",
+      "size_bytes": 2379
+    },
+    "Meme_X_CAOS_Decision_Source_v3.md": {
+      "sha256": "ddf539c41d2cebaff49576b50f098a439591afee4faba2d1589ccddac3367e1f",
+      "size_bytes": 8356
+    },
+    "Meme_X_Distribution_Pack_v3.md": {
+      "sha256": "b0e62ce11ac3ca873ab30b13bede3f9f622b46d6df079e3cd380bd357bd929c6",
+      "size_bytes": 3976
+    },
+    "Meme_X_Editorial_Revision_Record_v3_1.md": {
+      "sha256": "b35e6a491aa153f044bbaf1b66ca71e972b0699efab1114e0a01db1ee8e40367",
+      "size_bytes": 2674
+    },
+    "Meme_X_Legacy_Asset_Inventory_v3_1.md": {
+      "sha256": "2c9ff88854a7a17d6ca20ef1faecbca607856afc10a652143806e0482927bf89",
+      "size_bytes": 836
+    },
+    "Meme_X_Package_README_v3_1.md": {
+      "sha256": "ddbca42bf2239ad794b515b502bcb74933e29a431f15f38d193c0a9545d938f3",
+      "size_bytes": 1115
+    },
+    "Meme_X_Readback_v3_1.json": {
+      "sha256": "b3296febe3390355684549c6254ad2c4574473a89609cbdc5282323b6e636a1b",
+      "size_bytes": 3407
+    },
+    "Meme_X_Visual_Prompt_Pack_v3.md": {
+      "sha256": "2fb4467a686c0e02ba8fc5996d8ef4fb78992e0f18d12c6932458565c158fea0",
+      "size_bytes": 10169
+    },
+    "OUTCOME_BRIEF.json": {
+      "sha256": "ce71f6051bd8489abb3fae634713c0bc524507997abe1301927a87425eb973de",
+      "size_bytes": 3028
+    },
+    "PROJECT_MANIFEST.json": {
+      "sha256": "e7ecfc1b1dc592c152ac57114612dbbff42140c937bfe8a096de96eaa3e48655",
+      "size_bytes": 1709
+    },
+    "RESUME_ENTRY.md": {
+      "sha256": "4f9b2c5c71697001fda120112a7bbe005ecf45310118235a3914dded8aea5ee1",
+      "size_bytes": 991
+    },
+    "RUNTIME_BOOTSTRAP.md": {
+      "sha256": "c6cb026810ba3ffa86414fe69eb081f81ba4bc199679a9b2578c3f8b4c3e3d2b",
+      "size_bytes": 1189
+    },
+    "TASK_GRAPH.json": {
+      "sha256": "2c5e13f4a2722dd475b07270721f963a5372bbdc787a129f1457523331abecd0",
+      "size_bytes": 5157
+    },
+    "bootstrap.py": {
+      "sha256": "08c3b456596040fe1e14d993bd6e5cd8e0740bec231a64b2a279f59e4d4d4333",
+      "size_bytes": 9484
+    },
+    "source/v3/Meme_X_Article_EN_v3.docx": {
+      "sha256": "c1c1063cd8f6d9bbd559a4e349dd6fee0b64a9f512c11ce64f0f821bdf5614d0",
+      "size_bytes": 42005
+    },
+    "source/v3/Meme_X_Article_EN_v3.md": {
+      "sha256": "2729101827024bc47adc3c85185a55c4b0a8c02b6824ae50b51c9c4e7fd8211d",
+      "size_bytes": 9423
+    },
+    "source/v3/Meme_X_Article_ZH_v3.docx": {
+      "sha256": "e2fa87052ce1e3e1a435159d42d9937e55d4b6498cb7fac4413a34421ea9a5ed",
+      "size_bytes": 42792
+    },
+    "source/v3/Meme_X_Article_ZH_v3.md": {
+      "sha256": "f3e11e7e89ec07c106fe4a9b3412a82624f16368603542c2fa1fcdff2883fa2d",
+      "size_bytes": 9041
+    },
+    "source/v3/Meme_X_Asset_Manifest_v3.md": {
+      "sha256": "d675af5473c0fbebee390029e71f7976e9d91983f4f269cc2b61e00893d7f595",
+      "size_bytes": 1194
+    },
+    "source/v3/Meme_X_CAOS_Audit_v3.md": {
+      "sha256": "5b5e0aa0686cdc79afc4c28067608435984a6d110641ae92801404815d01db50",
+      "size_bytes": 5388
+    },
+    "source/v3/Meme_X_Editorial_Revision_Record_v3.md": {
+      "sha256": "8867a17135603df6a0591b917e4f84159e975915f61d3919e7402178be9b46b9",
+      "size_bytes": 2655
+    },
+    "source/v3/Meme_X_Readback_v3.json": {
+      "sha256": "30783ed7f63f6d7fc1bcc74cbb9069424bbb1bad0be266fe94f4338ccd843d5d",
+      "size_bytes": 2021
+    }
+  }
+}
