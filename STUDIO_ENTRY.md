@@ -22,7 +22,7 @@ Generic video-production intent has no default business Program. Resume an exist
 
 ## Governance boundary
 
-The Video runtime is standalone: it does not import, call, require or wait for a CAOS runtime, API, parent task ID or parent lease. This is runtime independence, **not permission to bypass CAOS governance**. When the active ChatGPT session is CAOS-governed, follow CAOS's parent-level decision loop, execution loop and independent acceptance externally. Do not modify the CAOS repository, files, branches, pull requests, configuration or installed skills.
+The Video runtime is standalone and has no CAOS runtime/API dependency: it does not import, call, require or wait for a CAOS runtime, API, parent task ID or parent lease. This is runtime independence, **not permission to bypass CAOS governance**. When the active ChatGPT session is CAOS-governed, follow CAOS's parent-level decision loop, execution loop and independent acceptance externally. Do not modify the CAOS repository, files, branches, pull requests, configuration or installed skills.
 
 ## Authority order
 
