@@ -422,6 +422,23 @@ class StudioEngine:
             brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
             return self._current_parent_handoff_in_tx(connection, project_id, brief)
 
+    @staticmethod
+    def _assert_parent_claim_freshness(
+        connection: sqlite3.Connection, project_id: str, task_id: str,
+        brief: dict[str, Any], handoff: dict[str, Any],
+    ) -> None:
+        if handoff["mode"] != "CAOS_PARENT":
+            return
+        event = connection.execute(
+            "SELECT payload_json FROM events WHERE project_id=? AND entity_type='TASK' "
+            "AND entity_id=? AND event_type='TASK_CLAIMED' ORDER BY event_no DESC LIMIT 1",
+            (project_id, task_id),
+        ).fetchone()
+        bound = _loads(event["payload_json"], {}) if event else {}
+        if (bound.get("brief_sha256") != StudioEngine._brief_sha256(brief)
+                or bound.get("parent_handoff_sha256") != handoff.get("receipt_sha256")):
+            raise GateError("CAOS_PARENT_CLAIM_STALE_AFTER_BRIEF_OR_HANDOFF_CHANGE")
+
     def create_project(self, project_id: str, title: str, brief: dict[str, Any]) -> dict[str, Any]:
         project_id = _safe_id(project_id, "project_id")
         self._validate_brief(brief)
@@ -899,7 +916,9 @@ class StudioEngine:
                     "SELECT * FROM tasks WHERE project_id=? AND task_id=?",
                     (project_id, row["task_id"]),
                 ).fetchone()
-                self._event(connection, project_id, "TASK", row["task_id"], "TASK_CLAIMED", {"worker_id": worker_id, "lease_until": lease_until, "attempt": claimed["attempts"]})
+                self._event(connection, project_id, "TASK", row["task_id"], "TASK_CLAIMED", {"worker_id": worker_id, "lease_until": lease_until, "attempt": claimed["attempts"],
+                                                                                                 "brief_sha256": self._brief_sha256(brief),
+                                                                                                 "parent_handoff_sha256": handoff.get("receipt_sha256")})
                 packet = self._work_packet(connection, project_id, claimed)
                 connection.commit()
                 packet["claim"] = asdict(TaskClaim(project_id, row["task_id"], worker_id, token, lease_until, claimed["attempts"]))
@@ -933,6 +952,7 @@ class StudioEngine:
                 raise GateError(f"CAOS parent admission invalidated: {handoff['reason']}")
             if handoff["mode"] == "CAOS_PARENT" and _loads(row["requirements_json"], {}).get("effect_class") not in handoff["allowed_effects"]:
                 raise GateError("CAOS_PARENT_EFFECT_SCOPE_UNADMITTED")
+            self._assert_parent_claim_freshness(connection, project_id, task_id, brief, handoff)
             connection.execute(
                 "UPDATE tasks SET lease_until=?,updated_at=? WHERE project_id=? AND task_id=?",
                 (until, _iso(now), project_id, task_id),
@@ -955,6 +975,7 @@ class StudioEngine:
             raise GateError(f"CAOS parent admission invalidated: {handoff['reason']}")
         if handoff["mode"] == "CAOS_PARENT" and _loads(row["requirements_json"], {}).get("effect_class") not in handoff["allowed_effects"]:
             raise GateError("CAOS_PARENT_EFFECT_SCOPE_UNADMITTED")
+        self._assert_parent_claim_freshness(connection, project_id, task_id, brief, handoff)
         return row
 
     def _register_artifact_in_tx(
