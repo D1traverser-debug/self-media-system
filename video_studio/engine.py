@@ -308,6 +308,117 @@ class StudioEngine:
             raise ContractError("brief.goal and brief.audience must be strings")
         if not isinstance(brief["deliverables"], list) or not all(isinstance(item, str) and item.strip() for item in brief["deliverables"]):
             raise ContractError("brief.deliverables must be a non-empty array of strings")
+        StudioEngine._governance_mode(brief)
+
+    @staticmethod
+    def _governance_mode(brief: dict[str, Any]) -> str:
+        governance = brief.get("governance", {})
+        if not isinstance(governance, dict):
+            raise ContractError("brief.governance must be an object")
+        mode = governance.get("mode", "VIDEO_STANDALONE")
+        if mode not in {"VIDEO_STANDALONE", "CAOS_PARENT"}:
+            raise ContractError("unsupported governance.mode")
+        if mode == "CAOS_PARENT":
+            if governance.get("parent_system") != "cognition-agent-os":
+                raise ContractError("CAOS_PARENT requires exact parent_system")
+            effects = governance.get("allowed_effects")
+            if not isinstance(effects, list) or not effects or any(not isinstance(e, str) or not e for e in effects):
+                raise ContractError("CAOS_PARENT requires explicit allowed_effects")
+            if not isinstance(brief.get("success_criteria"), list) or not brief["success_criteria"]:
+                raise ContractError("CAOS_PARENT requires owner success_criteria")
+        return mode
+
+    @staticmethod
+    def _brief_sha256(brief: dict[str, Any]) -> str:
+        return hashlib.sha256(_json(brief).encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def _validate_parent_handoff(brief: dict[str, Any], project_id: str, receipt: dict[str, Any]) -> None:
+        if not isinstance(receipt, dict):
+            raise ContractError("parent handoff must be an object")
+        required = ("schema_version", "parent_system", "child_system", "project_id",
+                    "brief_sha256", "owner_goal_ref", "goal", "owner_corrections",
+                    "source_refs", "decision", "allowed_effects", "verification",
+                    "unknowns")
+        if any(key not in receipt for key in required):
+            raise ContractError("CAOS parent handoff missing required evidence/decision fields")
+        if (receipt["schema_version"] != 1 or receipt["parent_system"] != "cognition-agent-os"
+                or receipt["child_system"] != "video-growth-agent" or receipt["project_id"] != project_id):
+            raise ContractError("CAOS parent handoff system/project mismatch")
+        if receipt["brief_sha256"] != StudioEngine._brief_sha256(brief) or receipt["goal"] != brief["goal"]:
+            raise ContractError("CAOS parent handoff is stale or mismatched to brief")
+        if not isinstance(receipt["owner_goal_ref"], str) or not receipt["owner_goal_ref"].strip():
+            raise ContractError("CAOS parent handoff needs owner goal provenance")
+        if not isinstance(receipt["owner_corrections"], list) or not isinstance(receipt["unknowns"], list):
+            raise ContractError("CAOS parent handoff correction/unknown inventory malformed")
+        sources = receipt["source_refs"]
+        if not isinstance(sources, list) or not sources or any(not isinstance(x, str) or not x.strip() for x in sources):
+            raise ContractError("CAOS parent handoff needs explicit sources")
+        effects = receipt["allowed_effects"]
+        allowed = brief["governance"]["allowed_effects"]
+        if not isinstance(effects, list) or not effects or not all(isinstance(x, str) and x in allowed for x in effects):
+            raise ContractError("CAOS parent handoff cannot broaden allowed effects")
+        verification = receipt["verification"]
+        if (not isinstance(verification, dict)
+                or not isinstance(verification.get("owner_outcomes"), list)
+                or not verification["owner_outcomes"]
+                or not isinstance(verification.get("independent_evidence"), list)
+                or not verification["independent_evidence"]):
+            raise ContractError("CAOS handoff requires outcome and independent evidence conditions")
+        decision = receipt["decision"]
+        if not isinstance(decision, dict) or any(not decision.get(k) for k in (
+                "question", "hypotheses", "alternatives", "selected_option", "falsifier", "rollback")):
+            raise ContractError("CAOS handoff decision is incomplete")
+        hypotheses, alternatives = decision["hypotheses"], decision["alternatives"]
+        if (not isinstance(hypotheses, list) or len(hypotheses) < 2
+                or not all(isinstance(x, dict) and x.get("discriminator") for x in hypotheses)
+                or not isinstance(alternatives, list) or len(alternatives) < 2
+                or not all(isinstance(x, dict) and x.get("id") for x in alternatives)
+                or decision["selected_option"] not in [x["id"] for x in alternatives]):
+            raise ContractError("CAOS handoff requires competing, testable options")
+
+    @staticmethod
+    def _current_parent_handoff_in_tx(connection: sqlite3.Connection, project_id: str, brief: dict[str, Any]) -> dict[str, Any]:
+        if StudioEngine._governance_mode(brief) != "CAOS_PARENT":
+            return {"mode": "VIDEO_STANDALONE", "admitted": True}
+        row = connection.execute(
+            "SELECT payload_json FROM events WHERE project_id=? AND entity_type='GOVERNANCE' "
+            "AND event_type='PARENT_HANDOFF_ADMITTED' ORDER BY event_no DESC LIMIT 1",
+            (project_id,),
+        ).fetchone()
+        if row is None:
+            return {"mode": "CAOS_PARENT", "admitted": False, "reason": "PARENT_HANDOFF_MISSING"}
+        receipt = _loads(row["payload_json"], {})
+        if receipt.get("brief_sha256") != StudioEngine._brief_sha256(brief):
+            return {"mode": "CAOS_PARENT", "admitted": False, "reason": "PARENT_HANDOFF_STALE"}
+        return {"mode": "CAOS_PARENT", "admitted": True, "receipt_sha256": StudioEngine._brief_sha256(receipt),
+                "assurance_limit": "STRUCTURAL_AND_BRIEF_BINDING_ONLY_NOT_NATIVE_CAOS_SELECTION_OR_OWNER_OUTCOME"}
+
+    def admit_parent_handoff(self, project_id: str, receipt: dict[str, Any]) -> dict[str, Any]:
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            try:
+                brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+                if self._governance_mode(brief) != "CAOS_PARENT":
+                    raise GateError("standalone Video project cannot claim CAOS parent admission")
+                self._validate_parent_handoff(brief, project_id, receipt)
+                existing = self._current_parent_handoff_in_tx(connection, project_id, brief)
+                digest = self._brief_sha256(receipt)
+                if existing.get("admitted") and existing.get("receipt_sha256") == digest:
+                    connection.commit()
+                    return existing
+                self._event(connection, project_id, "GOVERNANCE", project_id, "PARENT_HANDOFF_ADMITTED", receipt)
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
+        return {"mode": "CAOS_PARENT", "admitted": True, "receipt_sha256": digest,
+                "assurance_limit": "STRUCTURAL_AND_BRIEF_BINDING_ONLY_NOT_NATIVE_CAOS_SELECTION_OR_OWNER_OUTCOME"}
+
+    def parent_handoff_status(self, project_id: str) -> dict[str, Any]:
+        with closing(self._connect(project_id)) as connection:
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            return self._current_parent_handoff_in_tx(connection, project_id, brief)
 
     def create_project(self, project_id: str, title: str, brief: dict[str, Any]) -> dict[str, Any]:
         project_id = _safe_id(project_id, "project_id")
@@ -386,6 +497,8 @@ class StudioEngine:
                     raise ContractError(f"unknown affected_task_ids: {unknown}")
                 invalidated = self._descendant_closure(tasks, roots) if roots else set()
                 old_brief = _loads(project["brief_json"], {})
+                if self._governance_mode(old_brief) == "CAOS_PARENT" and self._governance_mode(brief) != "CAOS_PARENT":
+                    raise GateError("cannot silently downgrade a CAOS-governed project")
                 old_digest = hashlib.sha256(_json(old_brief).encode("utf-8")).hexdigest()
                 new_digest = hashlib.sha256(_json(brief).encode("utf-8")).hexdigest()
                 now = _iso()
@@ -741,7 +854,11 @@ class StudioEngine:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
-                self._project_row(connection, project_id)
+                project = self._project_row(connection, project_id)
+                brief = _loads(project["brief_json"], {})
+                handoff = self._current_parent_handoff_in_tx(connection, project_id, brief)
+                if not handoff["admitted"]:
+                    raise GateError(f"CAOS parent admission required: {handoff['reason']}")
                 now = _now()
                 expired = connection.execute(
                     "SELECT * FROM tasks WHERE project_id=? AND status='RUNNING' AND lease_until < ?",
@@ -1114,6 +1231,9 @@ class StudioEngine:
             for review in review_rows:
                 by_rubric.setdefault(review["rubric_id"], []).append(review["outcome"])
             brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            parent_handoff = self._current_parent_handoff_in_tx(connection, project_id, brief)
+            if not parent_handoff["admitted"]:
+                failures.append(f"caos_parent_handoff:{parent_handoff['reason']}")
             release_policy = brief.get("release_policy", {})
             effective_rubrics = sorted(set(required_rubrics or []) | set(release_policy.get("required_review_rubrics", [])))
             if not effective_rubrics:
@@ -1250,7 +1370,8 @@ class StudioEngine:
         with closing(self._connect(project_id)) as connection:
             events = connection.execute("SELECT COUNT(*) AS count FROM events WHERE project_id=?", (project_id,)).fetchone()["count"]
             open_failures = connection.execute("SELECT COUNT(*) AS count FROM failures WHERE project_id=? AND status='OPEN'", (project_id,)).fetchone()["count"]
-        return {"project": project, "task_counts": counts, "ready_tasks": ready, "open_failures": open_failures, "event_count": events}
+        return {"project": project, "task_counts": counts, "ready_tasks": ready, "open_failures": open_failures, "event_count": events,
+                "parent_handoff": self.parent_handoff_status(project_id)}
 
     def events(self, project_id: str, limit: int = 100) -> list[dict[str, Any]]:
         with closing(self._connect(project_id)) as connection:
