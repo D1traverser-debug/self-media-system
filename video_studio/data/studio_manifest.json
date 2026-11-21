@@ -32,7 +32,9 @@
     "caos_skill_dependency": false,
     "parent_task_or_lease_dependency": false,
     "governance_method_owned_by_video": true,
-    "caos_session_governance_supported": true
+    "caos_session_governance_supported": true,
+    "caos_source_repository": "D1traverser-debug/cognition-agent-os",
+    "caos_source_mutation": "FORBIDDEN"
   },
   "decision_method": [
     "COMPETING_HYPOTHESES",

@@ -22,7 +22,11 @@ REQUIRED_ASSURANCE_TERMS = (
     "ATTESTED_ISOLATED",
 )
 CURRENT_GLOBAL_FILES = (
+    "STUDIO_ENTRY.md",
     "CAOS_VIDEO_ENTRY.md",
+    "skills/video-growth-agent/SKILL.md",
+    "docs/standalone_video_studio.md",
+    "video_studio/data/studio_manifest.json",
     "video_growth_agent/data/domain_manifest.json",
     "video_growth_agent/data/capabilities.json",
     "README.md",
@@ -506,23 +510,26 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
     if not (root / "audits/CAOS_GOVERNANCE_TAKEOVER_2026-11-14.md").is_file():
         failures.append("caos_governance_takeover_audit_missing")
 
-    skill_path = root / "CAOS_VIDEO_ENTRY.md"
-    skill_text = skill_path.read_text(encoding="utf-8") if skill_path.is_file() else ""
-    skill_lower = skill_text.lower()
+    entry_path = root / "STUDIO_ENTRY.md"
+    entry_text = entry_path.read_text(encoding="utf-8") if entry_path.is_file() else ""
+    entry_lower = entry_text.lower()
     for token, label in (
-        ("D1traverser-debug/cognition-agent-os", "caos_source_binding_missing"),
-        ("chat_governed_external", "caos_external_governance_mode_missing"),
-        ("decision loop", "caos_decision_loop_missing"),
-        ("execution loop", "caos_execution_loop_missing"),
-        ("independent acceptance", "caos_independent_acceptance_missing"),
-        ("projects/project_index.json", "caos_video_project_authority_missing"),
-        ("ip studio os", "caos_ipos_boundary_missing"),
-        ("CAOS source is read-only", "caos_source_read_only_boundary_missing"),
+        ("canonical entry", "video_canonical_entry_marker_missing"),
+        ("caos-governed", "caos_external_session_governance_missing"),
+        ("decision loop", "caos_decision_loop_boundary_missing"),
+        ("execution loop", "caos_execution_loop_boundary_missing"),
+        ("independent acceptance", "caos_independent_acceptance_boundary_missing"),
+        ("ipos", "video_ipos_authority_boundary_missing"),
+        ("do not modify the caos repository", "caos_source_read_only_boundary_missing"),
+        ("runtime/api dependency", "caos_no_runtime_dependency_boundary_missing"),
     ):
-        if token.lower() not in skill_lower:
+        if token not in entry_lower:
             failures.append(label)
-    if "runtime/api dependency" not in skill_lower:
-        failures.append("caos_no_runtime_dependency_boundary_missing")
+
+    legacy_entry_path = root / "CAOS_VIDEO_ENTRY.md"
+    legacy_entry = legacy_entry_path.read_text(encoding="utf-8").lower() if legacy_entry_path.is_file() else ""
+    if "legacy_pointer_only" not in legacy_entry or "studio_entry.md" not in legacy_entry:
+        failures.append("caos_video_legacy_entry_not_demoted")
 
     capability_path = root / "video_growth_agent/data/capabilities.json"
     if not capability_path.is_file():
@@ -579,7 +586,7 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
             failures.append("video_domain_manifest_system_drift")
         if manifest.get("status") != "VIDEO_DOMAIN_RUNTIME_ACTIVE":
             failures.append("video_domain_manifest_status_drift")
-        if manifest.get("skill", {}).get("entrypoint") != "CAOS_VIDEO_ENTRY.md":
+        if manifest.get("skill", {}).get("entrypoint") != "STUDIO_ENTRY.md":
             failures.append("video_domain_manifest_entrypoint_drift")
         if governance.get("system") != "CAOS" or governance.get("mode") != "CHAT_GOVERNED_EXTERNAL":
             failures.append("video_domain_manifest_caos_binding_drift")
@@ -679,13 +686,25 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         project_index = _json(project_index_path)
         if project_index.get("authority") != "VIDEO_GROWTH_AGENT":
             failures.append("project_index_authority_drift")
-        if project_index.get("default_project_id") != "ai-self-media-commercialization":
-            failures.append("project_index_default_program_drift")
+        if project_index.get("default_project_id") is not None:
+            failures.append("project_index_generic_default_forbidden")
+        governance = project_index.get("governance", {})
+        if governance.get("entrypoint") != "STUDIO_ENTRY.md":
+            failures.append("project_index_canonical_entrypoint_drift")
+        if governance.get("mode") != "CAOS_SESSION_GOVERNED_WHEN_ACTIVE":
+            failures.append("project_index_caos_session_governance_mode_drift")
+        if governance.get("runtime_dependency") is not False or governance.get("source_mutation") != "FORBIDDEN":
+            failures.append("project_index_caos_read_only_boundary_drift")
         projects = project_index.get("projects", [])
         by_id = {str(item.get("project_id")): item for item in projects}
         if set(by_id) < {"ai-self-media-commercialization", "pilot-002"}:
             failures.append("project_index_required_projects_missing")
-        integrated_aliases = set(by_id.get("ai-self-media-commercialization", {}).get("aliases", []))
+        integrated_entry = by_id.get("ai-self-media-commercialization", {})
+        if integrated_entry.get("default_for_generic_domain_intent") is not False:
+            failures.append("project_index_business_program_generic_default_forbidden")
+        if integrated_entry.get("scope") != "OPTIONAL_EXPLICITLY_SELECTED_MEDIA_BUSINESS_PROGRAM":
+            failures.append("project_index_business_program_scope_drift")
+        integrated_aliases = set(integrated_entry.get("aliases", []))
         for alias in ("AI自媒体视频商业化", "AI视频涨粉与商业化", "原创数字IP"):
             if alias not in integrated_aliases:
                 failures.append(f"project_index_integrated_alias_missing:{alias}")
@@ -694,6 +713,46 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
             failures.append("pilot002_legacy_alias_missing")
         if "video-growth:main" in integrated_aliases:
             failures.append("project_index_legacy_alias_collision")
+
+    studio_manifest_path = root / "video_studio/data/studio_manifest.json"
+    studio_manifest = _json(studio_manifest_path) if studio_manifest_path.is_file() else {}
+    if not studio_manifest:
+        failures.append("video_studio_manifest_missing")
+    else:
+        if studio_manifest.get("default_entrypoint") != "STUDIO_ENTRY.md":
+            failures.append("video_studio_default_entrypoint_drift")
+        if studio_manifest.get("runtime") != "video_studio.engine.StudioEngine":
+            failures.append("video_studio_runtime_binding_drift")
+        if studio_manifest.get("product_scope") != "PRODUCTION_FIRST_WITH_OPTIONAL_MEDIA_GROWTH_IP_AND_COMMERCIALIZATION":
+            failures.append("video_studio_product_scope_drift")
+        if studio_manifest.get("release_status") not in {"REBUILD_IN_PROGRESS", "PRODUCTION_READY", "RELEASE_CANDIDATE"}:
+            failures.append("video_studio_release_status_invalid")
+        studio_governance = studio_manifest.get("governance", {})
+        if studio_governance.get("system") != "VIDEO_STUDIO_NATIVE":
+            failures.append("video_studio_native_authority_missing")
+        if studio_governance.get("caos_runtime_dependency") is not False or studio_governance.get("caos_api_dependency") is not False:
+            failures.append("video_studio_caos_runtime_dependency_forbidden")
+        if studio_governance.get("caos_source_mutation") != "FORBIDDEN":
+            failures.append("video_studio_caos_source_mutation_not_forbidden")
+        if studio_governance.get("caos_source_repository") != "D1traverser-debug/cognition-agent-os":
+            failures.append("video_studio_caos_source_binding_missing")
+        caps = studio_manifest.get("capabilities", {})
+        if caps.get("media_job_contract", {}).get("assurance") != "HARNESS_WIRED":
+            failures.append("video_studio_media_job_contract_not_wired")
+        if caps.get("image_set_concept_contract", {}).get("assurance") != "HARNESS_WIRED":
+            failures.append("video_studio_image_set_contract_not_wired")
+        if caps.get("video_generation", {}).get("persistent_provider_executor_registered") is not False:
+            failures.append("video_studio_unverified_provider_claim")
+    for rel in (
+        "video_studio/engine.py",
+        "video_studio/job_contract.py",
+        "video_studio/image_set.py",
+        "video_studio/media.py",
+        "video_studio/cli.py",
+        "video_studio/data/studio_manifest.json",
+    ):
+        if not (root / rel).is_file():
+            failures.append(f"video_studio_core_file_missing:{rel}")
 
     pilot_state_path = root / "projects/pilot-002/PROGRAM_STATE.json"
     if not pilot_state_path.is_file():
