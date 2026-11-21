@@ -27,6 +27,11 @@ def test_video_domain_has_one_external_caos_governance_binding():
         assert binding["source_mutation"] == "FORBIDDEN"
 
     assert manifest["skill"]["entrypoint"] == "STUDIO_ENTRY.md"
+    assert manifest["skill"]["legacy_handoff"] == "CAOS_VIDEO_ENTRY.md"
+    handoff = (ROOT / "CAOS_VIDEO_ENTRY.md").read_text(encoding="utf-8")
+    assert "ACTIVE_SESSION_GOVERNANCE_HANDOFF" in handoff
+    assert "STUDIO_ENTRY.md" in handoff
+    assert "CAOS source is read-only" in handoff
     assert state["governance_mode"] == "CHAT_GOVERNED_EXTERNAL"
     assert state["caos_runtime_dependency"] is False
     assert "parent_identity_semantics" not in state

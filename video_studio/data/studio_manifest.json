@@ -31,11 +31,13 @@
     "caos_api_dependency": false,
     "caos_skill_dependency": false,
     "parent_task_or_lease_dependency": false,
-    "governance_method_owned_by_video": true,
+    "governance_method_owned_by_video": false,
     "caos_session_governance_supported": true,
     "caos_source_repository": "D1traverser-debug/cognition-agent-os",
     "caos_source_mutation": "FORBIDDEN",
-    "caos_session_governance_when_active": true
+    "caos_session_governance_when_active": true,
+    "video_domain_method_owned_by_video": true,
+    "parent_governance_owned_externally": true
   },
   "decision_method": [
     "COMPETING_HYPOTHESES",

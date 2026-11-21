@@ -25,7 +25,7 @@ def test_standalone_studio_is_the_new_entry_and_has_no_parent_runtime_dependency
     assert set(manifest["business_workstreams"]) == {"MEDIA_GROWTH", "ORIGINAL_DIGITAL_IP", "COMMERCIALIZATION", "PRODUCTION_SYSTEM"}
     assert manifest["domain_adapter_policy"]["legacy_fixed_stage_orchestrator"] == "NOT_A_CONTROLLER"
     assert pyproject["project"]["scripts"]["vga-studio"] == "video_studio.cli:main"
-    assert "STUDIO_ENTRY.md" in skill and "STUDIO_ENTRY.md" in entry
+    assert "STUDIO_ENTRY.md" in skill and "canonical entry" in entry.lower()
     assert "CAOS_VIDEO_ENTRY.md" not in skill
     assert "import caos" not in source.lower()
     assert "from caos" not in source.lower()

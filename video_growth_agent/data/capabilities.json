@@ -584,5 +584,9 @@
     "runtime_dependency": false,
     "source_mutation": "FORBIDDEN",
     "domain_authority": "VIDEO_GROWTH_AGENT"
-  }
+  },
+  "catalog_status": "DOMAIN_CAPABILITY_INVENTORY__NOT_CURRENT_SESSION_AVAILABILITY",
+  "runtime_authority": "video_studio/data/studio_manifest.json",
+  "provider_availability": "PER_ACTIVE_SESSION_CAPABILITY_HANDSHAKE",
+  "legacy_module_reuse": "REQUIRES_CONTRACT_AND_EXECUTION_EVIDENCE"
 }

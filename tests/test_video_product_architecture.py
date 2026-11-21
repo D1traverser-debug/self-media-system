@@ -28,12 +28,22 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
     assert governance["runtime_controller"] is False
 
     assert manifest["domain_authority"]["project_index"] == "projects/PROJECT_INDEX.json"
-    assert manifest["domain_authority"]["product_requirements"] == "docs/product_requirements.md"
-    assert manifest["domain_authority"]["architecture"] == "docs/media_business_os.md"
-    assert manifest["domain_authority"]["integrated_business_flywheel"] == "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json"
-    assert manifest["runtime"]["program_orchestration"] == "video_growth_agent/program_orchestration.py"
-    assert manifest["runtime"]["media_business_os"] == "video_growth_agent/production_os.py"
+    assert manifest["domain_authority"]["runtime_root"] == "video_studio"
+    assert manifest["domain_authority"]["product_requirements"] == "STUDIO_ENTRY.md"
+    assert manifest["domain_authority"]["architecture"] == "docs/standalone_video_studio.md"
+    assert manifest["domain_authority"]["optional_integrated_business_flywheel"] == "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json"
+    assert manifest["domain_authority"]["active_capability_manifest"] == "video_studio/data/studio_manifest.json"
+    assert manifest["runtime"]["version"] == "1.0.0"
+    assert manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"
+    assert manifest["runtime"]["task_graph"] == "PROJECT_SPECIFIC_DYNAMIC_DAG"
+    assert manifest["legacy_runtime"]["version"] == "0.8.0"
+    assert manifest["legacy_runtime"]["status"] == "COMPATIBILITY_ONLY__NOT_NEW_STUDIO_CONTROLLER"
+    assert manifest["legacy_runtime"]["program_orchestration"] == "video_growth_agent/program_orchestration.py"
+    assert manifest["legacy_runtime"]["media_business_os"] == "video_growth_agent/production_os.py"
 
+    assert manifest["runtime"]["production_status"] == "CONTROL_PLANE_ACTIVE__END_TO_END_PROVIDER_PIPELINE_NOT_YET_PROVEN"
+    assert caps["catalog_status"] == "DOMAIN_CAPABILITY_INVENTORY__NOT_CURRENT_SESSION_AVAILABILITY"
+    assert caps["runtime_authority"] == "video_studio/data/studio_manifest.json"
     assert caps["profile_version"] >= 12
     assert caps["owner"] == "VIDEO_GROWTH_AGENT"
     assert caps["governance_binding"]["system"] == "CAOS"
@@ -61,8 +71,8 @@ def test_generic_video_production_has_no_default_and_business_program_is_explici
     assert {"AI自媒体视频商业化", "AI视频涨粉与商业化", "原创数字IP"} <= aliases
     assert integrated["default_for_generic_domain_intent"] is False
     assert integrated["scope"] == "OPTIONAL_EXPLICITLY_SELECTED_MEDIA_BUSINESS_PROGRAM"
-    assert any("exact project_id" in rule for rule in index["resolution_rules"])
-    assert any("no generic default project" in rule for rule in index["resolution_rules"])
+    assert any("exact project_id" in rule.lower() for rule in index["resolution_rules"])
+    assert any("no generic default project" in rule.lower() for rule in index["resolution_rules"])
 
     pilot = by_id["pilot-002"]
     assert "video-growth:main" in pilot["aliases"]
