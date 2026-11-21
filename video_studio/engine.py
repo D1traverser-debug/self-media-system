@@ -13,6 +13,8 @@ import sqlite3
 import uuid
 from typing import Any, Iterable
 
+from .job_contract import MediaJobContractError, validate_media_job
+
 
 SCHEMA_VERSION = 1
 TASK_STATES = {
@@ -298,16 +300,10 @@ class StudioEngine:
 
     @staticmethod
     def _validate_brief(brief: dict[str, Any]) -> None:
-        if not isinstance(brief, dict):
-            raise ContractError("brief must be a JSON object")
-        required = ["goal", "audience", "deliverables"]
-        missing = [key for key in required if not brief.get(key)]
-        if missing:
-            raise ContractError(f"brief is missing required outcome fields: {missing}")
-        if not isinstance(brief["goal"], str) or not isinstance(brief["audience"], str):
-            raise ContractError("brief.goal and brief.audience must be strings")
-        if not isinstance(brief["deliverables"], list) or not all(isinstance(item, str) and item.strip() for item in brief["deliverables"]):
-            raise ContractError("brief.deliverables must be a non-empty array of strings")
+        try:
+            validate_media_job(brief)
+        except MediaJobContractError as exc:
+            raise ContractError(str(exc)) from exc
 
     def create_project(self, project_id: str, title: str, brief: dict[str, Any]) -> dict[str, Any]:
         project_id = _safe_id(project_id, "project_id")

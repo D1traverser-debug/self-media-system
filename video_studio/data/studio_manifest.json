@@ -95,6 +95,14 @@
       "tool": "ffprobe",
       "scope": "technical_measurement_only",
       "auto_release": false
+    },
+    "media_job_contract": {
+      "module": "video_studio.job_contract",
+      "assurance": "HARNESS_WIRED",
+      "typed_deliverables": true,
+      "legacy_filename_deliverables_supported": true,
+      "implicit_paid_actions": false,
+      "automatic_publication": false
     }
   },
   "release_status": "REBUILD_IN_PROGRESS",
