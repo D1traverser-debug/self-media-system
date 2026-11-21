@@ -392,6 +392,7 @@ class StudioEngine:
         if receipt.get("brief_sha256") != StudioEngine._brief_sha256(brief):
             return {"mode": "CAOS_PARENT", "admitted": False, "reason": "PARENT_HANDOFF_STALE"}
         return {"mode": "CAOS_PARENT", "admitted": True, "receipt_sha256": StudioEngine._brief_sha256(receipt),
+                "allowed_effects": list(receipt["allowed_effects"]),
                 "assurance_limit": "STRUCTURAL_AND_BRIEF_BINDING_ONLY_NOT_NATIVE_CAOS_SELECTION_OR_OWNER_OUTCOME"}
 
     def admit_parent_handoff(self, project_id: str, receipt: dict[str, Any]) -> dict[str, Any]:
@@ -413,6 +414,7 @@ class StudioEngine:
                 connection.rollback()
                 raise
         return {"mode": "CAOS_PARENT", "admitted": True, "receipt_sha256": digest,
+                "allowed_effects": list(receipt["allowed_effects"]),
                 "assurance_limit": "STRUCTURAL_AND_BRIEF_BINDING_ONLY_NOT_NATIVE_CAOS_SELECTION_OR_OWNER_OUTCOME"}
 
     def parent_handoff_status(self, project_id: str) -> dict[str, Any]:
@@ -872,10 +874,18 @@ class StudioEngine:
                     )
                     self._event(connection, project_id, "TASK", row["task_id"], "TASK_LEASE_EXPIRED", {"worker_id": row["worker_id"], "attempt": row["attempts"], "next_status": next_status})
                 self._refresh_in_tx(connection, project_id)
-                row = connection.execute(
-                    "SELECT * FROM tasks WHERE project_id=? AND status='READY' ORDER BY priority DESC,created_at,task_id LIMIT 1",
+                candidates = connection.execute(
+                    "SELECT * FROM tasks WHERE project_id=? AND status='READY' ORDER BY priority DESC,created_at,task_id",
                     (project_id,),
-                ).fetchone()
+                ).fetchall()
+                if handoff["mode"] == "CAOS_PARENT":
+                    permitted = set(handoff["allowed_effects"])
+                    row = next((item for item in candidates
+                                if _loads(item["requirements_json"], {}).get("effect_class") in permitted), None)
+                    if row is None and candidates:
+                        raise GateError("CAOS_PARENT_EFFECT_SCOPE_UNADMITTED: no READY task declares an allowed effect_class")
+                else:
+                    row = candidates[0] if candidates else None
                 if row is None:
                     connection.commit()
                     return None
@@ -917,6 +927,12 @@ class StudioEngine:
                 raise ClaimError("claim ownership does not match")
             if _parse_time(row["lease_until"]) < now:
                 raise ClaimError("claim lease has expired")
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            handoff = self._current_parent_handoff_in_tx(connection, project_id, brief)
+            if not handoff["admitted"]:
+                raise GateError(f"CAOS parent admission invalidated: {handoff['reason']}")
+            if handoff["mode"] == "CAOS_PARENT" and _loads(row["requirements_json"], {}).get("effect_class") not in handoff["allowed_effects"]:
+                raise GateError("CAOS_PARENT_EFFECT_SCOPE_UNADMITTED")
             connection.execute(
                 "UPDATE tasks SET lease_until=?,updated_at=? WHERE project_id=? AND task_id=?",
                 (until, _iso(now), project_id, task_id),
@@ -933,6 +949,12 @@ class StudioEngine:
             raise ClaimError("worker does not hold the current task claim")
         if _parse_time(row["lease_until"]) < _now():
             raise ClaimError("task claim expired; reclaim before completing")
+        brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+        handoff = self._current_parent_handoff_in_tx(connection, project_id, brief)
+        if not handoff["admitted"]:
+            raise GateError(f"CAOS parent admission invalidated: {handoff['reason']}")
+        if handoff["mode"] == "CAOS_PARENT" and _loads(row["requirements_json"], {}).get("effect_class") not in handoff["allowed_effects"]:
+            raise GateError("CAOS_PARENT_EFFECT_SCOPE_UNADMITTED")
         return row
 
     def _register_artifact_in_tx(
@@ -993,6 +1015,12 @@ class StudioEngine:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
+                brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+                handoff = self._current_parent_handoff_in_tx(connection, project_id, brief)
+                if not handoff["admitted"]:
+                    raise GateError(f"CAOS parent admission required for source import: {handoff['reason']}")
+                if handoff["mode"] == "CAOS_PARENT" and "ISOLATED_LOCAL_WRITE" not in handoff["allowed_effects"]:
+                    raise GateError("CAOS_PARENT_ASSET_IMPORT_EFFECT_NOT_ALLOWED")
                 output_rows = connection.execute(
                     "SELECT task_id,outputs_json FROM tasks WHERE project_id=?", (project_id,)
                 ).fetchall()
