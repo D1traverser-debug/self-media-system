@@ -41,6 +41,15 @@ def test_repository_harness_requires_canonical_video_entry_and_external_caos_bou
     assert studio_manifest["release_status"] == "REBUILD_IN_PROGRESS"
     assert studio_manifest["governance"]["caos_runtime_dependency"] is False
     assert studio_manifest["governance"]["caos_source_mutation"] == "FORBIDDEN"
+    for field in (
+        "stable_artifact_name_mapping",
+        "task_completion_checks_declared_deliverable_outputs",
+        "release_checks_all_required_deliverables",
+        "checks_real_bytes_and_media_type",
+        "rights_status_checked_for_each_required_deliverable",
+        "qualitative_review_remains_separate",
+    ):
+        assert studio_manifest["capabilities"]["media_job_contract"][field] is True
     assert (ROOT / "video_studio/job_contract.py").is_file()
     domain_manifest = json.loads((ROOT / "video_growth_agent/data/domain_manifest.json").read_text(encoding="utf-8"))
     assert domain_manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"

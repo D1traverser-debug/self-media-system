@@ -41,7 +41,7 @@ Every project brief should record:
 
 - `goal`: the observable result the owner wants;
 - `audience`: intended viewer and their prior knowledge;
-- `deliverables`: exact files or publication packages expected;
+- `deliverables`: exact files or publication packages expected. Each deliverable resolves to a stable `artifact_name` (the basename by default, or an explicit safe ID when task-graph names differ); task completion and release checks use that identity.
 - `format`: duration, aspect ratio, resolution, frame rate, language and platform when known;
 - `content_contract`: topic, argument, emotional effect, narrative promise and content boundaries;
 - `craft_contract`: visual, motion, editing, sound, voice, typography and continuity expectations;
@@ -143,7 +143,7 @@ The runtime does not impose one global quality score. The brief selects relevant
 
 The built-in FFprobe adapter currently measures stream presence, duration, resolution, frame rate and available stream-duration consistency. Additional FFmpeg/ subtitle analyzers may be added as separately declared, tested adapters for loudness, clipping, black frames or subtitle bounds; do not claim those checks ran unless their receipts exist. No technical tool proves that a film is compelling, funny, emotionally coherent or commercially effective. Human or genuinely independent multimodal review must inspect the actual media when the rubric requires it.
 
-`release-check` verifies the exact current file digest, required independent PASS reviews, rights state and configured release evidence. It records acceptance evidence; it does not publish to a platform. Publication remains a separate authorized action.
+`release-check` verifies the exact current file digest, required independent PASS reviews, rights state and configured release evidence. It also resolves every required deliverable in the normalized media-job brief through its stable `artifact_name`, then checks that each registered artifact is current, contains real bytes, and has the declared or kind-compatible media type. Required deliverables that are absent, stale, mistyped, empty or uncleared block release. Mechanical checks do not replace FFprobe, visual, audio, editorial or independent human review; criteria outside the mechanical contract remain deferred and require their own evidence. A mechanical PASS is not a craft PASS. It records acceptance evidence; it does not publish to a platform. Publication remains a separate authorized action.
 
 ## 10. Failure diagnosis and method repair
 

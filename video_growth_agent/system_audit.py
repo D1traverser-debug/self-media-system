@@ -788,8 +788,19 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         if studio_governance.get("caos_source_repository") != "D1traverser-debug/cognition-agent-os":
             failures.append("video_studio_caos_source_binding_missing")
         caps = studio_manifest.get("capabilities", {})
-        if caps.get("media_job_contract", {}).get("assurance") != "HARNESS_WIRED":
+        media_job_capability = caps.get("media_job_contract", {})
+        if media_job_capability.get("assurance") != "HARNESS_WIRED":
             failures.append("video_studio_media_job_contract_not_wired")
+        for field in (
+            "stable_artifact_name_mapping",
+            "task_completion_checks_declared_deliverable_outputs",
+            "release_checks_all_required_deliverables",
+            "checks_real_bytes_and_media_type",
+            "rights_status_checked_for_each_required_deliverable",
+            "qualitative_review_remains_separate",
+        ):
+            if media_job_capability.get(field) is not True:
+                failures.append(f"video_studio_media_job_contract_field_missing:{field}")
         if caps.get("image_set_concept_contract", {}).get("assurance") != "HARNESS_WIRED":
             failures.append("video_studio_image_set_contract_not_wired")
         if caps.get("video_generation", {}).get("persistent_provider_executor_registered") is not False:

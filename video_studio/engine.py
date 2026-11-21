@@ -13,7 +13,12 @@ import sqlite3
 import uuid
 from typing import Any, Iterable
 
-from .job_contract import MediaJobContractError, validate_media_job
+from .job_contract import (
+    MediaJobContractError,
+    validate_media_job,
+    validate_task_outputs,
+    validate_media_job_artifacts,
+)
 
 
 SCHEMA_VERSION = 1
@@ -912,6 +917,13 @@ class StudioEngine:
                 expected = set(_loads(task["outputs_json"], []))
                 if set(outputs) != expected:
                     raise ContractError(f"expected outputs {sorted(expected)}, got {sorted(outputs)}")
+                brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+                try:
+                    deliverable_output_checks = validate_task_outputs(
+                        brief, outputs, self._project_dir(project_id)
+                    )
+                except MediaJobContractError as exc:
+                    raise ContractError(f"deliverable output contract failed: {exc}") from exc
                 registered: dict[str, Any] = {}
                 for name, payload in outputs.items():
                     if not isinstance(payload, dict) or not payload.get("path"):
@@ -927,11 +939,16 @@ class StudioEngine:
                     )
                     self._event(connection, project_id, "ARTIFACT", registered[name]["artifact_id"], "ARTIFACT_CREATED", registered[name])
                 result_payload = {"outputs": {key: value["artifact_id"] for key, value in registered.items()}, **(result or {})}
+                if deliverable_output_checks:
+                    result_payload["deliverable_output_checks"] = deliverable_output_checks
+                event_result = dict(result or {})
+                if deliverable_output_checks:
+                    event_result["deliverable_output_checks"] = deliverable_output_checks
                 connection.execute(
                     "UPDATE tasks SET status='COMPLETED',worker_id=NULL,claim_token=NULL,lease_until=NULL,result_json=?,error_json=NULL,updated_at=? WHERE project_id=? AND task_id=?",
                     (_json(result_payload), _iso(), project_id, task_id),
                 )
-                self._event(connection, project_id, "TASK", task_id, "TASK_COMPLETED", {"worker_id": worker_id, "outputs": result_payload["outputs"], "result": result or {}})
+                self._event(connection, project_id, "TASK", task_id, "TASK_COMPLETED", {"worker_id": worker_id, "outputs": result_payload["outputs"], "result": event_result})
                 self._refresh_in_tx(connection, project_id)
                 connection.commit()
                 return {"task_id": task_id, "status": "COMPLETED", "artifacts": registered, "result": result_payload}
@@ -1124,6 +1141,28 @@ class StudioEngine:
             if missing_evidence:
                 failures.append(f"release_evidence_missing:{missing_evidence}")
             required_artifacts = list(release_policy.get("required_artifact_names", []))
+            media_job_acceptance = None
+            try:
+                normalized_job = validate_media_job(brief)
+                deliverable_records: dict[str, Any] = {}
+                for item in normalized_job["deliverables"]:
+                    artifact_name = item["artifact_name"]
+                    row = self._artifact_by_name(connection, project_id, artifact_name)
+                    if row is not None:
+                        record = dict(row)
+                        record["path"] = str(self._project_dir(project_id) / record["relative_path"])
+                        record["metadata"] = _loads(record.get("metadata_json"), {})
+                        deliverable_records[artifact_name] = record
+                        required_artifacts.append(artifact_name)
+                    elif item["required"]:
+                        required_artifacts.append(artifact_name)
+                required_artifacts = list(dict.fromkeys(required_artifacts))
+                media_job_acceptance = validate_media_job_artifacts(
+                    normalized_job, deliverable_records, require_rights=require_rights
+                )
+                failures.extend(media_job_acceptance["failures"])
+            except MediaJobContractError as exc:
+                raise ContractError(f"media job release contract is invalid: {exc}") from exc
             for required_name in required_artifacts:
                 required_artifact = self._artifact_by_name(connection, project_id, required_name)
                 if required_artifact is None:
@@ -1143,8 +1182,10 @@ class StudioEngine:
                     source_path = self._project_dir(project_id) / source_asset["relative_path"]
                     if not source_path.is_file() or _sha256(source_path) != source_asset["sha256"]:
                         failures.append(f"required_source_asset_bytes_changed:{asset_name}")
+            failures = list(dict.fromkeys(failures))
             receipt = {
                 "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
+                "media_job_acceptance": media_job_acceptance,
                 "required_rubrics": effective_rubrics, "required_artifacts": required_artifacts,
                 "required_assets": required_assets, "evidence_refs": sorted(supplied_evidence),
                 "rights_status": artifact["rights_status"], "failures": failures,

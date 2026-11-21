@@ -107,7 +107,13 @@
       "typed_deliverables": true,
       "legacy_filename_deliverables_supported": true,
       "implicit_paid_actions": false,
-      "automatic_publication": false
+      "automatic_publication": false,
+      "stable_artifact_name_mapping": true,
+      "task_completion_checks_declared_deliverable_outputs": true,
+      "release_checks_all_required_deliverables": true,
+      "checks_real_bytes_and_media_type": true,
+      "rights_status_checked_for_each_required_deliverable": true,
+      "qualitative_review_remains_separate": true
     }
   },
   "release_status": "REBUILD_IN_PROGRESS",

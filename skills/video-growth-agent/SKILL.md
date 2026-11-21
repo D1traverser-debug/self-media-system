@@ -165,7 +165,7 @@ Use separate rubrics appropriate to the project. Common dimensions:
 
 Technical QA and editorial/craft QA are different. FFprobe can measure streams, duration, dimensions and frame rate; it cannot prove a film is compelling, funny, accurate, legally cleared or commercially effective.
 
-Bind every review to the exact artifact ID and SHA-256. Conflicting PASS and FAIL verdicts block release. Replaced bytes invalidate prior review authority. Run `release-check` on the exact final deliverable with required rubrics, rights and platform evidence. Release admission is not publication; upload or paid external actions require owner authorization.
+Bind every review to the exact artifact ID and SHA-256. Conflicting PASS and FAIL verdicts block release. Replaced bytes invalidate prior review authority. Run `release-check` on the exact final deliverable with required rubrics, rights and platform evidence. The release check must resolve every required deliverable from the brief by `artifact_name` and block if any required file is missing, stale, mistyped, empty or uncleared. Mechanical file/type checks do not replace FFprobe, visual, audio, editorial or independent human review; unresolved criteria remain open. Release admission is not publication; upload or paid external actions require owner authorization.
 
 ## 9. Failure, repair and recovery loop
 
