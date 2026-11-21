@@ -51,7 +51,7 @@ def handoff(project, b):
             "falsifier": "Actual owner result fails after the method",
             "rollback": "Revert branch and retain immutable evidence",
         },
-        "allowed_effects": ["PUBLIC_READ"],
+        "allowed_effects": ["PUBLIC_READ", "ISOLATED_LOCAL_WRITE"],
         "verification": {
             "owner_outcomes": ["Complete owner-requested result"],
             "independent_evidence": ["Real artifact digest and independent check"],
@@ -66,6 +66,7 @@ def task():
         "kind": "editorial_research", "executor": "agent",
         "depends_on": [], "inputs": [], "outputs": ["evidence"],
         "acceptance": {"evidence": "Sources and counterevidence required"},
+        "requirements": {"effect_class": "ISOLATED_LOCAL_WRITE"},
     }
 
 
@@ -148,6 +149,47 @@ def test_admission_is_idempotent(tmp_path):
     engine.admit_parent_handoff("case", r)
     assert engine.status("case")["event_count"] == before
 
+
+
+
+def test_claim_remains_stale_after_new_handoff_if_it_started_before_revision(tmp_path):
+    engine, b = studio(tmp_path)
+    engine.admit_parent_handoff("case", handoff("case", b))
+    packet = engine.claim_next("case", "worker")
+    newer = deepcopy(b)
+    newer["goal"] = "Changed owner goal"
+    engine.revise_brief("case", newer, reason="New goal", affected_task_ids=[])
+    engine.admit_parent_handoff("case", handoff("case", newer))
+    with pytest.raises(GateError, match="CLAIM_STALE"):
+        engine.claimed_packet("case", "research", "worker", packet["claim"]["claim_token"])
+    with pytest.raises(GateError, match="CLAIM_STALE"):
+        engine.heartbeat("case", "research", "worker", packet["claim"]["claim_token"])
+
+
+def test_unadmitted_effect_class_does_not_block_legal_peer(tmp_path):
+    engine = StudioEngine(tmp_path)
+    b = brief()
+    engine.create_project("case", "case", b)
+    forbidden = task()
+    forbidden["task_id"] = "external"
+    forbidden["outputs"] = ["external_output"]
+    forbidden["requirements"] = {"effect_class": "PRODUCTION_RELEASE"}
+    forbidden["priority"] = 100
+    permitted = task()
+    permitted["priority"] = 1
+    engine.add_tasks("case", [forbidden, permitted])
+    engine.admit_parent_handoff("case", handoff("case", b))
+    assert engine.claim_next("case", "worker")["task"]["task_id"] == "research"
+
+
+def test_unadmitted_effect_class_fails_closed(tmp_path):
+    engine, b = studio(tmp_path)
+    engine.admit_parent_handoff("case", handoff("case", b))
+    engine.revise_task("case", "research",
+                       {"requirements": {"effect_class": "PRODUCTION_RELEASE"}},
+                       reason="Probe forbidden effect")
+    with pytest.raises(GateError, match="EFFECT_SCOPE_UNADMITTED"):
+        engine.claim_next("case", "worker")
 
 def test_invalid_governed_brief_denied(tmp_path):
     engine = StudioEngine(tmp_path)
