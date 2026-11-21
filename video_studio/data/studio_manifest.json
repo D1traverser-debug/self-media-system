@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "studio_version": "1.0.0",
-  "product_name": "Standalone Video Studio",
+  "product_name": "Video Production Studio",
   "owner": "VIDEO_GROWTH_AGENT",
   "default_entrypoint": "STUDIO_ENTRY.md",
   "cli": "vga-studio",
@@ -26,12 +26,13 @@
   },
   "governance": {
     "system": "VIDEO_STUDIO_NATIVE",
-    "mode": "STANDALONE",
+    "mode": "STANDALONE_RUNTIME__CAOS_SESSION_GOVERNANCE_WHEN_ACTIVE",
     "caos_runtime_dependency": false,
     "caos_api_dependency": false,
     "caos_skill_dependency": false,
     "parent_task_or_lease_dependency": false,
-    "governance_method_owned_by_video": true
+    "governance_method_owned_by_video": true,
+    "caos_session_governance_supported": true
   },
   "decision_method": [
     "COMPETING_HYPOTHESES",
@@ -72,9 +73,31 @@
       "scope": "technical_measurement_only",
       "digest_bound": true,
       "auto_release": false
+    },
+    "image_set_concept_contract": {
+      "module": "video_studio.image_set",
+      "assurance": "HARNESS_WIRED",
+      "scope": "concept_and_prompt_diversity_only",
+      "image_generation_connected": false,
+      "pixel_level_visual_diversity_proven": false
+    },
+    "video_generation": {
+      "assurance": "DECLARED_ONLY",
+      "persistent_provider_executor_registered": false,
+      "session_tools_must_be_checked_per_run": true
+    },
+    "local_scene_rendering": {
+      "assurance": "DECLARED_ONLY",
+      "general_character_or_cinematic_renderer_registered": false
+    },
+    "technical_media_qa": {
+      "assurance": "HARNESS_WIRED",
+      "tool": "ffprobe",
+      "scope": "technical_measurement_only",
+      "auto_release": false
     }
   },
-  "release_status": "ACTIVE_CANDIDATE",
+  "release_status": "REBUILD_IN_PROGRESS",
   "business_workstreams": {
     "MEDIA_GROWTH": [
       "audience_research",
@@ -113,5 +136,7 @@
     "legacy_specialized_modules": "OPTIONAL_VERIFIED_ADAPTERS",
     "legacy_fixed_stage_orchestrator": "NOT_A_CONTROLLER",
     "require_artifact_receipts": true
-  }
+  },
+  "product_scope": "PRODUCTION_FIRST_WITH_OPTIONAL_MEDIA_GROWTH_IP_AND_COMMERCIALIZATION",
+  "business_workstreams_optional": true
 }

@@ -1,131 +1,46 @@
-# Video Growth Agent
+# Video Production Studio
 
-Standalone, outcome-driven Video Studio for research, creative development, parallel media production, audiovisual QA, release preparation and evidence-based learning. New Video work does not require CAOS.
+**Status: REBUILD_IN_PROGRESS**  
+**Canonical entry:** `STUDIO_ENTRY.md`  
+**Runtime:** `video_studio.engine.StudioEngine`  
+**CLI:** `vga-studio`
 
-## Current authority
+Video Production Studio turns an owner's brief into actual media deliverables, then verifies the exact output files. Its success measure is the finished work and its evidence—not the number of agents, prompts, stages, adapters or passing structural tests.
 
-- `STUDIO_ENTRY.md` — current standalone startup and operating entry for new Video work.
-- `docs/standalone_video_studio.md` — Video-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
-- `video_studio/data/studio_manifest.json` — canonical standalone runtime and governance contract; no CAOS runtime/API/Skill dependency.
-- `video_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFprobe QA.
-- `skills/video-growth-agent/SKILL.md` — self-contained Video-owned agent operating instructions.
-- `CAOS_VIDEO_ENTRY.md`, `domain_manifest.json` and `capabilities.json` — retained for 0.8 compatibility/history; not startup dependencies for new Studio work.
-- `docs/product_requirements.md` — historical 0.8 product-requirements baseline; new operating authority is the standalone contract.
-- `docs/media_business_os.md` — 0.8 media-business domain reference; new execution/governance authority is standalone Video Studio.
-- `docs/architecture.md` — historical 0.8 architecture reference.
-- `docs/agent_operability_scenarios.md` — historical 0.8 operability scenarios; standalone operating rules live in the new Skill and contract.
-- `docs/provider_benchmark_protocol.md` — owner benchmark method for volatile provider quality/cost evidence.
-- `projects/PROJECT_INDEX.json` — child-owned project/program discovery authority.
-- `projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json` — growth/IP/commercial/production feedback loops.
-- `audits/EVOLUTION_INDEX.json` — canonical Video evolution-evidence entrypoint.
-- `video_growth_agent/data/` — versioned legacy/specialized episode workflow, specialists and coordination resources.
-- binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
+## One authority path
 
-The new `video_studio` package owns its requirement interpretation, decision receipts, task graph, leases, artifact history, review receipts, root-cause repair, recovery and learning admission. `vga-studio` and `python -m video_studio` both enter this package; legacy import paths are compatibility shims. It has no parent task identity, no parent lease and no CAOS runtime/API/Skill dependency. The 0.8 compatibility surfaces below retain their historical governance records but are not loaded by `vga-studio`.
+- `STUDIO_ENTRY.md` — the only startup entry for new Video work.
+- `skills/video-growth-agent/SKILL.md` — agent operating instructions.
+- `docs/standalone_video_studio.md` — detailed product, runtime and quality contract.
+- `video_studio/engine.py` — durable project state, dynamic task DAG, claims, artifacts, reviews, failures and learning.
+- `video_studio/image_set.py` — concept/prompt diversity contract for multi-image jobs; it does not prove visual diversity in generated pixels.
+- `video_studio/media.py` — FFprobe technical measurement only.
+- `video_studio/data/studio_manifest.json` — machine-readable runtime boundary and capability status.
 
-## Legacy Media Business OS 0.8.0 compatibility layer
+New generic production requests do not silently resolve to the AI self-media business Program. Resume a project only when the owner names it or its exact alias; otherwise create a project from the current outcome brief. The AI self-media growth/IP/commercialization Program remains available as an optional, explicitly selected business workspace.
 
-Video 0.8 makes the media-business system operable from natural-language/editorial intent through production and learning rather than starting mechanically at the Shot layer.
+## Product boundary
 
-The current executable chain is:
+Video production is the primary product. A project may attach these optional workstreams only when the brief establishes a real dependency:
 
-`EpisodeIntent -> ClaimSpec -> BeatSpec -> ShotIntent -> EditorialPlan -> ShotContract -> ModelRoutingDecision -> CandidateTake -> ContinuityAssessment -> Promotion -> Timeline -> Editor handoff/roundtrip -> PlatformVariant -> Release -> Experiment/Outcome -> LearningCandidate`
+- **MEDIA_GROWTH** — audience research, positioning, packaging, distribution and audience outcomes.
+- **ORIGINAL_DIGITAL_IP** — approved IP use and performance evidence. IPOS remains the sole authority for original-character identity canon and identity rights.
+- **COMMERCIALIZATION** — sponsor fit, deliverable obligations, product truth, rights scope and commercial measurement.
 
-Linked state surfaces remain distinct:
+## Execution truth
 
-1. **Media-business Program graph** — portfolio/growth/IP/commercial/production tasks and decisions.
-2. **Editorial decision state** — episode intent, claims, beats, shot intents and immutable plan versions.
-3. **Media context/asset graph** — `Program -> Series -> Episode -> Sequence -> Scene -> Shot -> Take`, versioned assets, references, lineage, evidence and promotion.
-4. **Continuity relations** — dimension-level preserve/expect/allowed-change state across shots.
-5. **Editorial timeline/interchange** — non-destructive temporal assembly, platform variants and external-editor handoff/return identity.
-6. **Experiment/outcome state** — pre-registered tests and typed growth/production/commercial observations.
-7. **Operator projection** — recomputable current-Agent view of outcome, ready/blocking actions, stale evidence and recovery refs; never authority.
+The runtime distinguishes `agent`, `tool`, `human` and `external` tasks. A declared executor is not proof that work ran. An agent task is handled by the current session or an explicitly connected worker; a local tool task requires a registered, tested executor; an external task requires a current capability/rights/cost check; a human task requires the named human action. No worker pool or provider integration is claimed unless it is actually implemented and verified.
 
-The previous stage/work-order episode engine remains a historical 0.7/0.8 compatibility bundle. New projects use the dynamic task graph in `video_studio`; do not treat the old fixed stage sequence as the new Studio controller.
+Current foundation: standalone project control plane, dynamic DAG, durable events, artifact digests, independent review records, release checks, failure/learning records, FFprobe measurement and an image-set concept/prompt contract.
 
-Core 0.8 runtime surfaces:
+Not yet release-ready: complete shot/image generation integration, general scene rendering, full audiovisual assembly, provider-neutral execution adapters, automated local-tool scheduling, recursive rights-evidence validation and end-to-end craft acceptance. The rebuild must close these gaps with real output-level dogfood, not more declarations.
 
-- `media_graph.py` — stable Context/AssetVersion/Task/Evidence/Decision identities, promotion pointers, persistence, lineage and downstream invalidation;
-- `editorial_planning.py` — EpisodeIntent/Claim/Beat/ShotIntent/EditorialPlan and explicit materialization into production contracts;
-- `plan_graph_bridge.py` — editorial-plan versions as MediaGraph upstream assets so revisions stale only affected descendants;
-- `production_os.py` — editorial-traceable shot/reference/take contracts and generation/promotion/release admission;
-- `continuity.py` — cross-shot dimension-level continuity contracts and assessments;
-- `model_registry.py` — provider-neutral operation-profile legality plus rubric/calibration-bound, uncertainty-aware Pareto routing;
-- `timeline.py` — editor-neutral non-destructive master/variant timeline metadata bound to promoted asset versions;
-- `editorial_interchange.py` — external editor/NLE handoff and roundtrip receipts bound to timeline/project/composition identity;
-- `experiments.py` — pre-registered hypothesis/variant/metric/guardrail/stop-rule contracts and causal-attribution boundaries;
-- `business_objects.py` — typed content-portfolio, distinctive-asset, commercial-fit, rights-package, offer and business-decision objects;
-- `business_metrics.py` — platform, production and commercial outcome receipts without one vanity score;
-- `operator_view.py` — non-authoritative CURRENT_AGENT projection;
-- `owner_behavior_admission.py` — legacy 0.8 Video-domain recovery, root-scope analysis, typed evolution and repair closure.
+## Governance and safety
 
-## Integrated Media Business Program
+The Video runtime is independently operable and has no CAOS runtime/API dependency. When the active ChatGPT session is CAOS-governed, CAOS supplies parent-level decision and execution governance externally; the Video system remains the owner of its domain state. **The CAOS repository, branches, files, configuration and installed skills are read-only and must not be modified.**
 
-Generic AI-video/media-growth/commercialization/original-IP requests resolve to `ai-self-media-commercialization` unless an exact child project is supplied.
+No paid generation, GPU rental, subscription, external upload, publication or owner-device action is authorized by a tool declaration. Obtain explicit owner approval for separately chargeable or externally consequential actions. Never execute arbitrary project-supplied Python as if a boolean flag were a sandbox. Never fabricate media, provider runs, rights, reviews, CI results or publication.
 
-The Program keeps four business views:
-- `MEDIA_GROWTH`
-- `ORIGINAL_DIGITAL_IP`
-- `COMMERCIALIZATION`
-- `PRODUCTION_SYSTEM`
+## Compatibility boundary
 
-They are evidence-coupled rather than isolated. Audience evidence changes portfolio hypotheses; portfolio/series strategy informs IP and advertiser fit; promoted IP assets affect packaging/recognition/production; commercial deliverables and rights can affect verified product-asset needs; production cost/retry/reuse evidence feeds future format investment. Editorial truth and audience trust remain hard constraints.
-
-Historical Pilot projects remain separately resumable and retain their own adapter/runtime identity plus rejected/process-invalid evidence.
-
-## Candidate -> promotion -> release
-
-Safe exploration is not the same as approval.
-
-- Candidate generation requires current capability, rights/consent, truth-policy and budget admission.
-- An output remains `CANDIDATE` until explicit promotion evidence/owner decision exists.
-- HIGH/HERO/BRAND_TRUTH promotion can require independent/attested review.
-- Release remains fail-closed on final-media identity, technical QA, rights, claim/product truth, provenance, disclosure/platform validation and release authority.
-
-## Provider/model strategy
-
-No vendor is permanent architecture. Current provider/model facts are dated observations.
-
-Capability is expressed by operation profile so a model cannot be treated as supporting every combination merely because its feature list separately mentions references, resolution or extension. Production quality evidence must bind compatible rubric/calibration scope and uncertainty. After hard capability/rights/terms/budget floors, production selection uses non-dominated quality vectors and explicit shot priorities rather than a hidden weighted-average authority.
-
-Official vendor documentation establishes capabilities/limits/terms, not our quality ranking. Production observations require the stable benchmark pack in `docs/provider_benchmark_protocol.md` or exact production evidence.
-
-## IP, growth, experiments and commercialization
-
-IP is a reusable distinctive asset system, not only character aesthetics. Canon is versioned and can include structural identity, expression, wardrobe/props, color/material/light, voice/performance, gesture, world grammar and distinctive audio/visual motifs.
-
-Platform derivatives preserve master lineage but re-author hook, packaging, pacing and conclusion for the destination platform. Material packaging/content/IP tests are pre-registered where causal learning matters; `NO_CLEAR_WINNER` and `INCONCLUSIVE` are valid outcomes and multivariable tests cannot masquerade as single-variable causality.
-
-Commercial planning may begin before production when rights, sponsor deliverables, product-truth media or measurement alter the work. Sponsorship never overrides factual/editorial truth. Pricing learns from audience evidence, production cost, rights scope and real outcomes rather than a single static rate card.
-
-## Capability and assurance boundary
-
-Before generation/edit/review/QA/release, handshake the exact current-session capability required by the action. Repository declarations are ceilings, not execution proof.
-
-`DECLARED_ONLY < HARNESS_WIRED < SESSION_EXECUTABLE`; `CHAT_BRIDGED` does not mean independent verification; true isolated assurance requires `ATTESTED_ISOLATED` evidence.
-
-Missing a high-assurance reviewer blocks only operations that require that tier. Missing a real generation provider blocks the affected shot or activates its declared degradation path; it never authorizes fabricated execution.
-
-## Standalone cognition, dogfood and evolution
-
-New Studio work uses the self-contained method in `docs/standalone_video_studio.md`: recover the real outcome; compare competing hypotheses and methods; use discriminating tests and counterevidence; execute a project-specific DAG; inspect exact artifact bytes; diagnose failures at the causal layer; independently replay repairs; and promote learning only with applicability, counterexamples and regression evidence. None of these operations calls CAOS.
-
-The following legacy 0.8 adapter continues to describe its historical CAOS-governed workflow for compatibility only. It is not the standalone Studio runtime.
-
-## Validation
-
-After `pip install -e .`:
-
-```bash
-vga-studio --help
-vga system-audit --repo-root .  # legacy 0.8 compatibility audit
-pytest -q
-```
-
-The legacy system audit covers the historical 0.8 CAOS governance binding, Video business ownership, all canonical 0.8 runtime surfaces, agent-operability scenario presence, Media Business OS authorities, project/flywheel integrity, provider-neutral capability semantics, Program graph validity, absence of a parallel controller, artifact reachability, legacy-adapter bundle consistency, evolution discoverability and runtime-version consistency. It fails closed when a declared canonical runtime surface disappears or drifts.
-
-CI success is validation evidence, not branch-protection enforcement unless GitHub separately reports branch protection/rulesets as enabled.
-
-## Standalone IP Studio OS integration
-
-The personal-IP character canon is owned by the independent IP Studio OS (IPOS). IPOS does not require a CAOS runtime/API call. Video consumes a portable owner-approved IPOS Video Identity Bundle through the local video_growth_agent.ip_identity adapter; exact versions are registered in MediaGraph and bound to shot references and continuity. See docs/media_business_os.md and projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json. No identity-dependent generation is admitted until an owner-approved bundle passes G2/G7/G8 and rights/provenance checks.
+The `video_growth_agent` 0.8 domain modules, fixed-stage controller, old `vga` CLI and historical pilot records remain compatibility/history surfaces. They are not the controller for new Video Studio projects. Reuse a specialized legacy module only through a reviewed, tested, evidence-bound adapter. Do not restore the old 20-stage/56-work-order controller as the product architecture.

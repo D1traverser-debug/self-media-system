@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "authority": "VIDEO_GROWTH_AGENT",
   "identity_rule": "VIDEO_BUSINESS_PROJECT_PROGRAM_WORKSTREAM_AND_SUBTASK_IDENTITIES_ARE_VIDEO_OWNED__CAOS_GOVERNANCE_CONTEXT_HAS_NO_VIDEO_TASK_IDENTITY",
-  "default_project_id": "ai-self-media-commercialization",
+  "default_project_id": null,
   "projects": [
     {
       "project_id": "ai-self-media-commercialization",
       "kind": "INTEGRATED_MEDIA_GROWTH_IP_COMMERCIALIZATION_PROGRAM",
       "status": "ACTIVE",
-      "default_for_generic_domain_intent": true,
+      "default_for_generic_domain_intent": false,
       "aliases": [
         "AI自媒体视频商业化与原创数字IP",
         "AI自媒体视频商业化",
@@ -23,7 +23,8 @@
         "projects/ai-self-media-commercialization/PROGRAM_STATE.json",
         "projects/ai-self-media-commercialization/CURRENT_PROGRESS.md"
       ],
-      "resume_ref": "projects/ai-self-media-commercialization/RESUME_ENTRY.md"
+      "resume_ref": "projects/ai-self-media-commercialization/RESUME_ENTRY.md",
+      "scope": "OPTIONAL_EXPLICITLY_SELECTED_MEDIA_BUSINESS_PROGRAM"
     },
     {
       "project_id": "pilot-002",
@@ -56,16 +57,18 @@
     }
   ],
   "resolution_rules": [
-    "Exact project_id or exact legacy alias wins over generic intent.",
-    "Generic Video/AI-video/growth/commercialization/original-IP intent without another exact project reference resolves to default_project_id.",
-    "Repository search rank, newest file and chat memory do not select a project.",
-    "CAOS governance does not recreate these Video project identities as parent tasks."
+    "Exact project_id or exact owner-supplied alias resumes that project.",
+    "The ai-self-media-commercialization Program is selected only by its exact project ID/name/alias or an explicit instruction to continue that Program.",
+    "Generic Video production intent creates a new project-specific media job from the current outcome brief; there is no generic default project.",
+    "If a request is ambiguous between production and an optional business workstream, preserve the production goal and ask only the one material clarification.",
+    "Repository search rank, newest file and stale chat memory never select a project.",
+    "CAOS session governance is external to Video project/task identity; it does not create a Video parent task or runtime dependency."
   ],
-  "updated_at": "2026-11-14T16:20:00+08:00",
+  "updated_at": "2026-11-21T22:45:00+08:00",
   "governance": {
     "system": "CAOS",
-    "mode": "CHAT_GOVERNED_EXTERNAL",
-    "entrypoint": "CAOS_VIDEO_ENTRY.md",
+    "mode": "CAOS_SESSION_GOVERNED_WHEN_ACTIVE",
+    "entrypoint": "STUDIO_ENTRY.md",
     "runtime_dependency": false,
     "source_repository": "D1traverser-debug/cognition-agent-os",
     "source_mutation": "FORBIDDEN"

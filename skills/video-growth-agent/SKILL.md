@@ -15,7 +15,7 @@ description: Standalone outcome-driven media studio for research, creative devel
 
 **Operating contract:** `docs/standalone_video_studio.md`.
 
-This Skill owns its complete Video-domain method and workflow. It must not rely on CAOS, a parent agent, hidden chat memory, a parent task ID, a parent lease, a governance API, or a second orchestration controller. The old `vga` / 0.8 system is a compatibility library only. New Video work enters through `video_studio`.
+This Skill owns the durable Video-domain requirements, task state, artifacts, production execution, review, failure recovery and learning. The Video runtime has no CAOS runtime/API dependency, parent task ID or parent lease. When the active ChatGPT session is CAOS-governed, CAOS supplies parent-level governance externally; this Skill must not bypass that governance or modify CAOS. Runtime independence is not governance independence. The old `vga` / 0.8 system is a compatibility library only. New Video work enters through `video_studio`.
 
 ## 1. Startup and recovery
 
@@ -49,18 +49,20 @@ Keep hard requirements separate from preferences. When trade-offs are necessary,
 
 Use `vga-studio init` for a new project. Use `revise-brief` for outcome changes and `revise-task` for contract changes. Always supply the reason. Let the engine invalidate the changed node and affected descendants; never reuse stale downstream work as current.
 
-## 2A. Video business workstreams
+## 2A. Product boundary and optional workstreams
 
-Treat Video Growth Agent as a coupled media-business system, not merely a video-rendering pipeline. Determine which workstream(s) the owner's goal actually engages:
+Video production is the primary product outcome. A project may be a short, long-form film, animation, explainer, documentary, engineering proof, news × fiction × meme piece, product film, tutorial, trailer, social asset set or a hybrid/custom form. Do not force every request through a business-program workflow or one visual template.
 
-- **MEDIA_GROWTH:** audience/problem evidence, demand, platform positioning, content portfolio, series hypotheses, hooks/packaging, distribution and audience outcomes.
-- **ORIGINAL_DIGITAL_IP:** video-side use and recognition of approved original IP, performance evidence, repeatable asset usage and licensing-use value. IPOS alone owns character identity canon, likeness and identity rights.
+The following workstreams remain available as optional, evidence-coupled contexts. Include them only when the owner brief creates a real dependency:
+
+- **MEDIA_GROWTH:** audience/problem evidence, positioning, content portfolio, series hypotheses, hooks, platform packaging, distribution and audience outcomes.
+- **ORIGINAL_DIGITAL_IP:** use and performance of approved original IP. IPOS alone owns identity canon, likeness and identity rights.
 - **COMMERCIALIZATION:** sponsor/category fit, offer design, deliverable obligations, product truth, rights scope, disclosure and commercial measurement.
-- **PRODUCTION_SYSTEM:** research, editorial intent, claims, story/shot design, assets, generation, compositing, editing, sound, technical/craft QA and release.
+- **PRODUCTION_SYSTEM:** research, editorial intent, story/shot design, assets, generation, compositing, editing, sound, QA and release.
 
-Connect these workstreams only through explicit evidence and decisions. Audience evidence can revise portfolio hypotheses; IP performance can revise packaging or licensing strategy; sponsor obligations can change format and production requirements; production cost, failure, reuse and quality evidence can change future investment. Keep separate objective evidence for trust/truth, usefulness/story, retention, IP recognition, audiovisual craft, qualified growth, commercial value, rights, cost and learning. Never collapse them into a single vanity score.
+Generic Video production intent must not silently resolve to `ai-self-media-commercialization`. Resume that Program only when the owner names it or an exact alias is present. Otherwise create a project-specific media job from the current outcome brief. No generic default project is selected by repository search rank, file recency or stale chat memory.
 
-The `video_studio` engine is the control plane for durable work, not a claim that all business-domain models have been rewritten. When Program/Series/Episode/Shot/Timeline, continuity, provider routing, business metrics or IP identity semantics are required, use the corresponding Video-owned specialized module only through an explicit, verified adapter. Register resulting state and files as versioned Studio artifacts. Never restore the old fixed-stage `StudioOrchestrator` as the new controller.
+Connect optional workstreams only through explicit evidence and decisions. Audience evidence may revise packaging; approved IP evidence may affect asset use; sponsor obligations may change production requirements; production cost/reuse evidence may inform future investment. Keep truth, craft, rights, audience value and commercial outcomes as separate dimensions rather than collapsing them into one score.
 
 ## 3. Research and evidence
 
@@ -114,11 +116,22 @@ Before expensive production, prototype the highest-risk creative assumption with
 
 ## 6. Production method and tool choice
 
-Choose the medium per scene, beat or shot. Possible methods include original footage, authorized archive, image generation, video generation, image-to-video, 3D, procedural graphics, typography, diagrams, screen capture, compositing, practical photography, NLE editing, narration, music, sound effects and deliberate silence. Hybrid production is normal.
+Choose the medium per scene, beat or shot. Possible methods include original footage, authorized archive, image generation, video generation, image-to-video, 2D/2.5D, 3D, procedural animation, typography, diagrams, screen capture, compositing, practical photography, NLE editing, narration, music, sound effects and deliberate silence. Hybrid production is normal.
 
-Select a tool only after confirming that the exact operation is available in the current session/account and that its input, output, resolution, duration, reference, extension, editing and rights constraints fit the task. Feature-list mentions are not execution proof. Prefer the simplest admissible method that meets the target quality; do not default to the most expensive model.
+Before dispatch, identify the actual executor class:
 
-If a required tool is unavailable, record the blocked capability and compare an acceptable alternative. Never claim a generation, edit, render, upload or review occurred unless the exact output exists and can be inspected. Never fabricate provider run IDs, file paths, metadata, citations or review evidence.
+- `agent`: current agent session or an explicitly verified worker; do not claim automatic worker spawning.
+- `tool`: a deterministic local operation registered in the Video runtime and covered by tests.
+- `external`: a connected provider/service whose exact operation, input roles, output constraints, availability, terms, rights and price have been checked for this run.
+- `human`: owner decision or named human action/review.
+
+Session tools are not persistent repository integrations. Verify that a tool is available in the current session and that the exact operation fits the task. Record the returned job/output identity and import the actual media bytes into the project. Feature-list mentions, a model name or a prompt pack are not execution proof.
+
+Prefer the simplest admissible method that meets the target craft floor; do not default to the most expensive model or accept a cheap route that visibly fails the brief. No paid generation, GPU rental, subscription, external upload, publication or owner-device action is authorized by a capability declaration. Obtain explicit owner approval before such actions.
+
+If a required capability is unavailable, mark only the affected task as blocked/waiting and compare viable alternatives. Never claim generation, editing, rendering, upload or review unless the exact output exists and can be inspected. Never fabricate provider run IDs, file paths, metadata, citations or review evidence.
+
+Do not execute arbitrary project-supplied Python as a production renderer. A `trusted_code_execution` boolean or isolated Python mode is not an OS/network sandbox. Use declarative, reviewed render specifications or a genuinely isolated execution environment with explicit owner authorization.
 
 ## 7. Worker execution and artifact custody
 
@@ -126,6 +139,7 @@ Use `vga-studio claim` to atomically claim ready work. Respect the lease and hea
 
 Before marking work complete:
 
+- use a unique run/revision output directory; never overwrite a previous candidate or reuse a path because an attempt counter reset;
 - create every declared output as a real file inside the project workspace;
 - verify that each file opens and is the expected media/document type;
 - provide the exact output mapping and any result metadata;

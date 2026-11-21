@@ -8,37 +8,32 @@ Manifest: `video_studio/data/studio_manifest.json`
 
 ## 1. Product outcome
 
-Video Studio turns an owner's media goal into finished media and release materials. Its primary success oracle is the delivered work, not the presence of roles, stages, prompts, diagrams, task counts or passing tests.
+Video Production Studio turns an owner's media goal into the exact requested media package and independently checks the resulting bytes. The primary success oracle is the delivered work, not the presence of roles, stages, prompts, diagrams, task counts, adapters or passing tests.
 
-Supported work may include cinematic explainers, technology/business documentaries, engineering demonstrations, news × fictional-video satire, meme and entertainment edits, product/brand films, animation, trailers, tutorials, shorts, long-form videos, platform-native derivatives and mixed-media work.
+Supported work may include cinematic explainers, technology/business documentaries, engineering demonstrations, news × fictional-video satire, meme and entertainment edits, product/brand films, animation, trailers, tutorials, shorts, long-form videos, social image sets, platform-native derivatives and mixed-media work. No single visual style, runtime, aspect ratio, duration, model, editor or production method is universal.
 
-No single visual style, runtime, aspect ratio, duration, model, editor or production method is universal.
+## 1.1 Optional business-domain scope
 
-## 1.1 Business-domain scope
+Video production is the primary product. A project may attach these workstreams only when the owner's brief establishes a real dependency:
 
-The Studio is the standalone control plane for the complete Video Growth Agent domain, not only a clip renderer. A project graph may cover one workstream or connect several:
+- **MEDIA_GROWTH** — audience/problem research, demand signals, platform strategy, portfolio/series hypotheses, packaging, distribution and audience outcomes.
+- **ORIGINAL_DIGITAL_IP** — video-side use and performance of approved original IP. IPOS remains the sole authority for character identity canon, likeness and identity rights.
+- **COMMERCIALIZATION** — sponsor/category fit, offer hypotheses, deliverable obligations, product truth, rights scope, disclosure and commercial measurement.
 
-- **MEDIA_GROWTH** — audience/problem research, demand signals, platform strategy, portfolio and series hypotheses, packaging, distribution, retention and audience outcomes.
-- **ORIGINAL_DIGITAL_IP** — video-side use of approved IP, recognition/performance evidence, character/asset usage strategy and licensing-use value. Canon, likeness and identity rights remain owned by IPOS.
-- **COMMERCIALIZATION** — sponsor/category fit, offer hypotheses, deliverable obligations, product-truth requirements, rights scope, measurement and commercial outcomes.
-- **PRODUCTION_SYSTEM** — editorial research and claims, story/shot design, assets/takes, generation, compositing, edit, sound, QA and release.
+Cross-workstream decisions must be explicit and evidence-bound. These workstreams must not become mandatory gates for an unrelated video. The AI self-media commercialization Program is an optional business workspace, not the default destination for generic video-production requests. Exact project IDs/aliases resume existing work; otherwise create a project-specific media job.
 
-Cross-workstream decisions must be explicit. Audience evidence may change a series hypothesis; IP performance may change packaging or licensing strategy; sponsor obligations may change format and product-asset requirements; production cost, failure and reuse evidence may change future portfolio allocation. Editorial truth, rights and owner authority remain hard constraints. Do not optimize one proxy such as views, CTR, cinematic quality, AI-video percentage or lowest credit cost.
+## 2. Authority and governance boundary
 
-The `video_studio` engine supplies the durable project control plane: briefs, dynamic task DAGs, leases, artifacts, decisions, reviews, failures and learning receipts. It does **not** silently recreate every legacy domain object. When Program/Series/Episode/Shot/Timeline, continuity, provider routing, business metrics or IP identity semantics are required, reuse the corresponding Video-owned domain module through an explicit, tested adapter and register its outputs as versioned Studio artifacts. Do not use the legacy fixed-stage `StudioOrchestrator` as the new controller. Existing specialized modules are optional capability libraries, not a hidden parent workflow.
-
-## 2. Authority and independence
-
-- **Owner request and corrections** define the goal and constraints.
-- **Project brief** is the current executable outcome contract. Revisions are recorded in the append-only event history with old/new digests and reason.
-- **Decision receipts** explain material choices and their falsifiers; they do not override owner requirements.
-- **Task graph** owns execution dependencies and task state.
+- **Owner request and corrections** define the outcome and hard constraints.
+- **Project brief** is the current executable outcome contract. Revisions are recorded with old/new digests and a reason.
+- **Task graph** owns real execution dependencies and task state.
 - **Artifact records** own exact file identity, digest, version, rights and producer lineage.
 - **Review records** own artifact-bound evaluation evidence.
-- **Event log** is append-only operational history.
-- **IPOS** remains the sole authority for original character/identity canon.
+- **Event history** is append-only operational history.
+- **IPOS** remains the sole authority for original character/identity canon and identity rights.
+- **CAOS**, when the active ChatGPT session is CAOS-governed, supplies parent-level decision, execution and independent-acceptance governance externally.
 
-The new runtime is standalone. It has no CAOS imports, network calls, API, parent task identity, parent lease, hidden chat-memory dependency or external governance callback. The old 0.8 product architecture, `vga` CLI, stage workflow, and CAOS integration notes remain compatibility/history surfaces; the new `vga-studio` runtime does not load them.
+The Video runtime has no CAOS runtime/API dependency, parent task identity or parent lease. This is runtime independence, not permission to bypass active CAOS session governance. Never modify the CAOS repository, branches, files, configuration, pull requests or installed skills during Video work.
 
 ## 3. Goal recovery and requirement governance
 
@@ -104,13 +99,15 @@ Typical parallel lanes may include:
 
 Their outputs converge only where there is a real decision or production dependency.
 
-## 6. Production strategy
+## 6. Production strategy and capability boundary
 
-Choose the medium per story beat or shot, not per project. Admissible methods may include real footage, licensed archive, image generation, video generation, image-to-video, 3D, procedural animation, kinetic typography, diagrams, code-driven graphics, compositing, practical photography, screen capture, NLE editing, generated voice, human narration, music, sound effects and deliberate silence.
+Choose the medium per story beat or shot, not per project. Admissible methods may include real footage, licensed archive, image generation, video generation, image-to-video, 2D/2.5D motion, 3D, procedural animation, kinetic typography, diagrams, code-driven graphics, compositing, practical photography, screen capture, NLE editing, generated voice, human narration, music, sound effects and deliberate silence.
 
-A hybrid film may use different methods for different shots. The most expensive engine is not automatically best; the cheapest engine is not acceptable if it misses the required craft ceiling. Tool feature declarations are not proof of the exact operation combination, current availability, rights or output quality.
+Classify every task as `agent`, `tool`, `human` or `external`. A task declaration is not an installed capability. The agent class is executed by the current agent session or an explicitly connected worker; the local CLI does not auto-spawn LLM workers. Tool tasks require a registered and tested local operation. External tasks require a current capability handshake covering exact input roles, output limits, availability, rights/terms and price. Human tasks require the named human action or review.
 
-For high-risk creative assumptions, build a 3–12 second near-final sample or a small set of hero shots before full production. The sample should represent the final visual language, camera/motion, material quality, typography, sound and transition where relevant. A technical proof that a tool runs is not a quality proof.
+Session tools are not persistent repository integrations. If a current ChatGPT session provides image/video/audio generation or editing tools, verify the exact operation for that run, use them only within the owner's cost/rights authorization, and import the actual outputs into the project. Do not infer current availability from a stored model list or vendor feature page.
+
+The cheapest route is not acceptable if it fails the craft floor. Prototype the highest-risk assumption with a 3–12 second near-final sample or a small set of hero shots before full production. Do not execute arbitrary project-supplied Python as a renderer unless a genuine OS/network sandbox and explicit owner authorization exist. A boolean configuration flag is not a sandbox.
 
 ## 7. Execution, leases and recovery
 
@@ -200,8 +197,11 @@ vga-studio --root ./studio-work events episode-001
 
 The existing `vga` CLI and 0.8 Media Business OS remain available for historical Pilot recovery and proven specialized capabilities. They are not the new Studio's controller or task graph. Reuse old modules only through explicit adapters after verifying their current behavior, compatibility, real outputs and failure cases. Do not migrate old fixed stage order or role assignments merely because they exist.
 
-## 14. Known limits of this first standalone runtime
+## 14. Current implementation limits and release status
 
-The core supplies durable project governance, DAG scheduling, worker leases, artifact identity, review evidence, failure records and learning admission. It does not itself contain a universal LLM, image/video generation model, NLE, music library or paid provider credential. Nor does the core itself implement every business-domain object; the Skill coordinates those domain capabilities through explicit adapters and evidence-bound artifacts. The active worker must use the actual available media tools/provider adapters, report capability gaps honestly, and return files into the project workspace. The absence of a provider blocks only the affected operation or triggers an explicitly accepted degradation path; it never fabricates media output.
+The repository is in `REBUILD_IN_PROGRESS`. The standalone control plane provides durable briefs, dynamic DAGs, atomic claims, leases, immutable artifact digests, review records, release checks, failure records and learning receipts. The built-in FFprobe path provides technical measurement only. The new image-set module validates concept/prompt diversity and compiles independent prompts; it does not generate images or prove visual diversity in the resulting pixels.
 
-This boundary is intentional: the orchestration core remains provider-neutral and independently operable instead of pretending a generic task scheduler can create cinematic video by itself.
+The current mainline does not yet provide a complete registered image/video/audio provider executor, general scene/character renderer, integrated timeline/audio production pipeline, automated local-tool worker pool, recursive rights-evidence lineage validation or full output-level end-to-end acceptance. Connected ChatGPT tools, when available, are session capabilities—not persistent repository integrations. The system must report these gaps honestly and must not claim production readiness until real image-set and video dogfood deliverables pass the acceptance gates in the rebuild decision record.
+
+The 0.8 Media Business OS and specialized domain modules remain compatibility/capability sources only. Reuse them selectively through reviewed, tested, evidence-bound adapters; do not restore the legacy fixed-stage controller as the new execution architecture.
+
