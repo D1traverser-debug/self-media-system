@@ -17,6 +17,12 @@ description: Standalone outcome-driven media studio for research, creative devel
 
 This Skill owns its complete Video-domain method and workflow. It must not rely on CAOS, a parent agent, hidden chat memory, a parent task ID, a parent lease, a governance API, or a second orchestration controller. The old `vga` / 0.8 system is a compatibility library only. New Video work enters through `video_studio`.
 
+## CAOS-selected interaction versus standalone runtime
+
+The statement that Video Studio does not import or require CAOS refers to its **runtime deployment**, not to the owner's explicit selection of CAOS cognition governance in a ChatGPT conversation. When that selected conversation enters the Video child, CAOS retains goal/correction recovery, research, decision challenge, authorized-effect judgment and owner-level independent acceptance. Before any Video task claim, create a `CAOS_PARENT` brief and admit the goal/decision/effect/acceptance receipt through the Video-native `admit-parent-handoff` command. The native StudioEngine enforces the brief/receipt identity for governed projects; it retains Video-owned task IDs, assets, permissions and technical/craft review.
+
+A direct standalone Video request continues to work without CAOS and must not be auto-migrated. The current gate cannot by itself prove native ChatGPT Skill selection or force a misrouted agent to tag a task as governed; treat these as unresolved first-mile/native acceptance gates, not as successful activation.
+
 ## 1. Startup and recovery
 
 For every new task or continuation:
