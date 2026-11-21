@@ -489,7 +489,12 @@ def _media_business_failures(root: Path, runtime_version: str) -> list[str]:
 def repository_audit(repo_root: Path) -> dict[str, Any]:
     root = repo_root.resolve()
     failures: list[str] = []
-    runtime_version = _repo_runtime_version(root)
+    legacy_domain_runtime_version = _repo_runtime_version(root)
+    studio_manifest_path = root / "video_studio/data/studio_manifest.json"
+    studio_manifest = _json(studio_manifest_path) if studio_manifest_path.is_file() else {}
+    studio_runtime_version = str(studio_manifest.get("studio_version") or "")
+    if not studio_runtime_version:
+        failures.append("video_studio_version_missing")
 
     if (root / "config").exists():
         failures.append("duplicate_root_config_authority_present")
@@ -528,8 +533,12 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
 
     legacy_entry_path = root / "CAOS_VIDEO_ENTRY.md"
     legacy_entry = legacy_entry_path.read_text(encoding="utf-8").lower() if legacy_entry_path.is_file() else ""
-    if "legacy_pointer_only" not in legacy_entry or "studio_entry.md" not in legacy_entry:
-        failures.append("caos_video_legacy_entry_not_demoted")
+    if (
+        "active_session_governance_handoff" not in legacy_entry
+        or "studio_entry.md" not in legacy_entry
+        or "caos source is read-only" not in legacy_entry
+    ):
+        failures.append("caos_video_governance_handoff_invalid")
 
     capability_path = root / "video_growth_agent/data/capabilities.json"
     if not capability_path.is_file():
@@ -549,6 +558,10 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
             failures.append("video_domain_capability_profile_below_12")
         if capability.get("canonical_evolution_entrypoint") != "audits/EVOLUTION_INDEX.json":
             failures.append("video_domain_capability_evolution_entrypoint_drift")
+        if capability.get("catalog_status") != "DOMAIN_CAPABILITY_INVENTORY__NOT_CURRENT_SESSION_AVAILABILITY":
+            failures.append("video_domain_capability_catalog_status_drift")
+        if capability.get("runtime_authority") != "video_studio/data/studio_manifest.json":
+            failures.append("video_domain_capability_runtime_authority_drift")
         governance = capability.get("governance_binding", {})
         if governance.get("system") != "CAOS" or governance.get("mode") != "CHAT_GOVERNED_EXTERNAL":
             failures.append("video_domain_capability_caos_binding_drift")
@@ -584,10 +597,13 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         governance = manifest.get("governance", {})
         if manifest.get("system") != "VIDEO_GROWTH_AGENT":
             failures.append("video_domain_manifest_system_drift")
-        if manifest.get("status") != "VIDEO_DOMAIN_RUNTIME_ACTIVE":
+        if manifest.get("status") != "VIDEO_STUDIO_1_0_RUNTIME_ACTIVE__0_8_COMPATIBILITY_ONLY":
             failures.append("video_domain_manifest_status_drift")
-        if manifest.get("skill", {}).get("entrypoint") != "STUDIO_ENTRY.md":
+        skill_binding = manifest.get("skill", {})
+        if skill_binding.get("entrypoint") != "STUDIO_ENTRY.md":
             failures.append("video_domain_manifest_entrypoint_drift")
+        if skill_binding.get("legacy_handoff") != "CAOS_VIDEO_ENTRY.md":
+            failures.append("video_domain_manifest_governance_handoff_drift")
         if governance.get("system") != "CAOS" or governance.get("mode") != "CHAT_GOVERNED_EXTERNAL":
             failures.append("video_domain_manifest_caos_binding_drift")
         if governance.get("runtime_dependency") is not False or governance.get("source_mutation") != "FORBIDDEN":
@@ -595,10 +611,29 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         if governance.get("source_repository") != "D1traverser-debug/cognition-agent-os":
             failures.append("video_domain_manifest_caos_source_drift")
         runtime = manifest.get("runtime", {})
-        if runtime.get("version") != runtime_version:
+        if runtime.get("version") != studio_runtime_version:
             failures.append("video_domain_manifest_runtime_version_drift")
-        legacy_adapter_version = str(runtime.get("legacy_adapter_bundle_version") or runtime_version)
-        expected_runtime_refs = {
+        if runtime.get("entrypoint") != "video_studio.engine.StudioEngine":
+            failures.append("video_domain_manifest_runtime_entrypoint_drift")
+        if runtime.get("task_graph") != "PROJECT_SPECIFIC_DYNAMIC_DAG":
+            failures.append("video_domain_manifest_task_graph_drift")
+        if runtime.get("media_job_contract") != "video_studio.job_contract":
+            failures.append("video_domain_manifest_media_job_contract_drift")
+        if runtime.get("image_set_contract") != "video_studio.image_set":
+            failures.append("video_domain_manifest_image_set_contract_drift")
+        if runtime.get("production_status") != "CONTROL_PLANE_ACTIVE__END_TO_END_PROVIDER_PIPELINE_NOT_YET_PROVEN":
+            failures.append("video_domain_manifest_production_status_overclaim")
+        legacy_runtime = manifest.get("legacy_runtime", {})
+        if legacy_runtime.get("version") != legacy_domain_runtime_version:
+            failures.append("video_domain_manifest_legacy_runtime_version_drift")
+        if legacy_runtime.get("status") != "COMPATIBILITY_ONLY__NOT_NEW_STUDIO_CONTROLLER":
+            failures.append("video_domain_manifest_legacy_runtime_status_drift")
+        legacy_adapter_version = str(
+            legacy_runtime.get("legacy_adapter_bundle_version")
+            or manifest.get("compatibility", {}).get("legacy_episode_adapter_bundle")
+            or legacy_domain_runtime_version
+        )
+        expected_legacy_runtime_refs = {
             "episode_workflow": "video_growth_agent/data/workflow.json",
             "program_orchestration": "video_growth_agent/program_orchestration.py",
             "media_graph": "video_growth_agent/media_graph.py",
@@ -617,23 +652,33 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
             "root_scope_admission": "video_growth_agent/owner_behavior_admission.py:require_root_scope_admission",
             "system_audit": "vga system-audit --repo-root .",
         }
-        for key, expected in expected_runtime_refs.items():
-            if runtime.get(key) != expected:
-                failures.append(f"video_domain_manifest_runtime_ref_drift:{key}")
+        for key, expected in expected_legacy_runtime_refs.items():
+            if legacy_runtime.get(key) != expected:
+                failures.append(f"video_domain_manifest_legacy_runtime_ref_drift:{key}")
         compatibility = manifest.get("compatibility", {})
         if compatibility.get("legacy_episode_adapter_bundle") != legacy_adapter_version:
             failures.append("video_domain_manifest_legacy_adapter_compatibility_drift")
         domain_authority = manifest.get("domain_authority", {})
+        if domain_authority.get("runtime_root") != "video_studio":
+            failures.append("video_domain_manifest_runtime_root_drift")
+        if domain_authority.get("product_requirements") != "STUDIO_ENTRY.md":
+            failures.append("video_domain_manifest_product_requirements_drift")
         if domain_authority.get("project_index") != "projects/PROJECT_INDEX.json":
             failures.append("video_domain_manifest_project_index_drift")
-        if domain_authority.get("architecture") != "docs/media_business_os.md":
+        if domain_authority.get("architecture") != "docs/standalone_video_studio.md":
             failures.append("video_domain_manifest_media_business_architecture_drift")
+        if domain_authority.get("architecture_compatibility_view") != "docs/media_business_os.md":
+            failures.append("video_domain_manifest_legacy_architecture_view_drift")
         if domain_authority.get("agent_operability_scenarios") != "docs/agent_operability_scenarios.md":
             failures.append("video_domain_manifest_agent_operability_ref_drift")
         if domain_authority.get("canonical_evolution_entrypoint") != "audits/EVOLUTION_INDEX.json":
             failures.append("video_domain_manifest_evolution_entrypoint_drift")
-        if domain_authority.get("integrated_business_flywheel") != "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json":
+        if domain_authority.get("optional_integrated_business_flywheel") != "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json":
             failures.append("video_domain_manifest_business_flywheel_drift")
+        if domain_authority.get("active_capability_manifest") != "video_studio/data/studio_manifest.json":
+            failures.append("video_domain_manifest_active_capability_authority_drift")
+        if domain_authority.get("domain_capability_catalog") != "video_growth_agent/data/capabilities.json":
+            failures.append("video_domain_manifest_capability_catalog_drift")
 
     skill_team = root / "skills/video-growth-agent/references/team.md"
     packaged_team = root / "video_growth_agent/data/team.md"
@@ -714,11 +759,11 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         if "video-growth:main" in integrated_aliases:
             failures.append("project_index_legacy_alias_collision")
 
-    studio_manifest_path = root / "video_studio/data/studio_manifest.json"
-    studio_manifest = _json(studio_manifest_path) if studio_manifest_path.is_file() else {}
     if not studio_manifest:
         failures.append("video_studio_manifest_missing")
     else:
+        if studio_manifest.get("studio_version") != studio_runtime_version:
+            failures.append("video_studio_version_manifest_drift")
         if studio_manifest.get("default_entrypoint") != "STUDIO_ENTRY.md":
             failures.append("video_studio_default_entrypoint_drift")
         if studio_manifest.get("runtime") != "video_studio.engine.StudioEngine":
@@ -734,6 +779,12 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
             failures.append("video_studio_caos_runtime_dependency_forbidden")
         if studio_governance.get("caos_source_mutation") != "FORBIDDEN":
             failures.append("video_studio_caos_source_mutation_not_forbidden")
+        if studio_governance.get("governance_method_owned_by_video") is not False:
+            failures.append("video_studio_parent_governance_ownership_drift")
+        if studio_governance.get("video_domain_method_owned_by_video") is not True:
+            failures.append("video_studio_domain_method_ownership_drift")
+        if studio_governance.get("parent_governance_owned_externally") is not True:
+            failures.append("video_studio_external_parent_governance_drift")
         if studio_governance.get("caos_source_repository") != "D1traverser-debug/cognition-agent-os":
             failures.append("video_studio_caos_source_binding_missing")
         caps = studio_manifest.get("capabilities", {})
@@ -854,7 +905,7 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         except (ValueError, KeyError, TypeError) as exc:
             failures.append(f"integrated_subtask_graph_invalid:{exc}")
 
-    failures.extend(_media_business_failures(root, runtime_version))
+    failures.extend(_media_business_failures(root, legacy_domain_runtime_version))
 
     coordination = _json(root / "video_growth_agent/data/coordination-policy.json")
     coordination_governance = coordination.get("governance_binding", {})
@@ -871,7 +922,7 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
             agent_version=str(agents.get("version") or ""),
             plan_version=str(execution_plan.get("version") or ""),
             coordination_version=str(coordination.get("version") or ""),
-            runtime_version=runtime_version,
+            runtime_version=legacy_domain_runtime_version,
         )
     )
     if legacy_adapter_version and agents.get("version") != legacy_adapter_version:
@@ -880,7 +931,8 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
     return {
         "scope": "repository",
         "repo_root": str(root),
-        "runtime_version": runtime_version,
+        "runtime_version": studio_runtime_version,
+        "legacy_domain_runtime_version": legacy_domain_runtime_version,
         "legacy_adapter_bundle_version": agents.get("version"),
         "failures": failures,
         "pass": not failures,

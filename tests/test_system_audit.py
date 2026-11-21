@@ -21,7 +21,8 @@ def test_package_harness_passes_current_runtime_contract():
 def test_repository_harness_requires_canonical_video_entry_and_external_caos_boundary():
     report = repository_audit(ROOT)
     assert report["pass"] is True, report
-    assert report["runtime_version"] == "0.8.0"
+    assert report["runtime_version"] == "1.0.0"
+    assert report["legacy_domain_runtime_version"] == "0.8.0"
     assert report["legacy_adapter_bundle_version"] == "0.7.0"
     assert not (ROOT / "config").exists()
     assert not (ROOT / "continuity").exists()
@@ -36,10 +37,15 @@ def test_repository_harness_requires_canonical_video_entry_and_external_caos_bou
     assert project_index["governance"]["source_mutation"] == "FORBIDDEN"
     assert project_index["projects"][0]["default_for_generic_domain_intent"] is False
     studio_manifest = json.loads((ROOT / "video_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
+    assert studio_manifest["studio_version"] == "1.0.0"
     assert studio_manifest["release_status"] == "REBUILD_IN_PROGRESS"
     assert studio_manifest["governance"]["caos_runtime_dependency"] is False
     assert studio_manifest["governance"]["caos_source_mutation"] == "FORBIDDEN"
     assert (ROOT / "video_studio/job_contract.py").is_file()
+    domain_manifest = json.loads((ROOT / "video_growth_agent/data/domain_manifest.json").read_text(encoding="utf-8"))
+    assert domain_manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"
+    assert domain_manifest["legacy_runtime"]["version"] == "0.8.0"
+    assert domain_manifest["legacy_runtime"]["status"] == "COMPATIBILITY_ONLY__NOT_NEW_STUDIO_CONTROLLER"
     assert (ROOT / "video_growth_agent/data/domain_manifest.json").is_file()
     assert (ROOT / "video_growth_agent/data/capabilities.json").is_file()
     assert (ROOT / "projects/pilot-002/PROGRAM_STATE.json").is_file()
