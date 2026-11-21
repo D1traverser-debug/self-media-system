@@ -191,6 +191,38 @@ def test_unadmitted_effect_class_fails_closed(tmp_path):
     with pytest.raises(GateError, match="EFFECT_SCOPE_UNADMITTED"):
         engine.claim_next("case", "worker")
 
+
+
+def test_asset_import_is_blocked_until_local_write_scope_admitted(tmp_path):
+    engine, b = studio(tmp_path)
+    source = tmp_path / "source.txt"
+    source.write_text("Authorized test content", encoding="utf-8")
+    with pytest.raises(GateError, match="PARENT_HANDOFF_MISSING"):
+        engine.import_asset("case", "sample", source, kind="source", media_type="text/plain",
+                            rights_status="OWNED")
+    limited = handoff("case", b)
+    limited["allowed_effects"] = ["PUBLIC_READ"]
+    engine.admit_parent_handoff("case", limited)
+    with pytest.raises(GateError, match="ASSET_IMPORT_EFFECT_NOT_ALLOWED"):
+        engine.import_asset("case", "sample", source, kind="source", media_type="text/plain",
+                            rights_status="OWNED")
+    engine.admit_parent_handoff("case", handoff("case", b))
+    artifact = engine.import_asset("case", "sample", source, kind="source",
+                                   media_type="text/plain", rights_status="OWNED")
+    assert artifact["name"] == "sample"
+
+
+def test_replaced_parent_decision_invalidates_running_lease(tmp_path):
+    engine, b = studio(tmp_path)
+    first = handoff("case", b)
+    engine.admit_parent_handoff("case", first)
+    packet = engine.claim_next("case", "worker")
+    second = deepcopy(first)
+    second["unknowns"].append("New material contrary evidence")
+    engine.admit_parent_handoff("case", second)
+    with pytest.raises(GateError, match="CLAIM_STALE"):
+        engine.claimed_packet("case", "research", "worker", packet["claim"]["claim_token"])
+
 def test_invalid_governed_brief_denied(tmp_path):
     engine = StudioEngine(tmp_path)
     b = brief()
