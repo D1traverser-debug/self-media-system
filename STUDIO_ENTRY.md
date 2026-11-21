@@ -17,6 +17,14 @@ The current Studio owns its own requirement interpretation protocol, decision re
 
 IPOS remains the sole authority for the owner's original character/identity canon. The Studio consumes approved, versioned IPOS exports; it does not create a competing canon.
 
+## Owner-selected CAOS parent context (candidate)
+
+When the owner has selected the CAOS parent in ChatGPT and then enters this Video child, the ChatGPT cognition, decision and owner-outcome governance remains CAOS-owned. **Standalone runtime independence is not a waiver of that active parent governance.** The parent must recover owner goal/corrections, study and challenge evidence, compare alternatives and authorize lawful actions before handing Video work to its native engine.
+
+For new Video Studio projects explicitly governed in this way, the brief must contain `governance.mode=CAOS_PARENT`, `governance.parent_system=cognition-agent-os` and an explicit allowed-effect scope. Submit the brief-bound parent decision via `vga-studio admit-parent-handoff` before `claim`. See `docs/caos_parent_handoff.md`. Video keeps all domain state, rights, media review and release authority. CAOS retains the complete owner-goal acceptance. Direct standalone Video usage remains independent.
+
+The engine only enforces an **already selected and declared** governed project; it does not prove native ChatGPT Skill selection or prevent a misrouted chat from creating an untagged standalone project. Real-chat first-mile tests remain an explicit separate prerequisite.
+
 ## New-task startup
 
 1. Recover the complete owner goal and every correction, constraint, prohibition and requested deliverable. Separate hard requirements, preferences, examples, assumptions and unknowns.
