@@ -17,14 +17,12 @@
       "description": "Platform-native copy variants."
     },
     {
-      "name": {
-        "name": "cover-candidates.zip",
-        "artifact_name": "cover-candidates.zip",
-        "kind": "image_set",
-        "required": true,
-        "media_type": "application/zip",
-        "description": "ZIP package containing the approved cover candidates and their image-set manifest."
-      }
+      "name": "cover-candidates.zip",
+      "artifact_name": "cover-candidates.zip",
+      "kind": "image_set",
+      "required": true,
+      "media_type": "application/zip",
+      "description": "ZIP package containing the approved cover candidates and their image-set manifest."
     },
     {
       "name": "release-evidence-pack.json",
