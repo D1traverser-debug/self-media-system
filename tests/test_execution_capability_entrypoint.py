@@ -4,14 +4,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_caos_entry_and_capability_profile_require_current_session_handshake():
-    skill = (ROOT / "CAOS_VIDEO_ENTRY.md").read_text(encoding="utf-8")
+def test_canonical_video_entry_and_capability_profile_require_current_session_handshake():
+    entry = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8").lower()
     profile = json.loads((ROOT / "video_growth_agent/data/capabilities.json").read_text(encoding="utf-8"))
 
-    assert "video_growth_agent/data/capabilities.json" in skill
-    assert "decision loop" in skill.lower()
-    assert "execution loop" in skill.lower()
-    assert "CAOS source is read-only" in skill
+    assert "canonical entry" in entry
+    assert "caos-governed" in entry
+    assert "decision loop" in entry
+    assert "execution loop" in entry
+    assert "independent acceptance" in entry
+    assert "do not modify the caos repository" in entry
+    assert "runtime/api dependency" in entry
     assert profile["execution_readiness_contract"] == "2.0"
     assert profile["owner"] == "VIDEO_GROWTH_AGENT"
     assert profile["domain_id"] == "video"

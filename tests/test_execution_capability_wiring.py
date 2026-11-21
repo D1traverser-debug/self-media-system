@@ -26,7 +26,7 @@ def test_video_domain_has_one_external_caos_governance_binding():
         assert binding["runtime_dependency"] is False
         assert binding["source_mutation"] == "FORBIDDEN"
 
-    assert manifest["skill"]["entrypoint"] == "CAOS_VIDEO_ENTRY.md"
+    assert manifest["skill"]["entrypoint"] == "STUDIO_ENTRY.md"
     assert state["governance_mode"] == "CHAT_GOVERNED_EXTERNAL"
     assert state["caos_runtime_dependency"] is False
     assert "parent_identity_semantics" not in state

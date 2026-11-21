@@ -26,7 +26,7 @@
   },
   "governance": {
     "system": "VIDEO_STUDIO_NATIVE",
-    "mode": "STANDALONE_RUNTIME__CAOS_SESSION_GOVERNANCE_WHEN_ACTIVE",
+    "mode": "STANDALONE",
     "caos_runtime_dependency": false,
     "caos_api_dependency": false,
     "caos_skill_dependency": false,
@@ -34,7 +34,8 @@
     "governance_method_owned_by_video": true,
     "caos_session_governance_supported": true,
     "caos_source_repository": "D1traverser-debug/cognition-agent-os",
-    "caos_source_mutation": "FORBIDDEN"
+    "caos_source_mutation": "FORBIDDEN",
+    "caos_session_governance_when_active": true
   },
   "decision_method": [
     "COMPETING_HYPOTHESES",

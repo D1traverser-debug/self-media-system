@@ -691,7 +691,7 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         governance = project_index.get("governance", {})
         if governance.get("entrypoint") != "STUDIO_ENTRY.md":
             failures.append("project_index_canonical_entrypoint_drift")
-        if governance.get("mode") != "CAOS_SESSION_GOVERNED_WHEN_ACTIVE":
+        if governance.get("mode") != "CHAT_GOVERNED_EXTERNAL" or governance.get("session_governance_when_active") is not True:
             failures.append("project_index_caos_session_governance_mode_drift")
         if governance.get("runtime_dependency") is not False or governance.get("source_mutation") != "FORBIDDEN":
             failures.append("project_index_caos_read_only_boundary_drift")

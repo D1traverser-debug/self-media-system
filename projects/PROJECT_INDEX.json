@@ -67,10 +67,11 @@
   "updated_at": "2026-11-21T22:45:00+08:00",
   "governance": {
     "system": "CAOS",
-    "mode": "CAOS_SESSION_GOVERNED_WHEN_ACTIVE",
+    "mode": "CHAT_GOVERNED_EXTERNAL",
     "entrypoint": "STUDIO_ENTRY.md",
     "runtime_dependency": false,
     "source_repository": "D1traverser-debug/cognition-agent-os",
-    "source_mutation": "FORBIDDEN"
+    "source_mutation": "FORBIDDEN",
+    "session_governance_when_active": true
   }
 }

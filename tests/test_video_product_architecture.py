@@ -47,16 +47,22 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
     assert not (ROOT / "UAOS_SKILL.md").exists()
 
 
-def test_generic_growth_commercialization_and_ip_intents_converge_on_integrated_program():
+def test_generic_video_production_has_no_default_and_business_program_is_explicit():
     index = load("projects/PROJECT_INDEX.json")
     assert index["authority"] == "VIDEO_GROWTH_AGENT"
-    assert index["default_project_id"] == "ai-self-media-commercialization"
+    assert index["default_project_id"] is None
+    assert index["governance"]["entrypoint"] == "STUDIO_ENTRY.md"
+    assert index["governance"]["mode"] == "CHAT_GOVERNED_EXTERNAL"
+    assert index["governance"]["session_governance_when_active"] is True
     by_id = {item["project_id"]: item for item in index["projects"]}
 
     integrated = by_id["ai-self-media-commercialization"]
     aliases = set(integrated["aliases"])
     assert {"AI自媒体视频商业化", "AI视频涨粉与商业化", "原创数字IP"} <= aliases
-    assert integrated["default_for_generic_domain_intent"] is True
+    assert integrated["default_for_generic_domain_intent"] is False
+    assert integrated["scope"] == "OPTIONAL_EXPLICITLY_SELECTED_MEDIA_BUSINESS_PROGRAM"
+    assert any("exact project_id" in rule for rule in index["resolution_rules"])
+    assert any("no generic default project" in rule for rule in index["resolution_rules"])
 
     pilot = by_id["pilot-002"]
     assert "video-growth:main" in pilot["aliases"]

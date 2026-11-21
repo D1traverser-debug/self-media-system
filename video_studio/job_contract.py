@@ -165,7 +165,7 @@ def _validate_format(value: Any) -> dict[str, Any]:
     for field in ("platforms", "language"):
         if field == "platforms" and field in result:
             _string_list(result[field], "format.platforms")
-        if field == "language" and result[field] is not None and not isinstance(result[field], (str, list)):
+        if field == "language" and result.get(field) is not None and not isinstance(result.get(field), (str, list)):
             raise MediaJobContractError("format.language must be a string or an array")
     return result
 
