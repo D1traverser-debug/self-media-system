@@ -11,11 +11,11 @@
   "domain_evolution_semantics": "VIDEO_OWNS_MEDIA_GROWTH_IP_COMMERCIALIZATION_PRODUCTION_BUSINESS_EVOLUTION__CROSS_DOMAIN_GOVERNANCE_REVIEW_REQUIRED_THROUGH_CAOS_CHAT__NO_RUNTIME_UPCALL__ONE_OFF_DOES_NOT_AUTO_PROMOTE__TYPED_EVOLUTION_DISPOSITION_PRECEDES_PROBLEM_ACTION",
   "business_identity_semantics": "VIDEO_OWNS_PROGRAM_SERIES_EPISODE_SEQUENCE_SCENE_SHOT_TAKE_PROJECT_WORKSTREAM_SUBTASK_IDENTITIES__NO_PARENT_TASK_IDENTITY__CAOS_GOVERNANCE_CONTEXT_IS_NOT_A_VIDEO_BUSINESS_ID",
   "internal_orchestration_semantics": "EXPLICIT_DAG_DEPENDENCIES__PARALLEL_WHEN_READY__ARTIFACT_MEDIATED_CONSULT_COMPETE_CRITIQUE_ADJUDICATE__NO_UNBOUNDED_PEER_CHAT",
-  "media_business_architecture_ref": "docs/media_business_os.md",
+  "media_business_architecture_ref": "docs/standalone_video_studio.md",
   "agent_operability_scenarios_ref": "docs/agent_operability_scenarios.md",
   "provider_benchmark_ref": "docs/provider_benchmark_protocol.md",
   "canonical_evolution_entrypoint": "audits/EVOLUTION_INDEX.json",
-  "updated_at": "2026-11-14T18:00:00+08:00",
+  "updated_at": "2026-11-22T04:08:00+08:00",
   "assurance_taxonomy": [
     "DECLARED_ONLY",
     "HARNESS_WIRED",
@@ -588,5 +588,6 @@
   "catalog_status": "DOMAIN_CAPABILITY_INVENTORY__NOT_CURRENT_SESSION_AVAILABILITY",
   "runtime_authority": "video_studio/data/studio_manifest.json",
   "provider_availability": "PER_ACTIVE_SESSION_CAPABILITY_HANDSHAKE",
-  "legacy_module_reuse": "REQUIRES_CONTRACT_AND_EXECUTION_EVIDENCE"
+  "legacy_module_reuse": "REQUIRES_CONTRACT_AND_EXECUTION_EVIDENCE",
+  "legacy_media_business_architecture_ref": "docs/media_business_os.md"
 }

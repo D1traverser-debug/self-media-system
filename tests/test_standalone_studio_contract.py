@@ -5,6 +5,7 @@ from pathlib import Path
 import tomllib
 
 from video_studio.engine import StudioEngine
+from video_studio.job_contract import validate_media_job
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -43,6 +44,23 @@ def test_example_graphs_are_valid_dynamic_dags(tmp_path):
         engine.add_tasks(project_id, tasks)
         assert engine.audit(project_id)["pass"] is True
         assert engine.status(project_id)["task_counts"]["READY"] >= 1
+
+
+def test_example_required_deliverables_are_mapped_to_real_task_outputs():
+    for brief_name, tasks_name in (
+        ("technology-explainer.brief.json", "technology-explainer.tasks.json"),
+        ("news-fictional-media.brief.json", "news-fictional-media.tasks.json"),
+    ):
+        brief = json.loads((ROOT / "examples" / brief_name).read_text(encoding="utf-8"))
+        tasks = json.loads((ROOT / "examples" / tasks_name).read_text(encoding="utf-8"))
+        task_outputs = {name for task in tasks for name in task["outputs"]}
+        required_deliverables = [
+            item["artifact_name"] for item in validate_media_job(brief)["deliverables"] if item["required"]
+        ]
+        missing = sorted(set(required_deliverables) - task_outputs)
+        assert not missing, f"{brief_name} has required deliverables without producing tasks: {missing}"
+        required_release_outputs = set(brief.get("release_policy", {}).get("required_artifact_names", []))
+        assert required_release_outputs <= task_outputs
 
 
 def test_engine_uses_no_external_runtime_dependency():

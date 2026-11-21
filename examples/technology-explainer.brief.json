@@ -2,10 +2,30 @@
   "goal": "Produce a publishable 60-second cinematic explainer showing why AI inference is moving toward edge devices.",
   "audience": "Technology-curious viewers aged 20-40 who understand consumer technology but do not know chip architecture.",
   "deliverables": [
-    "final.mp4",
-    "cover.png",
-    "captions.srt",
-    "publish-copy.md"
+    {
+      "name": "final.mp4",
+      "artifact_name": "final-candidate",
+      "kind": "video",
+      "media_type": "video/mp4"
+    },
+    {
+      "name": "cover.png",
+      "artifact_name": "cover-candidate",
+      "kind": "image",
+      "media_type": "image/png"
+    },
+    {
+      "name": "captions.srt",
+      "artifact_name": "captions",
+      "kind": "subtitle",
+      "media_type": "application/x-subrip"
+    },
+    {
+      "name": "publish-copy.md",
+      "artifact_name": "publish-copy-candidate",
+      "kind": "document",
+      "media_type": "text/markdown"
+    }
   ],
   "format": {
     "duration_seconds": 60,

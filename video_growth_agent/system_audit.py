@@ -562,6 +562,10 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
             failures.append("video_domain_capability_catalog_status_drift")
         if capability.get("runtime_authority") != "video_studio/data/studio_manifest.json":
             failures.append("video_domain_capability_runtime_authority_drift")
+        if capability.get("media_business_architecture_ref") != "docs/standalone_video_studio.md":
+            failures.append("video_domain_capability_current_architecture_ref_drift")
+        if capability.get("legacy_media_business_architecture_ref") != "docs/media_business_os.md":
+            failures.append("video_domain_capability_legacy_architecture_ref_drift")
         governance = capability.get("governance_binding", {})
         if governance.get("system") != "CAOS" or governance.get("mode") != "CHAT_GOVERNED_EXTERNAL":
             failures.append("video_domain_capability_caos_binding_drift")
@@ -623,6 +627,8 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
             failures.append("video_domain_manifest_image_set_contract_drift")
         if runtime.get("production_status") != "CONTROL_PLANE_ACTIVE__END_TO_END_PROVIDER_PIPELINE_NOT_YET_PROVEN":
             failures.append("video_domain_manifest_production_status_overclaim")
+        if "programmatic_graphics" in runtime:
+            failures.append("video_domain_manifest_legacy_graphics_leaked_into_current_runtime")
         legacy_runtime = manifest.get("legacy_runtime", {})
         if legacy_runtime.get("version") != legacy_domain_runtime_version:
             failures.append("video_domain_manifest_legacy_runtime_version_drift")
@@ -636,6 +642,7 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         expected_legacy_runtime_refs = {
             "episode_workflow": "video_growth_agent/data/workflow.json",
             "program_orchestration": "video_growth_agent/program_orchestration.py",
+            "programmatic_graphics": "video_growth_agent/programmatic_graphics.py",
             "media_graph": "video_growth_agent/media_graph.py",
             "editorial_planning": "video_growth_agent/editorial_planning.py",
             "plan_graph_bridge": "video_growth_agent/plan_graph_bridge.py",
@@ -655,6 +662,8 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         for key, expected in expected_legacy_runtime_refs.items():
             if legacy_runtime.get(key) != expected:
                 failures.append(f"video_domain_manifest_legacy_runtime_ref_drift:{key}")
+        if legacy_runtime.get("programmatic_graphics_assurance") != "SESSION_EXECUTABLE__SILENT_CANDIDATE_ONLY__NO_PROMOTION":
+            failures.append("video_domain_manifest_legacy_graphics_assurance_drift")
         compatibility = manifest.get("compatibility", {})
         if compatibility.get("legacy_episode_adapter_bundle") != legacy_adapter_version:
             failures.append("video_domain_manifest_legacy_adapter_compatibility_drift")
@@ -926,6 +935,8 @@ def repository_audit(repo_root: Path) -> dict[str, Any]:
         failures.append("coordination_policy_legacy_parent_dependency_present")
     workflow = _json(root / "video_growth_agent/data/workflow.json")
     execution_plan = _json(root / "video_growth_agent/data/execution-plan.json")
+    if execution_plan.get("policy", {}).get("architecture_role") != "LEGACY_AND_SPECIALIZED_EPISODE_EXECUTION_ADAPTER_UNDER_STANDALONE_VIDEO_STUDIO":
+        failures.append("legacy_execution_plan_architecture_role_drift")
     agents = _json(root / "video_growth_agent/data/agents.json")
     failures.extend(_artifact_reachability_failures(workflow, execution_plan))
     failures.extend(

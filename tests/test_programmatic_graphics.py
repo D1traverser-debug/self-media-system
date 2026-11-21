@@ -300,7 +300,8 @@ def test_capability_registry_and_domain_manifest_advertise_only_bounded_scope():
     manifest = json.loads(
         (root / "video_growth_agent/data/domain_manifest.json").read_text(encoding="utf-8")
     )
-    assert manifest["runtime"]["programmatic_graphics"] == "video_growth_agent/programmatic_graphics.py"
+    assert "programmatic_graphics" not in manifest["runtime"]
+    assert manifest["legacy_runtime"]["programmatic_graphics"] == "video_growth_agent/programmatic_graphics.py"
 
 def test_current_agent_operability_scenario_documents_graphics_route():
     root = Path(__file__).resolve().parents[1]

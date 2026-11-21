@@ -229,17 +229,48 @@ def test_reviews_are_bound_to_exact_digest_and_independent_reviewer(tmp_path):
     assert review["artifact_digest"] == artifact["sha256"]
 
 
-def test_release_check_requires_all_reviews_rights_and_platform_evidence(tmp_path):
+def test_release_check_requires_all_reviews_rights_and_every_declared_deliverable(tmp_path):
     engine = make_engine(tmp_path)
     engine.add_tasks("demo", [task("render")])
     artifact = complete(engine, tmp_path, "render", "artist")
     for rubric in ("editorial", "craft", "technical"):
         engine.record_review("demo", artifact["artifact_id"], reviewer_id=f"reviewer-{rubric}", rubric_id=rubric, outcome="PASS", dimensions={"score": 4}, evidence_refs=[f"evidence://{rubric}"])
+
     blocked = engine.release_check("demo", artifact["artifact_id"], required_rubrics=["editorial", "craft", "technical"], evidence_refs=[])
     assert blocked["pass"] is False
     assert any(item.startswith("release_evidence_missing") for item in blocked["failures"])
+    assert {
+        "required_deliverable_missing:final.mp4",
+        "required_deliverable_missing:cover.png",
+        "required_deliverable_missing:publish-copy.md",
+    } <= set(blocked["failures"])
+
+    deliverables = [
+        ("final.mp4", "video", "video/mp4"),
+        ("cover.png", "image", "image/png"),
+        ("publish-copy.md", "document", "text/markdown"),
+    ]
+    engine.add_tasks("demo", [
+        task(f"deliver-{index}", outputs=[artifact_name])
+        for index, (artifact_name, _, _) in enumerate(deliverables)
+    ])
+    for index, (artifact_name, kind, media_type) in enumerate(deliverables):
+        packet = engine.claim_next("demo", f"producer-{index}")
+        assert packet is not None
+        output_path = engine._project_dir("demo") / "artifacts" / artifact_name
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_bytes(f"test bytes for {artifact_name}".encode("utf-8"))
+        engine.complete_task(
+            "demo", packet["task"]["task_id"], f"producer-{index}", packet["claim"]["claim_token"],
+            {artifact_name: {
+                "path": str(output_path), "kind": kind, "media_type": media_type,
+                "rights_status": "OWNED",
+            }},
+        )
+
     passed = engine.release_check("demo", artifact["artifact_id"], required_rubrics=["editorial", "craft", "technical"], evidence_refs=["platform-format-review"])
     assert passed["pass"] is True
+    assert passed["media_job_acceptance"]["status"] == "MECHANICAL_PASS"
 
 
 def test_invalidation_only_marks_target_and_dependency_descendants_stale(tmp_path):

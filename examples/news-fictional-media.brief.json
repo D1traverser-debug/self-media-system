@@ -4,7 +4,14 @@
   "deliverables": [
     "editorial-reading.md",
     "platform-copies.json",
-    "cover-candidates/",
+    {
+      "name": "cover-candidates.zip",
+      "artifact_name": "cover-candidates.zip",
+      "kind": "image_set",
+      "required": true,
+      "media_type": "application/zip",
+      "description": "ZIP package containing the approved cover candidates and their image-set manifest."
+    },
     "release-evidence-pack.json"
   ],
   "format": {
@@ -71,7 +78,8 @@
     "required_artifact_names": [
       "editorial-reading",
       "platform-copies",
-      "release-evidence-pack"
+      "release-evidence-pack",
+      "cover-candidates.zip"
     ],
     "required_asset_names": [
       "source-video"

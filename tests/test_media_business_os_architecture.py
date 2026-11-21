@@ -21,11 +21,12 @@ def version_at_least(actual: str, minimum: str) -> bool:
     )
 
 
-def test_media_business_os_is_primary_architecture_and_legacy_stage_machine_is_adapter():
+def test_media_business_os_is_legacy_domain_reference_under_standalone_studio():
     manifest = load("video_growth_agent/data/domain_manifest.json")
     plan = load("video_growth_agent/data/execution-plan.json")
-    assert manifest["domain_authority"]["architecture"] == "docs/media_business_os.md"
-    assert plan["policy"]["architecture_role"] == "LEGACY_AND_SPECIALIZED_EPISODE_EXECUTION_ADAPTER_UNDER_MEDIA_BUSINESS_OS"
+    assert manifest["domain_authority"]["architecture"] == "docs/standalone_video_studio.md"
+    assert manifest["domain_authority"]["architecture_compatibility_view"] == "docs/media_business_os.md"
+    assert plan["policy"]["architecture_role"] == "LEGACY_AND_SPECIALIZED_EPISODE_EXECUTION_ADAPTER_UNDER_STANDALONE_VIDEO_STUDIO"
     text = (ROOT / "docs/media_business_os.md").read_text(encoding="utf-8")
     assert "Program -> Series -> Episode -> Sequence -> Scene -> Shot -> Take" in text
     assert "The legacy stage/work-order engine remains a historical/specialized compatibility adapter" in text
@@ -45,6 +46,8 @@ def test_current_program_has_explicit_cross_workstream_flywheel():
 
 def test_provider_architecture_is_capability_evidence_based_not_named_default():
     caps = load("video_growth_agent/data/capabilities.json")
+    assert caps["media_business_architecture_ref"] == "docs/standalone_video_studio.md"
+    assert caps["legacy_media_business_architecture_ref"] == "docs/media_business_os.md"
     router = next(item for item in caps["capabilities"] if item["capability_id"] == "evidence_bound_model_routing")
     assert router["executor_ref"].startswith("video_growth_agent/model_registry.py")
     assert "current_provider_observations" in router["required_tools"]
