@@ -223,6 +223,27 @@ def test_replaced_parent_decision_invalidates_running_lease(tmp_path):
     with pytest.raises(GateError, match="CLAIM_STALE"):
         engine.claimed_packet("case", "research", "worker", packet["claim"]["claim_token"])
 
+
+
+def test_real_cli_admission_before_claim(tmp_path):
+    import json
+    from video_studio.cli import main
+
+    workspace = tmp_path / "studio"
+    b = brief()
+    bfile = tmp_path / "brief.json"
+    tasks_file = tmp_path / "tasks.json"
+    receipt_file = tmp_path / "receipt.json"
+    bfile.write_text(json.dumps(b), encoding="utf-8")
+    tasks_file.write_text(json.dumps([task()]), encoding="utf-8")
+    receipt_file.write_text(json.dumps(handoff("case", b)), encoding="utf-8")
+    root_args = ["--root", str(workspace)]
+    assert main(root_args + ["init", "case", "--brief", str(bfile)]) == 0
+    assert main(root_args + ["plan", "case", str(tasks_file)]) == 0
+    assert main(root_args + ["claim", "case", "--worker", "worker"]) == 2
+    assert main(root_args + ["admit-parent-handoff", "case", str(receipt_file)]) == 0
+    assert main(root_args + ["claim", "case", "--worker", "worker"]) == 0
+
 def test_invalid_governed_brief_denied(tmp_path):
     engine = StudioEngine(tmp_path)
     b = brief()
