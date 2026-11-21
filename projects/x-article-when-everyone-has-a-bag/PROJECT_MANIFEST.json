@@ -31,12 +31,19 @@
     "Meme_X_Asset_Manifest_v3_1.md",
     "Meme_X_Legacy_Asset_Inventory_v3_1.md",
     "Meme_X_Readback_v3_1.json",
-    "Meme_X_Article_Complete_Package_v3_1.zip"
+    "Meme_X_Article_Complete_Package_v3_1.zip",
+    "GITHUB_SYNC_RECEIPT.json",
+    "ASSET_SHA256.json"
   ],
   "historical_source": "source/v3/",
   "runtime_state": "BOOTSTRAP_SCRIPT_AND_CI_TEST; persistent local runtime root is user/workspace scoped",
-  "release_status": "BLOCKED_PENDING_INDEPENDENT_REVIEW_AND_OWNER_AUTHORIZATION",
+  "release_status": "BLOCKED_PENDING_INDEPENDENT_EDITOR_REVIEW_TRENCH_READER_REVIEW_X_NATIVE_PREVIEW_AND_OWNER_AUTHORIZATION",
   "asset_hash_manifest": "ASSET_SHA256.json",
   "runtime_bootstrap": "projects/x-article-when-everyone-has-a-bag/bootstrap.py",
-  "runtime_integration_test": "tests/test_meme_x_article_studio_project.py"
+  "runtime_integration_test": "tests/test_meme_x_article_studio_project.py",
+  "repository_commit_sha": "5dee50fef884c8dbaed3c3dd524d1100a0b1d524",
+  "ci_status": "PASS",
+  "studio_runtime_bootstrap_test": "PASS",
+  "persistent_runtime_state": "NOT_PERSISTED__CI_TEMPORARY_WORKSPACE",
+  "asset_commit_sha": "5dee50fef884c8dbaed3c3dd524d1100a0b1d524"
 }

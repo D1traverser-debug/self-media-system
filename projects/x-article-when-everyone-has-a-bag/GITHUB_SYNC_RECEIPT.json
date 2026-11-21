@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "repository": "D1traverser-debug/video-growth-agent",
+  "branch": "work/meme-x-article-bigfoot-2026-11",
+  "base_branch": "main",
+  "asset_commit_sha": "5dee50fef884c8dbaed3c3dd524d1100a0b1d524",
+  "asset_commit_url": "https://github.com/D1traverser-debug/video-growth-agent/commit/5dee50fef884c8dbaed3c3dd524d1100a0b1d524",
+  "base_main_sha": "6fac8f58227e8a9bf7f59707895692ade06b8806",
+  "compare": {
+    "status": "ahead",
+    "ahead_by": 1,
+    "behind_by": 0,
+    "changed_file_count": 32
+  },
+  "file_integrity": {
+    "project_and_test_blobs": 31,
+    "git_blob_sha_matches_local_hash_object": true,
+    "recursive_tree_truncated": false,
+    "project_index_registered": true
+  },
+  "ci": {
+    "workflow": "ci",
+    "run_id": 44930853361,
+    "run_url": "https://github.com/D1traverser-debug/video-growth-agent/actions/runs/44930853361",
+    "job_id": 136926921474,
+    "conclusion": "success",
+    "steps": {
+      "install_package_and_tests": "success",
+      "system_hygiene_audit": "success",
+      "pytest": "success",
+      "pytest_passed": 303,
+      "standalone_video_studio_smoke": "success",
+      "installed_cli_outside_repository_smoke": "success"
+    }
+  },
+  "studio_runtime": {
+    "bootstrap_integration_test": "PASS",
+    "engine_audit": "PASS",
+    "task_count": 7,
+    "completed_tasks": [
+      "recover_source_state",
+      "integrate_keyword",
+      "sync_assets_to_branch"
+    ],
+    "ready_tasks": [
+      "independent_editor_review",
+      "trench_reader_review",
+      "x_native_preview"
+    ],
+    "release_acceptance": "PENDING",
+    "persistent_runtime_state": "NOT_PERSISTED; CI used an isolated temporary workspace. bootstrap.py can initialize a persistent workspace from a repository checkout."
+  },
+  "boundaries": {
+    "main_modified": false,
+    "merged": false,
+    "caos_parent_modified": false,
+    "ipos_modified": false,
+    "x_published": false,
+    "publication_authorization": "NOT_GRANTED"
+  }
+}

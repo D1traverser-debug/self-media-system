@@ -68,7 +68,8 @@
         "projects/x-article-when-everyone-has-a-bag/OUTCOME_BRIEF.json",
         "projects/x-article-when-everyone-has-a-bag/TASK_GRAPH.json",
         "projects/x-article-when-everyone-has-a-bag/CURRENT_PROGRESS.md",
-        "projects/x-article-when-everyone-has-a-bag/ASSET_SHA256.json"
+        "projects/x-article-when-everyone-has-a-bag/ASSET_SHA256.json",
+        "projects/x-article-when-everyone-has-a-bag/GITHUB_SYNC_RECEIPT.json"
       ],
       "resume_ref": "projects/x-article-when-everyone-has-a-bag/RESUME_ENTRY.md",
       "runtime_mode": "STANDALONE_VIDEO_STUDIO",
