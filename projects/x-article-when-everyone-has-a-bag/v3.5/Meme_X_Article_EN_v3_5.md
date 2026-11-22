@@ -8,11 +8,11 @@ The percentage was a joke; the instinct behind it was serious. Phillip Banks had
 
 Banks said the character was copyrighted and that he planned takedowns for unauthorized merchandise and shitcoins. Brand accounts using the character as a trend were different; he mainly wanted credit. [CoinDesk reported the exchange.](https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok)
 
-Banks had created the character; the token had its own issuer, holders and fee route. The people creating its culture, holding its supply and receiving its payments could be different people. The word **community** can make those roles sound like one group.
+Banks had created the character; the token had its own issuer, holders and fee route. The people creating its culture, holding its supply and receiving trading fees may be different people. The word **community** can make those roles sound like one group.
 
 ## The meme travels farther than the token.
 
-A meme can be copied, remixed and carried into new audiences. A Bigfoot joke can circulate across X without anyone needing permission from a token holder. The token built around a meme has a finite supply, a launch history and a holder distribution.
+A meme can be copied, remixed and carried into new audiences. A Bigfoot joke can be remixed across X by people who never own the token attached to it. The token built around a meme has a finite supply, a launch history and a holder distribution.
 
 That difference becomes important when price turns into content. A holder posts a rising chart; the screenshot reaches a new audience; some viewers buy; their orders create another move worth posting. The chart starts feeding the attention that helped move it.
 
@@ -26,9 +26,9 @@ Bitquery examined 8,212,568 Pump.fun launches and found that the developer's fir
 
 The timing matters. By the time a token reaches the public feed, its earliest ownership positions may already be in place. A viral post confirms that attention has arrived; it says nothing about who was positioned first, how much supply they hold or how easily they can sell.
 
-Market cap multiplies the quoted price by token supply. It is a valuation snapshot, not the money that entered the token or the liquidity available to exit at that quote.
+Market cap is the quoted price multiplied by the supply figure a tracker uses. It is a valuation snapshot, not the money that entered the token or the liquidity available to exit at that quote.
 
-Wanting a higher price is ordinary self-interest. Opportunism is different: it appears when someone hides a position, presents a conflicted pitch as independent judgment, or withholds information that would change how a buyer reads the promotion. A disclosed holding is a conflict to price in, not proof of dishonesty. A claim of neutrality from an undisclosed holder is a different matter.
+Wanting a higher price is ordinary self-interest. Opportunism starts when a promoter hides a position, presents a conflicted pitch as independent judgment or withholds facts that would change a buyer's reading. A disclosed holding is a conflict to account for, not proof of dishonesty.
 
 ## Follow the work, the supply and the fees.
 
