@@ -1721,6 +1721,8 @@ class StudioEngine:
     ) -> dict[str, Any]:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            self._refresh_cross_project_transfers_in_tx(connection, project_id)
+            self._refresh_in_tx(connection, project_id)
             artifact = connection.execute(
                 "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?", (project_id, artifact_id)
             ).fetchone()
