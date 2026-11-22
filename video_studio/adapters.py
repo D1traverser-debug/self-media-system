@@ -245,22 +245,16 @@ def timeline_spec_from_dict(payload: Mapping[str, Any]) -> TimelineSpec:
     )
 
 
-def route_shot(payload: Mapping[str, Any]) -> dict[str, Any]:
-    data = _mapping(payload, "shot routing request")
-    request_data = _mapping(data.get("request"), "request")
-    request_data["required_capabilities"] = frozenset(request_data.get("required_capabilities", ()))
-    request = ShotRequest(**request_data)
-    engines = []
-    for raw in data.get("engines", []):
-        item = _mapping(raw, "engine profile")
-        item["capabilities"] = frozenset(item.get("capabilities", ()))
-        item["quality_evidence_refs"] = tuple(item.get("quality_evidence_refs", ()))
-        item["pricing_evidence_refs"] = tuple(item.get("pricing_evidence_refs", ()))
-        engines.append(EngineProfile(**item))
-    if not engines:
-        raise DomainAdapterError("shot routing requires at least one measured engine profile")
-    decision = CostAwareShotRouter().route(request, engines)
-    return _jsonable(decision)
+def route_shot(payload: Mapping[str, Any], *, now: datetime | None = None) -> dict[str, Any]:
+    """Route a shot through the one evidence-bound provider contract used by Studio tasks."""
+    try:
+        request, engines = _model_routing_request(payload)
+        decision = EvidenceBoundModelRouter().route(request, engines, now=now)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise DomainAdapterError(f"invalid evidence-bound shot routing contract: {exc}") from exc
+    route = _jsonable(decision)
+    route["blocked"] = decision.blocked
+    return route
 
 
 def assess_shot_continuity(payload: Mapping[str, Any]) -> dict[str, Any]:
@@ -327,46 +321,102 @@ def outcome_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
 
 
 
+def _string_sequence(value: Any, label: str) -> tuple[str, ...]:
+    if not isinstance(value, (list, tuple, set, frozenset)):
+        raise DomainAdapterError(f"{label} must be an array of non-empty strings")
+    items = tuple(value)
+    if not all(isinstance(item, str) and item.strip() for item in items):
+        raise DomainAdapterError(f"{label} must be an array of non-empty strings")
+    if len(items) != len(set(items)):
+        raise DomainAdapterError(f"{label} must not contain duplicates")
+    return items
+
+
 def _model_routing_request(payload: Mapping[str, Any]) -> tuple[ShotRoutingRequest, tuple[ModelObservation, ...]]:
     data = _mapping(payload, "evidence-bound model routing request")
     request_data = dict(_mapping(data.get("request"), "routing request"))
-    request_data["required_capabilities"] = frozenset(request_data.get("required_capabilities", []))
-    request_data["quality_priorities"] = tuple(request_data.get("quality_priorities", []))
-    request_data["quality_weights"] = dict(request_data.get("quality_weights", {}))
-    request = ShotRoutingRequest(**request_data)
+    request_data["required_capabilities"] = frozenset(
+        _string_sequence(request_data.get("required_capabilities", []), "request.required_capabilities")
+    )
+    request_data["quality_priorities"] = _string_sequence(
+        request_data.get("quality_priorities", []), "request.quality_priorities"
+    )
+    request_data["minimum_quality"] = dict(
+        _mapping(request_data.get("minimum_quality"), "request.minimum_quality")
+    )
+    request_data["quality_weights"] = dict(
+        _mapping(request_data.get("quality_weights", {}), "request.quality_weights")
+    )
+    try:
+        request = ShotRoutingRequest(**request_data)
+    except (TypeError, ValueError) as exc:
+        raise DomainAdapterError(f"invalid routing request: {exc}") from exc
 
     raw_engines = data.get("engines")
     if not isinstance(raw_engines, list) or not raw_engines:
         raise DomainAdapterError("shot routing requires a non-empty engines array")
     engines = []
-    for raw_engine in raw_engines:
-        engine_data = dict(_mapping(raw_engine, "model observation"))
-        engine_data["capabilities"] = frozenset(engine_data.get("capabilities", []))
-        engine_data["resolutions"] = frozenset(engine_data.get("resolutions", []))
+    for index, raw_engine in enumerate(raw_engines):
+        engine_data = dict(_mapping(raw_engine, f"model observation[{index}]"))
+        engine_data["capabilities"] = frozenset(
+            _string_sequence(engine_data.get("capabilities", []), f"engines[{index}].capabilities")
+        )
+        engine_data["resolutions"] = frozenset(
+            _string_sequence(engine_data.get("resolutions", []), f"engines[{index}].resolutions")
+        )
         for field_name in (
             "quality_evidence_refs", "pricing_evidence_refs", "terms_evidence_refs",
             "availability_evidence_refs",
         ):
-            engine_data[field_name] = tuple(engine_data.get(field_name, []))
+            engine_data[field_name] = _string_sequence(
+                engine_data.get(field_name, []), f"engines[{index}].{field_name}"
+            )
         profiles = []
-        for raw_profile in engine_data.get("operation_profiles", []):
-            profile_data = dict(_mapping(raw_profile, "operation profile"))
-            profile_data["capabilities"] = frozenset(profile_data.get("capabilities", []))
-            profile_data["allowed_durations_seconds"] = frozenset(profile_data.get("allowed_durations_seconds", []))
-            profile_data["resolutions"] = frozenset(profile_data.get("resolutions", []))
-            profile_data["allowed_source_origins"] = frozenset(profile_data.get("allowed_source_origins", []))
-            profile_data["conditions"] = tuple(profile_data.get("conditions", []))
-            profiles.append(OperationProfile(**profile_data))
+        raw_profiles = engine_data.get("operation_profiles", [])
+        if not isinstance(raw_profiles, list):
+            raise DomainAdapterError(f"engines[{index}].operation_profiles must be an array")
+        for profile_index, raw_profile in enumerate(raw_profiles):
+            profile_data = dict(_mapping(raw_profile, f"operation profile[{profile_index}]"))
+            profile_data["capabilities"] = frozenset(
+                _string_sequence(profile_data.get("capabilities", []), "operation_profile.capabilities")
+            )
+            durations = profile_data.get("allowed_durations_seconds", [])
+            if not isinstance(durations, (list, tuple)):
+                raise DomainAdapterError("operation_profile.allowed_durations_seconds must be a numeric array")
+            if any(isinstance(item, bool) or not isinstance(item, (int, float)) for item in durations):
+                raise DomainAdapterError("operation_profile.allowed_durations_seconds must be a numeric array")
+            profile_data["allowed_durations_seconds"] = frozenset(durations)
+            profile_data["resolutions"] = frozenset(
+                _string_sequence(profile_data.get("resolutions", []), "operation_profile.resolutions")
+            )
+            profile_data["allowed_source_origins"] = frozenset(
+                _string_sequence(profile_data.get("allowed_source_origins", []), "operation_profile.allowed_source_origins")
+            )
+            profile_data["conditions"] = _string_sequence(
+                profile_data.get("conditions", []), "operation_profile.conditions"
+            )
+            try:
+                profiles.append(OperationProfile(**profile_data))
+            except (TypeError, ValueError) as exc:
+                raise DomainAdapterError(f"invalid operation profile: {exc}") from exc
         engine_data["operation_profiles"] = tuple(profiles)
         observations = {}
         for dimension, raw_observation in _mapping(
             engine_data.get("quality_observations", {}), "quality_observations"
         ).items():
             observation_data = dict(_mapping(raw_observation, f"quality observation {dimension}"))
-            observation_data["evidence_refs"] = tuple(observation_data.get("evidence_refs", []))
-            observations[str(dimension)] = QualityObservation(**observation_data)
+            observation_data["evidence_refs"] = _string_sequence(
+                observation_data.get("evidence_refs", []), f"quality_observation[{dimension}].evidence_refs"
+            )
+            try:
+                observations[str(dimension)] = QualityObservation(**observation_data)
+            except (TypeError, ValueError) as exc:
+                raise DomainAdapterError(f"invalid quality observation {dimension}: {exc}") from exc
         engine_data["quality_observations"] = observations
-        engines.append(ModelObservation(**engine_data))
+        try:
+            engines.append(ModelObservation(**engine_data))
+        except (TypeError, ValueError) as exc:
+            raise DomainAdapterError(f"invalid model observation {index}: {exc}") from exc
     return request, tuple(engines)
 
 
@@ -834,19 +884,17 @@ def run_claimed_domain_adapter(
             result = receipt
 
         elif name == "shot_route":
-            request, engines = _model_routing_request(
-                _input_json(packet, str(config["routing_request_input"]))
-            )
             now_value = str(config.get("now", "")).strip()
             now = datetime.fromisoformat(now_value.replace("Z", "+00:00")) if now_value else None
-            decision = EvidenceBoundModelRouter().route(request, engines, now=now)
-            route = _jsonable(decision)
-            route["blocked"] = decision.blocked
-            if decision.blocked and config.get("block_if_no_engine", True):
+            route = route_shot(
+                _input_json(packet, str(config["routing_request_input"])),
+                now=now,
+            )
+            if route["blocked"] and config.get("block_if_no_engine", True):
                 raise DomainAdapterError(
                     "shot routing blocked: no current model observation satisfies operation profile, "
                     "commercial terms, provenance, calibrated quality, evidence freshness and budget policy: "
-                    + str(decision.blocked_reason)
+                    + str(route.get("blocked_reason"))
                 )
             output_name = str(config.get("output_name", outputs[0]))
             path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
@@ -856,16 +904,16 @@ def run_claimed_domain_adapter(
                     "path": str(path), "kind": "decision", "media_type": "application/json",
                     "rights_status": "NOT_APPLICABLE",
                     "metadata": {
-                        "adapter": name, "selected_engine_id": decision.selected_engine_id,
-                        "blocked": decision.blocked, "blocked_reason": decision.blocked_reason,
-                        "pareto_front": list(decision.pareto_front),
+                        "adapter": name, "selected_engine_id": route.get("selected_engine_id"),
+                        "blocked": route["blocked"], "blocked_reason": route.get("blocked_reason"),
+                        "pareto_front": route.get("pareto_front", []),
                     },
                 }
             }
             result = {
-                "adapter": name, "selected_engine_id": decision.selected_engine_id,
-                "blocked": decision.blocked, "blocked_reason": decision.blocked_reason,
-                "pareto_front": list(decision.pareto_front),
+                "adapter": name, "selected_engine_id": route.get("selected_engine_id"),
+                "blocked": route["blocked"], "blocked_reason": route.get("blocked_reason"),
+                "pareto_front": route.get("pareto_front", []),
             }
 
         elif name == "extended_media_qa":

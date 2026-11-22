@@ -102,23 +102,19 @@ def test_timeline_adapter_reconstructs_refs_and_requires_promoted_graph_assets()
         timeline.validate_against_graph(graph)
 
 
-def test_shot_router_adapter_uses_operation_capability_quality_and_evidence_gates():
-    decision = route_shot({
-        "request": {
-            "shot_id": "S1", "required_capabilities": ["i2v", "image_reference"],
-            "duration_seconds": 4, "minimum_quality": 4.0, "lane": "production", "risk": "hero",
-        },
-        "engines": [
-            {"engine_id": "cheap", "capabilities": ["i2v", "image_reference"], "measured_quality": 4.1,
-             "available": True, "output_cost_usd_per_second": 0.05,
-             "quality_evidence_refs": ["benchmark://cheap"], "pricing_evidence_refs": ["pricing://cheap"]},
-            {"engine_id": "premium", "capabilities": ["i2v", "image_reference"], "measured_quality": 4.8,
-             "available": True, "premium": True, "output_cost_usd_per_second": 0.50,
-             "quality_evidence_refs": ["benchmark://premium"], "pricing_evidence_refs": ["pricing://premium"]},
-        ],
-    })
-    assert decision["selected_engine_id"] == "premium"
-    assert all(item["eligible"] for item in decision["assessments"])
+def test_shot_router_rejects_the_removed_legacy_routing_shape():
+    with pytest.raises(DomainAdapterError, match="invalid evidence-bound shot routing contract"):
+        route_shot({
+            "request": {
+                "shot_id": "S1", "required_capabilities": ["i2v", "image_reference"],
+                "duration_seconds": 4, "minimum_quality": 4.0, "lane": "production", "risk": "hero",
+            },
+            "engines": [
+                {"engine_id": "cheap", "capabilities": ["i2v", "image_reference"], "measured_quality": 4.1,
+                 "available": True, "output_cost_usd_per_second": 0.05,
+                 "quality_evidence_refs": ["benchmark://cheap"], "pricing_evidence_refs": ["pricing://cheap"]},
+            ],
+        })
 
 
 def test_business_metrics_adapter_preserves_objective_vector_without_global_score():
@@ -212,6 +208,9 @@ def test_shot_route_adapter_uses_fresh_evidence_bound_model_registry(tmp_path):
     assert payload["selected_engine_id"] == "provider-a"
     assert payload["assessments"][0]["operation_profile_id"] == "i2v-1080p-5s"
     assert payload["assessments"][0]["quality_lower_bounds"]["identity"] == 4.6
+    direct = route_shot(routing_request)
+    assert direct["selected_engine_id"] == payload["selected_engine_id"]
+    assert direct["assessments"] == payload["assessments"]
     assert engine.audit("routing")["pass"] is True
 
 
