@@ -4,7 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from video_growth_agent import ArtifactRecord, ProjectStore, StudioRuntime
+from video_growth_agent.models import ArtifactRecord
+from video_growth_agent.storage import ProjectStore
+from video_growth_agent.runtime import StudioRuntime
 from video_growth_agent.execution_attestation import ExecutionAttestation, ExecutionTrustRegistry, canonical_digest
 from video_growth_agent.models import QACheck, QAReport
 from video_growth_agent.resources import data_path

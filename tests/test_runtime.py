@@ -3,7 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from video_growth_agent import Approval, ArtifactRecord, AssetRecord, GateBlocked, ProjectStore, StudioRuntime
+from video_growth_agent.models import Approval, ArtifactRecord, AssetRecord, QACheck, QAReport
+from video_growth_agent.orchestrator import GateBlocked
+from video_growth_agent.storage import ProjectStore
+from video_growth_agent.runtime import StudioRuntime
 from video_growth_agent.studio_agents import AgenticStudio
 
 
@@ -65,7 +68,7 @@ def test_current_prompts_are_approval_role_scoped_not_producer_scoped(tmp_path):
 
 
 def _record_fake_qa_receipt(rt, project_id: str, media_uri: str, hard_pass: bool, sha256: str | None = None):
-    from video_growth_agent import QACheck, QAReport
+    from video_growth_agent.models import QACheck, QAReport
     statuses = {"video_stream":"PASS","stream_duration_match":"PASS","true_peak":"PASS" if hard_pass else "FAIL","black_frames":"PASS"}
     checks = tuple(QACheck(check_id, status, "test") for check_id, status in statuses.items())
     metadata = {"checker":"ffmpeg-ffprobe-v0.2"}
@@ -106,7 +109,7 @@ def test_default_project_store_never_targets_installed_package(monkeypatch, tmp_
 
 
 def test_empty_or_untrusted_qa_receipt_cannot_pass_machine_gate(tmp_path):
-    from video_growth_agent import QAReport
+    from video_growth_agent.models import QAReport
     rt = runtime(tmp_path); rt.create_project("untrusted"); state = rt.state("untrusted"); state.stage = "TECH_QA"; state.artifacts["final_candidate"] = ArtifactRecord("final_candidate", "file://candidate.mp4", "TECH_QA", kind="media"); state.approvals["TECH_QA"] = {"technical_director": Approval("technical_director", "PASS")}; rt.store.save(state); rt.record_qa("untrusted", QAReport(media_uri="file://candidate.mp4", checks=())); state = rt.state("untrusted"); state.stage = "TECH_QA"; rt.store.save(state); assert "latest_media_qa_hard_pass" in rt.gate_report("untrusted")["machine_failures"]
 
 
