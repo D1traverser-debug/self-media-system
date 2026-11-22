@@ -6,8 +6,6 @@ Phillip Banks created the Chill Guy character. In November 2024, a Solana token 
 
 Banks said the character was copyrighted and that he planned takedowns for unauthorized merchandise and shitcoins. Brand accounts using it as a trend were different; he mainly wanted credit. [CoinDesk reported the exchange.](https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok)
 
-The episode put the artist, the token's unknown creator and its traders in the same conversation. Each had a different stake in what happened next.
-
 The word **community** can fold those roles together. It may refer to the people who make a meme travel, the wallets that own its token, or the accounts that receive money when it trades. Those groups can overlap, but their contributions and rewards still need to be identified separately.
 
 ## 01 / A meme can travel. Its token has owners.
@@ -32,7 +30,7 @@ Bitquery examined 8,212,568 Pump.fun launches whose first trades occurred betwee
 
 Bitquery identifies developer-linked wallets through the launch transaction, fee payment and the four transactions immediately after it. These are on-chain classifications, not verified identities; a first sale does not establish a full exit. The figures describe launch timing and wallet patterns, not a scam rate.
 
-By the time a token reaches your X feed, some of its earliest positions may already be in place. Your discovery time and the token's launch timeline run on different clocks.
+By the time a token reaches your X feed, some of its earliest positions may already be in place.
 
 Market cap multiplies the quoted price by the circulating supply. It is a valuation snapshot, not a measure of how much money entered or how much liquidity is available for an exit.
 
@@ -40,7 +38,7 @@ Market cap multiplies the quoted price by the circulating supply. It is a valuat
 
 Fan art, translations, moderation, spaces, raids and daily replies keep a meme in circulation. When contributors also hold the token, that work can express genuine attachment while helping attract buyers.
 
-A holder's post carries a view of the project alongside a financial position. Look at what the account discloses, what it contributes beyond price calls, and whether that work continues when trading slows. Original art, translations and moderation tell you something different from a feed built around chart screenshots.
+A holder's post carries a view of the project alongside a financial position. Check what the account discloses, what it contributes beyond price calls, and whether the work continues when trading slows.
 
 ## 05 / "Community" is three different ledgers.
 
@@ -64,10 +62,10 @@ That fundraiser shows what collective participation can accomplish outside a mar
 
 Before buying into a community pitch, match each claim to the evidence:
 
-- A cultural claim calls for visible work: what people keep making, translating and organizing when the chart is quiet.
-- An ownership claim calls for wallet data: who holds the supply and when early positions formed.
-- A cash-flow claim calls for the fee route: which wallets receive creator fees or holder rewards.
+- **Culture:** What do people keep making, translating and organizing when the chart is quiet?
+- **Ownership:** Who holds the supply, and when did the early positions form?
+- **Cash flow:** Which wallets receive creator fees or holder rewards?
 
-Then check the accounts promoting the token: do they disclose their positions, and what do they contribute beyond price calls?
+Then look at the accounts making the pitch. Do they disclose their positions?
 
 The timeline shows what people are doing. The holder list shows who owns the token. The fee route shows who gets paid.
