@@ -333,6 +333,129 @@ def test_release_check_reconciles_superseded_program_source_without_manual_refre
     assert transferred_state["status"] == "STALE"
 
 
+@pytest.mark.parametrize("score", ["NaN", "Infinity", "-Infinity"])
+def test_release_check_rejects_non_finite_review_scores(tmp_path, score):
+    review_brief = {
+        "goal": "Produce a document with measurable review quality.",
+        "audience": "The intended audience.",
+        "deliverables": ["final-document"],
+        "release_policy": {
+            "require_rights": True,
+            "required_review_rubrics": ["quality"],
+            "required_evidence_refs": [],
+            "require_technical_qa": False,
+            "review_contracts": {
+                "quality": {
+                    "dimension_floors": {"clarity": 4.0},
+                    "score_dimensions": ["clarity"],
+                    "min_average": 4.0,
+                },
+            },
+        },
+    }
+    engine = StudioEngine(tmp_path / f"non-finite-{score.lower().replace('-', 'neg')}")
+    engine.create_project("score-check", "Non-finite score check", review_brief)
+    engine.add_tasks("score-check", [task("render-score-check")])
+    packet = engine.claim_next("score-check", "score-producer")
+    output = engine._project_dir("score-check") / "artifacts" / "final-document.txt"
+    output.write_text("final document", encoding="utf-8")
+    final_artifact = engine.complete_task(
+        "score-check", "render-score-check", "score-producer", packet["claim"]["claim_token"],
+        {"render-score-check-artifact": {
+            "path": str(output), "kind": "document", "media_type": "text/plain",
+            "rights_status": "OWNED",
+        }},
+    )["artifacts"]["render-score-check-artifact"]
+    engine.record_review(
+        "score-check", final_artifact["artifact_id"],
+        reviewer_id="quality-reviewer", rubric_id="quality", outcome="PASS",
+        dimensions={"scorecard": {"clarity": score}},
+        evidence_refs=["review://non-finite-score"],
+    )
+    release = engine.release_check(
+        "score-check", final_artifact["artifact_id"], required_rubrics=["quality"],
+    )
+    assert release["pass"] is False
+    assert any(item.startswith("review_score_not_finite:quality:clarity:") for item in release["failures"])
+    assert any(item.startswith("review_scorecard_not_finite:quality:") for item in release["failures"])
+
+
+def test_cross_project_media_transfer_preserves_and_resolves_rights_evidence(tmp_path):
+    transfer_brief = {
+        "goal": "Produce an Episode image with complete source rights provenance.",
+        "audience": "The intended audience.",
+        "deliverables": ["final-image"],
+        "release_policy": {
+            "require_rights": True,
+            "require_rights_evidence": True,
+            "required_review_rubrics": ["editorial"],
+            "required_evidence_refs": [],
+            "require_technical_qa": False,
+        },
+    }
+    engine = StudioEngine(tmp_path / "rights-transfer-workspace")
+    engine.create_project("program", "Program", transfer_brief)
+    engine.create_project("episode", "Episode", transfer_brief)
+    license_path = tmp_path / "license-proof.json"
+    license_path.write_text(json.dumps({"license": "owner-authorized"}), encoding="utf-8")
+    license_artifact = engine.import_asset(
+        "program", "license-proof", license_path,
+        kind="evidence", media_type="application/json", rights_status="NOT_APPLICABLE",
+    )
+    image_path = tmp_path / "hero-image.png"
+    image_path.write_bytes(b"approved-image-bytes")
+    source_image = engine.import_asset(
+        "program", "hero-image", image_path,
+        kind="image", media_type="image/png", rights_status="OWNED",
+        metadata={"rights_evidence_refs": ["https://rights.example/hero-image", "license-proof"]},
+    )
+    with pytest.raises(ContractError, match="transfer the referenced rights evidence artifact first"):
+        engine.transfer_artifact(
+            "program", "hero-image", "episode",
+            expected_artifact_id=source_image["artifact_id"],
+            expected_version=source_image["version"],
+            expected_sha256=source_image["sha256"],
+        )
+
+    target_license = engine.transfer_artifact(
+        "program", "license-proof", "episode", "episode-license-proof",
+        expected_artifact_id=license_artifact["artifact_id"],
+        expected_version=license_artifact["version"],
+        expected_sha256=license_artifact["sha256"],
+    )["target"]
+    target_image = engine.transfer_artifact(
+        "program", "hero-image", "episode", "episode-hero-image",
+        expected_artifact_id=source_image["artifact_id"],
+        expected_version=source_image["version"],
+        expected_sha256=source_image["sha256"],
+    )["target"]
+    assert target_image["metadata"]["rights_evidence_refs"] == [
+        "https://rights.example/hero-image", target_license["artifact_id"],
+    ]
+
+    engine.add_tasks("episode", [task("render-final-image", inputs=["episode-hero-image"])])
+    packet = engine.claim_next("episode", "episode-renderer")
+    output = engine._project_dir("episode") / "artifacts" / "final-image.png"
+    output.write_bytes(b"final-image-bytes")
+    final_artifact = engine.complete_task(
+        "episode", "render-final-image", "episode-renderer", packet["claim"]["claim_token"],
+        {"render-final-image-artifact": {
+            "path": str(output), "kind": "image", "media_type": "image/png",
+            "rights_status": "OWNED",
+            "metadata": {"rights_evidence_refs": ["https://rights.example/hero-image", target_license["artifact_id"]]},
+        }},
+    )["artifacts"]["render-final-image-artifact"]
+    engine.record_review(
+        "episode", final_artifact["artifact_id"],
+        reviewer_id="episode-editorial-reviewer", rubric_id="editorial", outcome="PASS",
+        dimensions={"visual": "PASS"}, evidence_refs=["review://episode-image"],
+    )
+    release = engine.release_check(
+        "episode", final_artifact["artifact_id"], required_rubrics=["editorial"],
+    )
+    assert release["pass"] is True, release["failures"]
+
+
 def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(tmp_path, capsys):
     from video_studio.cli import main
 

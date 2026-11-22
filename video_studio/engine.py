@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from contextlib import closing
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -1364,6 +1365,68 @@ class StudioEngine:
                     destination.unlink(missing_ok=True)
                 raise
 
+    def _resolve_transfer_rights_evidence_refs(
+        self,
+        source_connection: sqlite3.Connection,
+        source_project_id: str,
+        target_project_id: str,
+        source_metadata: dict[str, Any],
+    ) -> list[str] | None:
+        if "rights_evidence_refs" not in source_metadata:
+            return None
+        raw_refs = source_metadata["rights_evidence_refs"]
+        if not isinstance(raw_refs, list):
+            raise ContractError("source rights_evidence_refs must be an array")
+        resolved: list[str] = []
+        target_rows: list[sqlite3.Row] | None = None
+        for raw_ref in raw_refs:
+            if not isinstance(raw_ref, str) or not raw_ref.strip():
+                raise ContractError("source rights_evidence_refs must contain non-empty strings")
+            ref = raw_ref.strip()
+            if ref.startswith(("https://", "http://")):
+                resolved.append(ref)
+                continue
+            source_evidence = source_connection.execute(
+                """SELECT * FROM artifacts WHERE project_id=?
+                   AND status IN ('CURRENT','ACCEPTED')
+                   AND (artifact_id=? OR name=?)
+                   ORDER BY version DESC LIMIT 1""",
+                (source_project_id, ref, ref),
+            ).fetchone()
+            if source_evidence is None:
+                raise ContractError(
+                    f"source rights evidence reference does not resolve: {source_project_id}/{ref}"
+                )
+            if target_rows is None:
+                with closing(self._connect(target_project_id)) as target_connection:
+                    target_rows = target_connection.execute(
+                        "SELECT artifact_id,metadata_json FROM artifacts WHERE project_id=? AND status IN ('CURRENT','ACCEPTED')",
+                        (target_project_id,),
+                    ).fetchall()
+            target_evidence_id = None
+            for target_row in target_rows:
+                target_metadata = _loads(target_row["metadata_json"], {})
+                transfer = target_metadata.get("cross_project_transfer") if isinstance(target_metadata, dict) else None
+                if not isinstance(transfer, dict):
+                    continue
+                if (
+                    transfer.get("source_project_id") == source_project_id
+                    and transfer.get("source_artifact_id") == source_evidence["artifact_id"]
+                    and transfer.get("source_artifact_name") == source_evidence["name"]
+                    and transfer.get("source_artifact_version") == int(source_evidence["version"])
+                    and transfer.get("source_sha256") == source_evidence["sha256"]
+                    and transfer.get("target_project_id") == target_project_id
+                ):
+                    target_evidence_id = target_row["artifact_id"]
+                    break
+            if target_evidence_id is None:
+                raise ContractError(
+                    "transfer the referenced rights evidence artifact first: "
+                    f"{source_project_id}/{source_evidence['name']} -> {target_project_id}"
+                )
+            resolved.append(target_evidence_id)
+        return list(dict.fromkeys(resolved))
+
     def transfer_artifact(
         self,
         source_project_id: str,
@@ -1427,10 +1490,17 @@ class StudioEngine:
                     "target_project_id": target_project_id,
                     "target_artifact_name": target_name,
                 }
+                source_metadata = _loads(source_row["metadata_json"], {})
                 metadata = {
                     "cross_project_transfer": transfer,
-                    "source_metadata": _loads(source_row["metadata_json"], {}),
+                    "source_metadata": source_metadata,
                 }
+                if isinstance(source_metadata, dict):
+                    transferred_rights_refs = self._resolve_transfer_rights_evidence_refs(
+                        source_connection, source_project_id, target_project_id, source_metadata,
+                    )
+                    if transferred_rights_refs is not None:
+                        metadata["rights_evidence_refs"] = transferred_rights_refs
                 with tempfile.TemporaryDirectory(prefix="vga-cross-project-transfer-") as temp_dir:
                     snapshot = Path(temp_dir) / source_path.name
                     shutil.copy2(source_path, snapshot)
@@ -1851,15 +1921,31 @@ class StudioEngine:
                         except (KeyError, TypeError, ValueError):
                             failures.append(f"review_score_missing:{rubric}:{dimension}:{review['review_id']}")
                             continue
-                        if score < float(floor):
-                            failures.append(f"review_score_below_floor:{rubric}:{dimension}:{score:g}<{float(floor):g}")
+                        if not math.isfinite(score):
+                            failures.append(f"review_score_not_finite:{rubric}:{dimension}:{review['review_id']}")
+                            continue
+                        try:
+                            floor_value = float(floor)
+                        except (TypeError, ValueError):
+                            failures.append(f"review_floor_invalid:{rubric}:{dimension}")
+                            continue
+                        if not math.isfinite(floor_value):
+                            failures.append(f"review_floor_not_finite:{rubric}:{dimension}")
+                            continue
+                        if score < floor_value:
+                            failures.append(f"review_score_below_floor:{rubric}:{dimension}:{score:g}<{floor_value:g}")
                     score_dimensions = contract.get("score_dimensions", [])
                     if score_dimensions:
                         try:
                             values = [float(scorecard[name]) for name in score_dimensions]
+                            if not all(math.isfinite(value) for value in values):
+                                failures.append(f"review_scorecard_not_finite:{rubric}:{review['review_id']}")
+                                continue
                             average = sum(values) / len(values)
                             minimum_average = float(contract.get("min_average", 0))
-                            if average < minimum_average:
+                            if not math.isfinite(minimum_average):
+                                failures.append(f"review_minimum_average_not_finite:{rubric}:{review['review_id']}")
+                            elif average < minimum_average:
                                 failures.append(f"review_average_below_floor:{rubric}:{average:.2f}<{minimum_average:g}")
                         except (KeyError, TypeError, ValueError, ZeroDivisionError):
                             failures.append(f"review_scorecard_incomplete:{rubric}:{review['review_id']}")
