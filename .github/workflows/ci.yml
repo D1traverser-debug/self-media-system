@@ -16,8 +16,6 @@ jobs:
           sudo apt-get install -y ffmpeg fonts-dejavu-core
       - name: Install package and tests
         run: pip install -e . pytest==9.1.1
-      - name: Run system hygiene audit
-        run: vga system-audit --repo-root .
       - name: Run standalone Video Studio system audit
         run: |
           vga-studio system-audit --repo-root . > /tmp/standalone-video-studio-system-audit.json || true
@@ -82,84 +80,33 @@ jobs:
           assert audit['pass'] is True, audit
           print('standalone-program-context-smoke: PASS')
           PY
-      - name: Smoke test installed CLI outside repository
+      - name: Smoke test installed Video Studio outside repository
         run: |
           cd /tmp
           vga-studio --help > /tmp/vga-studio-outside-repo.txt
           python -m video_studio --help > /tmp/video-studio-module-help.txt
           studio_root="$(mktemp -d)"
-          vga-studio --root "$studio_root" init outside-repo-smoke --title "Installed standalone smoke" --brief "$GITHUB_WORKSPACE/examples/technology-explainer.brief.json" > /tmp/standalone-init.json
+          vga-studio --root "$studio_root" init outside-repo-smoke --title "Installed Video Studio smoke" --brief "$GITHUB_WORKSPACE/examples/technology-explainer.brief.json" > /tmp/standalone-init.json
           vga-studio --root "$studio_root" plan outside-repo-smoke "$GITHUB_WORKSPACE/examples/technology-explainer.tasks.json" > /tmp/standalone-plan.json
           vga-studio --root "$studio_root" audit outside-repo-smoke > /tmp/standalone-audit.json
           python - <<'PY'
           import json
           import sys
-          from video_studio.engine import StudioEngine
           import video_studio
-          assert "video_growth_agent" not in sys.modules
-          from video_growth_agent.studio_engine import StudioEngine as LegacyEngine
-          assert LegacyEngine is StudioEngine
+          import video_studio.adapters
+          from video_studio.engine import StudioEngine
+
+          assert video_studio.StudioEngine is StudioEngine
+          blocked = {
+              "video_growth_agent.runtime",
+              "video_growth_agent.orchestrator",
+              "video_growth_agent.studio_agents",
+              "video_growth_agent.program_orchestration",
+              "video_growth_agent.storage",
+          }
+          assert not blocked.intersection(sys.modules)
           report = json.load(open('/tmp/standalone-audit.json', encoding='utf-8'))
           assert report['pass'] is True, report
           assert report['task_count'] == 13, report
-          print('standalone-video-studio-outside-repo: PASS')
-          PY
-          vga system-audit > /tmp/system-audit.json
-          python - <<'PY'
-          import json
-          report = json.load(open('/tmp/system-audit.json', encoding='utf-8'))
-          assert report['pass'] is True, report
-          PY
-          vga techniques --tag mechanism --max-cost 2 > /tmp/techniques.json
-          test -s /tmp/techniques.json
-          python - <<'PY'
-          import json
-          from importlib.metadata import version
-          from video_growth_agent import (
-              AgentRegistry,
-              AgenticStudio,
-              ExecutionPlanner,
-              GeminiReviewerAdapter,
-              OpenRouterVisionReviewerAdapter,
-              RoleRegistry,
-              StudioOrchestrator,
-              TechniqueLibrary,
-          )
-          from video_growth_agent.storage import ProjectStore
-
-          def semver(value):
-              return tuple(int(part) for part in value.split('.'))
-
-          package_version = version("video-growth-agent")
-          registry = RoleRegistry()
-          orchestrator = StudioOrchestrator()
-          agents = AgentRegistry()
-          planner = ExecutionPlanner(agents=agents, orchestrator=orchestrator)
-          assert package_version
-          assert registry.get("showrunner").prompt
-          assert registry.get("creative_director").prompt
-          assert orchestrator.workflow["version"]
-          assert agents.config["version"] == planner.config["version"]
-          assert semver(agents.config["version"]) <= semver(package_version)
-          assert agents.config["principles"]["tool_labels_are_capability_requests_not_execution_proof"] is True
-          assert planner.validate() == []
-          assert agents.get("executive_producer").user_voice is True
-          assert agents.get("visual_designer").role is None
-          assert agents.get("growth_strategist").kind == "supervisor"
-          assert agents.get("production_methodologist").kind == "worker"
-          assert agents.get("evolution_engineer").kind == "worker"
-          learn_agents = [task.get("agent") for task in planner.config["stages"]["LEARN"]["tasks"]]
-          assert learn_agents == ["production_methodologist", "evolution_engineer", "red_team", "showrunner"]
-          assert planner.config["stages"]["TECH_QA"]["tasks"][0]["outputs"] == ["technical_qa"]
-          assert planner.config["stages"]["RELEASE"]["external_inputs"] == ["final_media", "publish_pack"]
-          assert "LOOKDEV" in orchestrator.index
-          assert "creative_director" in orchestrator.required_roles("VISUAL_PREVIEW")
-          library = TechniqueLibrary()
-          assert library.get("T-001").name
-          assert all(item.status == "validated" for item in library.find({"mechanism", "hook", "scale", "data", "metaphor"}))
-          assert str(ProjectStore().root) == "/tmp/projects"
-          assert GeminiReviewerAdapter().model
-          assert OpenRouterVisionReviewerAdapter().model
-          AgenticStudio()
-          print("installed-agentic-studio-smoke: PASS")
+          print('installed-video-studio-outside-repo: PASS')
           PY
