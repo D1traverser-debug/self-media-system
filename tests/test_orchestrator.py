@@ -77,6 +77,6 @@ def test_role_registry_loads_only_requested_prompt():
 
 
 def test_creative_director_prompt_and_lookdev_stage_exist():
-    from video_growth_agent import RoleRegistry
+    from video_growth_agent.roles import RoleRegistry
     registry = RoleRegistry(); prompt = registry.get("creative_director").prompt; assert "absolute craft bar" in prompt
     o = StudioOrchestrator(); assert "LOOKDEV" in o.index; assert "creative_director" in o.required_roles("VISUAL_PREVIEW")

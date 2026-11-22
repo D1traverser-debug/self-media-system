@@ -18,7 +18,7 @@
     "runtime_controller": false
   },
   "skill": {
-    "entrypoint": "CAOS_VIDEO_ENTRY.md"
+    "entrypoint": "STUDIO_ENTRY.md"
   },
   "runtime": {
     "version": "1.0.0",
