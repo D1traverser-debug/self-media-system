@@ -1,6 +1,6 @@
 {
   "algorithm": "SHA-256",
-  "scope": "All project-root files except this manifest itself.",
+  "scope": "Historical v3/v3.1/v3.2 baseline snapshot only; not authoritative for the active v3.3 candidate or mutable project control-plane files. Each active candidate has its own versioned manifest; control-plane files are tracked by Git commit SHA.",
   "files": {
     "CURRENT_PROGRESS.md": {
       "sha256": "e0433d18b8c7c19a9c2757330b7c3f130f9372a745875a55e578d5bca71b5bdd",
@@ -118,5 +118,7 @@
       "sha256": "30783ed7f63f6d7fc1bcc74cbb9069424bbb1bad0be266fe94f4338ccd843d5d",
       "size_bytes": 2021
     }
-  }
+  },
+  "superseded_by": "v3.3/Meme_X_v3_3_Asset_Manifest.json",
+  "snapshot_version": "v3.2-baseline"
 }
