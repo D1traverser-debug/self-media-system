@@ -193,7 +193,7 @@ def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path
         kind="episode_intent", media_type="application/json", rights_status="NOT_APPLICABLE",
     )
     assert latest["version"] == 2
-    engine.refresh("episode")
+    assert engine.claim_next("episode", "episode-worker-after-source-change") is None
     assert engine.list_tasks("episode")[0]["status"] == "STALE"
     with engine._connect("episode") as connection:
         stale_target = connection.execute(
@@ -240,6 +240,8 @@ def test_claimed_episode_work_is_invalidated_when_program_source_changes_before_
         "program", "approved-program-source", source_v2,
         kind="document", media_type="text/plain", rights_status="OWNED",
     )
+    with pytest.raises(ClaimError, match="current task claim"):
+        engine.claimed_packet("episode", "consume-program-source", "episode-worker", packet["claim"]["claim_token"])
     output = engine._project_dir("episode") / "artifacts" / "derived.txt"
     output.write_text("derived from superseded source", encoding="utf-8")
     with pytest.raises(ClaimError, match="current task claim"):
@@ -269,7 +271,7 @@ def test_release_check_reconciles_superseded_program_source_without_manual_refre
         "release_policy": {
             "require_rights": True,
             "require_rights_evidence": True,
-            "required_review_rubrics": [],
+            "required_review_rubrics": ["source-provenance"],
             "required_evidence_refs": [],
             "require_technical_qa": False,
         },
@@ -300,7 +302,15 @@ def test_release_check_reconciles_superseded_program_source_without_manual_refre
         }},
     )
     final_artifact = completed["artifacts"]["render-release-document-artifact"]
-    first_release = engine.release_check("episode", final_artifact["artifact_id"], required_rubrics=[])
+    engine.record_review(
+        "episode", final_artifact["artifact_id"],
+        reviewer_id="episode-independent-reviewer", rubric_id="source-provenance",
+        outcome="PASS", dimensions={"source_version": 1},
+        evidence_refs=["review://program-source-v1"],
+    )
+    first_release = engine.release_check(
+        "episode", final_artifact["artifact_id"], required_rubrics=["source-provenance"],
+    )
     assert first_release["pass"] is True, first_release["failures"]
 
     source_v2 = tmp_path / "release-source-v2.txt"
@@ -309,7 +319,9 @@ def test_release_check_reconciles_superseded_program_source_without_manual_refre
         "program", "release-source", source_v2,
         kind="document", media_type="text/plain", rights_status="OWNED",
     )
-    second_release = engine.release_check("episode", final_artifact["artifact_id"], required_rubrics=[])
+    second_release = engine.release_check(
+        "episode", final_artifact["artifact_id"], required_rubrics=["source-provenance"],
+    )
     assert second_release["pass"] is False
     assert "artifact_not_current:STALE" in second_release["failures"]
     assert engine.list_tasks("episode")[0]["status"] == "STALE"
