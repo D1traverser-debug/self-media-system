@@ -9,21 +9,24 @@ from video_studio.engine import StudioEngine
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_standalone_studio_is_the_new_entry_and_has_no_parent_runtime_dependency():
+def test_video_studio_is_the_single_runtime_under_caos_parent_governance():
     manifest = json.loads((ROOT / "video_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     skill = (ROOT / "skills/video-growth-agent/SKILL.md").read_text(encoding="utf-8")
     entry = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
     source = (ROOT / "video_studio/engine.py").read_text(encoding="utf-8")
 
-    assert manifest["governance"]["system"] == "VIDEO_STUDIO_NATIVE"
-    assert manifest["governance"]["mode"] == "STANDALONE"
+    assert manifest["governance"]["system"] == "CAOS"
+    assert manifest["governance"]["mode"] == "CHAT_GOVERNED_EXTERNAL"
     assert manifest["governance"]["caos_runtime_dependency"] is False
     assert manifest["governance"]["caos_api_dependency"] is False
     assert manifest["governance"]["caos_skill_dependency"] is False
+    assert manifest["governance"]["session_governance_required"] is True
+    assert manifest["governance"]["standalone_mode"] == "EXPLICIT_OWNER_SELECTION_ONLY"
+    assert manifest["governance"]["source_mutation"] == "FORBIDDEN"
     assert manifest["execution"]["fixed_stage_machine"] is False
     assert set(manifest["business_workstreams"]) == {"MEDIA_GROWTH", "ORIGINAL_DIGITAL_IP", "COMMERCIALIZATION", "PRODUCTION_SYSTEM"}
-    assert manifest["domain_adapter_policy"]["legacy_fixed_stage_orchestrator"] == "NOT_A_CONTROLLER"
+    assert manifest["domain_adapter_policy"]["fixed_stage_orchestrator"] == "NOT_LOADED_BY_STUDIO_RUNTIME"
     assert pyproject["project"]["scripts"]["vga-studio"] == "video_studio.cli:main"
     assert "STUDIO_ENTRY.md" in skill and "STUDIO_ENTRY.md" in entry
     assert "CAOS_VIDEO_ENTRY.md" not in skill
