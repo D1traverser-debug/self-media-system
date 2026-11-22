@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from video_growth_agent import (
-    EvidenceBoundModelRouter,
+from video_growth_agent.model_registry import EvidenceBoundModelRouter
+from video_growth_agent.production_os import (
     ShotContract,
     admit_candidate_generation,
     evaluate_take_promotion,

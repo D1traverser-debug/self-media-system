@@ -1,5 +1,6 @@
 import pytest
-from video_growth_agent import Approval, ArtifactRecord, GateBlocked, ProjectState, StudioOrchestrator
+from video_growth_agent.models import Approval, ArtifactRecord, ProjectState
+from video_growth_agent.orchestrator import GateBlocked, StudioOrchestrator
 
 
 def artifact(name: str, stage: str) -> ArtifactRecord:
@@ -66,7 +67,7 @@ def test_invalidation_removes_downstream_approvals():
 
 
 def test_every_required_role_has_prompt():
-    from video_growth_agent import RoleRegistry
+    from video_growth_agent.roles import RoleRegistry
     registry = RoleRegistry(); assert registry.validate_workflow() == []
 
 

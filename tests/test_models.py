@@ -1,4 +1,4 @@
-from video_growth_agent import Approval, ArtifactRecord, AssetRecord, ProjectState
+from video_growth_agent.models import Approval, ArtifactRecord, AssetRecord, ProjectState
 
 
 def test_state_serialization_roundtrip():
