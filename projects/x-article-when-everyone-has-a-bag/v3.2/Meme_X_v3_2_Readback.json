@@ -21,20 +21,22 @@
     "https://pump.fun/docs/fees",
     "https://www.pbs.org/newshour/world/jamaican-bobsled-team-raises-30000-in-dogecoin-for-trip-to-sochi"
   ],
+  "word_count_whitespace_delimited": 1633,
+  "chinese_han_characters": 2606,
   "docx_hyperlinks": {
-    "english": 5,
-    "chinese": 5
+    "Meme_X_Article_EN_v3_2.docx": 5,
+    "Meme_X_Article_ZH_v3_2.docx": 5
   },
-  "rendered_layout": {
-    "english_pages": 4,
-    "chinese_pages": 3,
-    "visual_review": "PASS — all 7 rendered pages inspected"
-  },
-  "zip_integrity": "PASS",
   "images_generated": 0,
   "x_published": false,
   "independent_editor_review": "OPEN",
   "trench_reader_review": "OPEN",
   "x_native_composer_mobile_preview": "NOT_TESTED",
-  "owner_publication_authorization": "NOT_GRANTED"
+  "owner_publication_authorization": "NOT_GRANTED",
+  "rendered_layout": {
+    "english_pages": 4,
+    "chinese_pages": 3,
+    "render_engine": "LibreOffice via render_docx.py",
+    "visual_review": "PASS: all 7 rendered pages inspected; no clipping, blank page, split section heading or orphaned numbered item."
+  }
 }
