@@ -64,8 +64,6 @@ PBS reported on January 21, 2014 that the Dogesled fundraiser had raised more th
 - English and Chinese source URL sets: match
 - Title and subtitle: preserved
 - No new factual case or token discussion: confirmed
-- Word layout: English 4 pages; Chinese 3 pages; all 7 rendered pages visually inspected
-- ZIP integrity: PASS
 - X native composer/mobile preview: NOT TESTED
 - Independent editor review: OPEN
 - Real target-reader cold read: OPEN
