@@ -1,16 +1,16 @@
 # Video Growth Agent
 
-Standalone, outcome-driven Video Studio for research, creative development, parallel media production, audiovisual QA, release preparation and evidence-based learning. New Video work does not require CAOS.
+CAOS-governed Video Production Studio for research, creative development, parallel media production, audiovisual QA, release preparation and evidence-based learning. When Video is selected in a CAOS-governed session, CAOS parent governance is mandatory; the Video runtime remains technically independent.
 
 ## Current authority
 
-- `STUDIO_ENTRY.md` — current standalone startup and operating entry for new Video work.
+- `STUDIO_ENTRY.md` — only startup and operating entry for new Video work.
 - `docs/standalone_video_studio.md` — Video-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
-- `video_studio/data/studio_manifest.json` — canonical standalone runtime and governance contract; no CAOS runtime/API/Skill dependency.
+- `video_studio/data/studio_manifest.json` — canonical runtime and parent-governance contract; no CAOS runtime/API dependency.
 - `video_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFmpeg/FFprobe QA.
 - `video_studio/adapters.py` — explicit, task-bound adapters for EditorialPlan, ShotContract, IPOS shot binding, IPOS continuity, MediaGraph bootstrap, Timeline, continuity, shot routing, business metrics, supplementary audio QA and deterministic local graphic rendering.
 - `skills/video-growth-agent/SKILL.md` — self-contained Video-owned agent operating instructions.
-- `CAOS_VIDEO_ENTRY.md`, `domain_manifest.json` and `capabilities.json` — retained for 0.8 compatibility/history; not startup dependencies for new Studio work.
+- `domain_manifest.json` and `capabilities.json` — Video-owned domain identity and capability contracts consumed by the canonical Studio.
 - `docs/product_requirements.md` — historical 0.8 product-requirements baseline; new operating authority is the standalone contract.
 - `docs/media_business_os.md` — 0.8 media-business domain reference; new execution/governance authority is standalone Video Studio.
 - `docs/architecture.md` — historical 0.8 architecture reference.
@@ -19,12 +19,12 @@ Standalone, outcome-driven Video Studio for research, creative development, para
 - `projects/PROJECT_INDEX.json` — child-owned project/program discovery authority.
 - `projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json` — growth/IP/commercial/production feedback loops.
 - `audits/EVOLUTION_INDEX.json` — canonical Video evolution-evidence entrypoint.
-- `video_growth_agent/data/` — versioned legacy/specialized episode workflow, specialists and coordination resources.
+- `video_growth_agent/` — Video-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
 
-The new `video_studio` package owns its requirement interpretation, decision receipts, task graph, leases, artifact history, review receipts, root-cause repair, recovery and learning admission. `vga-studio` and `python -m video_studio` both enter this package; legacy import paths are compatibility shims. It has no parent task identity, no parent lease and no CAOS runtime/API/Skill dependency. The 0.8 controller, fixed-stage workflow and parent-governance surfaces are not loaded by `vga-studio`. Specialized domain modules are imported only through the explicit `video_studio.adapters` bridge when a task declares a verified adapter.
+The `video_studio` package is the sole Video runtime: it owns Video project briefs, task DAGs, leases, artifact history, review receipts, failure recovery and domain execution. CAOS governs session-level requirement interpretation, material decisions, root-cause investigation, cross-domain authorization and independent acceptance when the owner selects Video from CAOS. The Video runtime has no CAOS API, runtime, task-ID or lease dependency. Video domain modules are imported only through the explicit `video_studio.adapters` boundary; the old fixed-stage controller is not an active execution path.
 
-## Legacy Media Business OS 0.8.0 compatibility layer
+## Video domain model and production architecture
 
 Video 0.8 makes the media-business system operable from natural-language/editorial intent through production and learning rather than starting mechanically at the Shot layer.
 
@@ -42,7 +42,7 @@ Linked state surfaces remain distinct:
 6. **Experiment/outcome state** — pre-registered tests and typed growth/production/commercial observations.
 7. **Operator projection** — recomputable current-Agent view of outcome, ready/blocking actions, stale evidence and recovery refs; never authority.
 
-The previous stage/work-order episode engine remains a historical 0.7/0.8 compatibility bundle. New projects use the dynamic task graph in `video_studio`; do not treat the old fixed stage sequence as the new Studio controller.
+The fixed-stage work-order engine is not an active controller. New projects use the project-specific dynamic task graph in `video_studio`; domain logic is called through the single adapter boundary.
 
 Core 0.8 runtime surfaces:
 
@@ -58,7 +58,7 @@ Core 0.8 runtime surfaces:
 - `business_objects.py` — typed content-portfolio, distinctive-asset, commercial-fit, rights-package, offer and business-decision objects;
 - `business_metrics.py` — platform, production and commercial outcome receipts without one vanity score;
 - `operator_view.py` — non-authoritative CURRENT_AGENT projection;
-- `owner_behavior_admission.py` — legacy 0.8 Video-domain recovery, root-scope analysis, typed evolution and repair closure.
+- `owner_behavior_admission.py` — Video-domain recovery, root-scope analysis, typed evolution and repair-closure rules.
 
 ## Integrated Media Business Program
 
@@ -107,11 +107,11 @@ Before generation/edit/review/QA/release, handshake the exact current-session ca
 
 Missing a high-assurance reviewer blocks only operations that require that tier. Missing a real generation provider blocks the affected shot or activates its declared degradation path; it never authorizes fabricated execution.
 
-## Standalone cognition, dogfood and evolution
+## CAOS-governed cognition, dogfood and evolution
 
-New Studio work uses the self-contained method in `docs/standalone_video_studio.md`: recover the real outcome; compare competing hypotheses and methods; use discriminating tests and counterevidence; execute a project-specific DAG; inspect exact artifact bytes; diagnose failures at the causal layer; independently replay repairs; and promote learning only with applicability, counterexamples and regression evidence. None of these operations calls CAOS.
+CAOS parent governance governs the session-level decision and execution discipline: recover the real outcome; compare competing hypotheses and methods; use discriminating tests and counterevidence; inspect exact artifact bytes; diagnose failures at the causal layer; independently replay repairs; and promote learning only with applicability, counterexamples and regression evidence. Video Studio owns the domain task graph and execution records; no CAOS runtime/API call is made.
 
-The standalone release contract now records immutable input lineage, invalidates consumers on source replacement, requires rights evidence across used media lineage, enforces exact-digest FFmpeg/FFprobe QA (full decode, stream timing, true peak and black frames), supports attested human cold reads and requires three evidence-backed Red Team findings when configured. See `docs/standalone_video_studio.md` and the three outcome/task examples.\n\nThe following legacy 0.8 adapter continues to describe its historical CAOS-governed workflow for compatibility only. It is not the standalone Studio runtime.
+The standalone release contract now records immutable input lineage, invalidates consumers on source replacement, requires rights evidence across used media lineage, enforces exact-digest FFmpeg/FFprobe QA (full decode, stream timing, true peak and black frames), supports attested human cold reads and requires three evidence-backed Red Team findings when configured. See `docs/standalone_video_studio.md` and the three outcome/task examples.\n\nThe Video domain capability catalog describes verified domain operations; the Studio manifest is the sole runtime authority.
 
 
 ### Integrated media-business program example
@@ -143,14 +143,14 @@ After `pip install -e .`:
 
 ```bash
 vga-studio --help
-vga system-audit --repo-root .  # legacy 0.8 compatibility audit
+vga-studio system-audit --repo-root .
 pytest -q
 ```
 
-The legacy system audit covers the historical 0.8 CAOS governance binding, Video business ownership, all canonical 0.8 runtime surfaces, agent-operability scenario presence, Media Business OS authorities, project/flywheel integrity, provider-neutral capability semantics, Program graph validity, absence of a parallel controller, artifact reachability, legacy-adapter bundle consistency, evolution discoverability and runtime-version consistency. It fails closed when a declared canonical runtime surface disappears or drifts.
+The Video Studio system audit checks the canonical runtime, parent-governance boundary, adapter registry, project/task graph integrity, artifact lineage, release gates and known production-readiness gaps. It fails closed when the active runtime contract drifts.
 
 CI success is validation evidence, not branch-protection enforcement unless GitHub separately reports branch protection/rulesets as enabled.
 
-## Standalone IP Studio OS integration
+## IP Studio OS integration
 
-The personal-IP character canon is owned by the independent IP Studio OS (IPOS); IPOS does not require a CAOS runtime/API call. The standalone program plan models the owner-approved IPOS Video Identity Bundle as an external versioned input and keeps identity-dependent tasks waiting until G2/G7/G8 and rights/provenance pass. The old `video_growth_agent.ip_identity` adapter remains a 0.8 capability reference; it is not silently treated as a verified standalone adapter. See `projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json`.
+The personal-IP character canon is owned by the independent IP Studio OS (IPOS); IPOS does not require a CAOS runtime/API call. The standalone program plan models the owner-approved IPOS Video Identity Bundle as an external versioned input and keeps identity-dependent tasks waiting until G2/G7/G8 and rights/provenance pass. The current `video_studio.adapters` bridge exposes IPOS inspection, import, exact-version shot binding and continuity operations; identity-dependent work remains blocked until an owner-approved bundle exists. See `projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json`.

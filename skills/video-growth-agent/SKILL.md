@@ -1,9 +1,9 @@
 ---
 name: video-growth-agent
-description: Standalone outcome-driven media studio for research, creative development, parallel production, audiovisual quality control, release preparation and evidence-based learning. Use for new Video projects and continuation of existing Video work.
+description: CAOS-governed Video Production Studio for research, creative development, parallel production, audiovisual quality control, release preparation and evidence-based learning. Use for new Video projects and continuation of existing Video work.
 ---
 
-# Video Growth Agent — Standalone Studio
+# Video Production Studio — Video Domain Skill
 
 **Startup authority:** repository-root `STUDIO_ENTRY.md`.
 
@@ -15,7 +15,7 @@ description: Standalone outcome-driven media studio for research, creative devel
 
 **Operating contract:** `docs/standalone_video_studio.md`.
 
-This Skill owns its complete Video-domain method and workflow. It must not rely on CAOS, a parent agent, hidden chat memory, a parent task ID, a parent lease, a governance API, or a second orchestration controller. The old `vga` / 0.8 system is a compatibility library only. New Video work enters through `video_studio`.
+This Skill owns Video-domain requirements, project state, task graphs, assets, production execution, review, failure recovery and domain learning. When Video is selected in a CAOS-governed ChatGPT session, the CAOS parent Skill governs complete-goal recovery, material decisions, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Do not bypass that parent governance or modify the CAOS repository, Skills or configuration. Video Studio has no CAOS runtime/API/task-ID/lease dependency. Direct standalone use is allowed only when the owner explicitly selects it. The fixed-stage controller is not an active execution path.
 
 ## 1. Startup and recovery
 
@@ -209,4 +209,4 @@ vga-studio --root ./studio-work audit episode-001
 vga-studio --root ./studio-work events episode-001
 ```
 
-Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The standalone control-plane core uses Python's standard library. The explicit domain-adapter layer also uses the project-declared Pillow and filelock dependencies; media QA and local graphics rendering require FFmpeg and FFprobe. Existing specialized modules are imported only through the tested adapter bridge, not as a second controller.
+Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The Video control-plane core uses Python's standard library. The explicit domain-adapter layer also uses the project-declared Pillow and filelock dependencies; media QA and local graphics rendering require FFmpeg and FFprobe. Existing specialized modules are imported only through the tested adapter bridge, not as a second controller.

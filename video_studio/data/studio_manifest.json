@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "studio_version": "1.0.0",
-  "product_name": "Standalone Video Studio",
+  "product_name": "Video Production Studio",
   "owner": "VIDEO_GROWTH_AGENT",
   "default_entrypoint": "STUDIO_ENTRY.md",
   "cli": "vga-studio",
@@ -25,13 +25,16 @@
     "downstream_invalidation": true
   },
   "governance": {
-    "system": "VIDEO_STUDIO_NATIVE",
-    "mode": "STANDALONE",
+    "system": "CAOS",
+    "mode": "CHAT_GOVERNED_EXTERNAL",
+    "session_governance_required": true,
+    "standalone_mode": "EXPLICIT_OWNER_SELECTION_ONLY",
     "caos_runtime_dependency": false,
     "caos_api_dependency": false,
     "caos_skill_dependency": false,
     "parent_task_or_lease_dependency": false,
-    "governance_method_owned_by_video": true
+    "source_mutation": "FORBIDDEN",
+    "domain_authority": "VIDEO_GROWTH_AGENT"
   },
   "decision_method": [
     "COMPETING_HYPOTHESES",
@@ -55,11 +58,6 @@
     "requires_counterexamples": true,
     "requires_failure_conditions": true,
     "requires_independent_replay_for_validation": true
-  },
-  "legacy_compatibility": {
-    "vga_cli": "video_growth_agent.cli:main",
-    "baseline": "0.8.0",
-    "authority": "COMPATIBILITY_ONLY_FOR_NEW_STUDIO_PROJECTS"
   },
   "ip_authority": {
     "original_identity_canon": "IPOS",
@@ -101,7 +99,7 @@
       "ipos_bundle_import": "video_growth_agent.ip_identity.import_ipos_bundle",
       "timeline_validate": "video_growth_agent.timeline.TimelineSpec",
       "continuity_assess": "video_growth_agent.continuity.assess_continuity",
-      "shot_route": "video_growth_agent.engine_routing.CostAwareShotRouter",
+      "shot_route": "video_growth_agent.model_registry.EvidenceBoundModelRouter",
       "business_outcome_metrics": "video_growth_agent.business_metrics.EpisodeOutcomeReceipt",
       "extended_media_qa": "video_growth_agent.media_qa.MediaQAChecker",
       "programmatic_graphic_render": "video_growth_agent.programmatic_graphics.render_programmatic_graphic",
@@ -122,7 +120,7 @@
     "repository_system_audit": {
       "entrypoint": "vga-studio system-audit",
       "checks": [
-        "standalone_entry_and_governance",
+        "caos_parent_governance_and_runtime_boundary",
         "runtime_dependency_boundary",
         "domain_adapter_registry_matches_manifest",
         "program_authority_refs_are_digest_bound_inputs",
@@ -169,8 +167,8 @@
   },
   "domain_adapter_policy": {
     "control_plane": "video_studio",
-    "legacy_specialized_modules": "OPTIONAL_VERIFIED_ADAPTERS",
-    "legacy_fixed_stage_orchestrator": "NOT_A_CONTROLLER",
+    "video_domain_modules": "VIDEO_OWNED_DOMAIN_LOGIC__EXPLICIT_ADAPTERS_ONLY",
+    "fixed_stage_orchestrator": "NOT_LOADED_BY_STUDIO_RUNTIME",
     "require_artifact_receipts": true
   },
   "system_audit": "video_studio.system_audit.run_system_audit"

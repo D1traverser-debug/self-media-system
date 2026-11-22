@@ -1,8 +1,0 @@
-{
-  "schema_version": 1,
-  "deprecated": true,
-  "canonical_manifest": "video_studio/data/studio_manifest.json",
-  "canonical_runtime": "video_studio.engine.StudioEngine",
-  "authority": "STUDIO_ENTRY.md",
-  "compatibility_note": "This file is retained only as a historical path pointer. New Video Studio work must read the canonical manifest."
-}

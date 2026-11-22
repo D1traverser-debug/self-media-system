@@ -1,4 +1,4 @@
-# Standalone Video Studio — Product, Method and Runtime Contract
+# Video Production Studio — Product, Method and Runtime Contract
 
 Status: `ACTIVE_CANDIDATE_1.0`
 Runtime: `video_studio.engine`
@@ -16,7 +16,7 @@ No single visual style, runtime, aspect ratio, duration, model, editor or produc
 
 ## 1.1 Business-domain scope
 
-The Studio is the standalone control plane for the complete Video Growth Agent domain, not only a clip renderer. A project graph may cover one workstream or connect several:
+The Studio is the sole active control plane for the complete Video domain, not only a clip renderer. A project graph may cover one workstream or connect several:
 
 - **MEDIA_GROWTH** — audience/problem research, demand signals, platform strategy, portfolio and series hypotheses, packaging, distribution, retention and audience outcomes.
 - **ORIGINAL_DIGITAL_IP** — video-side use of approved IP, recognition/performance evidence, character/asset usage strategy and licensing-use value. Canon, likeness and identity rights remain owned by IPOS.
@@ -25,11 +25,11 @@ The Studio is the standalone control plane for the complete Video Growth Agent d
 
 Cross-workstream decisions must be explicit. Audience evidence may change a series hypothesis; IP performance may change packaging or licensing strategy; sponsor obligations may change format and product-asset requirements; production cost, failure and reuse evidence may change future portfolio allocation. Editorial truth, rights and owner authority remain hard constraints. Do not optimize one proxy such as views, CTR, cinematic quality, AI-video percentage or lowest credit cost.
 
-The `video_studio` engine supplies the durable project control plane: briefs, dynamic task DAGs, leases, artifacts, decisions, reviews, failures and learning receipts. It does **not** silently recreate every legacy domain object. When Program/Series/Episode/Shot/Timeline, continuity, provider routing, business metrics or IP identity semantics are required, reuse the corresponding Video-owned domain module through an explicit, tested adapter and register its outputs as versioned Studio artifacts. Do not use the legacy fixed-stage `StudioOrchestrator` as the new controller. Existing specialized modules are optional capability libraries, not a hidden parent workflow.
+The `video_studio` engine is the sole durable project control plane: briefs, dynamic task DAGs, leases, artifacts, decisions, reviews, failures and learning receipts. Program/Series/Episode/Shot/Timeline, continuity, provider routing, business metrics and IP identity semantics remain Video-owned domain logic and are exposed through the single tested adapter boundary. The fixed-stage `StudioOrchestrator` is not an active controller. No second task scheduler or parent workflow is permitted.
 
-The standalone runtime now exposes those explicit adapters through `vga-studio run-adapter`: EditorialPlan validation, ShotContract materialization/validation, IPOS bundle inspection/import, exact-version IPOS shot binding and canon continuity snapshot/link creation, MediaGraph bootstrap, TimelineSpec validation, shot continuity assessment, operation-specific shot routing, business outcome metrics, supplementary loudness/silence QA and deterministic programmatic-graphics rendering. Each adapter reads only declared, digest-verified task inputs and registers exact outputs through the Studio artifact transaction. The graphic renderer creates a silent candidate only; a separate sound task, canonical technical QA, human review and release check remain required.
+The Studio runtime exposes those explicit adapters through `vga-studio run-adapter`: EditorialPlan validation, ShotContract materialization/validation, IPOS bundle inspection/import, exact-version IPOS shot binding and canon continuity snapshot/link creation, MediaGraph bootstrap, TimelineSpec validation, shot continuity assessment, operation-specific shot routing, business outcome metrics, supplementary loudness/silence QA and deterministic programmatic-graphics rendering. Each adapter reads only declared, digest-verified task inputs and registers exact outputs through the Studio artifact transaction. The graphic renderer creates a silent candidate only; a separate sound task, canonical technical QA, human review and release check remain required.
 
-This is not a claim that every external provider is connected. The repository currently has no trusted external generative-video executor registered. Provider generation remains a tool/session capability operation; the router can select only from supplied, current, evidence-backed engine profiles. The standalone runtime does not invent availability or invoke paid providers implicitly.
+This is not a claim that every external provider is connected. The repository currently has no trusted external generative-video executor registered. Provider generation remains a tool/session capability operation; the router can select only from supplied, current, evidence-backed engine profiles. The runtime does not invent availability or invoke paid providers implicitly.
 
 
 ## 2. Authority and independence
@@ -43,7 +43,7 @@ This is not a claim that every external provider is connected. The repository cu
 - **Event log** is append-only operational history.
 - **IPOS** remains the sole authority for original character/identity canon.
 
-The new runtime is standalone. It has no CAOS imports, network calls, API, parent task identity, parent lease, hidden chat-memory dependency or external governance callback. The old 0.8 controller, `vga` CLI and fixed-stage workflow remain compatibility/history surfaces and are not loaded as a controller by `vga-studio`. Specialized domain modules are imported only through the explicit `video_studio.adapters` bridge when a task declares a tested adapter. CAOS integration notes remain historical documentation only.
+CAOS governs session-level cognition and authorization when the owner selects Video from a CAOS-governed session. Video Studio owns domain execution, project/task state and artifact records. The runtime has no CAOS imports, API, parent task identity or parent lease; this runtime boundary does not waive the active session's CAOS governance. The fixed-stage controller is not loaded by `vga-studio`. Video domain modules are imported only through `video_studio.adapters` when a task declares a supported adapter.
 
 ## 3. Goal recovery and requirement governance
 
@@ -213,9 +213,9 @@ These reviewer attributes are recorded as attestations. The runtime can validate
 
 ### Evidence and publication boundary
 
-`required_evidence_artifact_names` requires registered, current, digest-verified artifacts of an allowed evidence/document/report/decision/timeline/domain-state kind. `required_artifact_names` requires every declared deliverable. `required_asset_names` requires source assets to be in final lineage and rights-cleared. String-only `required_evidence_refs` remain compatibility references; use artifact names/IDs for evidence that must be machine-verified.
+`required_evidence_artifact_names` requires registered, current, digest-verified artifacts of an allowed evidence/document/report/decision/timeline/domain-state kind. `required_artifact_names` requires every declared deliverable. `required_asset_names` requires source assets to be in final lineage and rights-cleared. String-only evidence references are descriptive only and cannot satisfy machine-verified evidence requirements; use registered artifact names/IDs.
 
-A successful release check marks the exact artifact ACCEPTED; it does not upload, publish, schedule or spend money. Publication remains a separate owner-authorized action. The CLI's `--allow-unknown-rights` compatibility switch cannot override a hard requirement in the owner brief.
+A successful release check marks the exact artifact ACCEPTED; it does not upload, publish, schedule or spend money. Publication remains a separate owner-authorized action. No CLI option can override a hard rights requirement in the owner brief.
 
 ### Review and QA CLI
 
@@ -325,11 +325,11 @@ vga-studio --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSan
 
 The example is an adapter integration proof, not a claim that a title card alone is a finished film or that external generative-video providers are connected.
 
-## 14. Migration and compatibility
+## 14. Single runtime and governance boundary
 
-The existing `vga` CLI and 0.8 Media Business OS remain available for historical Pilot recovery and proven specialized capabilities. They are not the new Studio's controller or task graph. Reuse old modules only through explicit adapters after verifying their current behavior, compatibility, real outputs and failure cases. Do not migrate old fixed stage order or role assignments merely because they exist.
+`STUDIO_ENTRY.md` is the only Video startup entry. `vga-studio` is the only installed CLI and `video_studio.engine.StudioEngine` is the only active project runtime. CAOS parent governance is applied at the ChatGPT session level; the Video runtime does not create a second parent controller or make runtime/API calls to CAOS. Video domain logic is accessed only through the Studio adapter registry.
 
-## 15. Known limits of this first standalone runtime
+## 15. Known limits of the current runtime
 
 The core supplies durable project governance, DAG scheduling, worker leases, artifact identity, review evidence, failure records and learning admission. It does not itself contain a universal LLM, image/video generation model, NLE, music library or paid provider credential. Nor does the core itself implement every business-domain object; the Skill coordinates those domain capabilities through explicit adapters and evidence-bound artifacts. The active worker must use the actual available media tools/provider adapters, report capability gaps honestly, and return files into the project workspace. The absence of a provider blocks only the affected operation or triggers an explicitly accepted degradation path; it never fabricates media output.
 

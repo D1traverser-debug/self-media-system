@@ -1,7 +1,7 @@
-# Video Studio — Standalone Entry
+# Video Production Studio — Canonical Entry
 
 Status: `ACTIVE_CANDIDATE`
-This file, `STUDIO_ENTRY.md`, is the standalone startup authority for new Video work.
+This file, `STUDIO_ENTRY.md`, is the single startup authority for all Video work.
 Runtime: `video_studio.engine.StudioEngine`
 CLI: `vga-studio`
 Manifest: `video_studio/data/studio_manifest.json`
@@ -13,7 +13,7 @@ Turn the owner's actual media goal into a finished, independently checked delive
 
 ## Independence
 
-The current Studio owns its own requirement interpretation protocol, decision receipts, task graph, execution leases, artifact history, review evidence, failure diagnosis, recovery and learning admission. It covers MEDIA_GROWTH, ORIGINAL_DIGITAL_IP usage (without owning canon), COMMERCIALIZATION and PRODUCTION_SYSTEM through explicit task graphs and verified domain adapters. It does not import, call, require, or wait for CAOS, a CAOS Skill, a CAOS runtime, a parent task ID, or a parent lease. The legacy `CAOS_VIDEO_ENTRY.md` and the 0.8 runtime are historical/compatibility material, not startup dependencies for new Studio work.
+Video Studio owns Video-domain requirements, project/task state, assets, evidence, production execution and domain learning. When the owner selects Video in a CAOS-governed session, CAOS remains the parent authority for complete-goal recovery, decision quality, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Use the CAOS parent Skill in the active ChatGPT workspace. Do not modify the CAOS repository, Skills or configuration. The Video runtime has no CAOS API/runtime/task-ID/lease dependency; technical independence is not permission to bypass parent governance. Direct standalone operation is available only when the owner explicitly selects it. The fixed-stage controller is not an active Video execution path.
 
 IPOS remains the sole authority for the owner's original character/identity canon. The Studio consumes approved, versioned IPOS exports; it does not create a competing canon.
 
@@ -36,7 +36,7 @@ A video is not releasable until the exact final bytes pass digest-bound FFmpeg/F
 
 ## Default Program and quick start
 
-For generic Video business/system work, the default Program is `ai-self-media-commercialization` in `projects/PROJECT_INDEX.json`. Its standalone outcome brief and 50-task parallel work graph are the canonical current Program plan. The context manifest imports the existing Video-owned state and reference documents as immutable, digest-bound artifacts; it does not import the missing Jensen/Alice source video or fabricate an owner-approved IPOS bundle.
+For generic Video business/system work, the default Program is `ai-self-media-commercialization` in `projects/PROJECT_INDEX.json`. Its canonical outcome brief and 50-task parallel work graph are the canonical current Program plan. The context manifest imports the existing Video-owned state and reference documents as immutable, digest-bound artifacts; it does not import the missing Jensen/Alice source video or fabricate an owner-approved IPOS bundle.
 
 ```bash
 python -m pip install -e .
@@ -56,7 +56,7 @@ vga-studio --root ./studio-work status ai-self-media-commercialization
 vga-studio --root ./studio-work tasks ai-self-media-commercialization
 ```
 
-The Program can run independent growth, advertiser, production-economics, provider-capability and Jensen fact-audit work in parallel. Tasks requiring the exact `jensen-source-video` or `ipos-ready-for-video-bundle` intentionally remain `WAITING_INPUT` until those exact owner-controlled assets are supplied. The historical 0.8 task graph is imported only as a labelled reference; it is not the new controller.
+The Program can run independent growth, advertiser, production-economics, provider-capability and Jensen fact-audit work in parallel. Tasks requiring the exact `jensen-source-video` or `ipos-ready-for-video-bundle` intentionally remain `WAITING_INPUT` until those exact owner-controlled assets are supplied. The fixed-stage 0.8 task graph is not an active scheduler or controller.
 
 For an episode-specific project, use the technology-explainer example instead:
 
@@ -77,7 +77,7 @@ Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-stud
 
 The local tool registry does not directly call external generative-video providers. Agent tasks may use a currently connected session tool only after checking its exact operation, availability, rights, cost and output constraints; any paid generation requires explicit owner approval. A provider result is not complete until its actual file and receipt are imported and digest-registered. No provider capability is assumed permanent or silently inferred from a router profile.
 
-Run `vga-studio system-audit --repo-root .` for the standalone repository audit. It separates structural integrity from production readiness: a structural PASS may still report missing provider execution, source media or owner approvals. The existing `vga` command remains the 0.8 compatibility CLI; new standalone projects use `vga-studio` or `python -m video_studio`. The canonical implementation is the `video_studio` package; `video_growth_agent.studio_*` imports are compatibility shims only.
+Run `vga-studio system-audit --repo-root .` for the repository audit. It separates structural integrity from production readiness: a structural PASS may still report missing provider execution, source media or owner approvals. `vga-studio` is the only installed CLI; `python -m video_studio` invokes the same runtime module.
 
 ## Completion rule
 
