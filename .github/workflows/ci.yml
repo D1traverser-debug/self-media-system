@@ -27,7 +27,9 @@ jobs:
               raise SystemExit('standalone Video Studio system audit failed')
           assert report['structural_status'] == 'PASS', report
           assert report['production_readiness'] == 'PARTIAL', report
+          assert report['boundary']['caos_session_governance_required'] is True, report
           assert report['boundary']['caos_runtime_dependency'] is False, report
+          assert report['boundary']['caos_source_mutation_allowed'] is False, report
           assert report['boundary']['paid_provider_calls_made'] is False, report
           assert report['capability_gaps'], report
           print('standalone-video-studio-system-audit: PASS')

@@ -26,7 +26,8 @@ def test_video_domain_has_one_external_caos_governance_binding():
         assert binding["runtime_dependency"] is False
         assert binding["source_mutation"] == "FORBIDDEN"
 
-    assert manifest["skill"]["entrypoint"] == "CAOS_VIDEO_ENTRY.md"
+    assert manifest["skill"]["entrypoint"] == "STUDIO_ENTRY.md"
+    assert not (ROOT / "CAOS_VIDEO_ENTRY.md").exists()
     assert state["governance_mode"] == "CHAT_GOVERNED_EXTERNAL"
     assert state["caos_runtime_dependency"] is False
     assert "parent_identity_semantics" not in state
@@ -59,9 +60,9 @@ def test_ipos_remains_standalone_and_does_not_depend_on_caos_runtime():
     assert integration["current_handoff"]["status"] == "NO_APPROVED_BUNDLE_AVAILABLE"
 
 
-def test_active_video_entrypoints_do_not_route_to_legacy_parent():
+def test_single_video_entrypoint_preserves_caos_parent_boundary():
     active_paths = (
-        "CAOS_VIDEO_ENTRY.md",
+        "STUDIO_ENTRY.md",
         "README.md",
         "skills/video-growth-agent/SKILL.md",
         "docs/product_requirements.md",
