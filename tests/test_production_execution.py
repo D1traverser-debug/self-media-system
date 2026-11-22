@@ -102,7 +102,15 @@ def _source_assets(root: Path):
 
 def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
     engine = StudioEngine(tmp_path / "workspace")
-    engine.create_project("delivery-demo", "Production delivery demo", _brief())
+    delivery_brief = _brief()
+    delivery_brief["release_policy"] = {
+        "require_rights": True,
+        "require_rights_evidence": True,
+        "required_review_rubrics": ["editorial"],
+        "require_technical_qa": True,
+        "technical_qa_artifact_name": "technical-qa",
+    }
+    engine.create_project("delivery-demo", "Production delivery demo", delivery_brief)
     assets = _source_assets(tmp_path)
     imported_assets = {}
     for name, (path, kind, media_type, rights) in assets.items():
@@ -254,6 +262,16 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
         assert render_completion["artifacts"][media_name]["metadata"]["rights_evidence_refs"] == [
             clearance_artifact["artifact_id"]
         ]
+    final_video = render_completion["artifacts"]["final-video"]
+    engine.record_review(
+        "delivery-demo", final_video["artifact_id"],
+        reviewer_id="editorial-reviewer", rubric_id="editorial", outcome="PASS",
+        dimensions={"editorial_quality": "PASS"}, evidence_refs=["review://final-video"],
+    )
+    release = engine.release_check(
+        "delivery-demo", final_video["artifact_id"], required_rubrics=["editorial"],
+    )
+    assert release["pass"] is True, release["failures"]
     artifact_path = next(
         path for path in (engine._project_dir("delivery-demo") / "artifacts" / "production" / "package-delivery").rglob("delivery-package.zip")
     )
