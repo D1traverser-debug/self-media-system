@@ -1024,6 +1024,7 @@ class StudioEngine:
             connection.execute("BEGIN IMMEDIATE")
             try:
                 self._project_row(connection, project_id)
+                self._refresh_cross_project_transfers_in_tx(connection, project_id)
                 reclaimed = self._reclaim_expired_claims_in_tx(connection, project_id, _now())
                 self._refresh_in_tx(connection, project_id)
                 connection.commit()
@@ -1044,6 +1045,7 @@ class StudioEngine:
             try:
                 self._project_row(connection, project_id)
                 now = _now()
+                self._refresh_cross_project_transfers_in_tx(connection, project_id)
                 self._reclaim_expired_claims_in_tx(connection, project_id, now)
                 self._refresh_in_tx(connection, project_id)
                 query = "SELECT * FROM tasks WHERE project_id=? AND status='READY'"
@@ -1136,6 +1138,8 @@ class StudioEngine:
         return bindings, rows
 
     def claimed_packet(self, project_id: str, task_id: str, worker_id: str, claim_token: str) -> dict[str, Any]:
+        # A claim can outlive its upstream Program transfer; reconcile before exposing inputs.
+        self.refresh(project_id)
         with closing(self._connect(project_id)) as connection:
             task = self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
             packet = self._work_packet(connection, project_id, task)
@@ -1460,6 +1464,8 @@ class StudioEngine:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
+                self._refresh_cross_project_transfers_in_tx(connection, project_id)
+                self._refresh_in_tx(connection, project_id)
                 task = self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
                 expected = set(_loads(task["outputs_json"], []))
                 if set(outputs) != expected:
@@ -1503,6 +1509,10 @@ class StudioEngine:
                 self._refresh_in_tx(connection, project_id)
                 connection.commit()
                 return {"task_id": task_id, "status": "COMPLETED", "artifacts": registered, "result": result_payload}
+            except ClaimError:
+                # Persist any upstream-transfer invalidation before reporting the revoked claim.
+                connection.commit()
+                raise
             except Exception:
                 connection.rollback()
                 raise
@@ -1628,8 +1638,11 @@ class StudioEngine:
             raise ContractError("review requires reviewer, rubric and evidence_refs")
         _safe_id(reviewer_id, "reviewer_id")
         _safe_id(rubric_id, "rubric_id")
+        self.refresh(project_id)
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            self._refresh_cross_project_transfers_in_tx(connection, project_id)
+            self._refresh_in_tx(connection, project_id)
             artifact = connection.execute(
                 "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?", (project_id, artifact_id)
             ).fetchone()
@@ -2186,6 +2199,7 @@ class StudioEngine:
             return [{**dict(row), "payload": _loads(row["payload_json"], {})} for row in reversed(rows)]
 
     def audit(self, project_id: str) -> dict[str, Any]:
+        self.refresh(project_id)
         failures: list[str] = []
         tasks = self.list_tasks(project_id)
         task_map = {task["task_id"]: task for task in tasks}

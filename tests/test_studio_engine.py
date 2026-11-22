@@ -213,6 +213,114 @@ def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path
     assert engine.list_tasks("episode")[0]["status"] == "READY"
 
 
+def test_claimed_episode_work_is_invalidated_when_program_source_changes_before_completion(tmp_path):
+    engine = StudioEngine(tmp_path / "cross-project-completion-workspace")
+    engine.create_project("program", "Program", brief())
+    engine.create_project("episode", "Episode", brief())
+    source_v1 = tmp_path / "program-source-v1.txt"
+    source_v1.write_text("approved Program source v1", encoding="utf-8")
+    source = engine.import_asset(
+        "program", "approved-program-source", source_v1,
+        kind="document", media_type="text/plain", rights_status="OWNED",
+    )
+    transferred = engine.transfer_artifact(
+        "program", "approved-program-source", "episode",
+        expected_artifact_id=source["artifact_id"], expected_version=source["version"],
+        expected_sha256=source["sha256"],
+    )["target"]
+    engine.add_tasks("episode", [task("consume-program-source", inputs=["approved-program-source"])])
+    packet = engine.claim_next("episode", "episode-worker")
+    assert packet is not None
+    # The claimed packet is valid before the Program owner changes the source.
+    engine.claimed_packet("episode", "consume-program-source", "episode-worker", packet["claim"]["claim_token"])
+
+    source_v2 = tmp_path / "program-source-v2.txt"
+    source_v2.write_text("superseding Program source v2", encoding="utf-8")
+    engine.import_asset(
+        "program", "approved-program-source", source_v2,
+        kind="document", media_type="text/plain", rights_status="OWNED",
+    )
+    output = engine._project_dir("episode") / "artifacts" / "derived.txt"
+    output.write_text("derived from superseded source", encoding="utf-8")
+    with pytest.raises(ClaimError, match="current task claim"):
+        engine.complete_task(
+            "episode", "consume-program-source", "episode-worker", packet["claim"]["claim_token"],
+            {"consume-program-source-artifact": {
+                "path": str(output), "kind": "document", "media_type": "text/plain",
+                "rights_status": "OWNED",
+            }},
+        )
+
+    task_state = engine.list_tasks("episode")[0]
+    assert task_state["status"] == "STALE"
+    with engine._connect("episode") as connection:
+        transferred_state = connection.execute(
+            "SELECT status FROM artifacts WHERE project_id='episode' AND artifact_id=?",
+            (transferred["artifact_id"],),
+        ).fetchone()
+    assert transferred_state["status"] == "STALE"
+
+
+def test_release_check_reconciles_superseded_program_source_without_manual_refresh(tmp_path):
+    release_brief = {
+        "goal": "Produce a source-bound Episode deliverable.",
+        "audience": "The intended audience.",
+        "deliverables": ["final-document"],
+        "release_policy": {
+            "require_rights": True,
+            "require_rights_evidence": True,
+            "required_review_rubrics": [],
+            "required_evidence_refs": [],
+            "require_technical_qa": False,
+        },
+    }
+    engine = StudioEngine(tmp_path / "cross-project-release-workspace")
+    engine.create_project("program", "Program", release_brief)
+    engine.create_project("episode", "Episode", release_brief)
+    source_v1 = tmp_path / "release-source-v1.txt"
+    source_v1.write_text("approved Program source v1", encoding="utf-8")
+    source = engine.import_asset(
+        "program", "release-source", source_v1,
+        kind="document", media_type="text/plain", rights_status="OWNED",
+    )
+    transferred = engine.transfer_artifact(
+        "program", "release-source", "episode",
+        expected_artifact_id=source["artifact_id"], expected_version=source["version"],
+        expected_sha256=source["sha256"],
+    )["target"]
+    engine.add_tasks("episode", [task("render-release-document", inputs=["release-source"])])
+    packet = engine.claim_next("episode", "episode-renderer")
+    output = engine._project_dir("episode") / "artifacts" / "final-document.txt"
+    output.write_text("Episode output derived from Program source v1", encoding="utf-8")
+    completed = engine.complete_task(
+        "episode", "render-release-document", "episode-renderer", packet["claim"]["claim_token"],
+        {"render-release-document-artifact": {
+            "path": str(output), "kind": "document", "media_type": "text/plain",
+            "rights_status": "OWNED",
+        }},
+    )
+    final_artifact = completed["artifacts"]["render-release-document-artifact"]
+    first_release = engine.release_check("episode", final_artifact["artifact_id"], required_rubrics=[])
+    assert first_release["pass"] is True, first_release["failures"]
+
+    source_v2 = tmp_path / "release-source-v2.txt"
+    source_v2.write_text("superseding Program source v2", encoding="utf-8")
+    engine.import_asset(
+        "program", "release-source", source_v2,
+        kind="document", media_type="text/plain", rights_status="OWNED",
+    )
+    second_release = engine.release_check("episode", final_artifact["artifact_id"], required_rubrics=[])
+    assert second_release["pass"] is False
+    assert "artifact_not_current:STALE" in second_release["failures"]
+    assert engine.list_tasks("episode")[0]["status"] == "STALE"
+    with engine._connect("episode") as connection:
+        transferred_state = connection.execute(
+            "SELECT status FROM artifacts WHERE project_id='episode' AND artifact_id=?",
+            (transferred["artifact_id"],),
+        ).fetchone()
+    assert transferred_state["status"] == "STALE"
+
+
 def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(tmp_path, capsys):
     from video_studio.cli import main
 
