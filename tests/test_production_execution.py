@@ -150,7 +150,8 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
         }
         for name in ("shot-01", "shot-02", "audio-mix")
     ]
-    clearance_path = tmp_path / "rights-clearance.json"
+    clearance_path = engine._project_dir("delivery-demo") / "human-review" / "rights-clearance.json"
+    clearance_path.parent.mkdir(parents=True, exist_ok=True)
     clearance_path.write_text(json.dumps({
         "schema_version": "1.0", "status": "PASS",
         "reviewer_id": reviewer_id, "assets": clearance_assets,
