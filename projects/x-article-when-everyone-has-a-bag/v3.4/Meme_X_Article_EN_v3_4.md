@@ -6,7 +6,7 @@ Phillip Banks created the Chill Guy character. In November 2024, a Solana token 
 
 Banks said the character was copyrighted and that he planned takedowns for unauthorized merchandise and shitcoins. Brand accounts using it as a trend were different; he mainly wanted credit. [CoinDesk reported the exchange.](https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok)
 
-The word **community** can fold those roles together. It may refer to the people who make a meme travel, the wallets that own its token, or the accounts that receive money when it trades. Those groups can overlap, but their contributions and rewards still need to be identified separately.
+The word **community** can fold those roles together. It may refer to the people who make a meme travel, the wallets that own its token, or the wallets that receive payments when it trades. Those groups can overlap, but their contributions and rewards still need to be identified separately.
 
 ## 01 / A meme can travel. Its token has owners.
 
