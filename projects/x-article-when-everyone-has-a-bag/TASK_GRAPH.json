@@ -1,187 +1,218 @@
 [
   {
-    "task_id": "recover_source_state",
-    "title": "Recover and lock the approved v3 source and owner scope",
+    "task_id": "recover_project_state",
+    "title": "Recover v3, v3.2 and owner corrections; lock v3.3 scope",
     "kind": "source_recovery",
     "executor": "agent",
     "depends_on": [],
-    "inputs": [
-      "source-decision-v3",
-      "source-readback-v3"
-    ],
-    "outputs": [
-      "source-recovery-receipt"
-    ],
+    "inputs": ["source-decision-v3", "source-readback-v3", "candidate-v3-2-en", "candidate-v3-2-zh"],
+    "outputs": ["project-recovery-receipt"],
     "requirements": {
-      "source_version": "v3",
-      "owner_scope": "Bigfoot keyword only"
+      "current_candidate": "v3.3",
+      "preserve": "title, subtitle, thesis, seven sections, five article source URLs, Bigfoot once per language"
     },
     "acceptance": {
-      "identity": "Exact article title and v3 source files are confirmed.",
-      "scope": "No new Bigfoot topic or unrelated writing task is introduced."
+      "identity": "Exact existing article and immutable v3 source are confirmed.",
+      "scope": "The task is a human-editorial rewrite of the existing article, not a new Bigfoot topic or a keyword-only edit."
     },
     "priority": 100
   },
   {
-    "task_id": "integrate_keyword",
-    "title": "Integrate Bigfoot once into the existing EN/ZH manuscripts",
+    "task_id": "verify_sources_and_claims",
+    "title": "Recheck the five article sources and claim boundaries",
+    "kind": "evidence_review",
+    "executor": "agent",
+    "depends_on": ["recover_project_state"],
+    "inputs": ["source-decision-v3", "candidate-v3-2-en", "candidate-v3-2-zh"],
+    "outputs": ["source-fact-check-record"],
+    "requirements": {
+      "source_set": "five locked article URLs",
+      "method": "distinguish source fact, author inference and limitation"
+    },
+    "acceptance": {
+      "claims": "Chill Guy, Jais-White, Bitquery, Pump.fun and Dogesled claims are accurately bounded.",
+      "limits": "Wallet classifications are not real-world identity verification; first sale is not proof of complete exit; Dogesled is not token-pricing evidence."
+    },
+    "priority": 95
+  },
+  {
+    "task_id": "diagnose_editorial_voice",
+    "title": "Diagnose structural causes of AI-sounding prose",
+    "kind": "editorial_diagnosis",
+    "executor": "agent",
+    "depends_on": ["recover_project_state"],
+    "inputs": ["candidate-v3-2-en", "candidate-v3-2-zh", "source-decision-v3"],
+    "outputs": ["editorial-root-cause-record"],
+    "requirements": {
+      "competing_hypotheses": true,
+      "root_cause_required": true,
+      "alternatives_and_falsifier_required": true
+    },
+    "acceptance": {
+      "diagnosis": "Separate lexical symptoms from structural repetition, missing author stance and unnecessary caveat duplication.",
+      "decision": "Select a repair that changes argument progression and author voice, not merely synonyms or slang."
+    },
+    "priority": 95
+  },
+  {
+    "task_id": "revise_manuscripts",
+    "title": "Rewrite English manuscript and adapt the Chinese edition",
     "kind": "editorial_revision",
     "executor": "agent",
-    "depends_on": [
-      "recover_source_state"
-    ],
-    "inputs": [
-      "source-article-en-v3",
-      "source-article-zh-v3",
-      "source-docx-en-v3",
-      "source-docx-zh-v3"
-    ],
-    "outputs": [
-      "article-en-v3-1",
-      "article-zh-v3-1",
-      "article-en-docx-v3-1",
-      "article-zh-docx-v3-1",
-      "revision-record-v3-1"
-    ],
+    "depends_on": ["verify_sources_and_claims", "diagnose_editorial_voice"],
+    "inputs": ["source-article-en-v3", "source-article-zh-v3", "candidate-v3-2-en", "candidate-v3-2-zh", "source-fact-check-record", "editorial-root-cause-record"],
+    "outputs": ["article-en-v3-3", "article-zh-v3-3", "editorial-revision-record-v3-3"],
     "requirements": {
-      "scope": "one existing paragraph per language",
-      "preserve": "title, subtitle, thesis, seven sections, five source URLs"
+      "scope": "structural and voice rewrite",
+      "preserve": "title, subtitle, thesis, seven sections, five source URLs, Bigfoot once per language"
     },
     "acceptance": {
-      "keyword": "Exactly one Bigfoot mention in each language.",
-      "change": "Exactly one existing paragraph changes per language.",
-      "alignment": "EN/ZH meaning remains aligned."
+      "voice": "Distinct author stance, natural idiomatic English, no repeated section-ending template.",
+      "alignment": "Chinese edition preserves argument and evidence without literal English syntax.",
+      "length": "Approximately 20–30% shorter than v3.2 while retaining essential evidence."
     },
     "priority": 100
   },
   {
-    "task_id": "sync_assets_to_branch",
-    "title": "Package and verify the current article assets on the authorized branch",
+    "task_id": "refresh_distribution_and_visual_assets",
+    "title": "Refresh X distribution copy and visual placement prompts",
+    "kind": "dependent_asset_revision",
+    "executor": "agent",
+    "depends_on": ["revise_manuscripts"],
+    "inputs": ["article-en-v3-3", "article-zh-v3-3", "visual-prompt-pack-v3", "distribution-pack-v3"],
+    "outputs": ["layout-visual-prompts-v3-3", "distribution-pack-v3-3"],
+    "requirements": {
+      "visuals": "one 5:2 cover and three 16:9 inline prompts",
+      "placements": "after Sections 02, 03 and 05",
+      "distribution": "two lead posts, pinned reply, five-post thread, quote posts, follow CTA"
+    },
+    "acceptance": {
+      "alignment": "All downstream copy and visual prompts match v3.3 thesis and section flow.",
+      "character_count": "Every post/thread item is under 280 characters.",
+      "image_status": "Prompts only; do not claim image generation."
+    },
+    "priority": 90
+  },
+  {
+    "task_id": "build_delivery_package",
+    "title": "Build and verify Word, PDF, ZIP, readback and asset hashes",
+    "kind": "delivery_packaging",
+    "executor": "agent",
+    "depends_on": ["revise_manuscripts", "refresh_distribution_and_visual_assets"],
+    "inputs": ["article-en-v3-3", "article-zh-v3-3", "editorial-revision-record-v3-3", "layout-visual-prompts-v3-3", "distribution-pack-v3-3"],
+    "outputs": ["delivery-readback-v3-3", "delivery-manifest-v3-3", "handoff-attachment-receipt"],
+    "requirements": {
+      "formats": ["md", "docx", "pdf", "zip"],
+      "hash": "SHA-256",
+      "visual_check": "render all DOCX/PDF pages"
+    },
+    "acceptance": {
+      "structure": "Seven sections in each language; five matching source URLs; Bigfoot exactly once per language.",
+      "layout": "DOCX/PDF pages visually inspected; X native preview remains a separate gate.",
+      "package": "ZIP integrity passes and all attachments are named and digest-bound."
+    },
+    "priority": 100
+  },
+  {
+    "task_id": "sync_candidate_branch",
+    "title": "Sync exact v3.3 text assets to the isolated candidate branch",
     "kind": "repository_sync",
     "executor": "agent",
-    "depends_on": [
-      "integrate_keyword"
-    ],
-    "inputs": [
-      "article-en-v3-1",
-      "article-zh-v3-1",
-      "article-en-docx-v3-1",
-      "article-zh-docx-v3-1",
-      "visual-prompt-pack-v3",
-      "distribution-pack-v3"
-    ],
-    "outputs": [
-      "asset-readback-v3-1",
-      "github-sync-receipt"
-    ],
+    "depends_on": ["build_delivery_package"],
+    "inputs": ["article-en-v3-3", "article-zh-v3-3", "editorial-revision-record-v3-3", "layout-visual-prompts-v3-3", "distribution-pack-v3-3", "delivery-readback-v3-3", "delivery-manifest-v3-3"],
+    "outputs": ["github-sync-receipt", "branch-readback-receipt"],
     "requirements": {
       "repository": "D1traverser-debug/video-growth-agent",
-      "branch": "work/meme-x-article-bigfoot-2026-11",
+      "branch": "work/meme-x-article-bigfoot-2026-11-v3-3-editorial",
       "base": "main"
     },
     "acceptance": {
-      "sync": "Exact files are fetched back from the authorized branch.",
+      "sync": "Exact v3.3 Markdown and review assets are fetched back from the isolated branch.",
       "isolation": "main remains unchanged; no merge or publication occurs."
     },
     "priority": 100
   },
   {
     "task_id": "independent_editor_review",
-    "title": "Independent editorial review of the exact v3.1 manuscripts",
+    "title": "Independent editorial review of exact v3.3 manuscripts",
     "kind": "independent_review",
     "executor": "human",
-    "depends_on": [
-      "sync_assets_to_branch"
-    ],
-    "inputs": [
-      "article-en-v3-1",
-      "article-zh-v3-1"
-    ],
-    "outputs": [
-      "independent-editor-review-receipt"
-    ],
-    "requirements": {
-      "reviewer_must_not_be_producer": true,
-      "digest_bound": true
-    },
+    "depends_on": ["sync_candidate_branch"],
+    "inputs": ["article-en-v3-3", "article-zh-v3-3", "delivery-readback-v3-3"],
+    "outputs": ["independent-editor-review-receipt"],
+    "requirements": {"reviewer_must_not_be_producer": true, "digest_bound": true},
     "acceptance": {
-      "review": "A non-author reviewer checks argument, evidence, clarity, tone and keyword naturalness against exact artifact digests."
+      "review": "A non-author reviewer checks argument, factual precision, natural voice, bilingual alignment and reader value against exact artifact digests."
     },
     "priority": 90
   },
   {
-    "task_id": "trench_reader_review",
-    "title": "Obtain a real target-reader cold read",
+    "task_id": "target_reader_cold_read",
+    "title": "Obtain a real crypto-native target-reader cold read",
     "kind": "target_reader_review",
     "executor": "human",
-    "depends_on": [
-      "sync_assets_to_branch"
-    ],
-    "inputs": [
-      "article-en-v3-1"
-    ],
-    "outputs": [
-      "trench-reader-review-receipt"
-    ],
-    "requirements": {
-      "real_target_reader_required": true
-    },
+    "depends_on": ["sync_candidate_branch"],
+    "inputs": ["article-en-v3-3"],
+    "outputs": ["target-reader-review-receipt"],
+    "requirements": {"real_target_reader_required": true},
     "acceptance": {
-      "review": "Actual crypto-native target-reader feedback is recorded; no simulated response."
+      "review": "Actual crypto-native reader feedback is recorded; no simulated response or model-generated substitute."
     },
-    "priority": 80
+    "priority": 85
   },
   {
     "task_id": "x_native_preview",
-    "title": "Inspect the article in X native composer and mobile layout",
+    "title": "Inspect v3.3 in X native composer and mobile layout",
     "kind": "platform_preview",
     "executor": "human",
-    "depends_on": [
-      "sync_assets_to_branch"
-    ],
-    "inputs": [
-      "article-en-v3-1",
-      "visual-prompt-pack-v3",
-      "distribution-pack-v3"
-    ],
-    "outputs": [
-      "x-native-preview-receipt"
-    ],
-    "requirements": {
-      "native_composer_required": true,
-      "mobile_preview_required": true
-    },
+    "depends_on": ["sync_candidate_branch"],
+    "inputs": ["article-en-v3-3", "layout-visual-prompts-v3-3", "distribution-pack-v3-3"],
+    "outputs": ["x-native-preview-receipt"],
+    "requirements": {"native_composer_required": true, "mobile_preview_required": true},
     "acceptance": {
       "preview": "Actual X composer/mobile layout is checked; Word/PDF rendering is not a substitute."
     },
-    "priority": 80
+    "priority": 85
+  },
+  {
+    "task_id": "rights_review",
+    "title": "Review rights and permissions for text and planned visuals",
+    "kind": "rights_review",
+    "executor": "human",
+    "depends_on": ["sync_candidate_branch"],
+    "inputs": ["article-en-v3-3", "article-zh-v3-3", "layout-visual-prompts-v3-3"],
+    "outputs": ["rights-review-receipt"],
+    "requirements": {"rights_status_evidence_required": true},
+    "acceptance": {
+      "rights": "All assets have a documented status of OWNED, AUTHORIZED, LICENSED or PUBLIC_DOMAIN; unresolved rights block release."
+    },
+    "priority": 85
+  },
+  {
+    "task_id": "owner_release_authorization",
+    "title": "Obtain explicit owner authorization for the exact candidate",
+    "kind": "owner_authorization",
+    "executor": "human",
+    "depends_on": ["independent_editor_review", "target_reader_cold_read", "x_native_preview", "rights_review"],
+    "inputs": ["delivery-readback-v3-3", "github-sync-receipt", "independent-editor-review-receipt", "target-reader-review-receipt", "x-native-preview-receipt", "rights-review-receipt"],
+    "outputs": ["owner-publication-authorization-receipt"],
+    "requirements": {"explicit_owner_authorization_required": true, "no_auto_publish": true},
+    "acceptance": {
+      "authorization": "Owner explicitly approves publication of the exact digest-bound candidate; silence or implied consent is not approval."
+    },
+    "priority": 100
   },
   {
     "task_id": "release_acceptance",
-    "title": "Independent release gate for the exact candidate package",
+    "title": "Final release gate for the exact v3.3 candidate",
     "kind": "release_acceptance",
     "executor": "human",
-    "depends_on": [
-      "independent_editor_review",
-      "trench_reader_review",
-      "x_native_preview"
-    ],
-    "inputs": [
-      "asset-readback-v3-1",
-      "github-sync-receipt",
-      "independent-editor-review-receipt",
-      "trench-reader-review-receipt",
-      "x-native-preview-receipt"
-    ],
-    "outputs": [
-      "release-decision-receipt"
-    ],
-    "requirements": {
-      "owner_authorization_required": true,
-      "no_auto_publish": true
-    },
+    "depends_on": ["owner_release_authorization"],
+    "inputs": ["delivery-readback-v3-3", "github-sync-receipt", "owner-publication-authorization-receipt"],
+    "outputs": ["release-decision-receipt"],
+    "requirements": {"no_auto_publish": true},
     "acceptance": {
-      "release": "All independent review, target-reader, native preview, rights and owner authorization gates pass for exact current digests."
+      "release": "All independent review, target-reader, native preview, rights and owner authorization gates pass for the exact current digests."
     },
     "priority": 100
   }
