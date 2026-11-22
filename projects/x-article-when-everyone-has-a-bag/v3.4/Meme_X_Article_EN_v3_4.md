@@ -6,7 +6,7 @@ Phillip Banks created the Chill Guy character. In November 2024, a Solana token 
 
 Banks said the character was copyrighted and that he planned takedowns for unauthorized merchandise and shitcoins. Brand accounts using it as a trend were different; he mainly wanted credit. [CoinDesk reported the exchange.](https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok)
 
-The episode put the artist, the token's unknown creator and its traders in the same conversation. Each had a different stake in the character's success.
+The episode put the artist, the token's unknown creator and its traders in the same conversation. Each had a different stake in what happened next.
 
 The word **community** can fold those roles together. It may refer to the people who make a meme travel, the wallets that own its token, or the accounts that receive money when it trades. Those groups can overlap, but their contributions and rewards still need to be identified separately.
 
@@ -52,13 +52,13 @@ Inside a memecoin, the word community often bundles three separate ledgers:
 
 Pump.fun's documentation provides one example. At launch, a creator can choose to direct the Creator fee to eligible holders instead of receiving it personally. Holder Rewards have eligibility rules and distribution costs; payments are not guaranteed. [Pump.fun's fee documentation.](https://pump.fun/docs/fees)
 
-An early buyer supplies capital; an artist supplies the character; a moderator supplies labor. The holder list shows where the supply sits, and the fee route shows which wallets receive platform payments. You can then compare those records with the people doing the visible work.
+An early buyer supplies capital; an artist supplies the character; a moderator supplies labor. The holder list shows where the supply sits, and the fee route shows which wallets receive platform payments. If the wallets are identifiable, compare those records with the people doing the visible work.
 
 ## 06 / Dogecoin once turned online enthusiasm into a fundraiser.
 
 In 2014, the Dogecoin Foundation organized the Dogesled fundraiser, which raised more than $30,000 for Jamaica's two-man bobsled team to travel to the Sochi Winter Olympics. [PBS covered the fundraiser.](https://www.pbs.org/newshour/world/jamaican-bobsled-team-raises-30000-in-dogecoin-for-trip-to-sochi)
 
-People rallied around an internet currency and helped a team get to the Games. That is a concrete result of collective action outside the market. A later token's ownership and fee structure still have to be read from its own records.
+That fundraiser shows what collective participation can accomplish outside a market. A later token's ownership and fee structure still have to be read from its own records.
 
 ## 07 / Match the claim to the evidence.
 
@@ -66,6 +66,8 @@ Before buying into a community pitch, match each claim to the evidence:
 
 - A cultural claim calls for visible work: what people keep making, translating and organizing when the chart is quiet.
 - An ownership claim calls for wallet data: who holds the supply and when early positions formed.
-- A shared-upside claim calls for the fee route: which wallets receive payments and whether promoters disclose their positions.
+- A cash-flow claim calls for the fee route: which wallets receive creator fees or holder rewards.
+
+Then check the accounts promoting the token: do they disclose their positions, and what do they contribute beyond price calls?
 
 The timeline shows what people are doing. The holder list shows who owns the token. The fee route shows who gets paid.
