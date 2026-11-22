@@ -1,0 +1,78 @@
+{
+  "version": "v3.3",
+  "parent_version": "v3.2",
+  "english_title_preserved": true,
+  "english_subtitle_preserved": true,
+  "chinese_title_preserved": true,
+  "english_sections": 7,
+  "chinese_sections": 7,
+  "bigfoot_occurrences": {
+    "english": 1,
+    "chinese": 1
+  },
+  "article_source_links": {
+    "english": 5,
+    "chinese": 5,
+    "sets_match": true
+  },
+  "source_urls": [
+    "https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok",
+    "https://www.sciencedirect.com/science/article/pii/S0275531926003491",
+    "https://www.bitquery.io/investigations/pump-fun-snipers-bundles",
+    "https://pump.fun/docs/fees",
+    "https://www.pbs.org/newshour/world/jamaican-bobsled-team-raises-30000-in-dogecoin-for-trip-to-sochi"
+  ],
+  "english_word_count_whitespace_delimited": 1207,
+  "english_word_count_v3_2": 1633,
+  "english_word_reduction_percent_vs_v3_2": 26.1,
+  "chinese_han_characters": 1988,
+  "distribution_character_counts": {
+    "lead_a": 255,
+    "lead_b": 194,
+    "pinned_reply": 167,
+    "thread": [
+      120,
+      170,
+      193,
+      148,
+      165
+    ],
+    "quotes": [
+      83,
+      51,
+      55,
+      96,
+      66
+    ],
+    "follow_cta": 103
+  },
+  "all_distribution_posts_under_280": true,
+  "docx_hyperlinks": {
+    "Meme_X_Article_EN_v3_3.docx": 5,
+    "Meme_X_Article_ZH_v3_3.docx": 5
+  },
+  "pdf_files": [
+    "Meme_X_Article_EN_v3_3.pdf",
+    "Meme_X_Article_ZH_v3_3.pdf"
+  ],
+  "visual_prompts": 4,
+  "images_generated": 0,
+  "x_published": false,
+  "independent_editor_review": "OPEN",
+  "target_reader_cold_read": "OPEN",
+  "x_native_composer_mobile_preview": "NOT_TESTED",
+  "rights_review": "OPEN",
+  "owner_publication_authorization": "NOT_GRANTED",
+  "rendered_layout": {
+    "word_docx_pages": {
+      "english": 3,
+      "chinese": 2
+    },
+    "pdf_pages": {
+      "english": 3,
+      "chinese": 2
+    },
+    "visual_review": "PASS: all 10 rendered pages inspected (3 EN DOCX + 2 ZH DOCX + 3 EN PDF + 2 ZH PDF); no clipping, blank page or orphaned section heading observed.",
+    "x_native_composer_mobile_preview": "NOT_TESTED"
+  }
+}
