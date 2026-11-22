@@ -12,53 +12,68 @@ from video_studio.engine import StudioEngine
 
 PROJECT_ID = "x-article-when-everyone-has-a-bag"
 PROJECT_DIR = Path(__file__).resolve().parent
+V33_DIR = PROJECT_DIR / "v3.3"
 
 IMPORTS = [
     ("source-decision-v3", "Meme_X_CAOS_Decision_Source_v3.md"),
     ("source-readback-v3", "source/v3/Meme_X_Readback_v3.json"),
     ("source-article-en-v3", "source/v3/Meme_X_Article_EN_v3.md"),
     ("source-article-zh-v3", "source/v3/Meme_X_Article_ZH_v3.md"),
-    ("source-docx-en-v3", "source/v3/Meme_X_Article_EN_v3.docx"),
-    ("source-docx-zh-v3", "source/v3/Meme_X_Article_ZH_v3.docx"),
+    ("candidate-v3-2-en", "v3.2/Meme_X_Article_EN_v3_2.md"),
+    ("candidate-v3-2-zh", "v3.2/Meme_X_Article_ZH_v3_2.md"),
+    ("candidate-v3-2-audit", "Meme_X_CAOS_Audit_v3_1.md"),
     ("visual-prompt-pack-v3", "Meme_X_Visual_Prompt_Pack_v3.md"),
     ("distribution-pack-v3", "Meme_X_Distribution_Pack_v3.md"),
+    ("candidate-v3-3-en", "v3.3/Meme_X_Article_EN_v3_3.md"),
+    ("candidate-v3-3-zh", "v3.3/Meme_X_Article_ZH_v3_3.md"),
+    ("candidate-v3-3-audit", "v3.3/Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md"),
+    ("candidate-v3-3-layout", "v3.3/Meme_X_v3_3_X_Articles_Layout_and_Visual_Prompts.md"),
+    ("candidate-v3-3-distribution", "v3.3/Meme_X_v3_3_Distribution_Pack.md"),
+    ("candidate-v3-3-readback", "v3.3/Meme_X_v3_3_Readback.json"),
+    ("candidate-v3-3-manifest", "v3.3/Meme_X_v3_3_Asset_Manifest.json"),
+    ("candidate-v3-3-readme", "v3.3/Meme_X_v3_3_README.md"),
 ]
 
-OUTPUTS = [
-    ("article-en-v3-1", "Meme_X_Article_EN_v3_1.md", "document", "text/markdown"),
-    ("article-zh-v3-1", "Meme_X_Article_ZH_v3_1.md", "document", "text/markdown"),
-    ("article-en-docx-v3-1", "Meme_X_Article_EN_v3_1.docx", "document", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
-    ("article-zh-docx-v3-1", "Meme_X_Article_ZH_v3_1.docx", "document", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
-    ("revision-record-v3-1", "Meme_X_Editorial_Revision_Record_v3_1.md", "document", "text/markdown"),
-]
-
-def _complete_task_with_files(
+def _complete_claim(
     engine: StudioEngine,
     task_id: str,
     worker: str,
+    claim: dict[str, Any],
     file_specs: list[tuple[str, Path, str, str]],
     result: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    claim_packet = engine.claim_next(PROJECT_ID, worker, lease_seconds=900)
-    if not claim_packet or claim_packet["claim"]["task_id"] != task_id:
-        raise RuntimeError(f"expected ready task {task_id}, got {claim_packet and claim_packet['claim']['task_id']}")
-    claim = claim_packet["claim"]
     workspace = Path(engine.project(PROJECT_ID)["workspace"])
     output_payload: dict[str, Any] = {}
-    for name, source, kind, media_type in file_specs:
-        destination = workspace / "artifacts" / source.name
+    for artifact_name, source, kind, media_type in file_specs:
+        if not source.exists():
+            raise FileNotFoundError(f"missing output source for {task_id}: {source}")
+        destination = workspace / "artifacts" / f"{artifact_name}{source.suffix}"
         destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, destination)
-        output_payload[name] = {
+        if source.resolve() != destination.resolve():
+            shutil.copy2(source, destination)
+        output_payload[artifact_name] = {
             "path": destination.relative_to(workspace).as_posix(),
             "kind": kind,
             "media_type": media_type,
-            "rights_status": "UNKNOWN",
-            "metadata": {"source_path": str(source), "source_version": "v3.1"}
+            "rights_status": "UNKNOWN" if kind != "receipt" else "NOT_APPLICABLE",
+            "metadata": {"source_path": str(source), "candidate_version": "v3.3"}
         }
     return engine.complete_task(
         PROJECT_ID, task_id, worker, claim["claim_token"], output_payload, result or {}
     )
+
+def _claim_and_complete(
+    engine: StudioEngine,
+    expected_task_id: str,
+    worker: str,
+    file_specs: list[tuple[str, Path, str, str]],
+    result: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    packet = engine.claim_next(PROJECT_ID, worker, lease_seconds=900)
+    if not packet or packet["claim"]["task_id"] != expected_task_id:
+        actual = packet and packet["claim"]["task_id"]
+        raise RuntimeError(f"expected ready task {expected_task_id}, got {actual}")
+    return _complete_claim(engine, expected_task_id, worker, packet["claim"], file_specs, result)
 
 def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | None = None) -> dict[str, Any]:
     root = Path(root).expanduser().resolve()
@@ -66,103 +81,174 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
     project_dir = root / "projects" / PROJECT_ID
     if project_dir.exists():
         raise RuntimeError(f"Studio project already exists at {project_dir}; inspect it instead of reinitializing.")
+
     brief = json.loads((PROJECT_DIR / "OUTCOME_BRIEF.json").read_text(encoding="utf-8"))
     tasks = json.loads((PROJECT_DIR / "TASK_GRAPH.json").read_text(encoding="utf-8"))
     engine.create_project(PROJECT_ID, "When Everyone Has a Bag, Who Do You Believe?", brief)
 
-    # Import immutable source and unchanged dependent assets first.
     imported = []
     for name, relative in IMPORTS:
         source = PROJECT_DIR / relative
+        if not source.exists():
+            raise FileNotFoundError(f"required project asset missing: {relative}")
         media_type = mimetypes.guess_type(source.name)[0] or "application/octet-stream"
         imported.append(engine.import_asset(
             PROJECT_ID, name, source, kind="source", media_type=media_type,
-            rights_status="UNKNOWN", metadata={"repository_path": relative, "version": "v3"}
+            rights_status="UNKNOWN",
+            metadata={"repository_path": relative, "candidate_context": "v3.3"}
         ))
 
     engine.add_tasks(PROJECT_ID, tasks)
     decision = engine.record_decision(PROJECT_ID, {
-        "decision_id": "bigfoot-keyword-placement",
-        "question": "How should the keyword Bigfoot be integrated into the existing v3 X Article?",
-        "scope": "One keyword-only edit in Section 01; preserve the existing article and argument.",
-        "source_refs": ["owner-instruction:2026-11-21", "Meme_X_Article_EN_v3.md", "Meme_X_Article_ZH_v3.md"],
+        "decision_id": "human-editorial-rewrite-v3-3",
+        "question": "What is the root cause of the v3.2 AI-sounding cadence, and which repair best preserves the owner's intended article?",
+        "scope": "Structural and voice rewrite of the existing article; preserve titles, subtitle, thesis, seven sections, five article URLs and one Bigfoot metaphor per language.",
+        "source_refs": [
+            "owner-correction:2026-11-22",
+            "Meme_X_CAOS_Decision_Source_v3.md",
+            "v3.2/Meme_X_Article_EN_v3_2.md",
+            "v3.2/Meme_X_Article_ZH_v3_2.md",
+            "v3.3/Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md"
+        ],
         "hypotheses": [
-            {"id": "standalone-case", "claim": "Introduce Bigfoot as a new event or token case.", "discriminator": "Would require additional exposition or a new factual claim."},
-            {"id": "metaphor-only", "claim": "Use Bigfoot as a brief metaphor within an existing sentence.", "discriminator": "Can satisfy keyword presence without changing thesis, structure or evidence."}
+            {"id": "lexical-only", "claim": "A small number of generic words and transitions cause the AI feel.", "discriminator": "If the cadence and section pattern remain repetitive after synonym changes, this is not the root cause."},
+            {"id": "structural-repetition", "claim": "Sections repeatedly explain, caveat and finish with a polished mini-conclusion.", "discriminator": "Check whether each section advances a distinct step and whether repeated rhetorical templates disappear."},
+            {"id": "missing-author-stance", "claim": "The draft explains the issue but does not show what the author would actually inspect or conclude.", "discriminator": "Check whether the revised article contains concrete reader tests and an identifiable author position."},
+            {"id": "caveat-overload", "claim": "Repeated caveats interrupt the argument.", "discriminator": "Keep essential limitations once beside the claim and remove repeated defensive restatements."}
         ],
         "alternatives": [
-            {"id": "standalone-case", "description": "Create a new Bigfoot case-study paragraph."},
-            {"id": "metaphor-only", "description": "Replace one existing Section 01 sentence with a Bigfoot footprint metaphor."}
+            {"id": "slang-only", "description": "Add colloquial words and crypto slang without changing argument structure."},
+            {"id": "aggressive-anti-holder", "description": "Treat financially interested holders as dishonest or fake."},
+            {"id": "structural-voice-rewrite", "description": "Rebuild the opening and section progression, add an authorial trust test, and keep evidence limits adjacent to claims."},
+            {"id": "academic-expansion", "description": "Add more research explanation and formal caveats."}
         ],
-        "selected_option": "metaphor-only",
-        "falsifier": "If readers interpret the phrase as a new Bigfoot topic or it distracts from the meme-versus-token distinction, revert to v3 and re-edit.",
-        "rollback": "Restore the exact Section 01 paragraph from the immutable v3 source; keep all other assets unchanged."
+        "selected_option": "structural-voice-rewrite",
+        "falsifier": "If an independent crypto-native cold reader still describes the piece as a generic template or cannot identify the author's actual judgment, reopen the root-cause diagnosis rather than polishing synonyms again.",
+        "rollback": "v3.2 remains preserved on its own branch. Revert to the exact v3.2 candidate if v3.3 fails independent review; do not mutate immutable source/v3."
     })
 
     workspace = Path(engine.project(PROJECT_ID)["workspace"])
     receipt_dir = workspace / "artifacts"
     receipt_dir.mkdir(parents=True, exist_ok=True)
-    source_receipt = receipt_dir / "source-recovery-receipt.json"
+    source_receipt = receipt_dir / "project-recovery-receipt.json"
     source_receipt.write_text(json.dumps({
-        "project_id": PROJECT_ID, "source_version": "v3",
+        "project_id": PROJECT_ID,
+        "source_version": "v3",
+        "previous_candidate": "v3.2",
+        "current_candidate": "v3.3",
         "source_assets_imported": [item["name"] for item in imported],
-        "decision_id": decision["decision_id"], "scope": "Bigfoot keyword only"
+        "decision_id": decision["decision_id"],
+        "scope": "structural and voice rewrite of the existing X Article",
+        "parent_caos_modified": False,
+        "main_modified": False,
+        "published": False
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    claim_packet = engine.claim_next(PROJECT_ID, "studio-bootstrap", lease_seconds=900)
-    if not claim_packet or claim_packet["claim"]["task_id"] != "recover_source_state":
-        raise RuntimeError("recover_source_state was not the next ready task")
-    claim = claim_packet["claim"]
-    engine.complete_task(
-        PROJECT_ID, "recover_source_state", "studio-bootstrap", claim["claim_token"],
-        {"source-recovery-receipt": {
-            "path": "artifacts/source-recovery-receipt.json", "kind": "receipt",
-            "media_type": "application/json", "rights_status": "NOT_APPLICABLE"
-        }},
-        {"source_assets": len(imported), "decision_id": decision["decision_id"]}
+    _claim_and_complete(
+        engine, "recover_project_state", "studio-bootstrap",
+        [("project-recovery-receipt", source_receipt, "receipt", "application/json")],
+        {"imported_assets": len(imported), "decision_id": decision["decision_id"]}
     )
 
-    # Register the exact current manuscript bytes as outputs of the keyword-revision node.
-    _complete_task_with_files(
-        engine, "integrate_keyword", "studio-editorial",
-        [(name, PROJECT_DIR / filename, kind, media_type) for name, filename, kind, media_type in OUTPUTS],
-        {"revision": "v3.1", "scope": "one paragraph per language; Bigfoot keyword only"}
-    )
-
-    # Only complete repository-sync after a real branch and commit SHA are supplied.
-    sync_result = None
-    if branch and commit_sha and len(commit_sha) == 40:
-        sync_task = engine.claim_next(PROJECT_ID, "studio-sync", lease_seconds=900)
-        if not sync_task or sync_task["claim"]["task_id"] != "sync_assets_to_branch":
-            raise RuntimeError("sync_assets_to_branch was not ready after manuscript integration")
-        claim = sync_task["claim"]
-        readback_src = PROJECT_DIR / "Meme_X_Readback_v3_1.json"
-        sync_receipt_src = receipt_dir / "github-sync-receipt.json"
-        sync_receipt_src.write_text(json.dumps({
-            "repository": "D1traverser-debug/video-growth-agent",
-            "branch": branch, "commit_sha": commit_sha,
-            "project_path": f"projects/{PROJECT_ID}/",
-            "verification_context": "GitHub Actions checked out this exact commit before Studio bootstrap.",
-            "main_modified": False, "merged": False, "published": False
-        }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        readback_dst = receipt_dir / "Meme_X_Readback_v3_1.json"
-        shutil.copy2(readback_src, readback_dst)
-        sync_result = engine.complete_task(
-            PROJECT_ID, "sync_assets_to_branch", "studio-sync", claim["claim_token"],
-            {
-                "asset-readback-v3-1": {"path": "artifacts/Meme_X_Readback_v3_1.json", "kind": "receipt", "media_type": "application/json", "rights_status": "NOT_APPLICABLE"},
-                "github-sync-receipt": {"path": "artifacts/github-sync-receipt.json", "kind": "receipt", "media_type": "application/json", "rights_status": "NOT_APPLICABLE"}
-            },
-            {"branch": branch, "commit_sha": commit_sha}
+    # Source verification and voice diagnosis are independent branches after scope recovery.
+    parallel_specs = {
+        "verify_sources_and_claims": [
+            ("source-fact-check-record", V33_DIR / "Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md", "document", "text/markdown")
+        ],
+        "diagnose_editorial_voice": [
+            ("editorial-root-cause-record", V33_DIR / "Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md", "document", "text/markdown")
+        ]
+    }
+    parallel_results = {}
+    for _ in range(2):
+        packet = engine.claim_next(PROJECT_ID, "studio-review", lease_seconds=900)
+        if not packet:
+            raise RuntimeError("expected one of the two independent review tasks to be ready")
+        task_id = packet["claim"]["task_id"]
+        if task_id not in parallel_specs or task_id in parallel_results:
+            raise RuntimeError(f"unexpected parallel task claimed: {task_id}")
+        parallel_results[task_id] = _complete_claim(
+            engine, task_id, "studio-review", packet["claim"], parallel_specs[task_id],
+            {"review_record": "v3.3 editorial decision and source-bound style audit"}
         )
 
+    _claim_and_complete(
+        engine, "revise_manuscripts", "studio-editorial",
+        [
+            ("article-en-v3-3", V33_DIR / "Meme_X_Article_EN_v3_3.md", "document", "text/markdown"),
+            ("article-zh-v3-3", V33_DIR / "Meme_X_Article_ZH_v3_3.md", "document", "text/markdown"),
+            ("editorial-revision-record-v3-3", V33_DIR / "Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md", "document", "text/markdown")
+        ],
+        {"revision": "v3.3", "method": "structural and voice rewrite", "bigfoot_occurrences": {"en": 1, "zh": 1}}
+    )
+
+    _claim_and_complete(
+        engine, "refresh_distribution_and_visual_assets", "studio-assets",
+        [
+            ("layout-visual-prompts-v3-3", V33_DIR / "Meme_X_v3_3_X_Articles_Layout_and_Visual_Prompts.md", "document", "text/markdown"),
+            ("distribution-pack-v3-3", V33_DIR / "Meme_X_v3_3_Distribution_Pack.md", "document", "text/markdown")
+        ],
+        {"visual_prompts": 4, "images_generated": 0, "distribution_items_under_280": True}
+    )
+
+    attachment_receipt = receipt_dir / "handoff-attachment-receipt.json"
+    manifest = json.loads((V33_DIR / "Meme_X_v3_3_Asset_Manifest.json").read_text(encoding="utf-8"))
+    attachment_receipt.write_text(json.dumps({
+        "version": "v3.3",
+        "delivery_channel": "conversation attachments",
+        "status": "DELIVERED",
+        "attachments": [
+            {"name": "Meme_X_Article_EN_v3_3.docx", "sha256": manifest["files"]["Meme_X_Article_EN_v3_3.docx"]["sha256"]},
+            {"name": "Meme_X_Article_ZH_v3_3.docx", "sha256": manifest["files"]["Meme_X_Article_ZH_v3_3.docx"]["sha256"]},
+            {"name": "Meme_X_Article_EN_v3_3.pdf", "sha256": manifest["files"]["Meme_X_Article_EN_v3_3.pdf"]["sha256"]},
+            {"name": "Meme_X_Article_ZH_v3_3.pdf", "sha256": manifest["files"]["Meme_X_Article_ZH_v3_3.pdf"]["sha256"]},
+            {"name": "Meme_X_Article_Complete_Package_v3_3.zip", "status": "conversation_attachment", "zip_integrity": "PASS"}
+        ]
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    _claim_and_complete(
+        engine, "build_delivery_package", "studio-packager",
+        [
+            ("delivery-readback-v3-3", V33_DIR / "Meme_X_v3_3_Readback.json", "receipt", "application/json"),
+            ("delivery-manifest-v3-3", V33_DIR / "Meme_X_v3_3_Asset_Manifest.json", "receipt", "application/json"),
+            ("delivery-readme-v3-3", V33_DIR / "Meme_X_v3_3_README.md", "document", "text/markdown"),
+            ("handoff-attachment-receipt", attachment_receipt, "receipt", "application/json")
+        ],
+        {"zip_integrity": "PASS", "docx_pdf_visual_review": "PASS", "native_x_preview": "OPEN"}
+    )
+
+    sync_result = None
+    if branch and commit_sha and len(commit_sha) == 40:
+        sync_receipt = receipt_dir / "github-sync-receipt.json"
+        sync_receipt.write_text(json.dumps({
+            "repository": "D1traverser-debug/video-growth-agent",
+            "branch": branch,
+            "commit_sha": commit_sha,
+            "project_path": f"projects/{PROJECT_ID}/v3.3/",
+            "verification_context": "GitHub Actions checked out this exact commit before Studio bootstrap.",
+            "main_modified": False,
+            "merged": False,
+            "published": False
+        }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        sync_result = _claim_and_complete(
+            engine, "sync_candidate_branch", "studio-sync",
+            [
+                ("github-sync-receipt", sync_receipt, "receipt", "application/json"),
+                ("branch-readback-receipt", V33_DIR / "Meme_X_v3_3_Readback.json", "receipt", "application/json")
+            ],
+            {"branch": branch, "commit_sha": commit_sha, "main_modified": False, "published": False}
+        )
+
+    audit = engine.audit(PROJECT_ID)
+    status = engine.status(PROJECT_ID)
     return {
         "project_id": PROJECT_ID,
         "runtime_root": str(root),
-        "status": engine.status(PROJECT_ID),
-        "audit": engine.audit(PROJECT_ID),
+        "status": status,
+        "audit": audit,
         "decision": decision,
         "repository_sync_task": sync_result,
+        "parallel_review_tasks": list(parallel_results),
         "events": engine.events(PROJECT_ID, limit=100)
     }
 
