@@ -62,11 +62,17 @@ def test_engine_uses_no_external_runtime_dependency():
     assert "sqlite3" in source
     assert "video_growth_agent" not in source
 
-def test_legacy_engine_import_is_only_a_compatibility_shim():
-    from video_growth_agent.studio_engine import StudioEngine as LegacyImport
-    from video_studio.engine import StudioEngine as CanonicalEngine
+def test_video_has_one_installed_cli_and_no_engine_import_shims():
+    import tomllib
 
-    assert LegacyImport is CanonicalEngine
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    assert project["project"]["scripts"] == {"vga-studio": "video_studio.cli:main"}
+    for path in (
+        ROOT / "video_growth_agent/studio_cli.py",
+        ROOT / "video_growth_agent/studio_engine.py",
+        ROOT / "video_growth_agent/studio_media.py",
+    ):
+        assert not path.exists()
 
 
 def test_standalone_control_plane_is_independent_and_domain_bridge_is_explicit():

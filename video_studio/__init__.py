@@ -1,4 +1,4 @@
-"""Standalone Video Studio package; independent of legacy and CAOS runtimes."""
+"""Video Production Studio package and canonical runtime API."""
 from .engine import ClaimError, ContractError, GateError, ProjectNotFound, StudioEngine, StudioError, TaskClaim
 
 __all__ = [
