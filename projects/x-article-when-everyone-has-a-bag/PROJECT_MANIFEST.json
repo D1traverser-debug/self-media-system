@@ -40,7 +40,7 @@
   "asset_hash_manifest": "v3.2/Meme_X_v3_2_Asset_Manifest.json",
   "runtime_bootstrap": "projects/x-article-when-everyone-has-a-bag/bootstrap.py",
   "runtime_integration_test": "tests/test_meme_x_article_studio_project.py",
-  "repository_candidate_commit": "06140e06515552b6db46035c3c9b7f987609a79d",
   "text_asset_sync_status": "PASS",
-  "binary_handoff_status": "DELIVERED_AS_CONVERSATION_ATTACHMENTS"
+  "binary_handoff_status": "DELIVERED_AS_CONVERSATION_ATTACHMENTS",
+  "last_candidate_sync": "v3.2 text manuscripts and review records committed on the isolated candidate branch; formatted Word and ZIP supplied as conversation attachments"
 }
