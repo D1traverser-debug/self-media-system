@@ -100,7 +100,7 @@ def test_manual_technical_qa_artifact_cannot_forge_machine_pass(tmp_path):
 
 
 def test_release_accepts_digest_match_when_persistent_uri_differs(tmp_path):
-    from video_growth_agent import QACheck, QAReport
+    from video_growth_agent.models import QACheck, QAReport
     rt = runtime(tmp_path); rt.create_project("digest"); state = rt.state("digest"); state.stage = "RELEASE"; state.artifacts["final_media"] = ArtifactRecord("final_media", "library://final", "RELEASE", kind="media", digest="abc123"); state.artifacts["publish_pack"] = ArtifactRecord("publish_pack", "file://publish.md", "RELEASE"); state.approvals["RELEASE"] = {"showrunner": Approval("showrunner", "PASS")}; rt.store.save(state); rt.record_qa("digest", QAReport(media_uri="/mnt/data/materialized-final.mp4", checks=tuple(QACheck(check_id, "PASS", "test") for check_id in ("video_stream", "stream_duration_match", "true_peak", "black_frames")), metadata={"checker": "ffmpeg-ffprobe-v0.2", "sha256": "abc123"})); state = rt.state("digest"); state.stage = "RELEASE"; rt.store.save(state); assert rt.gate_report("digest")["machine_failures"] == []
 
 

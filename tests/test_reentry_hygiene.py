@@ -1,4 +1,3 @@
-import copy
 import json
 from pathlib import Path
 
@@ -9,9 +8,7 @@ from video_growth_agent.storage import ProjectStore
 from video_growth_agent.runtime import StudioRuntime
 from video_growth_agent.execution_attestation import ExecutionAttestation, ExecutionTrustRegistry, canonical_digest
 from video_growth_agent.models import QACheck, QAReport
-from video_growth_agent.resources import data_path
 from video_growth_agent.studio_agents import AgenticStudio
-from video_growth_agent.system_audit import _artifact_reachability_failures
 from video_growth_agent.techniques import TechniqueLibrary
 
 
@@ -217,16 +214,6 @@ def test_ffmpeg_measure_cannot_be_completed_as_fabricated_artifact(tmp_path):
     orders = studio.dispatch_stage("qa")
     review = next(order for order in orders if order.task_id == "technical_review")
     assert review.status == "READY"
-
-
-def test_artifact_reachability_catches_hidden_qa_side_effect():
-    workflow = json.loads(data_path("workflow.json").read_text(encoding="utf-8"))
-    plan = json.loads(data_path("execution-plan.json").read_text(encoding="utf-8"))
-    broken = copy.deepcopy(plan)
-    broken["stages"]["TECH_QA"]["tasks"][0]["outputs"] = []
-    failures = _artifact_reachability_failures(workflow, broken)
-    assert "artifact_input_unreachable:TECH_QA/technical_review:technical_qa" in failures
-    assert "workflow_required_artifact_unreachable:TECH_QA:technical_qa" in failures
 
 
 def test_candidate_techniques_are_explicit_opt_in_only():

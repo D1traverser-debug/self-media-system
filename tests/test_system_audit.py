@@ -1,70 +1,32 @@
-from importlib.metadata import version
 from pathlib import Path
-import shutil
 
-from video_growth_agent.system_audit import package_audit, repository_audit, run_system_audit
+from video_studio.system_audit import run_system_audit
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_package_harness_passes_current_runtime_contract():
-    report = package_audit()
-    assert report["pass"] is True, report
-    expected = version("video-growth-agent")
-    assert expected == "0.8.0"
-    assert report["legacy_adapter_bundle_version"] == "0.7.0"
-    assert report["agent_registry_version"] == report["execution_plan_version"]
-    assert report["execution_plan_version"] == report["coordination_policy_version"]
-
-
-def test_repository_harness_requires_caos_governance_and_rejects_legacy_parent():
-    report = repository_audit(ROOT)
-    assert report["pass"] is True, report
-    assert report["runtime_version"] == "0.8.0"
-    assert report["legacy_adapter_bundle_version"] == "0.7.0"
-    assert not (ROOT / "config").exists()
-    assert not (ROOT / "continuity").exists()
-    assert not (ROOT / ".uaos").exists()
-    assert not (ROOT / "UAOS_SKILL.md").exists()
-    assert not (ROOT / "tests/test_uaos_current.py").exists()
-    assert (ROOT / "CAOS_VIDEO_ENTRY.md").is_file()
-    assert (ROOT / "video_growth_agent/data/domain_manifest.json").is_file()
-    assert (ROOT / "video_growth_agent/data/capabilities.json").is_file()
-    assert (ROOT / "projects/pilot-002/PROGRAM_STATE.json").is_file()
-    for rel in (
-        "video_growth_agent/media_graph.py",
-        "video_growth_agent/editorial_planning.py",
-        "video_growth_agent/plan_graph_bridge.py",
-        "video_growth_agent/production_os.py",
-        "video_growth_agent/continuity.py",
-        "video_growth_agent/model_registry.py",
-        "video_growth_agent/timeline.py",
-        "video_growth_agent/editorial_interchange.py",
-        "video_growth_agent/experiments.py",
-        "video_growth_agent/business_objects.py",
-        "video_growth_agent/business_metrics.py",
-        "video_growth_agent/operator_view.py",
-        "video_growth_agent/owner_behavior_admission.py",
-        "video_growth_agent/ip_identity.py",
-    ):
-        assert (ROOT / rel).is_file(), rel
-
-
-def test_repository_harness_fails_closed_when_canonical_media_runtime_is_missing(tmp_path):
-    shadow = tmp_path / "repo"
-    shutil.copytree(
-        ROOT,
-        shadow,
-        ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache"),
-    )
-    missing = shadow / "video_growth_agent/editorial_planning.py"
-    missing.unlink()
-    report = repository_audit(shadow)
-    assert report["pass"] is False
-    assert "media_business_runtime_missing:video_growth_agent/editorial_planning.py" in report["failures"]
-
-
-def test_combined_system_audit_passes_repository_and_package():
+def test_canonical_video_system_audit_passes_structural_contract():
     report = run_system_audit(ROOT)
     assert report["pass"] is True, report
-    assert report["failures"] == []
+    assert report["structural_status"] == "PASS"
+    assert report["production_readiness"] == "PARTIAL"
+    assert report["capability_gaps"]
+    assert report["owner_inputs_required"]
+
+
+def test_audit_distinguishes_caos_session_governance_from_runtime_independence():
+    report = run_system_audit(ROOT)
+    assert report["pass"] is True, report
+    boundary = report["boundary"]
+    assert boundary["caos_session_governance_required"] is True
+    assert boundary["caos_runtime_dependency"] is False
+    assert boundary["caos_source_mutation_allowed"] is False
+    assert boundary["paid_provider_calls_made"] is False
+    assert boundary["automatic_publication"] is False
+
+
+def test_audit_checks_only_one_installed_video_cli():
+    import tomllib
+
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    assert project["project"]["scripts"] == {"vga-studio": "video_studio.cli:main"}

@@ -105,14 +105,17 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         and "import-manifest" in entry
         and "system-audit" in entry
         and studio_manifest.get("system_audit") == "video_studio.system_audit.run_system_audit"
-        and governance.get("system") == "VIDEO_STUDIO_NATIVE"
-        and governance.get("mode") == "STANDALONE"
+        and governance.get("system") == "CAOS"
+        and governance.get("mode") == "CHAT_GOVERNED_EXTERNAL"
+        and governance.get("session_governance_required") is True
+        and governance.get("standalone_mode") == "EXPLICIT_OWNER_SELECTION_ONLY"
         and governance.get("caos_runtime_dependency") is False
         and governance.get("caos_api_dependency") is False
         and governance.get("caos_skill_dependency") is False
         and governance.get("parent_task_or_lease_dependency") is False
+        and governance.get("source_mutation") == "FORBIDDEN"
     )
-    _check(checks, "standalone_entry_and_governance", entry_ok, {
+    _check(checks, "caos_parent_governance_and_runtime_boundary", entry_ok, {
         "entry": "STUDIO_ENTRY.md",
         "runtime": studio_manifest.get("runtime"),
         "governance": governance,
@@ -401,7 +404,9 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         "capability_gaps": capability_gaps,
         "owner_inputs_required": owner_inputs_required,
         "boundary": {
+            "caos_session_governance_required": True,
             "caos_runtime_dependency": False,
+            "caos_source_mutation_allowed": False,
             "paid_provider_calls_made": False,
             "automatic_publication": False,
             "temporary_workspace_only": True,

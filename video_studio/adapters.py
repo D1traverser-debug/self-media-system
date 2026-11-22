@@ -250,6 +250,8 @@ def route_shot(payload: Mapping[str, Any], *, now: datetime | None = None) -> di
     try:
         request, engines = _model_routing_request(payload)
         decision = EvidenceBoundModelRouter().route(request, engines, now=now)
+    except DomainAdapterError as exc:
+        raise DomainAdapterError(f"invalid evidence-bound shot routing contract: {exc}") from exc
     except (KeyError, TypeError, ValueError) as exc:
         raise DomainAdapterError(f"invalid evidence-bound shot routing contract: {exc}") from exc
     route = _jsonable(decision)

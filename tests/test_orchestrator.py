@@ -72,7 +72,7 @@ def test_every_required_role_has_prompt():
 
 
 def test_role_registry_loads_only_requested_prompt():
-    from video_growth_agent import RoleRegistry
+    from video_growth_agent.roles import RoleRegistry
     registry = RoleRegistry(); role = registry.get("art_director"); assert role.role == "art_director"; assert "PPT/SaaS-dashboard" in role.prompt; assert "looks-like-ppt" in role.veto
 
 
