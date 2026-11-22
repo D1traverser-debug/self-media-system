@@ -40,6 +40,4 @@ Pump.fun provides one example of how the cash-flow side can work. Its documentat
 
 Online communities can also produce value beyond trading. Dogecoin supporters raised more than $30,000 for Jamaica's two-man bobsled team to travel to the 2014 Sochi Winter Olympics. That fundraiser showed real coordination; it did not determine how a separate token's supply or fees were distributed. [PBS covered the fundraiser.](https://www.pbs.org/newshour/world/jamaican-bobsled-team-raises-30000-in-dogecoin-for-trip-to-sochi)
 
-A busy timeline is evidence of activity. It is not proof of broad ownership, independent demand or shared upside. Read the work to understand the culture, the holder distribution to understand ownership, and the fee route to understand who gets paid.
-
 A crowded feed tells you the joke has travelled. The holder map and fee route tell you where the upside went.
