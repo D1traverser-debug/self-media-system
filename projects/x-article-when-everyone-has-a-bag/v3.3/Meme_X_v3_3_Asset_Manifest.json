@@ -21,12 +21,12 @@
       "size_bytes": 42943
     },
     "Meme_X_Article_EN_v3_3.pdf": {
-      "sha256": "9e2c4a8f97777ab70941355208c5b8a6aa5d7faa3753e7faa0eb49ace43d3fd2",
-      "size_bytes": 10356
+      "sha256": "cc579288605053615e1a42938f10651c2347a1739a2b7740f84ba50b424bcdc0",
+      "size_bytes": 35316
     },
     "Meme_X_Article_ZH_v3_3.pdf": {
-      "sha256": "abde57f1eaae78f27be51b699f2819d0be2aee849217952ce47f6b24b7f4b9a7",
-      "size_bytes": 11422
+      "sha256": "1f150af2faff57b2b041943a44fb751d3fde5bdc38f44812ae1d07ef14015411",
+      "size_bytes": 36383
     },
     "Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md": {
       "sha256": "f7fe53508f987cbf397d4e8ec1d0571409911da8206b7f3f65eebb143f1791c2",
@@ -41,7 +41,7 @@
       "size_bytes": 3179
     },
     "Meme_X_v3_3_README.md": {
-      "sha256": "74e0261bd95fb537b0966545d8602facf9e28110129d56707f8a0becb05a8c59",
+      "sha256": "74e0261bd95fb537b0966545d8602facf9e28129d56707f8a0becb05a8c59",
       "size_bytes": 1280
     },
     "Meme_X_v3_3_Readback.json": {
