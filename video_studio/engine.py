@@ -1387,12 +1387,15 @@ class StudioEngine:
                 resolved.append(ref)
                 continue
             source_evidence = source_connection.execute(
-                """SELECT * FROM artifacts WHERE project_id=?
-                   AND status IN ('CURRENT','ACCEPTED')
-                   AND (artifact_id=? OR name=?)
-                   ORDER BY version DESC LIMIT 1""",
-                (source_project_id, ref, ref),
+                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                (source_project_id, ref),
             ).fetchone()
+            if source_evidence is not None and source_evidence["status"] not in {"CURRENT", "ACCEPTED"}:
+                raise ContractError(
+                    f"source rights evidence artifact is stale: {source_project_id}/{ref}"
+                )
+            if source_evidence is None:
+                source_evidence = self._artifact_by_name(source_connection, source_project_id, ref)
             if source_evidence is None:
                 raise ContractError(
                     f"source rights evidence reference does not resolve: {source_project_id}/{ref}"
@@ -1940,13 +1943,13 @@ class StudioEngine:
                             values = [float(scorecard[name]) for name in score_dimensions]
                             if not all(math.isfinite(value) for value in values):
                                 failures.append(f"review_scorecard_not_finite:{rubric}:{review['review_id']}")
-                                continue
-                            average = sum(values) / len(values)
-                            minimum_average = float(contract.get("min_average", 0))
-                            if not math.isfinite(minimum_average):
-                                failures.append(f"review_minimum_average_not_finite:{rubric}:{review['review_id']}")
-                            elif average < minimum_average:
-                                failures.append(f"review_average_below_floor:{rubric}:{average:.2f}<{minimum_average:g}")
+                            else:
+                                average = sum(values) / len(values)
+                                minimum_average = float(contract.get("min_average", 0))
+                                if not math.isfinite(minimum_average):
+                                    failures.append(f"review_minimum_average_not_finite:{rubric}:{review['review_id']}")
+                                elif average < minimum_average:
+                                    failures.append(f"review_average_below_floor:{rubric}:{average:.2f}<{minimum_average:g}")
                         except (KeyError, TypeError, ValueError, ZeroDivisionError):
                             failures.append(f"review_scorecard_incomplete:{rubric}:{review['review_id']}")
                     min_findings = int(contract.get("min_findings", 0))
