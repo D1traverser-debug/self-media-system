@@ -995,6 +995,43 @@ class StudioEngine:
             "instructions": "Produce only the declared outputs. Preserve source truth, provenance and rights. If the task cannot meet its acceptance contract, return a structured failure instead of claiming completion.",
         }
 
+    def _reclaim_expired_claims_in_tx(
+        self, connection: sqlite3.Connection, project_id: str, now: datetime,
+    ) -> list[dict[str, Any]]:
+        expired = connection.execute(
+            "SELECT * FROM tasks WHERE project_id=? AND status='RUNNING' AND lease_until < ?",
+            (project_id, _iso(now)),
+        ).fetchall()
+        reclaimed: list[dict[str, Any]] = []
+        for row in expired:
+            next_status = "PENDING" if row["attempts"] < row["max_attempts"] else "FAILED"
+            connection.execute(
+                "UPDATE tasks SET status=?,worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,updated_at=? WHERE project_id=? AND task_id=?",
+                (next_status, _iso(now), project_id, row["task_id"]),
+            )
+            self._event(connection, project_id, "TASK", row["task_id"], "TASK_LEASE_EXPIRED", {
+                "worker_id": row["worker_id"], "attempt": row["attempts"], "next_status": next_status,
+            })
+            reclaimed.append({
+                "task_id": row["task_id"], "worker_id": row["worker_id"],
+                "attempt": row["attempts"], "next_status": next_status,
+            })
+        return reclaimed
+
+    def reclaim_expired_claims(self, project_id: str) -> list[dict[str, Any]]:
+        """Recover expired task leases even when no task is currently READY."""
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            try:
+                self._project_row(connection, project_id)
+                reclaimed = self._reclaim_expired_claims_in_tx(connection, project_id, _now())
+                self._refresh_in_tx(connection, project_id)
+                connection.commit()
+                return reclaimed
+            except Exception:
+                connection.rollback()
+                raise
+
     def claim_next(
         self, project_id: str, worker_id: str, lease_seconds: int = 900, *,
         executor: str | None = None, task_id: str | None = None,
@@ -1007,17 +1044,7 @@ class StudioEngine:
             try:
                 self._project_row(connection, project_id)
                 now = _now()
-                expired = connection.execute(
-                    "SELECT * FROM tasks WHERE project_id=? AND status='RUNNING' AND lease_until < ?",
-                    (project_id, _iso(now)),
-                ).fetchall()
-                for row in expired:
-                    next_status = "PENDING" if row["attempts"] < row["max_attempts"] else "FAILED"
-                    connection.execute(
-                        "UPDATE tasks SET status=?,worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,updated_at=? WHERE project_id=? AND task_id=?",
-                        (next_status, _iso(now), project_id, row["task_id"]),
-                    )
-                    self._event(connection, project_id, "TASK", row["task_id"], "TASK_LEASE_EXPIRED", {"worker_id": row["worker_id"], "attempt": row["attempts"], "next_status": next_status})
+                self._reclaim_expired_claims_in_tx(connection, project_id, now)
                 self._refresh_in_tx(connection, project_id)
                 query = "SELECT * FROM tasks WHERE project_id=? AND status='READY'"
                 query_params: list[Any] = [project_id]

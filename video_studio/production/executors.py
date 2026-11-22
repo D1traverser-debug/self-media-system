@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -48,7 +49,11 @@ def run_claimed_tool_task(
             return run_claimed_domain_adapter(engine,project_id,task_id,worker_id,claim_token)
         operation=executor_ref.removeprefix("production:")
         attempt = int(task.get("attempt", 1))
-        output_dir = engine._project_dir(project_id) / "artifacts" / "production" / task_id / f"attempt-{attempt}"
+        claim_fingerprint = hashlib.sha256(claim_token.encode("utf-8")).hexdigest()[:24]
+        output_dir = (
+            engine._project_dir(project_id) / "artifacts" / "production" / task_id
+            / f"attempt-{attempt}-claim-{claim_fingerprint}"
+        )
         output_dir.mkdir(parents=True, exist_ok=True)
         context = ProductionTaskContext(
             engine=engine, packet=packet, project_id=project_id, task_id=task_id,

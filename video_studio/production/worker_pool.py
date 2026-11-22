@@ -64,10 +64,12 @@ def run_ready_tool_tasks(
     failed: list[dict[str, Any]] = []
     claimed_total: list[dict[str, Any]] = []
     unregistered_by_id: dict[str, dict[str, Any]] = {}
+    reclaimed_expired_claims: list[dict[str, Any]] = []
     rounds = 0
 
     for round_number in range(1, max_rounds + 1):
         rounds = round_number
+        reclaimed_expired_claims.extend(engine.reclaim_expired_claims(project_id))
         tasks = engine.list_tasks(project_id)
         ready_tools = [item for item in tasks if item.get("status") == "READY" and item.get("executor") == "tool"]
         candidates = [item for item in ready_tools if tool_executor_for_task(item)]
@@ -171,6 +173,7 @@ def run_ready_tool_tasks(
         "max_workers": max_workers,
         "lease_seconds": lease_seconds,
         "claimed": claimed_total,
+        "reclaimed_expired_claims": reclaimed_expired_claims,
         "completed": completed,
         "failed": failed,
         "task_counts": task_counts,

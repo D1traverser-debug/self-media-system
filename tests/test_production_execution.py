@@ -104,8 +104,13 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
     engine = StudioEngine(tmp_path / "workspace")
     engine.create_project("delivery-demo", "Production delivery demo", _brief())
     assets = _source_assets(tmp_path)
+    imported_assets = {}
     for name, (path, kind, media_type, rights) in assets.items():
-        engine.import_asset("delivery-demo", name, path, kind=kind, media_type=media_type, rights_status=rights)
+        metadata = {"rights_evidence_refs": ["rights-manifest"]} if name in {"shot-01", "shot-02", "audio-mix"} else {}
+        imported_assets[name] = engine.import_asset(
+            "delivery-demo", name, path, kind=kind, media_type=media_type,
+            rights_status=rights, metadata=metadata,
+        )
 
     package_map = {
         "final-video": "deliverables/final-video.mp4",
@@ -114,6 +119,7 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
         "cover": "deliverables/cover.png",
         "publish-copy": "publish/publish-copy.md",
         "rights-manifest": "rights/rights-manifest.json",
+        "rights-clearance": "rights/rights-clearance.json",
         "timeline-spec": "project/production-timeline.json",
         "shot-01": "project/assets/shot-01.mp4",
         "shot-02": "project/assets/shot-02.mp4",
@@ -121,6 +127,41 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
         "render-receipt": "evidence/render-receipt.json",
         "technical-qa": "evidence/technical-qa.json",
     }
+    engine.add_tasks("delivery-demo", [{
+        "task_id": "rights-review",
+        "title": "Human review of exact source rights and provenance",
+        "kind": "rights_provenance_audit",
+        "executor": "human",
+        "depends_on": [],
+        "inputs": ["shot-01", "shot-02", "audio-mix", "rights-manifest"],
+        "outputs": ["rights-clearance"],
+        "acceptance": {"rights": "A named human reviewer clears each exact source asset and cites evidence."},
+    }])
+    reviewer_id = "rights-reviewer"
+    review_packet = engine.claim_next("delivery-demo", reviewer_id, executor="human")
+    assert review_packet and review_packet["task"]["task_id"] == "rights-review"
+    clearance_assets = [
+        {
+            "input_name": name,
+            "artifact_id": imported_assets[name]["artifact_id"],
+            "sha256": imported_assets[name]["sha256"],
+            "rights_status": imported_assets[name]["rights_status"],
+            "evidence_refs": ["rights-manifest"],
+        }
+        for name in ("shot-01", "shot-02", "audio-mix")
+    ]
+    clearance_path = tmp_path / "rights-clearance.json"
+    clearance_path.write_text(json.dumps({
+        "schema_version": "1.0", "status": "PASS",
+        "reviewer_id": reviewer_id, "assets": clearance_assets,
+    }), encoding="utf-8")
+    clearance_artifact = engine.complete_task(
+        "delivery-demo", "rights-review", reviewer_id, review_packet["claim"]["claim_token"],
+        {"rights-clearance": {
+            "path": str(clearance_path), "kind": "evidence",
+            "media_type": "application/json", "rights_status": "NOT_APPLICABLE",
+        }},
+    )["artifacts"]["rights-clearance"]
     required = list(package_map)
     engine.add_tasks("delivery-demo", [
         {
@@ -129,9 +170,12 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
             "kind": "production_render",
             "executor": "tool",
             "depends_on": [],
-            "inputs": ["timeline-spec", "shot-01", "shot-02", "audio-mix", "captions"],
+            "inputs": ["timeline-spec", "shot-01", "shot-02", "audio-mix", "captions", "rights-clearance"],
             "outputs": ["final-video", "audio-master", "render-receipt"],
-            "requirements": {"production": {"operation": "ffmpeg_assemble", "render_spec_input": "timeline-spec"}},
+            "requirements": {"production": {
+                "operation": "ffmpeg_assemble", "render_spec_input": "timeline-spec",
+                "rights_clearance_input": "rights-clearance",
+            }},
             "acceptance": {"render": "Produce a non-empty MP4, 24-bit WAV master and digest-bound render receipt."},
         },
         {
@@ -173,6 +217,7 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
                     "cover": {"kind": "image", "media_type": "image/png"},
                     "publish-copy": {"kind": "document", "media_type": "text/markdown"},
                     "rights-manifest": {"kind": "evidence", "media_type": "application/json"},
+                    "rights-clearance": {"kind": "evidence", "media_type": "application/json"},
                     "timeline-spec": {"kind": "document", "media_type": "application/json"},
                     "shot-01": {"kind": "video", "media_type": "video/mp4"},
                     "shot-02": {"kind": "video", "media_type": "video/mp4"},
@@ -193,12 +238,21 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
 
     tasks = {item["task_id"]: item for item in engine.list_tasks("delivery-demo")}
     assert {key: value["status"] for key, value in tasks.items()} == {
+        "rights-review": "COMPLETED",
         "render-master": "COMPLETED",
         "technical-qa": "COMPLETED",
         "package-delivery": "COMPLETED",
     }
 
     assert engine.audit("delivery-demo")["pass"] is True
+    render_completion = next(
+        item["result"]["completion"] for item in result["completed"]
+        if item["task_id"] == "render-master"
+    )
+    for media_name in ("final-video", "audio-master"):
+        assert render_completion["artifacts"][media_name]["metadata"]["rights_evidence_refs"] == [
+            clearance_artifact["artifact_id"]
+        ]
     artifact_path = next(
         path for path in (engine._project_dir("delivery-demo") / "artifacts" / "production" / "package-delivery").rglob("delivery-package.zip")
     )
@@ -207,6 +261,7 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
         names = set(archive.namelist())
     assert set(package_map.values()).issubset(names)
     assert "delivery-manifest.json" in names
+    assert "rights/rights-clearance.json" in names
     assert engine.audit("delivery-demo")["pass"] is True
 
 
@@ -307,7 +362,10 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
     assert result["failed"] == []
     task = engine.list_tasks("motion-demo")[0]
     assert task["status"] == "COMPLETED"
-    output_dir = engine._project_dir("motion-demo") / "artifacts" / "production" / "render-motion-shot" / "attempt-1"
+    output_root = engine._project_dir("motion-demo") / "artifacts" / "production" / "render-motion-shot"
+    output_dirs = sorted(output_root.glob("attempt-1-claim-*"))
+    assert len(output_dirs) == 1
+    output_dir = output_dirs[0]
     shot = output_dir / "shot-candidate.mp4"
     receipt = json.loads((output_dir / "shot-render-receipt.json").read_text(encoding="utf-8"))
     assert shot.is_file() and shot.stat().st_size > 0
@@ -315,6 +373,21 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
     assert receipt["trusted_project_code_execution"] is True
     assert receipt["candidate_only"] is True
     assert receipt["frame_count"] == 10
+    assert engine.audit("motion-demo")["pass"] is True
+
+    engine.revise_task(
+        "motion-demo", "render-motion-shot",
+        {"title": "Render the revised project-owned motion scene"},
+        reason="Verify a revised task can regenerate outputs without overwriting prior attempt files.",
+    )
+    revised = run_ready_tool_tasks(engine, "motion-demo", worker_prefix="motion-renderer-revision", max_workers=1)
+    assert revised["scheduler_status"] == "TASK_GRAPH_COMPLETE_NOT_RELEASED", revised
+    assert revised["failed"] == []
+    assert engine.list_tasks("motion-demo")[0]["attempts"] == 1
+    output_dirs = sorted(output_root.glob("attempt-1-claim-*"))
+    assert len(output_dirs) == 2
+    assert output_dirs[0] != output_dirs[1]
+    assert all((path / "shot-candidate.mp4").is_file() for path in output_dirs)
     assert engine.audit("motion-demo")["pass"] is True
 
     invalid = json.loads(frame_spec.read_text(encoding="utf-8"))
@@ -589,3 +662,57 @@ def test_render_rights_clearance_rejects_unproven_or_mismatched_clearance(tmp_pa
     context, spec = _rights_clearance_fixture(tmp_path, **overrides)
     with pytest.raises(ProductionContractError, match=message):
         _validate_render_rights_clearance(context, spec, "rights-clearance")
+
+
+
+def test_worker_pool_reclaims_expired_tool_lease_before_ready_task_filtering(tmp_path, monkeypatch):
+    import video_studio.production.worker_pool as worker_pool
+
+    engine = StudioEngine(tmp_path / "expired-lease-workspace")
+    engine.create_project("expired-lease", "Expired lease recovery", _brief())
+    engine.add_tasks("expired-lease", [{
+        "task_id": "recover-me",
+        "title": "Recover an expired local tool task",
+        "kind": "local_measurement",
+        "executor": "tool",
+        "depends_on": [],
+        "inputs": [],
+        "outputs": ["recovered-receipt"],
+        "acceptance": {"recovery": "The expired lease is reclaimed and the task completes under a new claim."},
+    }])
+    first = engine.claim_next("expired-lease", "crashed-worker", executor="tool")
+    assert first is not None
+    with engine._connect("expired-lease") as connection:
+        connection.execute(
+            "UPDATE tasks SET lease_until='2000-01-01T00:00:00Z' WHERE project_id=? AND task_id=?",
+            ("expired-lease", "recover-me"),
+        )
+        connection.commit()
+
+    monkeypatch.setattr(
+        worker_pool, "tool_executor_for_task",
+        lambda task: "production:test" if task.get("task_id") == "recover-me" else None,
+    )
+
+    def complete_reclaimed_task(active_engine, project_id, task_id, worker_id, claim_token):
+        packet = active_engine.claimed_packet(project_id, task_id, worker_id, claim_token)
+        output = active_engine._project_dir(project_id) / "artifacts" / "recovered-receipt.json"
+        output.write_text(json.dumps({"recovered": True}), encoding="utf-8")
+        return active_engine.complete_task(project_id, task_id, worker_id, claim_token, {
+            "recovered-receipt": {
+                "path": str(output), "kind": "evidence",
+                "media_type": "application/json", "rights_status": "NOT_APPLICABLE",
+            },
+        })
+
+    monkeypatch.setattr(worker_pool, "run_claimed_tool_task", complete_reclaimed_task)
+    result = run_ready_tool_tasks(engine, "expired-lease", worker_prefix="recovery-worker", max_workers=1)
+    assert result["scheduler_status"] == "TASK_GRAPH_COMPLETE_NOT_RELEASED", result
+    assert result["reclaimed_expired_claims"] == [{
+        "task_id": "recover-me", "worker_id": "crashed-worker",
+        "attempt": 1, "next_status": "PENDING",
+    }]
+    assert [item["task_id"] for item in result["claimed"]] == ["recover-me"]
+    task = engine.list_tasks("expired-lease")[0]
+    assert task["status"] == "COMPLETED"
+    assert task["attempts"] == 2

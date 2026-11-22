@@ -152,6 +152,11 @@ def execute_ffmpeg_assemble(context: ProductionTaskContext) -> dict[str, Any]:
         _validate_render_rights_clearance(context, spec, clearance_input)
         if clearance_input else "NOT_APPLICABLE"
     )
+    clearance_artifact = context.inputs.get(clearance_input) if clearance_input else None
+    rights_metadata = (
+        {"rights_evidence_refs": [str(clearance_artifact["artifact_id"])]}
+        if clearance_artifact else {}
+    )
     result = FfmpegAssembler().render(
         spec, input_artifacts=context.inputs, output_dir=context.output_dir, expected_outputs=context.outputs,
     )
@@ -159,12 +164,18 @@ def execute_ffmpeg_assemble(context: ProductionTaskContext) -> dict[str, Any]:
         spec.video_output: _output_payload(
             Path(result["video_path"]), kind="video", media_type="video/mp4",
             rights_status=output_rights_status,
-            metadata={"production_executor": "ffmpeg_assemble", "candidate_only": True, "render_receipt_ref": spec.receipt_output},
+            metadata={
+                "production_executor": "ffmpeg_assemble", "candidate_only": True,
+                "render_receipt_ref": spec.receipt_output, **rights_metadata,
+            },
         ),
         spec.audio_output: _output_payload(
             Path(result["audio_path"]), kind="audio", media_type="audio/wav",
             rights_status=output_rights_status,
-            metadata={"production_executor": "ffmpeg_assemble", "master_mix": True, "sample_rate": 48000, "bit_depth": 24},
+            metadata={
+                "production_executor": "ffmpeg_assemble", "master_mix": True,
+                "sample_rate": 48000, "bit_depth": 24, **rights_metadata,
+            },
         ),
         spec.receipt_output: _output_payload(
             Path(result["receipt_path"]), kind="evidence", media_type="application/json",
