@@ -1,0 +1,19 @@
+{
+  "version": "v3.2",
+  "project": "x-article-when-everyone-has-a-bag",
+  "status": "ACTIVE_CANDIDATE_NOT_PUBLISHED",
+  "repo_branch": "work/meme-x-article-bigfoot-2026-11-v3-2",
+  "files": [
+    "projects/x-article-when-everyone-has-a-bag/v3.2/Meme_X_Article_EN_v3_2.md",
+    "projects/x-article-when-everyone-has-a-bag/v3.2/Meme_X_Article_ZH_v3_2.md",
+    "projects/x-article-when-everyone-has-a-bag/v3.2/Meme_X_v3_2_Revision_and_Fact_Check.md",
+    "projects/x-article-when-everyone-has-a-bag/v3.2/Meme_X_v3_2_README.md",
+    "projects/x-article-when-everyone-has-a-bag/v3.2/Meme_X_v3_2_Readback.json"
+  ],
+  "external_handoff_files": [
+    "Meme_X_Article_EN_v3_2.docx",
+    "Meme_X_Article_ZH_v3_2.docx",
+    "Meme_X_Article_Complete_Package_v3_2.zip"
+  ],
+  "note": "Word files and ZIP package are supplied as conversation attachments; repository contains the versioned text sources and review records."
+}
