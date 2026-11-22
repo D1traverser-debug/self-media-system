@@ -5,8 +5,15 @@
     "kind": "source_recovery",
     "executor": "agent",
     "depends_on": [],
-    "inputs": ["source-decision-v3", "source-readback-v3", "candidate-v3-2-en", "candidate-v3-2-zh"],
-    "outputs": ["project-recovery-receipt"],
+    "inputs": [
+      "source-decision-v3",
+      "source-readback-v3",
+      "candidate-v3-2-en",
+      "candidate-v3-2-zh"
+    ],
+    "outputs": [
+      "project-recovery-receipt"
+    ],
     "requirements": {
       "current_candidate": "v3.3",
       "preserve": "title, subtitle, thesis, seven sections, five article source URLs, Bigfoot once per language"
@@ -22,9 +29,17 @@
     "title": "Recheck the five article sources and claim boundaries",
     "kind": "evidence_review",
     "executor": "agent",
-    "depends_on": ["recover_project_state"],
-    "inputs": ["source-decision-v3", "candidate-v3-2-en", "candidate-v3-2-zh"],
-    "outputs": ["source-fact-check-record"],
+    "depends_on": [
+      "recover_project_state"
+    ],
+    "inputs": [
+      "source-decision-v3",
+      "candidate-v3-2-en",
+      "candidate-v3-2-zh"
+    ],
+    "outputs": [
+      "source-fact-check-record"
+    ],
     "requirements": {
       "source_set": "five locked article URLs",
       "method": "distinguish source fact, author inference and limitation"
@@ -40,9 +55,17 @@
     "title": "Diagnose structural causes of AI-sounding prose",
     "kind": "editorial_diagnosis",
     "executor": "agent",
-    "depends_on": ["recover_project_state"],
-    "inputs": ["candidate-v3-2-en", "candidate-v3-2-zh", "source-decision-v3"],
-    "outputs": ["editorial-root-cause-record"],
+    "depends_on": [
+      "recover_project_state"
+    ],
+    "inputs": [
+      "candidate-v3-2-en",
+      "candidate-v3-2-zh",
+      "source-decision-v3"
+    ],
+    "outputs": [
+      "editorial-root-cause-record"
+    ],
     "requirements": {
       "competing_hypotheses": true,
       "root_cause_required": true,
@@ -59,9 +82,23 @@
     "title": "Rewrite English manuscript and adapt the Chinese edition",
     "kind": "editorial_revision",
     "executor": "agent",
-    "depends_on": ["verify_sources_and_claims", "diagnose_editorial_voice"],
-    "inputs": ["source-article-en-v3", "source-article-zh-v3", "candidate-v3-2-en", "candidate-v3-2-zh", "source-fact-check-record", "editorial-root-cause-record"],
-    "outputs": ["article-en-v3-3", "article-zh-v3-3", "editorial-revision-record-v3-3"],
+    "depends_on": [
+      "verify_sources_and_claims",
+      "diagnose_editorial_voice"
+    ],
+    "inputs": [
+      "source-article-en-v3",
+      "source-article-zh-v3",
+      "candidate-v3-2-en",
+      "candidate-v3-2-zh",
+      "source-fact-check-record",
+      "editorial-root-cause-record"
+    ],
+    "outputs": [
+      "article-en-v3-3",
+      "article-zh-v3-3",
+      "editorial-revision-record-v3-3"
+    ],
     "requirements": {
       "scope": "structural and voice rewrite",
       "preserve": "title, subtitle, thesis, seven sections, five source URLs, Bigfoot once per language"
@@ -78,9 +115,19 @@
     "title": "Refresh X distribution copy and visual placement prompts",
     "kind": "dependent_asset_revision",
     "executor": "agent",
-    "depends_on": ["revise_manuscripts"],
-    "inputs": ["article-en-v3-3", "article-zh-v3-3", "visual-prompt-pack-v3", "distribution-pack-v3"],
-    "outputs": ["layout-visual-prompts-v3-3", "distribution-pack-v3-3"],
+    "depends_on": [
+      "revise_manuscripts"
+    ],
+    "inputs": [
+      "article-en-v3-3",
+      "article-zh-v3-3",
+      "visual-prompt-pack-v3",
+      "distribution-pack-v3"
+    ],
+    "outputs": [
+      "layout-visual-prompts-v3-3",
+      "distribution-pack-v3-3"
+    ],
     "requirements": {
       "visuals": "one 5:2 cover and three 16:9 inline prompts",
       "placements": "after Sections 02, 03 and 05",
@@ -98,11 +145,30 @@
     "title": "Build and verify Word, PDF, ZIP, readback and asset hashes",
     "kind": "delivery_packaging",
     "executor": "agent",
-    "depends_on": ["revise_manuscripts", "refresh_distribution_and_visual_assets"],
-    "inputs": ["article-en-v3-3", "article-zh-v3-3", "editorial-revision-record-v3-3", "layout-visual-prompts-v3-3", "distribution-pack-v3-3"],
-    "outputs": ["delivery-readback-v3-3", "delivery-manifest-v3-3", "handoff-attachment-receipt"],
+    "depends_on": [
+      "revise_manuscripts",
+      "refresh_distribution_and_visual_assets"
+    ],
+    "inputs": [
+      "article-en-v3-3",
+      "article-zh-v3-3",
+      "editorial-revision-record-v3-3",
+      "layout-visual-prompts-v3-3",
+      "distribution-pack-v3-3"
+    ],
+    "outputs": [
+      "delivery-readback-v3-3",
+      "delivery-manifest-v3-3",
+      "handoff-attachment-receipt",
+      "delivery-readme-v3-3"
+    ],
     "requirements": {
-      "formats": ["md", "docx", "pdf", "zip"],
+      "formats": [
+        "md",
+        "docx",
+        "pdf",
+        "zip"
+      ],
       "hash": "SHA-256",
       "visual_check": "render all DOCX/PDF pages"
     },
@@ -118,9 +184,22 @@
     "title": "Sync exact v3.3 text assets to the isolated candidate branch",
     "kind": "repository_sync",
     "executor": "agent",
-    "depends_on": ["build_delivery_package"],
-    "inputs": ["article-en-v3-3", "article-zh-v3-3", "editorial-revision-record-v3-3", "layout-visual-prompts-v3-3", "distribution-pack-v3-3", "delivery-readback-v3-3", "delivery-manifest-v3-3"],
-    "outputs": ["github-sync-receipt", "branch-readback-receipt"],
+    "depends_on": [
+      "build_delivery_package"
+    ],
+    "inputs": [
+      "article-en-v3-3",
+      "article-zh-v3-3",
+      "editorial-revision-record-v3-3",
+      "layout-visual-prompts-v3-3",
+      "distribution-pack-v3-3",
+      "delivery-readback-v3-3",
+      "delivery-manifest-v3-3"
+    ],
+    "outputs": [
+      "github-sync-receipt",
+      "branch-readback-receipt"
+    ],
     "requirements": {
       "repository": "D1traverser-debug/video-growth-agent",
       "branch": "work/meme-x-article-bigfoot-2026-11-v3-3-editorial",
@@ -137,10 +216,21 @@
     "title": "Independent editorial review of exact v3.3 manuscripts",
     "kind": "independent_review",
     "executor": "human",
-    "depends_on": ["sync_candidate_branch"],
-    "inputs": ["article-en-v3-3", "article-zh-v3-3", "delivery-readback-v3-3"],
-    "outputs": ["independent-editor-review-receipt"],
-    "requirements": {"reviewer_must_not_be_producer": true, "digest_bound": true},
+    "depends_on": [
+      "sync_candidate_branch"
+    ],
+    "inputs": [
+      "article-en-v3-3",
+      "article-zh-v3-3",
+      "delivery-readback-v3-3"
+    ],
+    "outputs": [
+      "independent-editor-review-receipt"
+    ],
+    "requirements": {
+      "reviewer_must_not_be_producer": true,
+      "digest_bound": true
+    },
     "acceptance": {
       "review": "A non-author reviewer checks argument, factual precision, natural voice, bilingual alignment and reader value against exact artifact digests."
     },
@@ -151,10 +241,18 @@
     "title": "Obtain a real crypto-native target-reader cold read",
     "kind": "target_reader_review",
     "executor": "human",
-    "depends_on": ["sync_candidate_branch"],
-    "inputs": ["article-en-v3-3"],
-    "outputs": ["target-reader-review-receipt"],
-    "requirements": {"real_target_reader_required": true},
+    "depends_on": [
+      "sync_candidate_branch"
+    ],
+    "inputs": [
+      "article-en-v3-3"
+    ],
+    "outputs": [
+      "target-reader-review-receipt"
+    ],
+    "requirements": {
+      "real_target_reader_required": true
+    },
     "acceptance": {
       "review": "Actual crypto-native reader feedback is recorded; no simulated response or model-generated substitute."
     },
@@ -165,10 +263,21 @@
     "title": "Inspect v3.3 in X native composer and mobile layout",
     "kind": "platform_preview",
     "executor": "human",
-    "depends_on": ["sync_candidate_branch"],
-    "inputs": ["article-en-v3-3", "layout-visual-prompts-v3-3", "distribution-pack-v3-3"],
-    "outputs": ["x-native-preview-receipt"],
-    "requirements": {"native_composer_required": true, "mobile_preview_required": true},
+    "depends_on": [
+      "sync_candidate_branch"
+    ],
+    "inputs": [
+      "article-en-v3-3",
+      "layout-visual-prompts-v3-3",
+      "distribution-pack-v3-3"
+    ],
+    "outputs": [
+      "x-native-preview-receipt"
+    ],
+    "requirements": {
+      "native_composer_required": true,
+      "mobile_preview_required": true
+    },
     "acceptance": {
       "preview": "Actual X composer/mobile layout is checked; Word/PDF rendering is not a substitute."
     },
@@ -179,10 +288,20 @@
     "title": "Review rights and permissions for text and planned visuals",
     "kind": "rights_review",
     "executor": "human",
-    "depends_on": ["sync_candidate_branch"],
-    "inputs": ["article-en-v3-3", "article-zh-v3-3", "layout-visual-prompts-v3-3"],
-    "outputs": ["rights-review-receipt"],
-    "requirements": {"rights_status_evidence_required": true},
+    "depends_on": [
+      "sync_candidate_branch"
+    ],
+    "inputs": [
+      "article-en-v3-3",
+      "article-zh-v3-3",
+      "layout-visual-prompts-v3-3"
+    ],
+    "outputs": [
+      "rights-review-receipt"
+    ],
+    "requirements": {
+      "rights_status_evidence_required": true
+    },
     "acceptance": {
       "rights": "All assets have a documented status of OWNED, AUTHORIZED, LICENSED or PUBLIC_DOMAIN; unresolved rights block release."
     },
@@ -193,10 +312,27 @@
     "title": "Obtain explicit owner authorization for the exact candidate",
     "kind": "owner_authorization",
     "executor": "human",
-    "depends_on": ["independent_editor_review", "target_reader_cold_read", "x_native_preview", "rights_review"],
-    "inputs": ["delivery-readback-v3-3", "github-sync-receipt", "independent-editor-review-receipt", "target-reader-review-receipt", "x-native-preview-receipt", "rights-review-receipt"],
-    "outputs": ["owner-publication-authorization-receipt"],
-    "requirements": {"explicit_owner_authorization_required": true, "no_auto_publish": true},
+    "depends_on": [
+      "independent_editor_review",
+      "target_reader_cold_read",
+      "x_native_preview",
+      "rights_review"
+    ],
+    "inputs": [
+      "delivery-readback-v3-3",
+      "github-sync-receipt",
+      "independent-editor-review-receipt",
+      "target-reader-review-receipt",
+      "x-native-preview-receipt",
+      "rights-review-receipt"
+    ],
+    "outputs": [
+      "owner-publication-authorization-receipt"
+    ],
+    "requirements": {
+      "explicit_owner_authorization_required": true,
+      "no_auto_publish": true
+    },
     "acceptance": {
       "authorization": "Owner explicitly approves publication of the exact digest-bound candidate; silence or implied consent is not approval."
     },
@@ -207,10 +343,20 @@
     "title": "Final release gate for the exact v3.3 candidate",
     "kind": "release_acceptance",
     "executor": "human",
-    "depends_on": ["owner_release_authorization"],
-    "inputs": ["delivery-readback-v3-3", "github-sync-receipt", "owner-publication-authorization-receipt"],
-    "outputs": ["release-decision-receipt"],
-    "requirements": {"no_auto_publish": true},
+    "depends_on": [
+      "owner_release_authorization"
+    ],
+    "inputs": [
+      "delivery-readback-v3-3",
+      "github-sync-receipt",
+      "owner-publication-authorization-receipt"
+    ],
+    "outputs": [
+      "release-decision-receipt"
+    ],
+    "requirements": {
+      "no_auto_publish": true
+    },
     "acceptance": {
       "release": "All independent review, target-reader, native preview, rights and owner authorization gates pass for the exact current digests."
     },
