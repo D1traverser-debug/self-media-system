@@ -170,7 +170,7 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
             "title": "Assemble the exact audiovisual master and separate audio master",
             "kind": "production_render",
             "executor": "tool",
-            "depends_on": [],
+            "depends_on": ["rights-review"],
             "inputs": ["timeline-spec", "shot-01", "shot-02", "audio-mix", "captions", "rights-clearance"],
             "outputs": ["final-video", "audio-master", "render-receipt"],
             "requirements": {"production": {
