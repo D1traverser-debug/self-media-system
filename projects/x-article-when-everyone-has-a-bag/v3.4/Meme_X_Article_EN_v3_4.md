@@ -6,7 +6,7 @@ Phillip Banks created the Chill Guy character. In November 2024, a Solana token 
 
 Banks said the character was copyrighted and that he planned takedowns for unauthorized merchandise and shitcoins. Brand accounts using it as a trend were different; he mainly wanted credit. [CoinDesk reported the exchange.](https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok)
 
-The same character had become an artwork, a viral social object and the basis of a trade. The artist, the unknown token creator and the traders were all part of the story, but they occupied different positions around it.
+The meme's creator, its unknown token issuer and the people trading it were now part of the same story. One had made the character, another had launched the token, and traders were trying to bring the artist into its upside.
 
 The word **community** can fold those roles together. It may refer to the people who make a meme travel, the wallets that own its token, or the accounts that receive money when it trades. Those groups can overlap, but their contributions and rewards still need to be identified separately.
 
@@ -22,7 +22,7 @@ Virality shows how far the culture has travelled. It says little about how widel
 
 When a post catches, price can become part of the content. Buyers push the price up. A holder screenshots the green candle and posts it back into the feed. The screenshot draws new eyes to the meme; some viewers become buyers. Their trades can produce the next screenshot.
 
-A November 2026 study by Tomas Jais and Reilly White finds stronger spillovers and attention-driven trading among community tokens. The paper describes a broader market pattern; it does not trace the cause of any single rally. [Read the study.](https://www.sciencedirect.com/science/article/pii/S0275531926003491)
+A November 2026 study by Tomas Jais and Reilly White finds stronger spillovers and attention-driven trading among community tokens. Its findings describe market-wide behavior, helping explain the trading environment rather than any one coin's move. [Read the study.](https://www.sciencedirect.com/science/article/pii/S0275531926003491)
 
 Once the chart is circulating as content, it is doing more than recording a price. It is helping distribute the story.
 
@@ -34,13 +34,13 @@ Bitquery links developer wallets through the launch transaction, fee payment and
 
 By the time a token reaches your X feed, some of its earliest positions may already be in place. Your discovery time and the token's launch timeline run on different clocks.
 
-Market cap multiplies the quoted price by the circulating supply. It does not tell you how much money entered or how much liquidity is available for an exit.
+Market cap multiplies the quoted price by the circulating supply. The number is a valuation, not a measure of how much money entered or how much liquidity is available for an exit.
 
 ## 04 / The person posting may also own the trade.
 
 Fan art, translations, moderation, spaces, raids and daily replies keep a meme in circulation. When contributors also hold the token, that work can express genuine attachment while helping attract the next buyer.
 
-That overlap matters when reading a holder's posts. Check whether the account discloses its position, what it contributes beyond price calls, and what remains when trading slows. Original work and continued community labor tell you something different from a feed built around chart screenshots.
+Look at what the account discloses, what it contributes beyond price calls, and what remains when trading slows. A feed full of original work, translations and moderation is doing a different job from one built around chart screenshots.
 
 ## 05 / "Community" is three different ledgers.
 
@@ -58,7 +58,7 @@ An early buyer supplies capital; an artist supplies the character; a moderator s
 
 In 2014, the Dogecoin Foundation organized the Dogesled fundraiser, which raised more than $30,000 for Jamaica's two-man bobsled team to travel to the Sochi Winter Olympics. [PBS covered the fundraiser.](https://www.pbs.org/newshour/world/jamaican-bobsled-team-raises-30000-in-dogecoin-for-trip-to-sochi)
 
-People rallied around an internet currency and helped a team get to the Games. That fundraiser is evidence of collective action outside the market. A later token's ownership and fee structure still need their own accounting.
+That fundraiser shows what collective participation can accomplish outside a market. A later token's ownership and fee structure still need their own accounting.
 
 ## 07 / Match the claim to the evidence.
 
@@ -68,4 +68,4 @@ Before buying into a community pitch, match each claim to the evidence:
 - An ownership claim calls for wallet data: who holds the supply and when early positions formed.
 - A shared-upside claim calls for the fee route: who receives payments and whether promoters disclose their positions.
 
-The work shows who is building the community. The holder data and fee route show who owns the token and where its payments go.
+The timeline shows what people are doing. The holder list shows who owns the token. The fee route shows who gets paid.
