@@ -66,11 +66,11 @@ def test_meme_x_article_v36_editorial_contract_is_coherent():
         name = f"Meme_X_Article_{lng}_v3_6.md"
         content = (module.V36_DIR / name).read_text(encoding="utf-8")
         texts[lng] = content
-        urls[lng] = re.findall(r"https?://[^\\s)]+", content)
+        urls[lng] = re.findall(r"https?://[^\s)]+", content)
         assert content.count("Bigfoot") == 1
         headings = re.findall(r"(?m)^## (.+)$", content)
         assert len(headings) == 3
-        assert all(not re.match(r"^\\d", h) for h in headings)
+        assert all(not re.match(r"^\d", h) for h in headings)
     assert urls["EN"] == urls["ZH"]
     assert len(urls["EN"]) == 5
 
