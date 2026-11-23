@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 import json
+import hashlib
 from pathlib import Path
 import re
 from typing import Any, Mapping
@@ -496,8 +497,12 @@ def run_claimed_domain_adapter(
     outputs = list(task.get("outputs", []))
     if not outputs:
         raise DomainAdapterError("domain adapter task must declare at least one output")
-    output_dir = engine._project_dir(project_id) / "artifacts" / "domain-adapters" / _safe_filename(task_id)
     attempt = int(task.get("attempt", 1))
+    claim_fingerprint = hashlib.sha256(claim_token.encode("utf-8")).hexdigest()[:24]
+    output_dir = (
+        engine._project_dir(project_id) / "artifacts" / "domain-adapters"
+        / _safe_filename(task_id) / f"attempt-{attempt}-claim-{claim_fingerprint}"
+    )
     result: dict[str, Any]
 
     try:

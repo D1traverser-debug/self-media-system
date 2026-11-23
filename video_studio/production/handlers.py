@@ -28,7 +28,9 @@ def _output_payload(
 
 
 def _validate_render_rights_clearance(
-    context: ProductionTaskContext, spec: RenderSpec, clearance_input: str,
+    context: ProductionTaskContext, spec: RenderSpec | FrameRenderSpec, clearance_input: str,
+    *, source_names: tuple[str, ...] | None = None,
+    required_operation: str | None = None, authorized_output: str | None = None,
 ) -> str:
     clearance = context.inputs.get(clearance_input)
     if not clearance:
@@ -39,6 +41,13 @@ def _validate_render_rights_clearance(
         raise ProductionContractError(f"cannot read structured rights clearance: {exc}") from exc
     if not isinstance(payload, dict) or payload.get("schema_version") != "1.0" or payload.get("status") != "PASS":
         raise ProductionContractError("rights clearance must be schema_version 1.0 with status PASS")
+    if required_operation is not None and (
+        payload.get("authorized_operation") != required_operation
+        or payload.get("authorized_output") != authorized_output
+    ):
+        raise ProductionContractError(
+            "rights clearance must explicitly authorize this operation and exact output name"
+        )
     reviewer_id = payload.get("reviewer_id")
     if not isinstance(reviewer_id, str) or not reviewer_id.strip():
         raise ProductionContractError("rights clearance must identify the human reviewer")
@@ -68,7 +77,8 @@ def _validate_render_rights_clearance(
     ):
         raise ProductionContractError("rights clearance must be produced by a completed human rights review task")
     used_names = list(dict.fromkeys(
-        [clip.input_name for clip in spec.clips] + [track.input_name for track in spec.audio_tracks]
+        source_names if source_names is not None
+        else [clip.input_name for clip in spec.clips] + [track.input_name for track in spec.audio_tracks]
     ))
     records = payload.get("assets")
     if not isinstance(records, list):
@@ -120,6 +130,21 @@ def execute_python_frame_render(context: ProductionTaskContext) -> dict[str, Any
     if not spec_artifact:
         raise ProductionContractError(f"frame render spec is not a declared task input: {spec_name}")
     spec = FrameRenderSpec.from_dict(json.loads(Path(str(spec_artifact["path"])).read_text(encoding="utf-8")))
+    clearance_input = str(context.config.get("rights_clearance_input", "")).strip()
+    rights_status = (
+        _validate_render_rights_clearance(
+            context, spec, clearance_input,
+            source_names=tuple(dict.fromkeys((spec.renderer_input, *spec.asset_inputs))),
+            required_operation="PYTHON_FRAME_RENDER",
+            authorized_output=spec.video_output,
+        )
+        if clearance_input else "NOT_APPLICABLE"
+    )
+    clearance_artifact = context.inputs.get(clearance_input) if clearance_input else None
+    rights_metadata = (
+        {"rights_evidence_refs": [str(clearance_artifact["artifact_id"])]}
+        if clearance_artifact else {}
+    )
     result = PythonFrameRenderer().render(
         spec, input_artifacts=context.inputs, output_dir=context.output_dir,
         expected_outputs=context.outputs, project_root=context.engine._project_dir(context.project_id),
@@ -127,7 +152,11 @@ def execute_python_frame_render(context: ProductionTaskContext) -> dict[str, Any
     outputs = {
         spec.video_output: _output_payload(
             Path(result["video_path"]), kind="video", media_type="video/mp4",
-            metadata={"production_executor": "python_frame_render", "candidate_only": True, "render_receipt_ref": spec.receipt_output},
+            rights_status=rights_status,
+            metadata={
+                "production_executor": "python_frame_render", "candidate_only": True,
+                "render_receipt_ref": spec.receipt_output, **rights_metadata,
+            },
         ),
         spec.receipt_output: _output_payload(
             Path(result["receipt_path"]), kind="evidence", media_type="application/json",

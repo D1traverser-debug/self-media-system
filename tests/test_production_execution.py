@@ -358,20 +358,61 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
         "video_output": "shot-candidate",
         "receipt_output": "shot-render-receipt",
     }, indent=2), encoding="utf-8")
-    engine.import_asset("motion-demo", "renderer-script", renderer, kind="source_code", media_type="text/x-python", rights_status="OWNED")
+    evidence_file = tmp_path / "rights-evidence.json"
+    evidence_file.write_text(json.dumps({"source": "owner-created renderer", "scope": "derivative shot"}), encoding="utf-8")
+    engine.import_asset(
+        "motion-demo", "rights-evidence", evidence_file, kind="evidence",
+        media_type="application/json", rights_status="NOT_APPLICABLE",
+    )
+    renderer_asset = engine.import_asset(
+        "motion-demo", "renderer-script", renderer, kind="source_code",
+        media_type="text/x-python", rights_status="OWNED",
+        metadata={"rights_evidence_refs": ["rights-evidence"]},
+    )
     engine.import_asset("motion-demo", "frame-render-spec", frame_spec, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+    engine.add_tasks("motion-demo", [{
+        "task_id": "rights-review",
+        "title": "Human-clear exact renderer inputs and the planned derived video",
+        "kind": "rights_provenance_audit", "executor": "human",
+        "depends_on": [], "inputs": ["renderer-script", "frame-render-spec", "rights-evidence"],
+        "outputs": ["rights-clearance"],
+        "acceptance": {"rights": "Human review binds exact code digest and output."},
+    }])
+    reviewer_id = "frame-rights-reviewer"
+    review = engine.claim_next("motion-demo", reviewer_id, executor="human")
+    assert review and review["task"]["task_id"] == "rights-review"
+    clearance_file = tmp_path / "frame-rights-clearance.json"
+    clearance_file.write_text(json.dumps({
+        "schema_version": "1.0", "status": "PASS",
+        "reviewer_id": reviewer_id,
+        "authorized_operation": "PYTHON_FRAME_RENDER",
+        "authorized_output": "shot-candidate",
+        "assets": [{
+            "input_name": "renderer-script", "artifact_id": renderer_asset["artifact_id"],
+            "sha256": renderer_asset["sha256"], "rights_status": "OWNED",
+            "evidence_refs": ["rights-evidence"],
+        }],
+    }), encoding="utf-8")
+    clearance_artifact = engine.complete_task(
+        "motion-demo", "rights-review", reviewer_id, review["claim"]["claim_token"],
+        {"rights-clearance": {
+            "path": str(clearance_file), "kind": "evidence",
+            "media_type": "application/json", "rights_status": "NOT_APPLICABLE",
+        }},
+    )["artifacts"]["rights-clearance"]
     engine.add_tasks("motion-demo", [{
         "task_id": "render-motion-shot",
         "title": "Render a project-owned animated scene with explicit code execution approval",
         "kind": "production_render",
         "executor": "tool",
-        "depends_on": [],
-        "inputs": ["renderer-script", "frame-render-spec"],
+        "depends_on": ["rights-review"],
+        "inputs": ["renderer-script", "frame-render-spec", "rights-clearance"],
         "outputs": ["shot-candidate", "shot-render-receipt"],
         "requirements": {"production": {
             "operation": "python_frame_render",
             "render_spec_input": "frame-render-spec",
             "trusted_code_execution": True,
+            "rights_clearance_input": "rights-clearance",
         }},
         "acceptance": {"render": "Produce exactly 10 frames and a digest-bound candidate receipt."},
     }])
@@ -379,8 +420,12 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
     result = run_ready_tool_tasks(engine, "motion-demo", worker_prefix="motion-renderer", max_workers=1)
     assert result["scheduler_status"] == "TASK_GRAPH_COMPLETE_NOT_RELEASED", result
     assert result["failed"] == []
-    task = engine.list_tasks("motion-demo")[0]
+    task = next(item for item in engine.list_tasks("motion-demo") if item["task_id"] == "render-motion-shot")
     assert task["status"] == "COMPLETED"
+    render_completion = next(item["result"]["completion"] for item in result["completed"])
+    shot_artifact = render_completion["artifacts"]["shot-candidate"]
+    assert shot_artifact["rights_status"] == "AUTHORIZED"
+    assert shot_artifact["metadata"]["rights_evidence_refs"] == [clearance_artifact["artifact_id"]]
     output_root = engine._project_dir("motion-demo") / "artifacts" / "production" / "render-motion-shot"
     output_dirs = sorted(output_root.glob("attempt-1-claim-*"))
     assert len(output_dirs) == 1
@@ -402,7 +447,7 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
     revised = run_ready_tool_tasks(engine, "motion-demo", worker_prefix="motion-renderer-revision", max_workers=1)
     assert revised["scheduler_status"] == "TASK_GRAPH_COMPLETE_NOT_RELEASED", revised
     assert revised["failed"] == []
-    assert engine.list_tasks("motion-demo")[0]["attempts"] == 1
+    assert next(item for item in engine.list_tasks("motion-demo") if item["task_id"] == "render-motion-shot")["attempts"] == 1
     output_dirs = sorted(output_root.glob("attempt-1-claim-*"))
     assert len(output_dirs) == 2
     assert output_dirs[0] != output_dirs[1]

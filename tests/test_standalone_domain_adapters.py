@@ -385,6 +385,22 @@ def test_business_object_validate_adapter_emits_typed_commercial_fit_artifact(tm
     assert payload["object"]["editorial_independence_required"] is True
     assert engine.audit("commercial")["pass"] is True
 
+    engine.revise_task(
+        "commercial", "validate-fit", {"title": "Revalidate commercial fit"},
+        reason="Revisions must preserve previous immutable adapter outputs.",
+    )
+    second_claim = engine.claim_next("commercial", "commercial-validator-2")
+    assert second_claim and second_claim["task"]["attempt"] == 1
+    second = run_claimed_domain_adapter(
+        engine, "commercial", "validate-fit", "commercial-validator-2",
+        second_claim["claim"]["claim_token"],
+    )
+    second_output = second["completion"]["artifacts"]["topic-commercial-fit"]
+    assert second_output["path"] != output["path"]
+    assert Path(output["path"]).is_file() and Path(second_output["path"]).is_file()
+    assert json.loads(Path(second_output["path"]).read_text(encoding="utf-8")) == payload
+    assert engine.audit("commercial")["pass"] is True
+
 
 def test_episode_intent_validate_adapter_checks_real_source_bindings_and_cross_project_transfer(tmp_path):
     engine = StudioEngine(tmp_path)
