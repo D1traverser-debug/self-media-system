@@ -1,0 +1,51 @@
+{
+  "project_id": "x-article-when-everyone-has-a-bag",
+  "candidate": "v3.6",
+  "status": "EDITORIAL_CANDIDATE_NOT_PUBLISHED",
+  "source_urls_match": true,
+  "link_count": {
+    "EN": {
+      "markdown": 5,
+      "docx": 5,
+      "pdf_annotation_segments": 6,
+      "all_url_sets_match": true
+    },
+    "ZH": {
+      "markdown": 5,
+      "docx": 5,
+      "pdf_annotation_segments": 7,
+      "all_url_sets_match": true
+    }
+  },
+  "bigfoot_count": {
+    "EN": 1,
+    "ZH": 1
+  },
+  "section_headings": {
+    "EN": [
+      "The joke travels. The ownership stays on-chain.",
+      "Your first sighting may be someone else's exit.",
+      "The people building the culture can be real. So can their incentives."
+    ],
+    "ZH": [
+      "梗在全网流动，筹码留在链上",
+      "你第一次刷到它时，可能正好是别人的退出时刻",
+      "创造文化的人是真实的，经济激励也是真实的"
+    ]
+  },
+  "word_count_en": 1102,
+  "han_character_count_zh": 1804,
+  "body_questions_en": 0,
+  "docx_pdf_visual_review": "PASS: 3 English DOCX pages and 2 Chinese DOCX pages visually inspected after final render; no clipping, blank pages, broken CJK glyphs, overlaps or orphan section headings. PDF copies derived from the same rendered files.",
+  "rights": "NOT_CLEARED_FOR_VISUAL_ASSETS",
+  "images_generated": 0,
+  "independent_editor_review": "OPEN",
+  "target_reader_cold_read": "OPEN",
+  "x_native_mobile_preview": "NOT_TESTED",
+  "publication_authorization": "NOT_GRANTED",
+  "x_published": false,
+  "pdf_page_count": {
+    "EN": 3,
+    "ZH": 2
+  }
+}
