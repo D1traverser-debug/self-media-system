@@ -1,0 +1,52 @@
+{
+  "project_id": "x-article-when-everyone-has-a-bag",
+  "version": "v3.6",
+  "status": "CANDIDATE_NOT_PUBLISHED",
+  "hash_scope": "Package members except the manifest and ZIP; no circular self hash.",
+  "files": {
+    "Meme_X_Article_EN_v3_6.md": {
+      "sha256": "c892a145bb753d4ee7a9b1dacc5c52ed2c026a9a1e609805c2c391a0eed9829f",
+      "bytes": 7135
+    },
+    "Meme_X_Article_ZH_v3_6.md": {
+      "sha256": "d0b87537e79e67a721037d635b6ba827b641fc3eb6c8db4585a3c2834eee1e81",
+      "bytes": 6735
+    },
+    "Meme_X_Article_EN_v3_6.docx": {
+      "sha256": "823d84cad1ca65fdcef29d99f7cdfb791f6e6e6da5912c92fe8baa199a2b96a2",
+      "bytes": 41882
+    },
+    "Meme_X_Article_ZH_v3_6.docx": {
+      "sha256": "a00064006b80e55feca84b58488d8cb5094cbc1759173dc310d820f14c2aff8a",
+      "bytes": 42505
+    },
+    "Meme_X_Article_EN_v3_6.pdf": {
+      "sha256": "94173be0b224fdc8de38d99dcf95ec508e24a2ee629b29bd5d80f8f9f2c8abd7",
+      "bytes": 56932
+    },
+    "Meme_X_Article_ZH_v3_6.pdf": {
+      "sha256": "05150966cd2c47081d958085e5198a933d1d63952cfbc9bf436096f94da4cb1c",
+      "bytes": 235550
+    },
+    "Meme_X_v3_6_Editorial_Audit.md": {
+      "sha256": "06afee3965410afd071c6e791e100679b986f3a61f7ff357acd10d2febc7fbd3",
+      "bytes": 11906
+    },
+    "Meme_X_v3_6_X_Layout_and_Visual_Prompts.md": {
+      "sha256": "4f9e60052b0411d527b385716db644b1bfc7cf748f7fc3d18c7fb2c7ba90e1bb",
+      "bytes": 6971
+    },
+    "Meme_X_v3_6_Distribution_Copy.md": {
+      "sha256": "27bb850e39ca9cf94dc777abfc59e5418adb5298d7eb61f33062c225568ab1d4",
+      "bytes": 999
+    },
+    "Meme_X_v3_6_README.md": {
+      "sha256": "9d9ee679cea8263e72048d85008a63653fd0d9b18e2d7f8c635480cd58682636",
+      "bytes": 1249
+    },
+    "Meme_X_v3_6_Readback.json": {
+      "sha256": "2145659655ac231d7cd2ba7d5145a5f4c8113cee00a03c2e4f815546e138fd01",
+      "bytes": 1580
+    }
+  }
+}
