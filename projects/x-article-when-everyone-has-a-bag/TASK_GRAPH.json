@@ -1,7 +1,7 @@
 [
   {
     "task_id": "recover_project_state",
-    "title": "Recover v3, v3.2 and owner corrections; lock v3.3 scope",
+    "title": "Recover original article, v3.5 and owner corrections; lock v3.6 scope",
     "kind": "source_recovery",
     "executor": "agent",
     "depends_on": [],
@@ -15,8 +15,8 @@
       "project-recovery-receipt"
     ],
     "requirements": {
-      "current_candidate": "v3.3",
-      "preserve": "title, subtitle, thesis, seven sections, five article source URLs, Bigfoot once per language"
+      "current_candidate": "v3.6",
+      "preserve": "titles, subtitle, thesis, five source URLs, one Bigfoot metaphor per language; update to three unnumbered sections"
     },
     "acceptance": {
       "identity": "Exact existing article and immutable v3 source are confirmed.",
@@ -52,7 +52,7 @@
   },
   {
     "task_id": "diagnose_editorial_voice",
-    "title": "Diagnose structural causes of AI-sounding prose",
+    "title": "Diagnose value, creative opportunism, author voice and content-driven architecture",
     "kind": "editorial_diagnosis",
     "executor": "agent",
     "depends_on": [
@@ -79,7 +79,7 @@
   },
   {
     "task_id": "revise_manuscripts",
-    "title": "Rewrite English manuscript and adapt the Chinese edition",
+    "title": "Rewrite v3.5 into substantive v3.6 EN and faithful ZH",
     "kind": "editorial_revision",
     "executor": "agent",
     "depends_on": [
@@ -92,51 +92,51 @@
       "candidate-v3-2-en",
       "candidate-v3-2-zh",
       "source-fact-check-record",
-      "editorial-root-cause-record"
+      "editorial-root-cause-record",
+      "candidate-v3-5-en"
     ],
     "outputs": [
-      "article-en-v3-3",
-      "article-zh-v3-3",
-      "editorial-revision-record-v3-3"
+      "article-en-v3-6",
+      "article-zh-v3-6",
+      "editorial-revision-record-v3-6"
     ],
     "requirements": {
-      "scope": "structural and voice rewrite",
-      "preserve": "title, subtitle, thesis, seven sections, five source URLs, Bigfoot once per language"
+      "scope": "material editorial rewrite",
+      "preserve": "title, subtitle, thesis, five source URLs, keyword once per language; three unnumbered sections"
     },
     "acceptance": {
-      "voice": "Distinct author stance, natural idiomatic English, no repeated section-ending template.",
-      "alignment": "Chinese edition preserves argument and evidence without literal English syntax.",
-      "length": "Approximately 20–30% shorter than v3.2 while retaining essential evidence."
+      "voice": "Evidence-grounded authorial judgment, no repeated defensive formulations, no body question-stack",
+      "alignment": "Faithful, idiomatic Chinese adaptation",
+      "length": "Enough narrative and market detail to earn reader value; no mechanical reduction quota"
     },
     "priority": 100
   },
   {
     "task_id": "refresh_distribution_and_visual_assets",
-    "title": "Refresh X distribution copy and visual placement prompts",
+    "title": "Refresh X distribution and compact visual plan for v3.6",
     "kind": "dependent_asset_revision",
     "executor": "agent",
     "depends_on": [
       "revise_manuscripts"
     ],
     "inputs": [
-      "article-en-v3-3",
-      "article-zh-v3-3",
+      "article-en-v3-6",
+      "article-zh-v3-6",
       "visual-prompt-pack-v3",
       "distribution-pack-v3"
     ],
     "outputs": [
-      "layout-visual-prompts-v3-3",
-      "distribution-pack-v3-3"
+      "layout-visual-prompts-v3-6",
+      "distribution-pack-v3-6"
     ],
     "requirements": {
-      "visuals": "one 5:2 cover and three 16:9 inline prompts",
-      "placements": "after Sections 02, 03 and 05",
-      "distribution": "two lead posts, pinned reply, five-post thread, quote posts, follow CTA"
+      "visuals": "one 5:2 cover + two 16:9 inline concept prompts",
+      "placements": "cover; feedback passage; two-timeline passage",
+      "distribution": "two optional lead posts, follow-up reply, optional follow CTA"
     },
     "acceptance": {
-      "alignment": "All downstream copy and visual prompts match v3.3 thesis and section flow.",
-      "character_count": "Every post/thread item is under 280 characters.",
-      "image_status": "Prompts only; do not claim image generation."
+      "alignment": "Visual and social copy matches v3.6 three-section flow",
+      "image_status": "Prompts only; zero generated or rights-cleared visuals"
     },
     "priority": 90
   },
@@ -150,17 +150,17 @@
       "refresh_distribution_and_visual_assets"
     ],
     "inputs": [
-      "article-en-v3-3",
-      "article-zh-v3-3",
-      "editorial-revision-record-v3-3",
-      "layout-visual-prompts-v3-3",
-      "distribution-pack-v3-3"
+      "article-en-v3-6",
+      "article-zh-v3-6",
+      "editorial-revision-record-v3-6",
+      "layout-visual-prompts-v3-6",
+      "distribution-pack-v3-6"
     ],
     "outputs": [
-      "delivery-readback-v3-3",
-      "delivery-manifest-v3-3",
+      "delivery-readback-v3-6",
+      "delivery-manifest-v3-6",
       "handoff-attachment-receipt",
-      "delivery-readme-v3-3"
+      "delivery-readme-v3-6"
     ],
     "requirements": {
       "formats": [
@@ -173,28 +173,28 @@
       "visual_check": "render all DOCX/PDF pages"
     },
     "acceptance": {
-      "structure": "Seven sections in each language; five matching source URLs; Bigfoot exactly once per language.",
-      "layout": "DOCX/PDF pages visually inspected; X native preview remains a separate gate.",
-      "package": "ZIP integrity passes and all attachments are named and digest-bound."
+      "structure": "Three unnumbered sections each language; five matching source URLs; Bigfoot one occurrence per language",
+      "layout": "All Word/PDF pages inspected; X native composer remains OPEN",
+      "package": "Exact ZIP bytes, member count and SHA-256 readback pass"
     },
     "priority": 100
   },
   {
     "task_id": "sync_candidate_branch",
-    "title": "Sync exact v3.3 text assets to the isolated candidate branch",
+    "title": "Synchronize audited v3.6 source and review files into isolated branch",
     "kind": "repository_sync",
     "executor": "agent",
     "depends_on": [
       "build_delivery_package"
     ],
     "inputs": [
-      "article-en-v3-3",
-      "article-zh-v3-3",
-      "editorial-revision-record-v3-3",
-      "layout-visual-prompts-v3-3",
-      "distribution-pack-v3-3",
-      "delivery-readback-v3-3",
-      "delivery-manifest-v3-3"
+      "article-en-v3-6",
+      "article-zh-v3-6",
+      "editorial-revision-record-v3-6",
+      "layout-visual-prompts-v3-6",
+      "distribution-pack-v3-6",
+      "delivery-readback-v3-6",
+      "delivery-manifest-v3-6"
     ],
     "outputs": [
       "github-sync-receipt",
@@ -202,27 +202,27 @@
     ],
     "requirements": {
       "repository": "D1traverser-debug/video-growth-agent",
-      "branch": "work/meme-x-article-bigfoot-2026-11-v3-3-editorial",
-      "base": "main"
+      "branch": "work/meme-x-article-bigfoot-2026-11-v3-6-full-audit",
+      "base": "work/meme-x-article-bigfoot-2026-11-v3-5-value-style-structure"
     },
     "acceptance": {
-      "sync": "Exact v3.3 Markdown and review assets are fetched back from the isolated branch.",
+      "sync": "Exact v3.6 Markdown and review assets are fetched back from the isolated branch.",
       "isolation": "main remains unchanged; no merge or publication occurs."
     },
     "priority": 100
   },
   {
     "task_id": "independent_editor_review",
-    "title": "Independent editorial review of exact v3.3 manuscripts",
+    "title": "Independent editorial review of exact v3.6 manuscripts",
     "kind": "independent_review",
     "executor": "human",
     "depends_on": [
       "sync_candidate_branch"
     ],
     "inputs": [
-      "article-en-v3-3",
-      "article-zh-v3-3",
-      "delivery-readback-v3-3"
+      "article-en-v3-6",
+      "article-zh-v3-6",
+      "delivery-readback-v3-6"
     ],
     "outputs": [
       "independent-editor-review-receipt"
@@ -245,7 +245,7 @@
       "sync_candidate_branch"
     ],
     "inputs": [
-      "article-en-v3-3"
+      "article-en-v3-6"
     ],
     "outputs": [
       "target-reader-review-receipt"
@@ -260,16 +260,16 @@
   },
   {
     "task_id": "x_native_preview",
-    "title": "Inspect v3.3 in X native composer and mobile layout",
+    "title": "Inspect v3.6 in X native composer and mobile layout",
     "kind": "platform_preview",
     "executor": "human",
     "depends_on": [
       "sync_candidate_branch"
     ],
     "inputs": [
-      "article-en-v3-3",
-      "layout-visual-prompts-v3-3",
-      "distribution-pack-v3-3"
+      "article-en-v3-6",
+      "layout-visual-prompts-v3-6",
+      "distribution-pack-v3-6"
     ],
     "outputs": [
       "x-native-preview-receipt"
@@ -292,9 +292,9 @@
       "sync_candidate_branch"
     ],
     "inputs": [
-      "article-en-v3-3",
-      "article-zh-v3-3",
-      "layout-visual-prompts-v3-3"
+      "article-en-v3-6",
+      "article-zh-v3-6",
+      "layout-visual-prompts-v3-6"
     ],
     "outputs": [
       "rights-review-receipt"
@@ -319,7 +319,7 @@
       "rights_review"
     ],
     "inputs": [
-      "delivery-readback-v3-3",
+      "delivery-readback-v3-6",
       "github-sync-receipt",
       "independent-editor-review-receipt",
       "target-reader-review-receipt",
@@ -340,14 +340,14 @@
   },
   {
     "task_id": "release_acceptance",
-    "title": "Final release gate for the exact v3.3 candidate",
+    "title": "Final release gate for the exact v3.6 candidate",
     "kind": "release_acceptance",
     "executor": "human",
     "depends_on": [
       "owner_release_authorization"
     ],
     "inputs": [
-      "delivery-readback-v3-3",
+      "delivery-readback-v3-6",
       "github-sync-receipt",
       "owner-publication-authorization-receipt"
     ],
