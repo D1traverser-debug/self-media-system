@@ -1,36 +1,49 @@
 {
-  "goal": "Substantively rewrite the existing v3.2 X Article as v3.3 to remove formulaic AI cadence, strengthen authorial judgment and preserve the approved thesis, seven-section structure and single Bigfoot metaphor.",
+  "goal": "Complete a full value/voice/structure/evidence audit of the existing Meme X Article and revise v3.5 into a substantive v3.6 English original with faithful Chinese adaptation, visual plan and correct child-system state.",
   "audience": "Crypto-native X readers and Solana/memecoin market participants who value a sharp, nuanced argument about cultural contribution, token ownership and cash-flow rights.",
   "deliverables": [
-    "v3.3/Meme_X_Article_EN_v3_3.md",
-    "v3.3/Meme_X_Article_ZH_v3_3.md",
-    "Meme_X_Article_EN_v3_3.docx",
-    "Meme_X_Article_ZH_v3_3.docx",
-    "Meme_X_Article_EN_v3_3.pdf",
-    "Meme_X_Article_ZH_v3_3.pdf",
-    "v3.3/Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md",
-    "v3.3/Meme_X_v3_3_X_Articles_Layout_and_Visual_Prompts.md",
-    "v3.3/Meme_X_v3_3_Distribution_Pack.md",
-    "v3.3/Meme_X_v3_3_README.md",
-    "v3.3/Meme_X_v3_3_Readback.json",
-    "v3.3/Meme_X_v3_3_Asset_Manifest.json",
-    "Meme_X_Article_Complete_Package_v3_3.zip"
+    "v3.6/Meme_X_Article_EN_v3_6.md",
+    "v3.6/Meme_X_Article_ZH_v3_6.md",
+    "v3.6/Meme_X_v3_6_Editorial_Audit.md",
+    "v3.6/Meme_X_v3_6_X_Layout_and_Visual_Prompts.md",
+    "v3.6/Meme_X_v3_6_Distribution_Copy.md",
+    "v3.6/Meme_X_v3_6_README.md",
+    "v3.6/Meme_X_v3_6_Readback.json",
+    "v3.6/Meme_X_v3_6_Asset_Manifest.json",
+    "Meme_X_Article_EN_v3_6.docx",
+    "Meme_X_Article_ZH_v3_6.docx",
+    "Meme_X_Article_EN_v3_6.pdf",
+    "Meme_X_Article_ZH_v3_6.pdf",
+    "Meme_X_Article_v3_6_Complete_Handoff.zip"
   ],
   "format": {
     "platform": "X Articles",
-    "languages": ["en", "zh"],
-    "article_sections": 7,
-    "visual_prompt_count": 4,
-    "distribution_assets": ["two lead posts", "pinned reply", "five-post thread", "five quote posts", "follow CTA"]
+    "languages": [
+      "en",
+      "zh"
+    ],
+    "article_sections": 3,
+    "visual_prompt_count": 3,
+    "distribution_assets": [
+      "primary feed post",
+      "alternative feed post",
+      "follow-up reply",
+      "optional follow CTA"
+    ],
+    "article_heading_style": "UNNUMBERED_CONTENT_LED"
   },
   "content_contract": {
     "title_en": "When Everyone Has a Bag, Who Do You Believe?",
     "title_zh": "当所有人都有仓位，你还能相信谁？",
     "subtitle_en": "Everyone can make a meme famous. Not everyone gets paid when its token runs.",
     "approved_thesis": "Financial incentives make public conviction an ambiguous signal.",
-    "argument_frame": ["cultural contribution", "token ownership", "cash-flow rights"],
+    "argument_frame": [
+      "cultural contribution",
+      "token ownership",
+      "cash-flow rights"
+    ],
     "keyword": "Bigfoot",
-    "keyword_rule": "Use Bigfoot exactly once in Section 01 of each language as a metaphor. Do not explain Bigfoot or create a new topic, event, token or case study.",
+    "keyword_rule": "Use Bigfoot exactly once per language in a metaphor, without creating a Bigfoot event, token or separate topical discussion.",
     "article_sources": [
       "https://www.coindesk.com/markets/2024/11/21/chillguy-creator-threatens-legal-action-as-crypto-trenches-scour-tiktok",
       "https://www.sciencedirect.com/science/article/pii/S0275531926003491",
@@ -38,32 +51,32 @@
       "https://pump.fun/docs/fees",
       "https://www.pbs.org/newshour/world/jamaican-bobsled-team-raises-30000-in-dogecoin-for-trip-to-sochi"
     ],
-    "revision_rule": "A structural and voice rewrite is authorized. Preserve title, subtitle, approved thesis, seven-section structure, five article source URLs and the single Bigfoot metaphor per language. Refresh dependent distribution and visual/layout assets where the revised manuscript requires it."
+    "revision_rule": "Preserve original title/subtitle/core thesis and five grounded source URLs; revise section count and structure according to the owner's later instruction to reduce mechanical indexing and over-questioning; current outcome is three unnumbered sections."
   },
   "hard_constraints": [
     "Continue the existing article; do not create a new article.",
     "Do not turn Bigfoot into a topic, factual case, event or token discussion.",
-    "Do not change the English/Chinese titles, English subtitle, approved thesis, seven-section structure or five article source URLs.",
     "Do not add unsupported claims, imply wallet classifications are verified identities, or treat first sale as proof of a complete exit.",
     "Do not represent the Dogesled fundraiser as proof of fair token pricing.",
     "Do not claim that sincere holders are necessarily neutral or that financial incentives prove dishonesty.",
     "Do not modify the CAOS parent system or IPOS.",
     "Do not modify main, merge a branch or publish to X.",
     "Do not claim independent review, target-reader validation, rights approval or X-native preview unless evidenced.",
-    "Do not claim image generation; this delivery contains prompts and placements only."
+    "Do not claim image generation; this delivery contains prompts and placements only.",
+    "Do not force seven numbered sections or scripted question clusters; content-driven structure is now authoritative."
   ],
   "success_criteria": [
-    "Bigfoot appears exactly once in each language.",
-    "Both manuscripts retain seven sections and the same five article source URLs.",
-    "English word count is reduced by approximately 20–30% versus v3.2 without deleting necessary evidence.",
-    "Each section advances a distinct part of the argument; repeated mini-conclusions and stock transitions are materially reduced.",
-    "The author expresses a concrete position through reader tests and judgments rather than self-announcing phrases.",
-    "English reads as natural crypto-native X Article prose; Chinese is a faithful, idiomatic adaptation rather than a sentence-by-sentence calque.",
-    "Distribution copy is refreshed and each standalone post/thread item is under 280 characters.",
-    "Visual prompt pack specifies one 5:2 cover and three 16:9 inline visuals, placements, captions, alt text and manual data-card caveats.",
-    "DOCX/PDF copies are generated, hyperlinks are preserved and rendered pages are visually checked.",
-    "The complete ZIP passes integrity checks and the asset manifest contains SHA-256 hashes.",
-    "The Video Studio runtime accepts the brief and dynamic task graph."
+    "Existing title, subtitle, thesis and five source URLs are preserved.",
+    "English article contains three natural unnumbered sections; Chinese adaptation mirrors the meaning and evidence.",
+    "Bigfoot appears exactly once per language without an unrelated factual tangent.",
+    "Material facts have verified sources and wallet heuristics are not treated as real-world identity findings.",
+    "Opening uses the sourced Chill Guy 2% remark and financial stakes; article pays off reader trust question with a useful inference.",
+    "Distinguish genuine cultural work, token ownership and fees without moralizing every holder.",
+    "Distribution copy has natural platform voice with no canned question-stack or fake personal experience.",
+    "One proposed 5:2 cover and two proposed 16:9 inline images have specific placements/captions/alt text; no images generated.",
+    "Word/PDF sources render cleanly and links survive across both languages.",
+    "Zip exact member/hash integrity passes and the GitHub text files are read back exactly.",
+    "Native X composer/mobile review, rights approval, external editor review and publication remain OPEN without evidence."
   ],
   "governance_boundary": {
     "decision_method": "CAOS session-level decision governance: competing hypotheses, root-cause diagnosis, alternative comparison, falsifier, execution checks and evidence-bound acceptance.",
@@ -81,6 +94,11 @@
       "owner-publication-authorization"
     ],
     "owner_publication_authorization_required": true,
-    "required_rights_statuses": ["OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN"]
+    "required_rights_statuses": [
+      "OWNED",
+      "AUTHORIZED",
+      "LICENSED",
+      "PUBLIC_DOMAIN"
+    ]
   }
 }
