@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import subprocess
 import json
 import mimetypes
 import os
@@ -215,18 +217,37 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
             ("delivery-readme-v3-6", V36_DIR / "Meme_X_v3_6_README.md", "document", "text/markdown"),
             ("handoff-attachment-receipt", attachment_receipt, "receipt", "application/json")
         ],
-        {"zip_integrity": "PASS", "docx_pdf_visual_review": "PASS", "native_x_preview": "OPEN"}
+        {"zip_integrity": "EXTERNAL_HANDOFF_READBACK_ONLY__ZIP_NOT_IN_REPOSITORY", "docx_pdf_visual_review": "EXTERNAL_HANDOFF_READBACK_ONLY", "native_x_preview": "OPEN"}
     )
 
     sync_result = None
     if branch and commit_sha and len(commit_sha) == 40:
+        # A supplied SHA alone is not evidence that the checked-out branch is the source being bootstrapped.
+        repo_root = PROJECT_DIR.parents[1]
+        try:
+            actual_head = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=repo_root, text=True, stderr=subprocess.PIPE
+            ).strip()
+        except (OSError, subprocess.CalledProcessError) as exc:
+            raise RuntimeError("cannot verify Git checkout identity before sync completion") from exc
+        if actual_head != commit_sha:
+            raise RuntimeError(f"checkout SHA {actual_head} differs from claimed commit {commit_sha}")
+        for file_name, descriptor in manifest["files"].items():
+            if not file_name.endswith((".md", ".json")):
+                continue  # Binary Word/PDF handoff files are external conversation attachments.
+            source = V36_DIR / file_name
+            if not source.is_file():
+                raise FileNotFoundError(f"expected v3.6 text asset missing from Git checkout: {file_name}")
+            actual_digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            if actual_digest != descriptor["sha256"]:
+                raise RuntimeError(f"v3.6 text hash mismatch for {file_name}")
         sync_receipt = receipt_dir / "github-sync-receipt.json"
         sync_receipt.write_text(json.dumps({
             "repository": "D1traverser-debug/video-growth-agent",
             "branch": branch,
             "commit_sha": commit_sha,
             "project_path": f"projects/{PROJECT_ID}/v3.6/",
-            "verification_context": "GitHub Actions checked out this exact commit before Studio bootstrap.",
+            "verification_context": "git rev-parse HEAD matched the supplied commit SHA; all v3.6 Markdown/JSON assets matched the signed handoff manifest.",
             "main_modified": False,
             "merged": False,
             "published": False
