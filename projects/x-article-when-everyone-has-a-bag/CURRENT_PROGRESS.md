@@ -1,59 +1,28 @@
 # Current Progress — Meme X Article
 
-Project ID: x-article-when-everyone-has-a-bag  
-Current candidate: v3.3  
-Status: ACTIVE_CANDIDATE — not released.
+**Project:** `x-article-when-everyone-has-a-bag`  
+**Current candidate:** **v3.6**  
+**Branch:** `work/meme-x-article-bigfoot-2026-11-v3-6-full-audit`  
+**State:** AUTHORING & DOCUMENT VERIFICATION COMPLETE; EXTERNAL RELEASE GATES OPEN.
 
-## Locked editorial baseline
+## Editorial outcome
+- Rewrote v3.5 (748 words) into a source-backed English candidate (about 1,102 words) using the 2024 Chill Guy creator/2% token quip, 2026 empirical evidence and a sustained argument about community/holder positions/fee recipients.
+- Removed the topic detour defining deceptive opportunism; editorial opportunism is expressed through a concrete, interesting source anchor and reading value.
+- Three natural H2s replace the old seven-numbered-sections contract according to later owner feedback.
+- Original EN/ZH titles, EN subtitle and approved thesis preserved; five source links match in both languages; Bigfoot once per language as a metaphor only.
+- Material market evidence is bounded: Bitquery developer-label heuristic and first-sale definition; $500m reported market cap not executable exit depth; Jais/White market-level study; Pump.fun fee recipient role distinct from original meme/IP author; Dogesled actual fundraising.
+- Completed English original and idiomatic Chinese adaptation, two lightweight distribution lead alternatives and visual placement with 1 cover + 2 inline prompts.
 
-- Existing article: *When Everyone Has a Bag, Who Do You Believe?*
-- English and Chinese titles preserved.
-- Original English subtitle preserved.
-- Thesis: financial incentives make public conviction an ambiguous signal.
-- Three-ledger frame: cultural contribution, token ownership, cash-flow rights.
-- Seven numbered sections retained.
-- Bigfoot remains one metaphorical keyword in Section 01 only; no new topic, event, case study or token discussion.
+## Files and local checks
+- 3 English DOCX/PDF pages and 2 Chinese DOCX/PDF pages rendered; all reviewed visually for clipping and glyphs.
+- All five source-link URL sets agree across EN/ZH Markdown, DOCX and PDF; PDF may create multiple link-rectangle segments for one URL.
+- Complete handoff ZIP contains 12 files and passes entry byte and CRC checks; SHA-256 manifest and readback are committed in `v3.6/`.
+- Versioned EN/ZH Markdown, Editorial Audit, Layout/Prompts, Distribution, README, readback and manifest synced as GitHub text assets on the isolated branch. Binary DOCX/PDF/ZIP are conversation attachments with hashes in the manifest.
 
-## Root-cause correction from v3.2
+## Video Studio state
+- `PROJECT_MANIFEST.json`, `OUTCOME_BRIEF.json`, `TASK_GRAPH.json`, `RESUME_ENTRY.md`, `RUNTIME_BOOTSTRAP.md`, `bootstrap.py` and related test have been re-pointed to v3.6 in this branch.
+- Runtime source updates are **not** evidence that StudioEngine bootstrap, CI and release-check were executed. Do not self-certify them.
+- CAOS parent/Novel/Financial/IPOS are not modified. `main` is not merged.
 
-The v3.2 defect was not merely word choice. The manuscript repeated a generated-sounding rhetorical pattern: concept explanation, balanced caveat, polished mini-conclusion. It also announced an author position without making the author's actual judgment useful to the reader.
-
-The v3.3 revision therefore changes argument progression and voice, not just vocabulary:
-- Rebuilt the opening around the Chill Guy creator, unknown token issuer and traders asking the artist to post a Solana address.
-- Gave each section a distinct function and removed repeated mini-conclusions.
-- Replaced generic transitions with observable actions and market-native language.
-- Added concrete reader tests for culture, supply ownership, incentives and fee recipients.
-- Reduced the English manuscript from 1,633 whitespace-delimited words in v3.2 to 1,207 in v3.3 (26.1%).
-- Kept factual caveats beside the claims they qualify.
-
-## Completed in v3.3
-
-- Rewrote English manuscript and adapted the Chinese edition.
-- Preserved seven sections, the same five article URLs and one Bigfoot metaphor per language.
-- Rechecked CoinDesk, Jais–White, Bitquery, Pump.fun and PBS claims and documented limitations.
-- Refreshed distribution copy: two lead posts, pinned reply, five-post thread, quote posts and follow CTA; all items under 280 characters.
-- Prepared X Articles layout map and four visual prompts: one 5:2 cover and three 16:9 inline visuals, with placement, caption, alt text and data-card notes.
-- Generated English and Chinese Markdown, Word and PDF copies.
-- Verified five hyperlinks in each Word manuscript and matching source URL sets.
-- Rendered and visually inspected all handoff pages: English Word/PDF 3 pages each; Chinese Word/PDF 2 pages each.
-- Created the 12-member complete package and verified ZIP integrity PASS.
-- Recorded SHA-256 hashes, structural readback, distribution character counts and open release gates.
-
-## Repository state
-
-- v3.1 remains preserved on work/meme-x-article-bigfoot-2026-11.
-- v3.2 remains preserved on work/meme-x-article-bigfoot-2026-11-v3-2.
-- v3.3 is isolated on work/meme-x-article-bigfoot-2026-11-v3-3-editorial.
-- main was not modified or merged.
-- CAOS parent and IPOS were not modified. CAOS session-level decision governance was applied; the Video Studio runtime remains standalone per its architecture contract.
-- Versioned v3.3 Markdown, audit, layout/visual prompts, distribution pack, readback and manifest are synced under v3.3/.
-- Word/PDF copies and complete ZIP are delivered as conversation attachments and digest-recorded in the v3.3 asset manifest.
-
-## Open release gates
-
-- Independent editor review.
-- Real crypto-native target-reader cold read.
-- X native composer/mobile preview.
-- Rights review.
-- Explicit owner publication authorization.
-- No image generation and no X publication have occurred.
+## Release blockers
+Genuine independent editorial review; target-reader cold read; X composer/mobile layout preview; visual rights clearance if images are made; explicit owner publication approval. No image generated and no publication.
