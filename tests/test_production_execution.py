@@ -381,7 +381,8 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
     reviewer_id = "frame-rights-reviewer"
     review = engine.claim_next("motion-demo", reviewer_id, executor="human")
     assert review and review["task"]["task_id"] == "rights-review"
-    clearance_file = tmp_path / "frame-rights-clearance.json"
+    clearance_file = engine._project_dir("motion-demo") / "artifacts" / "frame-rights-clearance.json"
+    clearance_file.parent.mkdir(parents=True, exist_ok=True)
     clearance_file.write_text(json.dumps({
         "schema_version": "1.0", "status": "PASS",
         "reviewer_id": reviewer_id,
