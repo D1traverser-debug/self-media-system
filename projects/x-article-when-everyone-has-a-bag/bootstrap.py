@@ -12,7 +12,7 @@ from video_studio.engine import StudioEngine
 
 PROJECT_ID = "x-article-when-everyone-has-a-bag"
 PROJECT_DIR = Path(__file__).resolve().parent
-V33_DIR = PROJECT_DIR / "v3.3"
+V36_DIR = PROJECT_DIR / "v3.6"
 
 IMPORTS = [
     ("source-decision-v3", "Meme_X_CAOS_Decision_Source_v3.md"),
@@ -22,16 +22,17 @@ IMPORTS = [
     ("candidate-v3-2-en", "v3.2/Meme_X_Article_EN_v3_2.md"),
     ("candidate-v3-2-zh", "v3.2/Meme_X_Article_ZH_v3_2.md"),
     ("candidate-v3-2-audit", "Meme_X_CAOS_Audit_v3_1.md"),
+    ("candidate-v3-5-en", "v3.5/Meme_X_Article_EN_v3_5.md"),
     ("visual-prompt-pack-v3", "Meme_X_Visual_Prompt_Pack_v3.md"),
     ("distribution-pack-v3", "Meme_X_Distribution_Pack_v3.md"),
-    ("candidate-v3-3-en", "v3.3/Meme_X_Article_EN_v3_3.md"),
-    ("candidate-v3-3-zh", "v3.3/Meme_X_Article_ZH_v3_3.md"),
-    ("candidate-v3-3-audit", "v3.3/Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md"),
-    ("candidate-v3-3-layout", "v3.3/Meme_X_v3_3_X_Articles_Layout_and_Visual_Prompts.md"),
-    ("candidate-v3-3-distribution", "v3.3/Meme_X_v3_3_Distribution_Pack.md"),
-    ("candidate-v3-3-readback", "v3.3/Meme_X_v3_3_Readback.json"),
-    ("candidate-v3-3-manifest", "v3.3/Meme_X_v3_3_Asset_Manifest.json"),
-    ("candidate-v3-3-readme", "v3.3/Meme_X_v3_3_README.md"),
+    ("candidate-v3-6-en", "v3.6/Meme_X_Article_EN_v3_6.md"),
+    ("candidate-v3-6-zh", "v3.6/Meme_X_Article_ZH_v3_6.md"),
+    ("candidate-v3-6-audit", "v3.6/Meme_X_v3_6_Editorial_Audit.md"),
+    ("candidate-v3-6-layout", "v3.6/Meme_X_v3_6_X_Layout_and_Visual_Prompts.md"),
+    ("candidate-v3-6-distribution", "v3.6/Meme_X_v3_6_Distribution_Copy.md"),
+    ("candidate-v3-6-readback", "v3.6/Meme_X_v3_6_Readback.json"),
+    ("candidate-v3-6-manifest", "v3.6/Meme_X_v3_6_Asset_Manifest.json"),
+    ("candidate-v3-6-readme", "v3.6/Meme_X_v3_6_README.md"),
 ]
 
 def _complete_claim(
@@ -56,7 +57,7 @@ def _complete_claim(
             "kind": kind,
             "media_type": media_type,
             "rights_status": "UNKNOWN" if kind != "receipt" else "NOT_APPLICABLE",
-            "metadata": {"source_path": str(source), "candidate_version": "v3.3"}
+            "metadata": {"source_path": str(source), "candidate_version": "v3.6"}
         }
     return engine.complete_task(
         PROJECT_ID, task_id, worker, claim["claim_token"], output_payload, result or {}
@@ -95,20 +96,20 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
         imported.append(engine.import_asset(
             PROJECT_ID, name, source, kind="source", media_type=media_type,
             rights_status="UNKNOWN",
-            metadata={"repository_path": relative, "candidate_context": "v3.3"}
+            metadata={"repository_path": relative, "candidate_context": "v3.6"}
         ))
 
     engine.add_tasks(PROJECT_ID, tasks)
     decision = engine.record_decision(PROJECT_ID, {
-        "decision_id": "human-editorial-rewrite-v3-3",
+        "decision_id": "human-editorial-rewrite-v3-6",
         "question": "What is the root cause of the v3.2 AI-sounding cadence, and which repair best preserves the owner's intended article?",
-        "scope": "Structural and voice rewrite of the existing article; preserve titles, subtitle, thesis, seven sections, five article URLs and one Bigfoot metaphor per language.",
+        "scope": "Structural and voice rewrite of the existing article; preserve titles, subtitle, thesis, three unnumbered sections, five article URLs and one Bigfoot metaphor per language.",
         "source_refs": [
             "owner-correction:2026-11-22",
             "Meme_X_CAOS_Decision_Source_v3.md",
             "v3.2/Meme_X_Article_EN_v3_2.md",
             "v3.2/Meme_X_Article_ZH_v3_2.md",
-            "v3.3/Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md"
+            "v3.6/Meme_X_v3_6_Editorial_Audit.md"
         ],
         "hypotheses": [
             {"id": "lexical-only", "claim": "A small number of generic words and transitions cause the AI feel.", "discriminator": "If the cadence and section pattern remain repetitive after synonym changes, this is not the root cause."},
@@ -124,7 +125,7 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
         ],
         "selected_option": "structural-voice-rewrite",
         "falsifier": "If an independent crypto-native cold reader still describes the piece as a generic template or cannot identify the author's actual judgment, reopen the root-cause diagnosis rather than polishing synonyms again.",
-        "rollback": "v3.2 remains preserved on its own branch. Revert to the exact v3.2 candidate if v3.3 fails independent review; do not mutate immutable source/v3."
+        "rollback": "v3.2 remains preserved on its own branch. Revert to the exact v3.2 candidate if v3.6 fails independent review; do not mutate immutable source/v3."
     })
 
     workspace = Path(engine.project(PROJECT_ID)["workspace"])
@@ -135,7 +136,7 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
         "project_id": PROJECT_ID,
         "source_version": "v3",
         "previous_candidate": "v3.2",
-        "current_candidate": "v3.3",
+        "current_candidate": "v3.6",
         "source_assets_imported": [item["name"] for item in imported],
         "decision_id": decision["decision_id"],
         "scope": "structural and voice rewrite of the existing X Article",
@@ -153,10 +154,10 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
     # Source verification and voice diagnosis are independent branches after scope recovery.
     parallel_specs = {
         "verify_sources_and_claims": [
-            ("source-fact-check-record", V33_DIR / "Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md", "document", "text/markdown")
+            ("source-fact-check-record", V36_DIR / "Meme_X_v3_6_Editorial_Audit.md", "document", "text/markdown")
         ],
         "diagnose_editorial_voice": [
-            ("editorial-root-cause-record", V33_DIR / "Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md", "document", "text/markdown")
+            ("editorial-root-cause-record", V36_DIR / "Meme_X_v3_6_Editorial_Audit.md", "document", "text/markdown")
         ]
     }
     parallel_results = {}
@@ -169,49 +170,49 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
             raise RuntimeError(f"unexpected parallel task claimed: {task_id}")
         parallel_results[task_id] = _complete_claim(
             engine, task_id, "studio-review", packet["claim"], parallel_specs[task_id],
-            {"review_record": "v3.3 editorial decision and source-bound style audit"}
+            {"review_record": "v3.6 editorial decision and source-bound style audit"}
         )
 
     _claim_and_complete(
         engine, "revise_manuscripts", "studio-editorial",
         [
-            ("article-en-v3-3", V33_DIR / "Meme_X_Article_EN_v3_3.md", "document", "text/markdown"),
-            ("article-zh-v3-3", V33_DIR / "Meme_X_Article_ZH_v3_3.md", "document", "text/markdown"),
-            ("editorial-revision-record-v3-3", V33_DIR / "Meme_X_v3_3_Editorial_Decision_Style_Audit_Fact_Check.md", "document", "text/markdown")
+            ("article-en-v3-6", V36_DIR / "Meme_X_Article_EN_v3_6.md", "document", "text/markdown"),
+            ("article-zh-v3-6", V36_DIR / "Meme_X_Article_ZH_v3_6.md", "document", "text/markdown"),
+            ("editorial-revision-record-v3-6", V36_DIR / "Meme_X_v3_6_Editorial_Audit.md", "document", "text/markdown")
         ],
-        {"revision": "v3.3", "method": "structural and voice rewrite", "bigfoot_occurrences": {"en": 1, "zh": 1}}
+        {"revision": "v3.6", "method": "value, opportunity, voice and structural rewrite", "bigfoot_occurrences": {"en": 1, "zh": 1}}
     )
 
     _claim_and_complete(
         engine, "refresh_distribution_and_visual_assets", "studio-assets",
         [
-            ("layout-visual-prompts-v3-3", V33_DIR / "Meme_X_v3_3_X_Articles_Layout_and_Visual_Prompts.md", "document", "text/markdown"),
-            ("distribution-pack-v3-3", V33_DIR / "Meme_X_v3_3_Distribution_Pack.md", "document", "text/markdown")
+            ("layout-visual-prompts-v3-6", V36_DIR / "Meme_X_v3_6_X_Layout_and_Visual_Prompts.md", "document", "text/markdown"),
+            ("distribution-pack-v3-6", V36_DIR / "Meme_X_v3_6_Distribution_Copy.md", "document", "text/markdown")
         ],
-        {"visual_prompts": 4, "images_generated": 0, "distribution_items_under_280": True}
+        {"visual_prompts": 3, "images_generated": 0, "distribution_items_under_280": True}
     )
 
     attachment_receipt = receipt_dir / "handoff-attachment-receipt.json"
-    manifest = json.loads((V33_DIR / "Meme_X_v3_3_Asset_Manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads((V36_DIR / "Meme_X_v3_6_Asset_Manifest.json").read_text(encoding="utf-8"))
     attachment_receipt.write_text(json.dumps({
-        "version": "v3.3",
+        "version": "v3.6",
         "delivery_channel": "conversation attachments",
         "status": "DELIVERED",
         "attachments": [
-            {"name": "Meme_X_Article_EN_v3_3.docx", "sha256": manifest["files"]["Meme_X_Article_EN_v3_3.docx"]["sha256"]},
-            {"name": "Meme_X_Article_ZH_v3_3.docx", "sha256": manifest["files"]["Meme_X_Article_ZH_v3_3.docx"]["sha256"]},
-            {"name": "Meme_X_Article_EN_v3_3.pdf", "sha256": manifest["files"]["Meme_X_Article_EN_v3_3.pdf"]["sha256"]},
-            {"name": "Meme_X_Article_ZH_v3_3.pdf", "sha256": manifest["files"]["Meme_X_Article_ZH_v3_3.pdf"]["sha256"]},
-            {"name": "Meme_X_Article_Complete_Package_v3_3.zip", "status": "conversation_attachment", "zip_integrity": "PASS"}
+            {"name": "Meme_X_Article_EN_v3_6.docx", "sha256": manifest["files"]["Meme_X_Article_EN_v3_6.docx"]["sha256"]},
+            {"name": "Meme_X_Article_ZH_v3_6.docx", "sha256": manifest["files"]["Meme_X_Article_ZH_v3_6.docx"]["sha256"]},
+            {"name": "Meme_X_Article_EN_v3_6.pdf", "sha256": manifest["files"]["Meme_X_Article_EN_v3_6.pdf"]["sha256"]},
+            {"name": "Meme_X_Article_ZH_v3_6.pdf", "sha256": manifest["files"]["Meme_X_Article_ZH_v3_6.pdf"]["sha256"]},
+            {"name": "Meme_X_Article_v3_6_Complete_Handoff.zip", "status": "conversation_attachment", "zip_integrity": "PASS"}
         ]
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     _claim_and_complete(
         engine, "build_delivery_package", "studio-packager",
         [
-            ("delivery-readback-v3-3", V33_DIR / "Meme_X_v3_3_Readback.json", "receipt", "application/json"),
-            ("delivery-manifest-v3-3", V33_DIR / "Meme_X_v3_3_Asset_Manifest.json", "receipt", "application/json"),
-            ("delivery-readme-v3-3", V33_DIR / "Meme_X_v3_3_README.md", "document", "text/markdown"),
+            ("delivery-readback-v3-6", V36_DIR / "Meme_X_v3_6_Readback.json", "receipt", "application/json"),
+            ("delivery-manifest-v3-6", V36_DIR / "Meme_X_v3_6_Asset_Manifest.json", "receipt", "application/json"),
+            ("delivery-readme-v3-6", V36_DIR / "Meme_X_v3_6_README.md", "document", "text/markdown"),
             ("handoff-attachment-receipt", attachment_receipt, "receipt", "application/json")
         ],
         {"zip_integrity": "PASS", "docx_pdf_visual_review": "PASS", "native_x_preview": "OPEN"}
@@ -224,7 +225,7 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
             "repository": "D1traverser-debug/video-growth-agent",
             "branch": branch,
             "commit_sha": commit_sha,
-            "project_path": f"projects/{PROJECT_ID}/v3.3/",
+            "project_path": f"projects/{PROJECT_ID}/v3.6/",
             "verification_context": "GitHub Actions checked out this exact commit before Studio bootstrap.",
             "main_modified": False,
             "merged": False,
@@ -234,7 +235,7 @@ def bootstrap(root: str | Path, branch: str | None = None, commit_sha: str | Non
             engine, "sync_candidate_branch", "studio-sync",
             [
                 ("github-sync-receipt", sync_receipt, "receipt", "application/json"),
-                ("branch-readback-receipt", V33_DIR / "Meme_X_v3_3_Readback.json", "receipt", "application/json")
+                ("branch-readback-receipt", V36_DIR / "Meme_X_v3_6_Readback.json", "receipt", "application/json")
             ],
             {"branch": branch, "commit_sha": commit_sha, "main_modified": False, "published": False}
         )
