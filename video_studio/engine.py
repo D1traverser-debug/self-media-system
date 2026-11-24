@@ -1051,6 +1051,42 @@ class StudioEngine:
                 connection.rollback()
                 raise
 
+    def _decision_action_snapshot(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> dict[str, Any]:
+        """Bind a local action to actual current goal/task/input bytes, not a parent attestation."""
+        brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+        fields = ("task_id", "title", "kind", "executor", "depends_on_json", "inputs_json",
+                  "outputs_json", "acceptance_json", "requirements_json", "priority", "max_attempts")
+        inputs = []
+        for name in _loads(task["inputs_json"], []):
+            item = self._artifact_by_name(connection, project_id, name)
+            if item is None:
+                raise GateError(f"decision input unavailable: {name}")
+            path = self._project_dir(project_id) / item["relative_path"]
+            if not path.is_file() or _sha256(path) != item["sha256"]:
+                raise GateError(f"decision input changed: {name}")
+            inputs.append({"name": name, "artifact_id": item["artifact_id"], "sha256": item["sha256"]})
+        return {"project_id": project_id, "task_id": task["task_id"],
+                "brief_sha256": hashlib.sha256(_json(brief).encode("utf-8")).hexdigest(),
+                "task_sha256": hashlib.sha256(_json({key: task[key] for key in fields}).encode("utf-8")).hexdigest(),
+                "inputs": inputs, "assurance": "LOCAL_STRUCTURAL_BINDING_ONLY"}
+
+    def _require_task_decision(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> None:
+        from .scope import EPOCH
+        brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+        if brief.get("scope_epoch") != EPOCH:
+            return  # isolated historical regression compatibility
+        decision_id = _loads(task["requirements_json"], {}).get("decision_id")
+        if not isinstance(decision_id, str) or not _ID.fullmatch(decision_id):
+            raise GateError("current owner task requires an exact decision_id")
+        row = connection.execute(
+            "SELECT payload_json,status FROM decisions WHERE project_id=? AND decision_id=?",
+            (project_id, decision_id)).fetchone()
+        if row is None or row["status"] != "ACTIVE":
+            raise GateError("current task-bound decision is missing or inactive")
+        payload = _loads(row["payload_json"], {})
+        if payload.get("action_binding") != self._decision_action_snapshot(connection, project_id, task):
+            raise GateError("decision no longer binds current goal, task and input bytes; re-decide")
+
     def claim_next(
         self, project_id: str, worker_id: str, lease_seconds: int = 900, *,
         executor: str | None = None, task_id: str | None = None,
@@ -1077,14 +1113,23 @@ class StudioEngine:
                     task_id = _safe_id(task_id, "task_id")
                     query += " AND task_id=?"
                     query_params.append(task_id)
-                query += " ORDER BY priority DESC,created_at,task_id LIMIT 1"
-                row = connection.execute(query, query_params).fetchone()
+                query += " ORDER BY priority DESC,created_at,task_id"
+                row = None
+                for candidate in connection.execute(query, query_params).fetchall():
+                    from .scope import validate_task_binding
+                    validate_task_binding(_loads(self._project_row(connection, project_id)["brief_json"], {}),
+                                          {"requirements": _loads(candidate["requirements_json"], {})})
+                    try:
+                        self._require_task_decision(connection, project_id, candidate)
+                    except GateError:
+                        if task_id is not None:
+                            raise
+                        continue  # an unadmitted branch cannot starve unrelated ready work
+                    row = candidate
+                    break
                 if row is None:
                     connection.commit()
                     return None
-                from .scope import validate_task_binding
-                validate_task_binding(_loads(self._project_row(connection, project_id)["brief_json"], {}),
-                                      {"requirements": _loads(row["requirements_json"], {})})
                 token = secrets_token = uuid.uuid4().hex + uuid.uuid4().hex
                 lease_until = _iso(now + timedelta(seconds=lease_seconds))
                 connection.execute(
@@ -1208,6 +1253,10 @@ class StudioEngine:
             raise ClaimError("worker does not hold the current task claim")
         if _parse_time(row["lease_until"]) < _now():
             raise ClaimError("task claim expired; reclaim before completing")
+        try:
+            self._require_task_decision(connection, project_id, row)
+        except GateError as exc:
+            raise ClaimError(str(exc)) from exc
         return row
 
     def _register_artifact_in_tx(
@@ -1657,6 +1706,16 @@ class StudioEngine:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             self._project_row(connection, project_id)
+            if "action_binding" in payload:
+                raise ContractError("action_binding is engine-derived, not caller supplied")
+            if payload.get("task_id") is not None:
+                task_id = _safe_id(payload["task_id"], "task_id")
+                task = self._task_map(connection, project_id).get(task_id)
+                if task is None:
+                    raise ProjectNotFound(task_id)
+                if _loads(task["requirements_json"], {}).get("decision_id") != decision_id:
+                    raise ContractError("task must reference this exact decision_id before binding")
+                payload = {**payload, "action_binding": self._decision_action_snapshot(connection, project_id, task)}
             connection.execute(
                 "INSERT INTO decisions(project_id,decision_id,question,payload_json,status,created_at) VALUES(?,?,?,?,?,?)",
                 (project_id, decision_id, payload["question"], _json(payload), "ACTIVE", _iso()),

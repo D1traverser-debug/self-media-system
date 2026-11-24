@@ -43,6 +43,12 @@ def test_fresh_owner_task_can_be_one_node_and_resume_by_exact_id(tmp_path):
     assert route["brief"]["scope_epoch"] == EPOCH
     assert route["goal"] == brief["goal"]
     assert route["selected_task_graph"] is None
+    # The plan is structurally ready but not authorized by a current local decision.
+    assert engine.claim_next("fresh", "writer") is None
+    task["requirements"]["decision_id"] = "write-decision"
+    engine.revise_task("fresh", "write", {"requirements": task["requirements"]}, reason="bind the current decision")
+    engine.reopen("fresh", "write", "decision binding prepared")
+    engine.record_decision("fresh", decision_receipt("write", "write-decision"))
     assert engine.claim_next("fresh", "writer")["task"]["task_id"] == "write"
 
 
@@ -105,3 +111,34 @@ def test_goal_change_cannot_leave_old_owner_task_current(tmp_path):
     new = {**brief, "goal": "caption with no historical claims"}
     result = engine.revise_brief("fresh", new, reason="owner correction", affected_task_ids=["write"])
     assert set(result["invalidated_tasks"]) == {"research", "write"}
+
+
+def decision_receipt(task_id, decision_id):
+    # Structural fixture only; no assertion that a model or CAOS actually reasoned.
+    return {"task_id": task_id, "decision_id": decision_id, "question": "Select a method",
+            "scope": "current task", "source_refs": ["fixture-owner-goal"],
+            "hypotheses": [{"id": "h1", "discriminator": "test A"},
+                           {"id": "h2", "discriminator": "test B"}],
+            "alternatives": [{"id": "a"}, {"id": "b"}], "selected_option": "a",
+            "falsifier": "result fails fixture criteria", "rollback": "reopen task"}
+
+
+def test_independent_tasks_bind_independent_decisions_and_reject_stale_action(tmp_path):
+    from video_studio.engine import GateError
+    engine = StudioEngine(tmp_path)
+    brief = bind_owner_brief("fresh", {"goal": "two captions", "audience": "a", "deliverables": ["a", "b"]})
+    engine.create_project("fresh", "fresh", brief)
+    engine.add_tasks("fresh", [
+        {"task_id": name, "outputs": [name], "acceptance": {"quality": "clear"},
+         "requirements": {"deliverable_refs": [name], "decision_id": f"d-{name}"}}
+        for name in ("a", "b")])
+    with pytest.raises(GateError):
+        engine.claim_next("fresh", "worker", task_id="a")
+    engine.record_decision("fresh", decision_receipt("b", "d-b"))
+    assert engine.claim_next("fresh", "worker")["task"]["task_id"] == "b"
+    engine.record_decision("fresh", decision_receipt("a", "d-a"))
+    assert engine.claim_next("fresh", "worker")["task"]["task_id"] == "a"
+    engine.revise_brief("fresh", {**brief, "goal": "new owner correction"}, reason="goal changed")
+    engine.reopen("fresh", "a", "reconsider")
+    with pytest.raises(GateError):
+        engine.claim_next("fresh", "new-worker", task_id="a")

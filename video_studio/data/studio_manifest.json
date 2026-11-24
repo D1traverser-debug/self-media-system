@@ -287,7 +287,15 @@
       "relationship": "ORTHOGONAL_TO_EXECUTION_DEPENDENCY_GRAPH",
       "decision_reentry": "EARLIEST_CONTRADICTED_PREMISE_AND_DEPENDENTS",
       "parent_authority": "READ_ONLY_CAOS_SESSION",
-      "runtime_proof": "NOT_VERIFIED"
+      "runtime_proof": "NOT_VERIFIED",
+      "local_effect_binding": {
+        "scope": "OWNER_SCOPED_STUDIO_TASK_CLAIM_PACKET_COMPLETION",
+        "authority": "STUDIO_ENGINE_EXISTING_DECISIONS_TABLE",
+        "binding": "EXACT_DECISION_ID_GOAL_DIGEST_TASK_CONTRACT_DIGEST_INPUT_ARTIFACT_IDENTITIES_AND_BYTES",
+        "independent_branch_selection": true,
+        "assurance": "LOCAL_STRUCTURAL_BINDING_ONLY__NOT_NATIVE_CAOS_OR_SEMANTIC_REASONING_PROOF",
+        "uncovered": "NON_TASK_ACTIONS_AND_NATIVE_SESSION_COGNITION"
+      }
     },
     "organization_policy": {
       "professional_groups": "ON_DEMAND_CAPABILITY_INDEX_NOT_PERSISTENT_AGENTS",
