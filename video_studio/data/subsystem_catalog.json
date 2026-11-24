@@ -68,6 +68,18 @@
       "creative_result_verified": false
     },
     {
+      "id": "research_and_understanding",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_CAPABILITY_WITHOUT_REGISTERED_EXECUTOR",
+      "code_paths": [],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY_WITH_REAL_SESSION_TOOL_CHECK",
+      "creative_result_verified": false,
+      "status": "IMPLEMENTATION_GAP_NOT_A_REMOTE_SERVICE"
+    },
+    {
       "id": "editorial_and_language",
       "product_membership": "INTERNAL_CONTENT_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
@@ -320,5 +332,138 @@
     "video_growth_agent/data/workflow.json",
     "video_growth_agent/data/execution-plan.json",
     "video_growth_agent/data/agents.json"
-  ]
+  ],
+  "nested_product_capabilities": [
+    {
+      "id": "x_short_post_and_thread",
+      "owner_subsystem": "editorial_and_language",
+      "source_module": "video_studio/domain/editorial.py",
+      "membership": "INTERNAL_VIDEO_CONTENT_STUDIO",
+      "capability": "SHORT_COPY",
+      "knowledge_evidence": "LIBRARY_WRITING_METHOD_CANDIDATE_NOT_AUTOPROMOTED",
+      "actual_authoring_verified": false
+    },
+    {
+      "id": "x_articles_longform",
+      "owner_subsystem": "editorial_and_language",
+      "source_module": "video_studio/domain/editorial.py",
+      "membership": "INTERNAL_VIDEO_CONTENT_STUDIO",
+      "capability": "LONG_ARTICLE",
+      "knowledge_evidence": "LIBRARY_CROSS_SYSTEM_ARTICLE_METHOD_CANDIDATE_NOT_AUTOPROMOTED",
+      "actual_authoring_verified": false
+    },
+    {
+      "id": "multilingual_platform_copy_and_cover_words",
+      "owner_subsystem": "editorial_and_language",
+      "source_module": "video_studio/domain/editorial.py",
+      "membership": "INTERNAL_VIDEO_CONTENT_STUDIO",
+      "capability": "PLATFORM_PACKAGE",
+      "actual_authoring_verified": false
+    },
+    {
+      "id": "one_off_cover_and_avatar",
+      "owner_subsystem": "visual_and_static_design",
+      "source_module": "video_studio/domain/creative.py",
+      "membership": "INTERNAL_VIDEO_CONTENT_STUDIO",
+      "capability": "STATIC_IMAGE",
+      "actual_pixels_verified": false
+    },
+    {
+      "id": "original_identity_ipos_design",
+      "owner_subsystem": "original_identity_ipos",
+      "source_module": "video_studio/domain/identity.py",
+      "membership": "INTERNAL_VIDEO_CONTENT_STUDIO",
+      "capability": "IDENTITY_ASSET",
+      "owner_canon_approval_required": true
+    }
+  ],
+  "caos_sibling_business_systems": [
+    {
+      "id": "novel-writing-agent",
+      "relationship": "CAOS_PEER_BUSINESS_SYSTEM",
+      "permitted_bridge": "SCOPED_READ_ONLY_NARRATIVE_METHOD_CANDIDATE",
+      "task_authority_transfer": false,
+      "canon_or_file_write_transfer": false
+    },
+    {
+      "id": "financial-writing-agent",
+      "relationship": "CAOS_PEER_BUSINESS_SYSTEM",
+      "permitted_bridge": "SCOPED_READ_ONLY_EDITORIAL_METHOD_CANDIDATE",
+      "task_authority_transfer": false,
+      "canon_or_file_write_transfer": false
+    },
+    {
+      "id": "a-share-event-driven-agent",
+      "relationship": "CAOS_PEER_BUSINESS_SYSTEM",
+      "permitted_bridge": "SCOPED_READ_ONLY_MARKET_RESEARCH_METHOD_CANDIDATE",
+      "task_authority_transfer": false,
+      "canon_or_file_write_transfer": false
+    }
+  ],
+  "deliverable_ownership": {
+    "SHORT_COPY": {
+      "primary": "editorial_and_language",
+      "optional": []
+    },
+    "LONG_ARTICLE": {
+      "primary": "editorial_and_language",
+      "optional": [
+        "research_and_understanding",
+        "visual_and_static_design"
+      ]
+    },
+    "PLATFORM_PACKAGE": {
+      "primary": "editorial_and_language",
+      "optional": [
+        "platform_packaging_delivery",
+        "research_and_understanding"
+      ]
+    },
+    "PROMPT_SPEC": {
+      "primary": "visual_and_static_design",
+      "optional": [
+        "original_identity_ipos"
+      ]
+    },
+    "STATIC_IMAGE": {
+      "primary": "visual_and_static_design",
+      "optional": [
+        "original_identity_ipos"
+      ]
+    },
+    "MULTI_ASPECT_IMAGE_SET": {
+      "primary": "visual_and_static_design",
+      "optional": [
+        "original_identity_ipos"
+      ]
+    },
+    "MEDIA_TRANSFORM": {
+      "primary": "media_understanding_and_transform",
+      "optional": [
+        "motion_and_production"
+      ]
+    },
+    "ORIGINAL_VIDEO": {
+      "primary": "motion_and_production",
+      "optional": [
+        "visual_and_static_design",
+        "media_understanding_and_transform",
+        "editorial_and_language",
+        "original_identity_ipos"
+      ]
+    },
+    "IDENTITY_ASSET": {
+      "primary": "original_identity_ipos",
+      "optional": [
+        "visual_and_static_design"
+      ]
+    },
+    "ANALYSIS_REPORT": {
+      "primary": "research_and_understanding",
+      "optional": [
+        "cognition_and_audit",
+        "quality_and_assurance"
+      ]
+    }
+  }
 }

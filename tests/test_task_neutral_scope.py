@@ -174,3 +174,18 @@ def test_unrelated_decision_does_not_authorize_task_and_caller_binding_rejected(
     with pytest.raises(ContractError):
         engine.record_decision("fresh", {**receipt, "decision_id": "d-wrong"})
     assert engine.claim_next("fresh", "writer") is None
+
+
+def test_x_article_and_one_time_avatar_dispatch_are_typed_internal_routes(tmp_path):
+    new = resolve_intake(tmp_path, {
+        "mode": "NEW", "goal": "Write an English X Article with one illustration",
+        "deliverable_specs": [
+            {"id":"article","type":"LONG_ARTICLE","locale":"en-US"},
+            {"id":"illustration","type":"STATIC_IMAGE"},
+        ]})
+    picked = new["internal_subsystem_routing"]["routes"]
+    assert [p["primary_internal_subsystem"] for p in picked] == [
+        "editorial_and_language", "visual_and_static_design"]
+    assert new["internal_subsystem_routing"]["peer_system_task_authority_inherited"] is False
+    assert new["selected_task_graph"] is None
+    assert new["effect_authorized"] is False

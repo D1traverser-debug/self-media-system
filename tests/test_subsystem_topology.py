@@ -12,7 +12,7 @@ def test_every_python_module_and_registered_executor_has_one_real_internal_owner
     assert report["pass"], report["violations"]
     assert report["code_modules"] == report["owned_modules"]
     assert report["code_modules"] >= 59
-    assert report["subsystems"] == 15
+    assert report["subsystems"] == 16
     assert report["domain_adapters"] == 17
     assert report["production_operations"] == 5
     assert report["unclassified_paths"] == []
@@ -48,3 +48,33 @@ def test_relative_import_graph_follows_actual_package_levels(tmp_path):
         "video_studio.engine", "video_studio.production.contracts"}
     assert _module("video_growth_agent/ip_identity.py")=="video_growth_agent.ip_identity"
     assert _module("video_studio/domain/__init__.py")=="video_studio.domain"
+
+
+def test_x_article_and_social_posts_are_internal_not_stolen_by_peer_writing_systems():
+    from video_studio.subsystems import route_declared_content
+    plan = route_declared_content([
+        {"id": "post", "type": "SHORT_COPY", "constraints": {}},
+        {"id": "article", "type": "LONG_ARTICLE", "constraints": {}},
+        {"id": "avatar", "type": "STATIC_IMAGE",
+         "constraints": {"identity_mode": "TEMPORARY_CHARACTER"}},
+    ])
+    assert [x["primary_internal_subsystem"] for x in plan["routes"]] == [
+        "editorial_and_language", "editorial_and_language",
+        "visual_and_static_design"]
+    assert plan["routes"][2]["identity_scope"] == "TEMPORARY_NO_PERSONAL_IPOS"
+    assert plan["peer_system_task_authority_inherited"] is False
+    assert plan["selected_task_graph"] is None
+    assert all(x["effect_authorized"] is False for x in plan["routes"])
+    catalog = json.loads((ROOT / "video_studio/data/subsystem_catalog.json").read_text())
+    assert {x["id"] for x in catalog["caos_sibling_business_systems"]} == {
+        "novel-writing-agent", "financial-writing-agent", "a-share-event-driven-agent"}
+    assert {x["id"] for x in catalog["nested_product_capabilities"]} >= {
+        "x_short_post_and_thread", "x_articles_longform", "original_identity_ipos_design"}
+
+
+def test_owner_route_discloses_unimplemented_research_instead_of_claiming_tool():
+    from video_studio.subsystems import route_declared_content
+    r = route_declared_content([{"id":"analysis","type":"ANALYSIS_REPORT","constraints":{}}])
+    assert r["routes"][0]["primary_internal_subsystem"] == "research_and_understanding"
+    assert r["routes"][0]["actual_executor_verified"] is False
+    assert r["routes"][0]["independent_outcome_verified"] is False

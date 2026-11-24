@@ -94,6 +94,12 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             errors.append(f"subsystem wrongly external: {sid}")
         if sub["active_by_default"] is not False:
             errors.append(f"unauthorized default activation: {sid}")
+        if not sub["code_paths"] and not (
+            sid == "research_and_understanding"
+            and sub.get("status") == "IMPLEMENTATION_GAP_NOT_A_REMOTE_SERVICE"
+            and not sub["domain_adapters"] and not sub["production_operations"]
+        ):
+            errors.append(f"unjustified code-free internal subsystem: {sid}")
         for path in sub["code_paths"]:
             if path in owners:
                 errors.append(f"duplicate module owner: {path}")
@@ -154,6 +160,28 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
                 break
             to_visit.extend(imports.get(current, set()) - seen)
 
+    from .domain.contracts import DELIVERABLE_TYPES
+    routes = cat.get("deliverable_ownership", {})
+    if set(routes) != DELIVERABLE_TYPES:
+        errors.append("typed deliverable ownership is incomplete or contains phantom types")
+    for typ, route in routes.items():
+        selected = [route.get("primary"), *route.get("optional", [])]
+        if len(selected) != len(set(selected)) or any(x not in ids for x in selected):
+            errors.append(f"invalid internal subsystem route for {typ}")
+        if "legacy_agent_control_plane" in selected:
+            errors.append(f"retired controller cannot own current deliverable: {typ}")
+    nested = cat.get("nested_product_capabilities", [])
+    for item in nested:
+        sid = item.get("owner_subsystem")
+        module = item.get("source_module")
+        if sid not in ids or owners.get(module) != sid:
+            errors.append(f"nested content capability has no actual internal code owner: {item.get('id')}")
+        if item.get("membership") != "INTERNAL_VIDEO_CONTENT_STUDIO":
+            errors.append(f"nested capability misidentified as external: {item.get('id')}")
+    siblings = cat.get("caos_sibling_business_systems", [])
+    for item in siblings:
+        if item.get("relationship") != "CAOS_PEER_BUSINESS_SYSTEM" or item.get("task_authority_transfer") is not False or item.get("canon_or_file_write_transfer") is not False:
+            errors.append(f"cross-system authority mistakenly merged: {item.get('id')}")
     if cat.get("current_runtime") != "video_studio.engine.StudioEngine":
         errors.append("multiple or wrong durable control authority")
     if cat.get("boundaries", {}).get("ipos", {}).get("product_membership") != "INTERNAL_CONTENT_STUDIO":
@@ -182,4 +210,58 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         "semantic_line_by_line_complete": False,
         "real_creative_quality_verified": False,
         "native_caos_selection_verified": False,
+    }
+
+
+def route_declared_content(deliverables: list[dict[str, Any]]) -> dict[str, Any]:
+    """Read-only owner routing by REAL internal product responsibility.
+
+    Secondary specialists are advisory, not automatically enlisted. CAOS parent
+    is a cross-cutting authority, not a new Studio task-graph controller.
+    """
+    from importlib.resources import files
+    from .domain.contracts import DELIVERABLE_TYPES
+    cat = json.loads(files("video_studio").joinpath("data", "subsystem_catalog.json")
+                     .read_text(encoding="utf-8"))
+    known = {s["id"]: s for s in cat["subsystems"]}
+    routes = cat["deliverable_ownership"]
+    if set(routes) != DELIVERABLE_TYPES:
+        raise ValueError("unmapped or phantom content deliverable type")
+    result = []
+    for item in deliverables:
+        kind = item["type"]
+        entry = routes.get(kind)
+        if not entry or entry["primary"] not in known:
+            raise ValueError(f"unowned content deliverable: {kind}")
+        primary = entry["primary"]
+        if primary == "legacy_agent_control_plane":
+            raise ValueError("retired controller cannot own a current owner outcome")
+        if any(x not in known for x in entry["optional"]):
+            raise ValueError("optional specialist is not internally declared")
+        constraints = item.get("constraints", {})
+        mode = constraints.get("identity_mode")
+        # This boundary applies to a one-time visual avatar, not all images.
+        identity = ("CURRENT_IPOS_APPROVAL_REQUIRED"
+                    if mode in {"APPROVED_CANON_USE", "IDENTITY_DERIVATIVE"}
+                    else "CURRENT_IPOS_SPECIALIST_DESIGN"
+                    if mode == "PERSISTENT_IDENTITY_DESIGN"
+                    else "TEMPORARY_NO_PERSONAL_IPOS"
+                    if mode == "TEMPORARY_CHARACTER"
+                    else "NOT_AUTOMATIC")
+        result.append({
+            "deliverable_id": item["id"], "type": kind,
+            "primary_internal_subsystem": primary,
+            "potential_specialists_not_selected": entry["optional"],
+            "internal_product_membership": "CONTENT_STUDIO",
+            "identity_scope": identity,
+            "source_custody_is_not_business_boundary": True,
+            "actual_executor_verified": False,
+            "independent_outcome_verified": False,
+            "effect_authorized": False,
+        })
+    return {
+        "routes": result, "no_default_project": True,
+        "selected_task_graph": None, "caos_native_activation": "NOT_VERIFIED",
+        "peer_system_task_authority_inherited": False,
+        "status": "CONTENT_DOMAIN_OWNERSHIP_ONLY_NO_ACTION",
     }

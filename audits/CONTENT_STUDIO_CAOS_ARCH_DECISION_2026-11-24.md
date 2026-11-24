@@ -66,3 +66,7 @@ Compared the V2 IMAGE prompting reference-role method (generally transferable wi
 
 ## Deliverable-quality root cause and candidate architecture
 Compared retaining globally mandatory video lookdev/rough-cut stages (reject for short copy), removing all creative standards (reject loss of transferable craft) and a risk-aware per-type output quality criteria map. Selected per-type plan and per-ratio independent image review obligations; all 34 matrix scenarios have false self-certification fields. The plan does not execute a reviewer or replace independent owner outcomes. No CAOS/IPOS source mutation.
+
+
+## Original-system ownership correction beyond IPOS
+Opened original 2026-11-21 Video full audit, Meme/X cross-system decision record and CAOS parent architecture manual from the user's Library, and checked live peer repository names. X short-form and X Articles are Video's own internal editorial scope; novel, financial-writing and A-share agent systems are CAOS sibling business domains, not members of this Video runtime. Earlier assistant routing these as outside or inheriting cross-project tasks was wrong. Added nested internal capability identities, peer method-only boundaries and type-to-internal-subsystem routing for all ten declared deliverable types. Added research capability as an explicitly unimplemented internal group, not a fake remote provider. This is source-based structural admission, not creative writing quality or live CAOS activation.
