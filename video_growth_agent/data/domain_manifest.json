@@ -59,10 +59,14 @@
     "external_identity_authority": {
       "system": "IP_STUDIO_OS",
       "contract": "IPOS Video Identity Bundle schema 1.0",
-      "rule": "IPOS is the sole creative identity authority; Video imports exact owner-approved versions locally and never rewrites canon."
+      "rule": "IPOS is the sole creative identity authority; Video imports exact owner-approved versions locally and never rewrites canon.",
+      "business_membership": "INTERNAL_CONTENT_STUDIO_ORIGINAL_IDENTITY_SUBSYSTEM",
+      "source_custody": "SEPARATE_PRIVATE_IPOS_CANON_AND_INSTALLED_SKILL",
+      "current_owner_state": "READ_CURRENT_AUTHORIZED_IPOS_SOURCE_ON_DEMAND__NO_HISTORIC_SNAPSHOT_PROMOTION"
     },
     "canonical_runtime_manifest": "video_studio/data/studio_manifest.json",
-    "historical_product_requirements_ref": "docs/product_requirements.md"
+    "historical_product_requirements_ref": "docs/product_requirements.md",
+    "identity_context": "video_studio/domain/identity.py"
   },
   "retired_active_surface": {
     "continuity_directory_allowed": false,

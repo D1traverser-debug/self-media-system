@@ -312,7 +312,17 @@
       "selection": "CAOS_GOVERNED_BY_ACTUAL_NEED_NOT_DEFAULT_STAGE",
       "native_caos_assurance": "NOT_VERIFIED"
     },
-    "layers_semantics": "RESPONSIBILITY_LEVELS_NOT_SEQUENTIAL_STAGES__CAOS_GOVERNS_ACROSS_ALL_LEVELS"
+    "layers_semantics": "RESPONSIBILITY_LEVELS_NOT_SEQUENTIAL_STAGES__CAOS_GOVERNS_ACROSS_ALL_LEVELS",
+    "identity_context": {
+      "product_membership": "NESTED_ORIGINAL_IDENTITY_IPOS",
+      "source_custody": "EXISTING_INSTALLED_IPOS_SKILL_AND_PRIVATE_LIBRARY",
+      "active_consumer": "video_growth_agent/ip_identity.py + five domain adapters + IPOS Video Identity Bundle 1.0",
+      "temporary_identity": "GENERAL_VISUAL_CRAFT_NO_IPOS_STATE",
+      "durable_design": "CURRENT_IPOS_SPECIALIST_WORKFLOW_AND_OWNER_APPROVAL",
+      "approved_use": "EXACT_CURRENT_BUNDLE_AND_RIGHTS_READBACK_REQUIRED",
+      "historical_snapshot": "RETIRED_PROJECT_EVIDENCE_ONLY",
+      "runtime_assurance": "NOT_PROVEN_BY_ROUTE_PREVIEW"
+    }
   },
   "knowledge_lifecycle": {
     "index": "video_studio/data/knowledge_catalog.json",

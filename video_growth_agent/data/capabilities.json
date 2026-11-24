@@ -864,11 +864,13 @@
     },
     {
       "id": "identity_collaboration",
-      "scope": "Temporary creative characters and approved long-lived IP identity collaboration",
+      "scope": "Nested Content Studio original identity/IPOS: temporary avatar, persistent design, approved canon use, continuity and derivatives, with separately custodied permanent canon",
       "demands": [
         "temporary_character",
         "approved_identity_use",
-        "identity_continuity"
+        "identity_continuity",
+        "persistent_identity_design",
+        "identity_derivative_production"
       ],
       "adapters": [
         "ipos_bundle_inspect",
@@ -879,7 +881,8 @@
       ],
       "operations": [],
       "gaps": [
-        "Original durable canon belongs to IPOS; ordinary avatar/temporary character work does not automatically invoke IPOS."
+        "Original durable canon belongs to IPOS; ordinary avatar/temporary character work does not automatically invoke IPOS.",
+        "IPOS is an internal product subsystem, but its current Skill/private canonical state is not copied or stored as Video owner data. Only verified approved bundles enter downstream media effects."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
       "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"

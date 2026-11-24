@@ -93,9 +93,12 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
         from .domain.contracts import inspect_declared_deliverables
         typed = inspect_declared_deliverables(
             declarations, expected_ids=(brief.get("deliverables") if mode == "RESUME" else request.get("deliverables")))
+    from .domain.identity import identity_route
+    identity_routing = identity_route(typed["deliverables"]) if typed else None
     return {
         "mode": mode, "goal": goal, "project_id": project_id, "brief": brief,
         "typed_deliverables": typed,
+        "identity_routing": identity_routing,
         "scope_epoch": EPOCH, "selected_task_graph": None,
         "default_project_id": None, "automatic_resume": False,
         "architecture": manifest["architecture"],

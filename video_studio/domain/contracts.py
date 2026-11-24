@@ -148,6 +148,8 @@ class DeliverableContract:
         acceptance = value.get("acceptance", {})
         if not isinstance(constraints, dict) or not isinstance(acceptance, dict):
             raise ContentContractError("constraints and acceptance must be objects")
+        from .identity import validate_identity_constraints
+        validate_identity_constraints(kind, constraints)
         promise = constraints.get("original_audio_promise")
         if promise is not None and (kind != "MEDIA_TRANSFORM" or promise not in AUDIO_PROMISES):
             raise ContentContractError("original_audio_promise must be a supported MEDIA_TRANSFORM mode")

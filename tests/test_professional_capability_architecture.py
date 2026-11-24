@@ -53,3 +53,14 @@ def test_no_fake_registered_route_or_ambiguous_capability():
 def test_coordination_points_to_live_entry():
     data = json.loads((ROOT / "video_growth_agent/data/coordination-policy.json").read_text())
     assert data["governance_binding"]["entrypoint"] == "STUDIO_ENTRY.md"
+
+
+def test_identity_capability_is_nested_and_on_demand():
+    from video_studio.scope import capability_lookup
+    identity = capability_lookup("identity_collaboration")
+    item = identity["groups"][0]
+    assert "persistent_identity_design" in item["demands"]
+    assert "identity_derivative_production" in item["demands"]
+    assert item["activation"] == "DEMAND_SELECTED_ONLY"
+    assert len([x for x in item["adapters"] if x.startswith("ipos_")]) == 5
+    assert identity["effect_authorized"] is False

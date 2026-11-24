@@ -130,3 +130,55 @@ def test_intake_rejects_conflicting_explicit_deliverable_ids(tmp_path):
         resolve_intake(tmp_path, {"mode": "NEW", "goal": "make a cover",
                                   "deliverables": ["something-else"],
                                   "deliverable_specs": [{"id": "cover", "type": "STATIC_IMAGE"}]})
+
+
+def test_ipos_subsystem_is_internal_but_canonical_approval_is_separately_custodied(tmp_path):
+    from video_studio.domain.contracts import ContentContractError
+    context = resolve_intake(tmp_path, {
+        "mode": "NEW", "goal": "Develop my permanent anonymous creator identity",
+        "deliverable_specs": [{"id": "creator", "type": "IDENTITY_ASSET",
+                               "constraints": {"identity_mode": "PERSISTENT_IDENTITY_DESIGN"}}]})
+    route = context["identity_routing"]["routes"][0]
+    assert route["product_context"] == "CONTENT_STUDIO/ORIGINAL_IDENTITY_IPOS"
+    assert route["status"].startswith("INTERNAL_SPECIALIST")
+    assert route["canon_use_admitted"] is False
+    assert route["current_owner_ipos_state_loaded"] is False
+    assert context["identity_routing"]["ip_studio_business_membership"] == "NESTED_CONTENT_STUDIO_SUBSYSTEM"
+    assert context["selected_task_graph"] is None
+
+    ephemeral = resolve_intake(tmp_path, {
+        "mode": "NEW", "goal": "Draw a disposable avatar for this post",
+        "deliverable_specs": [{"id": "avatar", "type": "STATIC_IMAGE",
+                               "constraints": {"identity_mode": "TEMPORARY_CHARACTER"}}]})
+    assert ephemeral["identity_routing"]["routes"][0]["product_context"] == "CONTENT_STUDIO/GENERAL_CREATIVE"
+    assert ephemeral["identity_routing"]["routes"][0]["requires_current_canon_bundle"] is False
+
+    proposed = resolve_intake(tmp_path, {
+        "mode": "NEW", "goal": "Use my existing character in a clip",
+        "deliverable_specs": [{"id": "clip", "type": "ORIGINAL_VIDEO",
+                               "constraints": {"identity_mode": "APPROVED_CANON_USE",
+                                               "bundle_ref": "ipos://unverified/example"}}]})
+    consumer = proposed["identity_routing"]["routes"][0]
+    assert consumer["requires_current_canon_bundle"] is True
+    assert consumer["status"] == "CURRENT_EXPORT_UNVERIFIED"
+    assert consumer["canon_use_admitted"] is False
+    assert proposed["effect_authorized"] is False
+
+    with pytest.raises(ContentContractError):
+        resolve_intake(tmp_path, {"mode": "NEW", "goal": "pretend approval",
+                                  "deliverable_specs": [{"id": "clip", "type": "ORIGINAL_VIDEO",
+                                    "constraints": {"identity_mode": "APPROVED_CANON_USE",
+                                                    "canon_approved": True}}]})
+    with pytest.raises(ContentContractError):
+        resolve_intake(tmp_path, {"mode": "NEW", "goal": "invalid identity method",
+                                  "deliverable_specs": [{"id": "a", "type": "SHORT_COPY",
+                                    "constraints": {"identity_mode": "PERSISTENT_IDENTITY_DESIGN"}}]})
+
+
+def test_unrelated_content_has_no_ipos_dependency(tmp_path):
+    context = resolve_intake(tmp_path, {"mode": "NEW", "goal": "Restore a non-character video",
+        "deliverable_specs": [{"id": "edit", "type": "MEDIA_TRANSFORM"}]})
+    route = context["identity_routing"]["routes"][0]
+    assert route["identity_mode"] == "NO_IDENTITY"
+    assert route["requires_current_canon_bundle"] is False
+    assert route["historical_project_snapshot_authority"] is False
