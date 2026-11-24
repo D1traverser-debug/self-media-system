@@ -1,5 +1,7 @@
 # Self-Learning Protocol
 
+> **Scope — 2026-11-24 task-neutral architecture:** Continuous learning is triggered by evidence gaps and failures at any relevant decision boundary. The historical LEARN-stage example is not a mandatory task or a separate scheduler. Apply read-only CAOS guidance and scoped independent replay; do not promote a method merely because a receipt exists. Current authority: repository-root `STUDIO_ENTRY.md` and `video_studio/data/studio_manifest.json`.
+
 Use when a quality gap, tool limitation, superior external example, ecosystem change, or repeated production failure appears.
 
 ## Prevention-first rule

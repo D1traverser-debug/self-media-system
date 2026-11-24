@@ -1,5 +1,7 @@
 # Agentic Studio Architecture
 
+> **Scope — 2026-11-24 task-neutral architecture:** Reusable coordination and independence methods only. Fixed-stage work orders and the older StudioRuntime are historical regression mechanisms, not the current scheduler. Apply role separation and proof at actual task boundaries. Current authority: repository-root `STUDIO_ENTRY.md` and `video_studio/data/studio_manifest.json`.
+
 ## Purpose
 Role prompts are not execution isolation. A creator that changes labels inside one context can carry intent, sunk-cost bias and self-justification into its own review. The studio therefore separates production, review and deterministic measurement at runtime.
 

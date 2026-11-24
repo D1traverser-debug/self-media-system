@@ -1,6 +1,8 @@
 # Workflow Semantics
 
-Machine-readable stage order and gate contracts live in `video_growth_agent/data/workflow.json`. This packaged resource is the runtime authority; do not maintain a second root-level config mirror.
+> **Scope — 2026-11-24 task-neutral architecture:** Historical fixed-stage workflow retained as a catalog of reusable production responsibilities and regression behavior. It is not a task template, active order, startup authority or mandatory pipeline. Current Video uses StudioEngine dynamic DAG with continuous CAOS and professional governance. Current authority: repository-root `STUDIO_ENTRY.md` and `video_studio/data/studio_manifest.json`.
+
+Machine-readable stage order and gate contracts live in `video_growth_agent/data/workflow.json`. This packaged resource is the retired fixed-stage compatibility reference; never use it as current scheduling authority.
 
 ## Stage intent
 - INTAKE: define task, constraints, platform, target viewer and evidence requirements; output `brief`.

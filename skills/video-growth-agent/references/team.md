@@ -1,5 +1,7 @@
 # Virtual Studio Team Prompts
 
+> **Scope — 2026-11-24 task-neutral architecture:** These are reusable professional responsibility lenses, not permanently instantiated agents, mandatory group assignments or fixed stage gates. Select and combine them according to the current demand while preserving actual independent review. Current authority: repository-root `STUDIO_ENTRY.md` and `video_studio/data/studio_manifest.json`.
+
 Roles are independent reviewers with distinct loss functions. When activated, use the role's mandate literally; do not soften criticism because another role already invested effort.
 
 ## Showrunner

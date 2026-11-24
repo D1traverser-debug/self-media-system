@@ -1,5 +1,7 @@
 # Runtime and Evidence Contract
 
+> **Scope — 2026-11-24 task-neutral architecture:** Historical 0.7/0.8 runtime mechanics are retained for regression and reusable principles (artifact evidence, immutable versions, invalidation, independent checks). The current controller is StudioEngine with SQLite and dynamic DAG; state.json, legacy vga CLI and fixed stage transitions below have no active routing authority. Current authority: repository-root `STUDIO_ENTRY.md` and `video_studio/data/studio_manifest.json`.
+
 The runtime exists to stop a persuasive agent from talking its way around missing work.
 
 ## Project checkpoint

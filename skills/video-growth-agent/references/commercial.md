@@ -1,6 +1,8 @@
 # Commercial Direction
 
-Current working commercial axis: AI applications, software/SaaS, 3C electronics, smart hardware and technology-business explanation, with adjacent expansion into appliance/smart-home, automotive technology, cloud/data/internet services when content fit is strong.
+> **Scope — 2026-11-24 task-neutral architecture:** Reusable commercial design methods. The industries and account positioning below are historical examples, not a standing owner requirement or default business task. Select scope from the current owner demand. Current authority: repository-root `STUDIO_ENTRY.md` and `video_studio/data/studio_manifest.json`.
+
+Historical commercial-axis example: AI applications, software/SaaS, 3C electronics, smart hardware and technology-business explanation, with adjacent expansion into appliance/smart-home, automotive technology, cloud/data/internet services when content fit is strong.
 
 Commercial field, content format and production format are separate decisions. Example: field=3C, format=conflict-led explainer, production=AI assets + motion graphics + screen capture.
 

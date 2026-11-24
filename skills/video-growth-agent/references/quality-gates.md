@@ -1,5 +1,7 @@
 # Quality Gates
 
+> **Scope — 2026-11-24 task-neutral architecture:** Quality dimensions and thresholds are task-specific calibration references. Apply aesthetic, communication and craft judgment continuously where relevant. Numeric timing, three-frame and full-motion requirements below refer to their appropriate long-form production conditions, not every title, still image, or editing request. Current authority: repository-root `STUDIO_ENTRY.md` and `video_studio/data/studio_manifest.json`.
+
 ## Hook / retention
 - First 0.5s contains real visual change.
 - First 2s communicate a conflict, promise or curiosity without requiring prior context.

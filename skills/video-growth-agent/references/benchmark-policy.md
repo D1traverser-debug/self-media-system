@@ -1,5 +1,7 @@
 # Benchmark and Lookdev Policy
 
+> **Scope — 2026-11-24 task-neutral architecture:** Use benchmark and sample methods proportionally to uncertainty, quality risk and actual medium. The moving-media pack and lookdev gate are conditional production methods, not prerequisites for unrelated or simple tasks. Current authority: repository-root `STUDIO_ENTRY.md` and `video_studio/data/studio_manifest.json`.
+
 ## Purpose
 Calibrate taste before production. The benchmark pack is a measuring instrument, not an inspiration dump.
 
