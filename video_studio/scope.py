@@ -31,6 +31,9 @@ def bind_owner_brief(project_id: str, brief: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("exact current owner goal is required")
     if brief.get("scope_epoch", EPOCH) != EPOCH:
         raise ValueError("cannot reuse a retired scope epoch")
+    if "deliverable_specs" in brief:
+        from .domain.contracts import inspect_declared_deliverables
+        inspect_declared_deliverables(brief["deliverable_specs"], expected_ids=brief.get("deliverables"))
     return {**brief, "scope_epoch": EPOCH}
 
 
@@ -84,8 +87,15 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
         if brief.get("scope_epoch") != EPOCH:
             raise ValueError("pre-cutover task instance is retired; create a fresh owner demand")
         goal = brief["goal"]
+    declarations = request.get("deliverable_specs") if mode == "NEW" else brief.get("deliverable_specs")
+    typed = None
+    if declarations is not None:
+        from .domain.contracts import inspect_declared_deliverables
+        typed = inspect_declared_deliverables(
+            declarations, expected_ids=brief.get("deliverables") if mode == "RESUME" else None)
     return {
         "mode": mode, "goal": goal, "project_id": project_id, "brief": brief,
+        "typed_deliverables": typed,
         "scope_epoch": EPOCH, "selected_task_graph": None,
         "default_project_id": None, "automatic_resume": False,
         "architecture": manifest["architecture"],
