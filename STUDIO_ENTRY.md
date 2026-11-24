@@ -9,7 +9,7 @@ Operating manual: `docs/standalone_video_studio.md`
 
 ## Mission
 
-Turn the owner's actual content goal—including independent writing, still images, IP identity, media editing, platform packaging and original video—into an independently checked deliverable. The system is outcome-driven, not stage-driven. Each project gets a task graph derived from its brief; independent tasks can run concurrently, and only declared dependencies block work.
+Turn the owner's actual content goal—including independent writing, still images, IP identity, media editing, platform packaging and original video—into an independently checked deliverable. The system is outcome-driven, not stage-driven. Direct tasks need no artificial project or graph. Durable projects use a task graph derived from the specific brief; independent tasks can run concurrently, and only declared dependencies block work.
 
 ## Independence
 
@@ -27,7 +27,7 @@ For a durable owner task, give `requirements.decision_id` an exact unique ID whe
 
 ## Hard release boundaries (when releasing an actual video)
 
-A video is not releasable until the exact final bytes pass digest-bound FFmpeg/FFprobe checks (video stream, stream-duration match, true peak, black frames and full decode), every used media asset in recursive lineage has cleared rights plus resolvable evidence, required human reviews are recorded against the exact digest, and the Red Team has at least three evidence-backed findings with no unresolved critical/high risk. Required platform/disclosure, EditorialPlan, timeline and other evidence artifacts must exist. Source-version changes stale their consumers and descendants. These checks never publish automatically.
+For an actual video release, exact final bytes must pass applicable digest-bound FFmpeg/FFprobe technical checks (video stream, stream-duration match, true peak, black frames and full decode); used media assets in recorded lineage require cleared rights and resolvable evidence. **Only when the current owner brief requires human cold review, Red Team, EditorialPlan, timeline or platform-specific documentation** must those specialized receipts exist and satisfy their declared criteria. When Red Team is required, its review contract demands at least three evidence-backed findings and no unresolved critical/high risk. A simple video crop does not inherit an unrelated historical explainer storyboard or Red Team requirement. Source-version changes invalidate affected dependents. Release eligibility never authorizes public posting.
 
 ## Professional capability discovery and recursive governance
 

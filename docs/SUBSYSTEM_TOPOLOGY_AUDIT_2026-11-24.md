@@ -33,3 +33,7 @@ The currently active domain_manifest previously used an object key named externa
 ## Historical video review policies are not universal
 
 The core repository audit previously emitted a generic check hard_release_gates while checking only old example video briefs (technology-explainer and news-fictional-media), including one 3-finding Red Team gate. Retaining that name and scope as universal implied articles and captions needed film-only release checks. The same real historical fixture policy is now named isolated_historical_video_fixture_release_policy, its report explicitly universal_content_gate=false, and per-type Content Studio assurance remains owner/output-specific. Historical sample source and regressions preserved; no generic release approval claimed.
+
+## Canonical entry contradiction closed
+
+Original STUDIO_ENTRY declared both direct, no-graph work and an unconditional graph for every project. It also copied historical video explainer Red Team/EditorialPlan/timeline gates into an apparently universal media release rule despite current Skill's 'when the brief requires' semantics and the newly scoped historical fixture audit. The canonical entry now separates direct from durable work, keeps rights/digest-bound video technical gates, and applies Red Team, human review and specialized evidence only where owner/brief requirements declare them. Manifest release-gate metadata is equally conditional; explicit Video's old samples retain their own minimum findings. A read-only test will fail on reintroduction of global old-stage assumptions.

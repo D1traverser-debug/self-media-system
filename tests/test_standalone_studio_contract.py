@@ -261,3 +261,13 @@ def test_current_content_studio_entry_and_product_name_match_nested_identity():
     assert "not a mandatory video-production pipeline" in readme
     assert "Historical example chain" in readme
     assert "video-growth-agent" in manifest["legacy_repository_identity"]
+
+
+def test_universal_entry_does_not_make_old_video_fixture_red_team_a_global_rule():
+    entry=(ROOT/"STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    m=json.loads((ROOT/"video_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
+    assert "Direct tasks need no artificial project or graph" in entry
+    assert "**Only when the current owner brief requires human cold review, Red Team" in entry
+    assert "Release eligibility never authorizes public posting" in entry
+    assert m["capabilities"]["release_gates"]["red_team"].startswith("WHEN_REQUIRED_BY_BRIEF_")
+    assert m["capabilities"]["release_gates"]["human_review"].startswith("WHEN_REQUIRED_BY_BRIEF_")
