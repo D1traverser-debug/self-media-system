@@ -8,7 +8,7 @@ import threading
 
 import pytest
 
-from video_studio.engine import ClaimError, ContractError, StudioEngine
+from social_media_studio.engine import ClaimError, ContractError, StudioEngine
 
 
 def brief():
@@ -140,7 +140,7 @@ def test_identical_asset_reimport_is_idempotent_and_preserves_completed_consumer
 
 
 def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path, capsys):
-    from video_studio.cli import main
+    from social_media_studio.cli import main
 
     workspace = tmp_path / "workspace"
     engine = StudioEngine(workspace)
@@ -457,7 +457,7 @@ def test_cross_project_media_transfer_preserves_and_resolves_rights_evidence(tmp
 
 
 def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(tmp_path, capsys):
-    from video_studio.cli import main
+    from social_media_studio.cli import main
 
     workspace = tmp_path / "workspace"
     engine = StudioEngine(workspace)
@@ -705,10 +705,10 @@ def test_learning_stays_candidate_until_independent_replay_and_counterexample_tr
 
 
 def test_cli_exposes_standalone_entry_without_caos_import(tmp_path):
-    source = (Path(__file__).parents[1] / "video_studio" / "engine.py").read_text(encoding="utf-8")
+    source = (Path(__file__).parents[1] / "social_media_studio" / "engine.py").read_text(encoding="utf-8")
     assert "import caos" not in source.lower()
     assert "caos_runtime" not in source.lower()
-    from video_studio.cli import main
+    from social_media_studio.cli import main
     brief_file = tmp_path / "brief.json"
     brief_file.write_text(json.dumps(brief()), encoding="utf-8")
     assert main(["--root", str(tmp_path / "ws"), "--offline-fixture", "init", "cli-demo", "--brief", str(brief_file)]) == 0
@@ -795,7 +795,7 @@ def test_builtin_ffprobe_qa_measures_real_media_and_completes_a_claimed_task(tmp
     import shutil
     import subprocess
 
-    from video_studio.media import run_claimed_media_qa
+    from social_media_studio.media import run_claimed_media_qa
 
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
         pytest.skip("FFmpeg/ffprobe are not installed")
@@ -912,7 +912,7 @@ def test_repeated_media_qa_uses_new_immutable_receipt_path(tmp_path):
     import shutil
     import subprocess
 
-    from video_studio.media import run_claimed_media_qa
+    from social_media_studio.media import run_claimed_media_qa
 
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
         pytest.skip("FFmpeg/ffprobe are not installed")
@@ -1283,7 +1283,7 @@ def test_consultative_advice_cannot_claim_decision_authority(tmp_path):
 
 
 def test_learning_self_validation_cannot_promote_and_retirement_is_checked(tmp_path):
-    from video_studio.engine import GateError, ContractError, ProjectNotFound
+    from social_media_studio.engine import GateError, ContractError, ProjectNotFound
     engine = make_engine(tmp_path)
     payload = {
         "learning_id": "method-one",
@@ -1343,7 +1343,7 @@ def test_explicit_external_wait_survives_refresh_and_does_not_starve_unrelated_t
 
 
 def test_reopen_does_not_reset_exhausted_retry_budget_without_real_contract_revision(tmp_path):
-    from video_studio.engine import GateError
+    from social_media_studio.engine import GateError
     engine = make_engine(tmp_path)
     spec = task("exhausted")
     spec["max_attempts"] = 1

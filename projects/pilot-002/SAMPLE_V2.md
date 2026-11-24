@@ -20,7 +20,7 @@ Therefore the aggregate QA below is diagnostic evidence only. It does **not** pr
 
 ## Artifact
 
-Durable Library folder: `/Video Growth Agent/Pilot 002/Sample V2/`
+Durable Library folder: `/Social Media Studio/Pilot 002/Sample V2/`
 
 - `Pilot002_Sample_V2.mp4`
 - `Pilot002_Sample_V2_contact.jpg`

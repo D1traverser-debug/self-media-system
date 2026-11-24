@@ -51,7 +51,7 @@ Cross-workstream influence never means hidden prompt context or authority duplic
 - advisory consultation does not decide;
 - competing candidates require explicit criteria and owner adjudication;
 - negotiation uses bounded artifact rounds;
-- project/program outputs become accepted assets only through explicit promotion. A Program-to-Episode handoff is transferred with `vga-studio transfer-asset` using the exact source artifact ID, version and SHA-256; the receiving Episode project imports the same artifact name and revalidates the Program validation receipt plus transfer metadata before any Episode task becomes READY.
+- project/program outputs become accepted assets only through explicit promotion. A Program-to-Episode handoff is transferred with `sms-studio transfer-asset` using the exact source artifact ID, version and SHA-256; the receiving Episode project imports the same artifact name and revalidates the Program validation receipt plus transfer metadata before any Episode task becomes READY.
 
 The business Program graph is not the editorial timeline and not the media asset graph. These are linked but distinct structures. The Program emits a validated `validated-episode-intent`; that exact artifact is transferred to an Episode project under the same name, where a second validator checks the immutable transfer receipt before opening the Episode DAG.
 
@@ -91,7 +91,7 @@ Character canon blocks only identity-dependent outputs. It does not block unrela
 
 IP Studio OS (IPOS) is the sole creative authority for the creator's character identity, avatar, approved visual canon, voice/performance canon, and reusable identity assets. IPOS is an independent system and must be able to complete research, design, rendering, QA, correction, versioning, and export without invoking CAOS or requiring a CAOS runtime/API/session.
 
-The Video system does not maintain a competing character bible or reconstruct canon from old prompts. It consumes a portable IPOS Video Identity Bundle (schema_version: 1.0) through video_growth_agent.ip_identity. The bundle carries owner approval, gate evidence, exact asset versions/digests, rights/provenance, video-use permission, identity invariants, forbidden drift, and continuity dimensions/rules.
+The Video system does not maintain a competing character bible or reconstruct canon from old prompts. It consumes a portable IPOS Video Identity Bundle (schema_version: 1.0) through social_media_studio.legacy.ip_identity. The bundle carries owner approval, gate evidence, exact asset versions/digests, rights/provenance, video-use permission, identity invariants, forbidden drift, and continuity dimensions/rules.
 
 Import is fail-closed for identity-dependent shots: owner approval, G2/G7/G8 PASS, video-use permission, promoted visual references, rights, and provenance must all be present. The imported bundle and assets are registered in MediaGraph as immutable assets with IPOS retained as external decision authority. Each identity-dependent ShotContract binds the exact bundle, approval and reference versions. The adapter never promotes an unapproved concept or an image merely because it exists.
 

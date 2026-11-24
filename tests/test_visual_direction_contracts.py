@@ -1,5 +1,5 @@
 import pytest
-from video_studio.domain.creative import VisualContractError, inspect_visual_direction
+from social_media_studio.domain.creative import VisualContractError, inspect_visual_direction
 
 
 def base(**kwargs):

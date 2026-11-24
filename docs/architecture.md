@@ -1,6 +1,6 @@
-# Video Growth Agent — Architecture
+# Social Media Studio — Architecture
 
-> **Historical domain reference (retired execution authority, 2026-11-24):** Preserve reusable domain logic, media contracts and engineering evidence. All project-specific state, default project routing, fixed-stage task mandates and legacy controller references below are historical only. Current authority is `STUDIO_ENTRY.md`, `video_studio/data/studio_manifest.json` and `docs/standalone_video_studio.md`; every owner-facing Video decision/action is governed by read-only CAOS. No default task exists.
+> **Historical domain reference (retired execution authority, 2026-11-24):** Preserve reusable domain logic, media contracts and engineering evidence. All project-specific state, default project routing, fixed-stage task mandates and legacy controller references below are historical only. Current authority is `STUDIO_ENTRY.md`, `social_media_studio/data/studio_manifest.json` and `docs/standalone_social_media_studio.md`; every owner-facing Video decision/action is governed by read-only CAOS. No default task exists.
 
 
 Status: `CANDIDATE_0_8_0`

@@ -1,0 +1,470 @@
+{
+  "schema_version": "1.0",
+  "kind": "SOCIAL_MEDIA_STUDIO_INTERNAL_SUBSYSTEM_TOPOLOGY",
+  "current_runtime": "social_media_studio.engine.StudioEngine",
+  "installed_cli": "social_media_studio.cli:main",
+  "product": "Social Media Studio",
+  "separate_cognition_controller": false,
+  "parent_governance": {
+    "caos_read_only": true,
+    "governs_all_material_decisions": true,
+    "native_activation_proof": "NOT_TESTED"
+  },
+  "subsystems": [
+    {
+      "id": "execution_and_owner_scope",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "CURRENT_DURABLE_CONTROL_PLANE",
+      "code_paths": [
+        "social_media_studio/__init__.py",
+        "social_media_studio/__main__.py",
+        "social_media_studio/cli.py",
+        "social_media_studio/scope.py",
+        "social_media_studio/engine.py",
+        "social_media_studio/adapters.py",
+        "social_media_studio/production/__init__.py",
+        "social_media_studio/production/context.py",
+        "social_media_studio/production/executors.py",
+        "social_media_studio/production/handlers.py",
+        "social_media_studio/production/registry.py",
+        "social_media_studio/production/worker_pool.py",
+        "social_media_studio/subsystems.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "cognition_and_audit",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/system_audit.py",
+        "social_media_studio/legacy/owner_behavior_admission.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "quality_and_assurance",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/domain/__init__.py",
+        "social_media_studio/domain/contracts.py",
+        "social_media_studio/domain/assurance.py",
+        "social_media_studio/legacy/execution_attestation.py",
+        "social_media_studio/legacy/reviewer_providers.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "research_and_understanding",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_CAPABILITY_WITHOUT_REGISTERED_EXECUTOR",
+      "code_paths": [],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY_WITH_REAL_SESSION_TOOL_CHECK",
+      "creative_result_verified": false,
+      "status": "IMPLEMENTATION_GAP_NOT_A_REMOTE_SERVICE"
+    },
+    {
+      "id": "editorial_and_language",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/domain/editorial.py",
+        "social_media_studio/legacy/editorial_planning.py",
+        "social_media_studio/legacy/editorial_packaging.py",
+        "social_media_studio/legacy/plan_graph_bridge.py"
+      ],
+      "domain_adapters": [
+        "editorial_plan_validate"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "visual_and_static_design",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/domain/creative.py",
+        "social_media_studio/legacy/programmatic_graphics.py",
+        "social_media_studio/production/frame_worker.py",
+        "social_media_studio/production/python_frame_renderer.py"
+      ],
+      "domain_adapters": [
+        "programmatic_graphic_render"
+      ],
+      "production_operations": [
+        "python_frame_render"
+      ],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "original_identity_ipos",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/domain/identity.py",
+        "social_media_studio/legacy/ip_identity.py"
+      ],
+      "domain_adapters": [
+        "ipos_bundle_inspect",
+        "ipos_bundle_import",
+        "ipos_shot_bind",
+        "ipos_continuity_snapshot",
+        "ipos_continuity_link"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "motion_and_production",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/legacy/production_os.py",
+        "social_media_studio/legacy/continuity.py",
+        "social_media_studio/legacy/timeline.py",
+        "social_media_studio/legacy/editorial_interchange.py",
+        "social_media_studio/production/contracts.py",
+        "social_media_studio/production/ffmpeg_assembler.py",
+        "social_media_studio/legacy/generation_guard.py"
+      ],
+      "domain_adapters": [
+        "shot_contract_materialize",
+        "shot_contract_validate",
+        "timeline_validate",
+        "continuity_assess",
+        "episode_intent_validate"
+      ],
+      "production_operations": [
+        "ffmpeg_assemble"
+      ],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "media_understanding_and_transform",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/media.py",
+        "social_media_studio/production/audio_preserve.py",
+        "social_media_studio/legacy/media_qa.py"
+      ],
+      "domain_adapters": [
+        "extended_media_qa"
+      ],
+      "production_operations": [
+        "ffprobe_media_qa",
+        "ffmpeg_video_audio_copy"
+      ],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "platform_packaging_delivery",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/production/delivery.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [
+        "delivery_package"
+      ],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "business_growth_commercial",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "OPTIONAL_BUSINESS_DOMAIN",
+      "code_paths": [
+        "social_media_studio/legacy/business_metrics.py",
+        "social_media_studio/legacy/business_objects.py",
+        "social_media_studio/legacy/experiments.py",
+        "social_media_studio/legacy/program_orchestration.py"
+      ],
+      "domain_adapters": [
+        "business_outcome_metrics",
+        "business_object_validate"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "provider_capability_routing",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/legacy/engine_routing.py",
+        "social_media_studio/legacy/model_registry.py"
+      ],
+      "domain_adapters": [
+        "shot_route"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "source_and_asset_lineage",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/legacy/media_graph.py"
+      ],
+      "domain_adapters": [
+        "media_graph_initialize"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "knowledge_roles_and_methods",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/legacy/roles.py",
+        "social_media_studio/legacy/techniques.py",
+        "social_media_studio/legacy/resources.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "compatibility_data_models",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "social_media_studio/legacy/models.py",
+        "social_media_studio/legacy/__init__.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "legacy_agent_control_plane",
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "role": "RETIRED_COMPATIBILITY",
+      "code_paths": [
+        "social_media_studio/legacy/cli.py",
+        "social_media_studio/legacy/orchestrator.py",
+        "social_media_studio/legacy/runtime.py",
+        "social_media_studio/legacy/storage.py",
+        "social_media_studio/legacy/studio_agents.py",
+        "social_media_studio/legacy/operator_view.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "ISOLATED_HISTORICAL_FIXTURE_ONLY",
+      "creative_result_verified": false
+    }
+  ],
+  "boundaries": {
+    "ipos": {
+      "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "design_and_canon_source": "SEPARATELY_CUSTODIED_CURRENT_IPOS_SKILL_PRIVATE_OWNER_STATE",
+      "code_in_this_repository": [
+        "social_media_studio/legacy/ip_identity.py",
+        "social_media_studio/domain/identity.py",
+        "social_media_studio/legacy/data/ipos_video_identity_bundle.schema.json"
+      ],
+      "owner_approval_required": true,
+      "studio_can_mutate_canon": false
+    },
+    "caos": {
+      "read_only": true,
+      "code_mutation_forbidden": true,
+      "child_controller": false
+    },
+    "legacy_control": {
+      "installed_cli": false,
+      "history_preserved": true,
+      "old_tasks_auto_selected": false
+    },
+    "publication": {
+      "auto_post": false
+    },
+    "review": {
+      "static_structure_not_creative_acceptance": true
+    }
+  },
+  "historical": [
+    "projects/",
+    "examples/",
+    "social_media_studio/legacy/data/workflow.json",
+    "social_media_studio/legacy/data/execution-plan.json",
+    "social_media_studio/legacy/data/agents.json"
+  ],
+  "nested_product_capabilities": [
+    {
+      "id": "x_short_post_and_thread",
+      "owner_subsystem": "editorial_and_language",
+      "source_module": "social_media_studio/domain/editorial.py",
+      "membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "capability": "SHORT_COPY",
+      "knowledge_evidence": "LIBRARY_WRITING_METHOD_CANDIDATE_NOT_AUTOPROMOTED",
+      "actual_authoring_verified": false
+    },
+    {
+      "id": "x_articles_longform",
+      "owner_subsystem": "editorial_and_language",
+      "source_module": "social_media_studio/domain/editorial.py",
+      "membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "capability": "LONG_ARTICLE",
+      "knowledge_evidence": "LIBRARY_CROSS_SYSTEM_ARTICLE_METHOD_CANDIDATE_NOT_AUTOPROMOTED",
+      "actual_authoring_verified": false
+    },
+    {
+      "id": "multilingual_platform_copy_and_cover_words",
+      "owner_subsystem": "editorial_and_language",
+      "source_module": "social_media_studio/domain/editorial.py",
+      "membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "capability": "PLATFORM_PACKAGE",
+      "actual_authoring_verified": false
+    },
+    {
+      "id": "one_off_cover_and_avatar",
+      "owner_subsystem": "visual_and_static_design",
+      "source_module": "social_media_studio/domain/creative.py",
+      "membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "capability": "STATIC_IMAGE",
+      "actual_pixels_verified": false
+    },
+    {
+      "id": "original_identity_ipos_design",
+      "owner_subsystem": "original_identity_ipos",
+      "source_module": "social_media_studio/domain/identity.py",
+      "membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
+      "capability": "IDENTITY_ASSET",
+      "owner_canon_approval_required": true
+    }
+  ],
+  "caos_sibling_business_systems": [
+    {
+      "id": "novel-writing-agent",
+      "relationship": "CAOS_PEER_BUSINESS_SYSTEM",
+      "permitted_bridge": "SCOPED_READ_ONLY_NARRATIVE_METHOD_CANDIDATE",
+      "task_authority_transfer": false,
+      "canon_or_file_write_transfer": false
+    },
+    {
+      "id": "financial-writing-agent",
+      "relationship": "CAOS_PEER_BUSINESS_SYSTEM",
+      "permitted_bridge": "SCOPED_READ_ONLY_EDITORIAL_METHOD_CANDIDATE",
+      "task_authority_transfer": false,
+      "canon_or_file_write_transfer": false
+    },
+    {
+      "id": "a-share-event-driven-agent",
+      "relationship": "CAOS_PEER_BUSINESS_SYSTEM",
+      "permitted_bridge": "SCOPED_READ_ONLY_MARKET_RESEARCH_METHOD_CANDIDATE",
+      "task_authority_transfer": false,
+      "canon_or_file_write_transfer": false
+    }
+  ],
+  "deliverable_ownership": {
+    "SHORT_COPY": {
+      "primary": "editorial_and_language",
+      "optional": []
+    },
+    "LONG_ARTICLE": {
+      "primary": "editorial_and_language",
+      "optional": [
+        "research_and_understanding",
+        "visual_and_static_design"
+      ]
+    },
+    "PLATFORM_PACKAGE": {
+      "primary": "editorial_and_language",
+      "optional": [
+        "platform_packaging_delivery",
+        "research_and_understanding"
+      ]
+    },
+    "PROMPT_SPEC": {
+      "primary": "visual_and_static_design",
+      "optional": [
+        "original_identity_ipos"
+      ]
+    },
+    "STATIC_IMAGE": {
+      "primary": "visual_and_static_design",
+      "optional": [
+        "original_identity_ipos"
+      ]
+    },
+    "MULTI_ASPECT_IMAGE_SET": {
+      "primary": "visual_and_static_design",
+      "optional": [
+        "original_identity_ipos"
+      ]
+    },
+    "MEDIA_TRANSFORM": {
+      "primary": "media_understanding_and_transform",
+      "optional": [
+        "motion_and_production"
+      ]
+    },
+    "ORIGINAL_VIDEO": {
+      "primary": "motion_and_production",
+      "optional": [
+        "visual_and_static_design",
+        "media_understanding_and_transform",
+        "editorial_and_language",
+        "original_identity_ipos"
+      ]
+    },
+    "IDENTITY_ASSET": {
+      "primary": "original_identity_ipos",
+      "optional": [
+        "visual_and_static_design"
+      ]
+    },
+    "ANALYSIS_REPORT": {
+      "primary": "research_and_understanding",
+      "optional": [
+        "cognition_and_audit",
+        "quality_and_assurance"
+      ]
+    }
+  },
+  "product_zh": "自媒体系统"
+}

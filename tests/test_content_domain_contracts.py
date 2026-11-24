@@ -3,16 +3,16 @@ from pathlib import Path
 
 import pytest
 
-from video_studio.domain.contracts import (
+from social_media_studio.domain.contracts import (
     ContentContractError, DELIVERABLE_TYPES, MediaShape, inspect_declared_deliverables,
 )
-from video_studio.scope import bind_owner_brief, resolve_intake
+from social_media_studio.scope import bind_owner_brief, resolve_intake
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_every_architecture_scenario_has_a_typed_route_without_effect(tmp_path):
-    matrix = json.loads((ROOT / "docs/CONTENT_STUDIO_ARCH_ACCEPTANCE_V2.json").read_text(encoding="utf-8"))
+    matrix = json.loads((ROOT / "docs/SOCIAL_MEDIA_STUDIO_ARCH_ACCEPTANCE_V2.json").read_text(encoding="utf-8"))
     assert len(matrix["scenarios"]) >= 28
     for scenario in matrix["scenarios"]:
         assert scenario["forbidden_implicit_effect"] and scenario["owner_outcome_oracle"]
@@ -133,24 +133,24 @@ def test_intake_rejects_conflicting_explicit_deliverable_ids(tmp_path):
 
 
 def test_ipos_subsystem_is_internal_but_canonical_approval_is_separately_custodied(tmp_path):
-    from video_studio.domain.contracts import ContentContractError
+    from social_media_studio.domain.contracts import ContentContractError
     context = resolve_intake(tmp_path, {
         "mode": "NEW", "goal": "Develop my permanent anonymous creator identity",
         "deliverable_specs": [{"id": "creator", "type": "IDENTITY_ASSET",
                                "constraints": {"identity_mode": "PERSISTENT_IDENTITY_DESIGN"}}]})
     route = context["identity_routing"]["routes"][0]
-    assert route["product_context"] == "CONTENT_STUDIO/ORIGINAL_IDENTITY_IPOS"
+    assert route["product_context"] == "SOCIAL_MEDIA_STUDIO/ORIGINAL_IDENTITY_IPOS"
     assert route["status"].startswith("INTERNAL_SPECIALIST")
     assert route["canon_use_admitted"] is False
     assert route["current_owner_ipos_state_loaded"] is False
-    assert context["identity_routing"]["ip_studio_business_membership"] == "NESTED_CONTENT_STUDIO_SUBSYSTEM"
+    assert context["identity_routing"]["ip_studio_business_membership"] == "NESTED_SOCIAL_MEDIA_STUDIO_SUBSYSTEM"
     assert context["selected_task_graph"] is None
 
     ephemeral = resolve_intake(tmp_path, {
         "mode": "NEW", "goal": "Draw a disposable avatar for this post",
         "deliverable_specs": [{"id": "avatar", "type": "STATIC_IMAGE",
                                "constraints": {"identity_mode": "TEMPORARY_CHARACTER"}}]})
-    assert ephemeral["identity_routing"]["routes"][0]["product_context"] == "CONTENT_STUDIO/GENERAL_CREATIVE"
+    assert ephemeral["identity_routing"]["routes"][0]["product_context"] == "SOCIAL_MEDIA_STUDIO/GENERAL_CREATIVE"
     assert ephemeral["identity_routing"]["routes"][0]["requires_current_canon_bundle"] is False
 
     proposed = resolve_intake(tmp_path, {

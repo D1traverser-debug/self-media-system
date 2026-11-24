@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.business_objects import (
+from social_media_studio.legacy.business_objects import (
     BusinessObjectError,
     CommercialFit,
     CommercialOfferCandidate,

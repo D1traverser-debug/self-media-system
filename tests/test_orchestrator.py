@@ -1,6 +1,6 @@
 import pytest
-from video_growth_agent.models import Approval, ArtifactRecord, ProjectState
-from video_growth_agent.orchestrator import GateBlocked, StudioOrchestrator
+from social_media_studio.legacy.models import Approval, ArtifactRecord, ProjectState
+from social_media_studio.legacy.orchestrator import GateBlocked, StudioOrchestrator
 
 
 def artifact(name: str, stage: str) -> ArtifactRecord:
@@ -67,16 +67,16 @@ def test_invalidation_removes_downstream_approvals():
 
 
 def test_every_required_role_has_prompt():
-    from video_growth_agent.roles import RoleRegistry
+    from social_media_studio.legacy.roles import RoleRegistry
     registry = RoleRegistry(); assert registry.validate_workflow() == []
 
 
 def test_role_registry_loads_only_requested_prompt():
-    from video_growth_agent.roles import RoleRegistry
+    from social_media_studio.legacy.roles import RoleRegistry
     registry = RoleRegistry(); role = registry.get("art_director"); assert role.role == "art_director"; assert "PPT/SaaS-dashboard" in role.prompt; assert "looks-like-ppt" in role.veto
 
 
 def test_creative_director_prompt_and_lookdev_stage_exist():
-    from video_growth_agent.roles import RoleRegistry
+    from social_media_studio.legacy.roles import RoleRegistry
     registry = RoleRegistry(); prompt = registry.get("creative_director").prompt; assert "absolute craft bar" in prompt
     o = StudioOrchestrator(); assert "LOOKDEV" in o.index; assert "creative_director" in o.required_roles("VISUAL_PREVIEW")

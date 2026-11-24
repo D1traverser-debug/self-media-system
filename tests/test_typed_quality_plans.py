@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
-from video_studio.domain.assurance import CRITERIA, build_quality_plan
+from social_media_studio.domain.assurance import CRITERIA, build_quality_plan
 
 ROOT=Path(__file__).resolve().parents[1]
 
 def test_34_scenarios_have_type_specific_no_pass_plans():
-    matrix=json.loads((ROOT/"docs/CONTENT_STUDIO_ARCH_ACCEPTANCE_V2.json").read_text())
+    matrix=json.loads((ROOT/"docs/SOCIAL_MEDIA_STUDIO_ARCH_ACCEPTANCE_V2.json").read_text())
     assert len(matrix["scenarios"]) >= 34
     for case in matrix["scenarios"]:
         obj={"id":case["id"],"type":case["deliverable_type"],

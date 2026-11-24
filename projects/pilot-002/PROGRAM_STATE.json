@@ -9,7 +9,7 @@
     "旧视频主项目"
   ],
   "legacy_alias_semantics": "Historical Video project alias only; not a CAOS governance task identity. Video owns the project identity and business state.",
-  "domain_binding_ref": "video_growth_agent/data/domain_manifest.json",
+  "domain_binding_ref": "social_media_studio/legacy/data/domain_manifest.json",
   "runtime_version": "0.7.0",
   "status": "HOLD",
   "resume_mode": "EXPLICIT_CHILD_PROJECT_REF",
@@ -39,12 +39,12 @@
   ],
   "authoritative_artifacts": {
     "rejected_candidate_v4": {
-      "library_path": "/Video Growth Agent/Pilot 002/Release V4/Pilot002_FINAL_RELEASE_V4.mp4",
+      "library_path": "/Social Media Studio/Pilot 002/Release V4/Pilot002_FINAL_RELEASE_V4.mp4",
       "sha256": "eec364e8530067dbc87a08a9ccbf2dd6e6e8a5ab32fb87f648c794a4000628eb",
       "status": "HISTORICAL_REJECTED_CANDIDATE"
     },
     "sample_v2": {
-      "library_path": "/Video Growth Agent/Pilot 002/Sample V2/Pilot002_Sample_V2.mp4",
+      "library_path": "/Social Media Studio/Pilot 002/Sample V2/Pilot002_Sample_V2.mp4",
       "status": "PROCESS_INVALID_AND_VISUAL_FAIL_PREVIS_ONLY",
       "github_record": "projects/pilot-002/SAMPLE_V2.md"
     },
@@ -54,8 +54,8 @@
     "sample_v3_shot_d_generation_brief": "projects/pilot-002/SAMPLE_V3_SHOT_D_GENERATION_BRIEF.json",
     "media_business_os": "docs/media_business_os.md",
     "provider_benchmark_protocol": "docs/provider_benchmark_protocol.md",
-    "generation_governance": "skills/video-growth-agent/references/generation-governance.md",
-    "reviewer_execution_attestation_contract": "skills/video-growth-agent/references/reviewer-execution-attestation.md",
+    "generation_governance": "skills/social-media-studio/references/generation-governance.md",
+    "reviewer_execution_attestation_contract": "skills/social-media-studio/references/reviewer-execution-attestation.md",
     "latest_system_self_audit": "audits/SYSTEM_SELF_AUDIT_2026-10-11.md"
   },
   "negative_space": {

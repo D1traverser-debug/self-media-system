@@ -4,11 +4,11 @@ import shutil
 import subprocess
 import pytest
 
-from video_studio.production.audio_preserve import (
+from social_media_studio.production.audio_preserve import (
     AudioIdentityError, VideoOnlyEditSpec, AudioPreservingVideoEditor, verify_audio_packet_identity,
 )
-from video_studio.production.ffmpeg_assembler import sha256_file
-from video_studio.production.registry import PRODUCTION_EXECUTORS
+from social_media_studio.production.ffmpeg_assembler import sha256_file
+from social_media_studio.production.registry import PRODUCTION_EXECUTORS
 
 def source_clip(root: Path) -> Path:
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
@@ -80,9 +80,9 @@ def test_disallowed_edit_and_untrusted_source_are_blocked(tmp_path):
 
 def test_real_owner_scoped_studio_claim_dispatch_complete_and_audio_receipt(tmp_path):
     import json
-    from video_studio.engine import StudioEngine
-    from video_studio.scope import bind_owner_brief
-    from video_studio.production.worker_pool import run_ready_tool_tasks
+    from social_media_studio.engine import StudioEngine
+    from social_media_studio.scope import bind_owner_brief
+    from social_media_studio.production.worker_pool import run_ready_tool_tasks
 
     project="audio-crop-demand"
     engine=StudioEngine(tmp_path/"workspace")

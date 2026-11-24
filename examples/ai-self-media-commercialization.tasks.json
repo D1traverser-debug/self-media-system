@@ -1157,7 +1157,7 @@
       "workstream": "CROSS_WORKSTREAM",
       "handoff_schema": "VIDEO_PROGRAM_TO_EPISODE/1.0",
       "source_artifact_ids_and_sha256_required": true,
-      "episode_intent_schema": "video_growth_agent.editorial_planning.EpisodeIntent",
+      "episode_intent_schema": "social_media_studio.legacy.editorial_planning.EpisodeIntent",
       "ip_identity_optional_until_ipos_ready": true,
       "no_character_canon_invention": true
     },

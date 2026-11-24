@@ -9,9 +9,9 @@ def read_json(path):
 
 
 def test_video_domain_has_one_external_caos_governance_binding():
-    manifest = read_json("video_growth_agent/data/domain_manifest.json")
-    capabilities = read_json("video_growth_agent/data/capabilities.json")
-    coordination = read_json("video_growth_agent/data/coordination-policy.json")
+    manifest = read_json("social_media_studio/legacy/data/domain_manifest.json")
+    capabilities = read_json("social_media_studio/legacy/data/capabilities.json")
+    coordination = read_json("social_media_studio/legacy/data/coordination-policy.json")
     index = read_json("projects/PROJECT_INDEX.json")
     state = read_json("projects/ai-self-media-commercialization/PROGRAM_STATE.json")
 
@@ -38,7 +38,7 @@ def test_legacy_parent_runtime_artifacts_are_removed_but_video_capabilities_surv
     assert not (ROOT / ".uaos").exists()
     assert not (ROOT / "UAOS_SKILL.md").exists()
     assert not (ROOT / "tests/test_uaos_current.py").exists()
-    profile = read_json("video_growth_agent/data/capabilities.json")
+    profile = read_json("social_media_studio/legacy/data/capabilities.json")
     capability_ids = {item["capability_id"] for item in profile["capabilities"]}
     assert "video_domain_problem_recovery_and_evolution_admission" in capability_ids
     assert len(capability_ids) >= 20
@@ -64,7 +64,7 @@ def test_single_video_entrypoint_preserves_caos_parent_boundary():
     active_paths = (
         "STUDIO_ENTRY.md",
         "README.md",
-        "skills/video-growth-agent/SKILL.md",
+        "skills/social-media-studio/SKILL.md",
         "docs/product_requirements.md",
         "docs/media_business_os.md",
         "docs/architecture.md",

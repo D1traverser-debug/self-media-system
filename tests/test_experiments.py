@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.experiments import (
+from social_media_studio.legacy.experiments import (
     ExperimentError,
     ExperimentPlan,
     ExperimentVariant,

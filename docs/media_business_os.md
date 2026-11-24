@@ -1,6 +1,6 @@
 # AI-Native Media Business OS
 
-> **Historical domain reference (retired execution authority, 2026-11-24):** Preserve reusable domain logic, media contracts and engineering evidence. All project-specific state, default project routing, fixed-stage task mandates and legacy controller references below are historical only. Current authority is `STUDIO_ENTRY.md`, `video_studio/data/studio_manifest.json` and `docs/standalone_video_studio.md`; every owner-facing Video decision/action is governed by read-only CAOS. No default task exists.
+> **Historical domain reference (retired execution authority, 2026-11-24):** Preserve reusable domain logic, media contracts and engineering evidence. All project-specific state, default project routing, fixed-stage task mandates and legacy controller references below are historical only. Current authority is `STUDIO_ENTRY.md`, `social_media_studio/data/studio_manifest.json` and `docs/standalone_social_media_studio.md`; every owner-facing Video decision/action is governed by read-only CAOS. No default task exists.
 
 
 Status: `PRODUCTION_0_8_0`
@@ -12,7 +12,7 @@ Architecture-experience governance: CAOS decision and architecture-experience me
 
 ## 1. Product definition
 
-Video Growth Agent is one AI-native media business operating system. It must turn evidence about audience demand, editorial questions and distinctive IP into repeatable media, measurable growth, reusable rights/assets and commercial value without losing truth, provenance, continuity or recoverability.
+Social Media Studio is one AI-native media business operating system. It must turn evidence about audience demand, editorial questions and distinctive IP into repeatable media, measurable growth, reusable rights/assets and commercial value without losing truth, provenance, continuity or recoverability.
 
 The system optimizes a portfolio, not a clip:
 
@@ -62,7 +62,7 @@ No accepted original is destructively overwritten. A revision creates a new vers
 
 The creator's canonical identity is owned by the independent IP Studio OS (IPOS), not by this Video repository and not by a video-local prompt, portrait, or duplicated character bible. IPOS is a standalone creative system: it does not require a CAOS runtime, CAOS API call, or CAOS session to research, design, approve, render, inspect, and export its work. Video consumes a portable artifact; it does not invoke IPOS as a runtime service.
 
-The boundary is an immutable, versioned IPOS Video Identity Bundle (schema_version: 1.0, issuer: IP_STUDIO_OS). The contract is mirrored at video_growth_agent/data/ipos_video_identity_bundle.schema.json for offline validation. The import/runtime adapter is video_growth_agent/ip_identity.py.
+The boundary is an immutable, versioned IPOS Video Identity Bundle (schema_version: 1.0, issuer: IP_STUDIO_OS). The contract is mirrored at social_media_studio/legacy/data/ipos_video_identity_bundle.schema.json for offline validation. The import/runtime adapter is social_media_studio/legacy/ip_identity.py.
 
 A bundle is admissible for identity-dependent video production only when all of the following are true:
 
@@ -178,7 +178,7 @@ The legacy stage/work-order engine remains a historical/specialized compatibilit
 
 ### Local programmatic graphics route
 
-`video_growth_agent.programmatic_graphics` provides a deterministic local FFmpeg route for bounded non-character information shots: title/quote cards, metric cards and bar charts. It is selected explicitly through `ShotContract.allowed_modes` containing `PROGRAMMATIC_GRAPHICS`; it also requires an exact EditorialPlan/beat binding, synthetic truth mode, disclosure requirement, and source-claim IDs for factual chart/stat/quote content. The renderer uses actual font metrics to wrap and fit every text field within pixel budgets, records measured text-layout evidence alongside font/spec/ShotContract/media digests, and captures real FFmpeg/ffprobe QA. Overlong values that cannot fit at a minimum readable size fail before a media file is created. When supplied an existing MediaGraph with the exact SHOT context and promoted reference versions whose graph digests match the ShotContract bindings, it registers the output as a `CANDIDATE` AssetVersion with evidence and a completed render task.
+`social_media_studio.legacy.programmatic_graphics` provides a deterministic local FFmpeg route for bounded non-character information shots: title/quote cards, metric cards and bar charts. It is selected explicitly through `ShotContract.allowed_modes` containing `PROGRAMMATIC_GRAPHICS`; it also requires an exact EditorialPlan/beat binding, synthetic truth mode, disclosure requirement, and source-claim IDs for factual chart/stat/quote content. The renderer uses actual font metrics to wrap and fit every text field within pixel budgets, records measured text-layout evidence alongside font/spec/ShotContract/media digests, and captures real FFmpeg/ffprobe QA. Overlong values that cannot fit at a minimum readable size fail before a media file is created. When supplied an existing MediaGraph with the exact SHOT context and promoted reference versions whose graph digests match the ShotContract bindings, it registers the output as a `CANDIDATE` AssetVersion with evidence and a completed render task.
 
 This route creates a silent visual preview only. It does not generate AI footage, voice/audio, observed real-world or product-truth evidence, IPOS identity assets, or a final mix. It never promotes or releases. A candidate must still pass craft/semantic/rights/continuity review and the existing promotion/release gates.
 

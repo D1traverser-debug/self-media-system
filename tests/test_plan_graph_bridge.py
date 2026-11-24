@@ -1,6 +1,6 @@
-from video_growth_agent.editorial_planning import BeatSpec, EditorialPlan, EpisodeIntent, ShotIntent
-from video_growth_agent.media_graph import AssetVersion, ContextRecord, MediaGraph
-from video_growth_agent.plan_graph_bridge import register_editorial_plan_asset
+from social_media_studio.legacy.editorial_planning import BeatSpec, EditorialPlan, EpisodeIntent, ShotIntent
+from social_media_studio.legacy.media_graph import AssetVersion, ContextRecord, MediaGraph
+from social_media_studio.legacy.plan_graph_bridge import register_editorial_plan_asset
 
 
 def _plan(version="v1"):

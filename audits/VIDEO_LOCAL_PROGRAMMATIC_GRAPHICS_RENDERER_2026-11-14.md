@@ -2,7 +2,7 @@
 
 Date: 2026-11-14 (Asia/Shanghai)
 Status: MERGED_MAINLINE_CI_VERIFIED__CANDIDATE_OUTPUTS_ONLY
-PR: https://github.com/D1traverser-debug/video-growth-agent/pull/33
+PR: https://github.com/D1traverser-debug/social-media-studio/pull/33
 Candidate branch: `feat/video-local-programmatic-graphics-renderer-20261114`
 Merge commit: `af4dec1a9ec2fff659e3e20d7f21cf9bdbe159ea`
 Mainline CI run: `43598791702`
@@ -29,7 +29,7 @@ The Video production OS had deterministic media QA and shot/timeline governance,
 
 ## 3. Selected architecture
 
-Add `video_growth_agent/programmatic_graphics.py` as a bounded local executor using FFmpeg for MP4 rendering and Pillow/FreeType only for actual font-metric measurement.
+Add `social_media_studio/legacy/programmatic_graphics.py` as a bounded local executor using FFmpeg for MP4 rendering and Pillow/FreeType only for actual font-metric measurement.
 
 Supported visual kinds:
 - TITLE_CARD
@@ -54,11 +54,11 @@ Admission requires an explicit `PROGRAMMATIC_GRAPHICS` ShotContract mode, editor
 
 ## 5. Implementation map
 
-- `video_growth_agent/programmatic_graphics.py`
-- `video_growth_agent/cli.py` — `vga render-graphic`
+- `social_media_studio/legacy/programmatic_graphics.py`
+- `social_media_studio/legacy/cli.py` — `vga render-graphic`
 - `pyproject.toml` — Pillow dependency for local font metrics
-- `video_growth_agent/data/capabilities.json`
-- `video_growth_agent/data/domain_manifest.json`
+- `social_media_studio/legacy/data/capabilities.json`
+- `social_media_studio/legacy/data/domain_manifest.json`
 - `tests/test_programmatic_graphics.py`
 - `projects/ai-self-media-commercialization/samples/programmatic-graphics-request.example.json`
 - operator README, production architecture, requirements, strategy, skill and scenario documentation
@@ -85,7 +85,7 @@ Exact renderer/graph-transaction code head `46bbb7beb5a9da28e39662aba56c4d4c5438
 
 ## 7. Governance
 
-- Video Growth Agent only.
+- Social Media Studio only.
 - CAOS source repository/code/PRs are untouched.
 - IPOS authority and canon remain unchanged.
 - PR #33 is merged to `main` via `af4dec1a9ec2fff659e3e20d7f21cf9bdbe159ea`; mainline CI run `43598791702` passed 263 tests, system audit and installed CLI smoke.

@@ -1,4 +1,4 @@
-from video_growth_agent.techniques import TechniqueLibrary
+from social_media_studio.legacy.techniques import TechniqueLibrary
 
 
 def test_technique_library_routes_by_tags_and_cost():

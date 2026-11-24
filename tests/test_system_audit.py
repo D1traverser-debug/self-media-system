@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from video_studio.system_audit import run_system_audit
+from social_media_studio.system_audit import run_system_audit
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -29,7 +29,7 @@ def test_audit_checks_only_one_installed_video_cli():
     import tomllib
 
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    assert project["project"]["scripts"] == {"vga-studio": "video_studio.cli:main"}
+    assert project["project"]["scripts"] == {"sms-studio": "social_media_studio.cli:main"}
 
 
 def test_content_architecture_cases_are_audited_as_structure_not_craft():
@@ -50,7 +50,7 @@ def test_old_video_red_team_gate_is_not_universal_content_policy():
     assert fixture["pass"], fixture
     assert fixture["detail"]["scope"] == "HISTORICAL_VIDEO_FIXTURES_ONLY"
     assert fixture["detail"]["universal_content_gate"] is False
-    from video_studio.domain.assurance import build_quality_plan
+    from social_media_studio.domain.assurance import build_quality_plan
     tweet = build_quality_plan([{"id":"post","type":"SHORT_COPY"}])["plans"][0]
     assert "red-team" not in tweet["criteria"]
     assert "lookdev" not in tweet["criteria"]

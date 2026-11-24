@@ -4,17 +4,17 @@ import json
 from pathlib import Path
 import tomllib
 
-from video_studio.engine import StudioEngine
+from social_media_studio.engine import StudioEngine
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_video_studio_is_the_single_runtime_under_caos_parent_governance():
-    manifest = json.loads((ROOT / "video_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
+def test_social_media_studio_is_the_single_runtime_under_caos_parent_governance():
+    manifest = json.loads((ROOT / "social_media_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    skill = (ROOT / "skills/video-growth-agent/SKILL.md").read_text(encoding="utf-8")
+    skill = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
     entry = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
-    source = (ROOT / "video_studio/engine.py").read_text(encoding="utf-8")
+    source = (ROOT / "social_media_studio/engine.py").read_text(encoding="utf-8")
 
     assert manifest["governance"]["system"] == "CAOS"
     assert manifest["governance"]["mode"] == "CHAT_GOVERNED_EXTERNAL"
@@ -27,7 +27,7 @@ def test_video_studio_is_the_single_runtime_under_caos_parent_governance():
     assert manifest["execution"]["fixed_stage_machine"] is False
     assert set(manifest["business_workstreams"]) == {"MEDIA_GROWTH", "ORIGINAL_DIGITAL_IP", "COMMERCIALIZATION", "PRODUCTION_SYSTEM"}
     assert manifest["domain_adapter_policy"]["fixed_stage_orchestrator"] == "NOT_LOADED_BY_STUDIO_RUNTIME"
-    assert pyproject["project"]["scripts"]["vga-studio"] == "video_studio.cli:main"
+    assert pyproject["project"]["scripts"]["sms-studio"] == "social_media_studio.cli:main"
     assert "STUDIO_ENTRY.md" in skill and "STUDIO_ENTRY.md" in entry
     assert "CAOS_VIDEO_ENTRY.md" not in skill
     assert "import caos" not in source.lower()
@@ -58,42 +58,42 @@ def test_example_graphs_are_valid_dynamic_dags(tmp_path):
 
 
 def test_engine_uses_no_external_runtime_dependency():
-    source = (ROOT / "video_studio/engine.py").read_text(encoding="utf-8")
+    source = (ROOT / "social_media_studio/engine.py").read_text(encoding="utf-8")
     assert "requests" not in source
     assert "httpx" not in source
     assert "openai" not in source.lower()
     assert "sqlite3" in source
-    assert "video_growth_agent" not in source
+    assert "social_media_studio.legacy" not in source
 
 def test_video_has_one_installed_cli_and_no_engine_import_shims():
     import tomllib
 
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    assert project["project"]["scripts"] == {"vga-studio": "video_studio.cli:main"}
+    assert project["project"]["scripts"] == {"sms-studio": "social_media_studio.cli:main"}
     for path in (
-        ROOT / "video_growth_agent/studio_cli.py",
-        ROOT / "video_growth_agent/studio_engine.py",
-        ROOT / "video_growth_agent/studio_media.py",
+        ROOT / "social_media_studio/legacy/studio_cli.py",
+        ROOT / "social_media_studio/legacy/studio_engine.py",
+        ROOT / "social_media_studio/legacy/studio_media.py",
     ):
         assert not path.exists()
 
 
 def test_standalone_control_plane_is_independent_and_domain_bridge_is_explicit():
     for module in ("__init__.py", "__main__.py", "cli.py", "engine.py", "media.py"):
-        source = (ROOT / "video_studio" / module).read_text(encoding="utf-8")
-        assert "video_growth_agent" not in source
+        source = (ROOT / "social_media_studio" / module).read_text(encoding="utf-8")
+        assert "social_media_studio.legacy" not in source
         assert "from caos" not in source.lower()
         assert "import caos" not in source.lower()
 
-    adapters = (ROOT / "video_studio" / "adapters.py").read_text(encoding="utf-8")
-    assert "from video_growth_agent." in adapters
+    adapters = (ROOT / "social_media_studio" / "adapters.py").read_text(encoding="utf-8")
+    assert "from social_media_studio.legacy." in adapters
     assert "from caos" not in adapters.lower()
     assert "import caos" not in adapters.lower()
     assert "run_claimed_domain_adapter" in adapters
 
 
 def test_standalone_manifest_registers_explicit_domain_adapters_and_font_rights_metadata():
-    manifest = json.loads((ROOT / "video_studio" / "data" / "studio_manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads((ROOT / "social_media_studio" / "data" / "studio_manifest.json").read_text(encoding="utf-8"))
     adapters = manifest["capabilities"]["domain_adapters"]
     assert {
         "editorial_plan_validate", "shot_contract_materialize", "ipos_bundle_import",
@@ -184,7 +184,7 @@ def test_program_example_keeps_independent_workstreams_parallel_and_ipos_fail_cl
 
 
 def test_standalone_system_audit_passes_structure_and_reports_unfinished_media_capabilities():
-    from video_studio.system_audit import run_system_audit
+    from social_media_studio.system_audit import run_system_audit
 
     report = run_system_audit(ROOT)
     assert report["pass"] is True, report
@@ -252,20 +252,20 @@ def test_current_content_studio_entry_and_product_name_match_nested_identity():
     root = ROOT
     import json
     entry = (root / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
-    skill = (root / "skills/video-growth-agent/SKILL.md").read_text(encoding="utf-8")
+    skill = (root / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
     readme = (root / "README.md").read_text(encoding="utf-8")
-    manifest = json.loads((root / "video_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
-    assert manifest["product_name"] == "Universal Content Studio"
+    manifest = json.loads((root / "social_media_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["product_name"] == "Social Media Studio"
     assert "nested specialist domain" in entry
-    assert "INSIDE Content Studio" in skill
+    assert "INSIDE Social Media Studio" in skill
     assert "not a mandatory video-production pipeline" in readme
     assert "Historical example chain" in readme
-    assert "video-growth-agent" in manifest["legacy_repository_identity"]
+    assert "social-media-studio" in manifest["legacy_repository_identity"]
 
 
 def test_universal_entry_does_not_make_old_video_fixture_red_team_a_global_rule():
     entry=(ROOT/"STUDIO_ENTRY.md").read_text(encoding="utf-8")
-    m=json.loads((ROOT/"video_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
+    m=json.loads((ROOT/"social_media_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
     assert "Direct tasks need no artificial project or graph" in entry
     assert "**Only when the current owner brief requires human cold review, Red Team" in entry
     assert "Release eligibility never authorizes public posting" in entry

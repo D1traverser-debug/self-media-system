@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.editorial_planning import (
+from social_media_studio.legacy.editorial_planning import (
     BeatSpec,
     ClaimSpec,
     EditorialPlan,

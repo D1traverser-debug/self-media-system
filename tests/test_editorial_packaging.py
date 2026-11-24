@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from video_growth_agent.editorial_packaging import (
+from social_media_studio.legacy.editorial_packaging import (
     SEMANTIC_TESTS,
     audit_packaging,
     review_digest,
@@ -272,7 +272,7 @@ def test_legacy_case_remains_readable_but_warns_against_blind_upload():
 
 
 def test_case_is_discoverable_in_active_video_business_graph():
-    from video_growth_agent.program_orchestration import ProgramGraph
+    from social_media_studio.legacy.program_orchestration import ProgramGraph
     graph_path = CASE.parent.parent / "SUBTASK_GRAPH.json"
     graph = ProgramGraph.from_path(graph_path)
     node = graph.by_id["topic_satire_editorial_packaging"]
@@ -285,7 +285,7 @@ def test_case_is_discoverable_in_active_video_business_graph():
 
 
 def test_program_orchestrator_exposes_packaging_work_without_ipos_bundle():
-    from video_growth_agent.program_orchestration import ProgramOrchestrator
+    from social_media_studio.legacy.program_orchestration import ProgramOrchestrator
     graph_path = CASE.parent.parent / "SUBTASK_GRAPH.json"
     scheduler = ProgramOrchestrator.from_paths(graph_path)
     ready_ids = {node.node_id for node in scheduler.ready()}
@@ -297,7 +297,7 @@ def test_program_orchestrator_exposes_packaging_work_without_ipos_bundle():
 
 
 def test_packaging_cli_runs_without_loading_project_runtime(capsys):
-    from video_growth_agent.cli import main
+    from social_media_studio.legacy.cli import main
     assert main(["audit-packaging", str(CASE)]) == 0
     report = json.loads(capsys.readouterr().out)
     assert report["status"] == "EDITORIAL_CANDIDATE_GATES_OPEN"

@@ -12,9 +12,9 @@ import zipfile
 import pytest
 from PIL import Image
 
-from video_studio.engine import StudioEngine
-from video_studio.production.worker_pool import run_ready_tool_tasks
-from video_studio.engine import GateError
+from social_media_studio.engine import StudioEngine
+from social_media_studio.production.worker_pool import run_ready_tool_tasks
+from social_media_studio.engine import GateError
 
 
 def _brief():
@@ -324,7 +324,7 @@ def test_local_tool_pool_claims_independent_render_tasks_in_the_same_round(tmp_p
 
 
 def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
-    from video_studio.production.contracts import FrameRenderSpec, ProductionContractError
+    from social_media_studio.production.contracts import FrameRenderSpec, ProductionContractError
 
     engine = StudioEngine(tmp_path / "motion-workspace")
     engine.create_project("motion-demo", "Trusted motion renderer demo", _brief())
@@ -464,7 +464,7 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
 
 
 def test_executor_registry_reports_unknown_tool_tasks_without_claiming_them(tmp_path):
-    from video_studio.production.registry import PRODUCTION_EXECUTORS
+    from social_media_studio.production.registry import PRODUCTION_EXECUTORS
 
     assert set(PRODUCTION_EXECUTORS.operations()) == {
         "python_frame_render", "ffmpeg_assemble", "delivery_package", "ffprobe_media_qa", "ffmpeg_video_audio_copy",
@@ -520,7 +520,7 @@ def test_local_tool_completion_does_not_claim_project_complete_while_agent_work_
 
 
 def test_worker_pool_heartbeats_long_running_tool_claim(tmp_path, monkeypatch):
-    import video_studio.production.worker_pool as worker_pool
+    import social_media_studio.production.worker_pool as worker_pool
 
     engine = StudioEngine(tmp_path / "heartbeat-workspace")
     engine.create_project("heartbeat", "Lease heartbeat demo", _brief())
@@ -626,7 +626,7 @@ def _rights_clearance_fixture(
     clearance_rights_override: str | None = None,
     evidence_refs: list[str] | None = None,
 ):
-    from video_studio.production.contracts import RenderSpec
+    from social_media_studio.production.contracts import RenderSpec
 
     source_names = ("shot-01", "audio-mix")
     inputs = {}
@@ -701,7 +701,7 @@ def _rights_clearance_fixture(
 
 
 def test_render_rights_clearance_requires_exact_assets_and_completed_human_review(tmp_path):
-    from video_studio.production.handlers import _validate_render_rights_clearance
+    from social_media_studio.production.handlers import _validate_render_rights_clearance
 
     context, spec = _rights_clearance_fixture(tmp_path)
     assert _validate_render_rights_clearance(context, spec, "rights-clearance") == "AUTHORIZED"
@@ -721,8 +721,8 @@ def test_render_rights_clearance_requires_exact_assets_and_completed_human_revie
     ],
 )
 def test_render_rights_clearance_rejects_unproven_or_mismatched_clearance(tmp_path, overrides, message):
-    from video_studio.production.contracts import ProductionContractError
-    from video_studio.production.handlers import _validate_render_rights_clearance
+    from social_media_studio.production.contracts import ProductionContractError
+    from social_media_studio.production.handlers import _validate_render_rights_clearance
 
     context, spec = _rights_clearance_fixture(tmp_path, **overrides)
     with pytest.raises(ProductionContractError, match=message):
@@ -731,7 +731,7 @@ def test_render_rights_clearance_rejects_unproven_or_mismatched_clearance(tmp_pa
 
 
 def test_worker_pool_reclaims_expired_tool_lease_before_ready_task_filtering(tmp_path, monkeypatch):
-    import video_studio.production.worker_pool as worker_pool
+    import social_media_studio.production.worker_pool as worker_pool
 
     engine = StudioEngine(tmp_path / "expired-lease-workspace")
     engine.create_project("expired-lease", "Expired lease recovery", _brief())
@@ -784,7 +784,7 @@ def test_worker_pool_reclaims_expired_tool_lease_before_ready_task_filtering(tmp
 
 
 def test_owner_decision_blocked_branch_does_not_starve_real_registered_tool(tmp_path):
-    from video_studio.scope import bind_owner_brief
+    from social_media_studio.scope import bind_owner_brief
     engine = StudioEngine(tmp_path / "owner-workspace")
     project = "owner-parallel"
     engine.create_project(project, project, bind_owner_brief(project, _brief()))

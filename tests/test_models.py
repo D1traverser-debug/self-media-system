@@ -1,4 +1,4 @@
-from video_growth_agent.models import Approval, ArtifactRecord, AssetRecord, ProjectState
+from social_media_studio.legacy.models import Approval, ArtifactRecord, AssetRecord, ProjectState
 
 
 def test_state_serialization_roundtrip():
@@ -13,7 +13,7 @@ def test_state_serialization_roundtrip():
 def test_packaged_runtime_resources_are_single_repository_authority():
     import json
     from pathlib import Path
-    from video_growth_agent.resources import data_path
+    from social_media_studio.legacy.resources import data_path
 
     root = Path(__file__).resolve().parents[1]
     assert not (root / "config").exists()
@@ -21,12 +21,12 @@ def test_packaged_runtime_resources_are_single_repository_authority():
         payload = json.loads(data_path(name).read_text(encoding="utf-8"))
         assert isinstance(payload, dict) and payload
     assert data_path("team.md").read_text(encoding="utf-8") == (
-        root / "skills/video-growth-agent/references/team.md"
+        root / "skills/social-media-studio/references/team.md"
     ).read_text(encoding="utf-8")
     roles = json.loads(data_path("roles.json").read_text(encoding="utf-8"))
-    assert roles["canonical_prompt_source"] == "video_growth_agent/data/team.md"
-    assert roles["documentation_projection"] == "skills/video-growth-agent/references/team.md"
-    from video_growth_agent.roles import RoleRegistry
+    assert roles["canonical_prompt_source"] == "social_media_studio/legacy/data/team.md"
+    assert roles["documentation_projection"] == "skills/social-media-studio/references/team.md"
+    from social_media_studio.legacy.roles import RoleRegistry
     registry = RoleRegistry()
     # Role sections are a subset: generic review protocols are continuous
     # methods, not permanent roles or mandatory workflow nodes.

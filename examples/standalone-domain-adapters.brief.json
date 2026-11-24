@@ -1,6 +1,6 @@
 {
-  "goal": "Create one short, deterministic title-card candidate through the standalone Video Studio domain adapters, then bind full technical QA to the exact rendered bytes.",
-  "audience": "Technology viewers; the operational audience is a Video Studio worker using only declared local inputs and the standalone runtime.",
+  "goal": "Create one short, deterministic title-card candidate through the standalone Social Media Studio domain adapters, then bind full technical QA to the exact rendered bytes.",
+  "audience": "Technology viewers; the operational audience is a Social Media Studio worker using only declared local inputs and the standalone runtime.",
   "deliverables": [
     "editorial-plan-validation",
     "shot-contract",

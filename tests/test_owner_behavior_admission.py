@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.owner_behavior_admission import (
+from social_media_studio.legacy.owner_behavior_admission import (
     BehaviorAdmissionError,
     EvolutionDisposition,
     HypothesisDisposition,

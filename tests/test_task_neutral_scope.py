@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from video_studio.engine import StudioEngine
-from video_studio.scope import EPOCH, bind_owner_brief, resolve_intake
+from social_media_studio.engine import StudioEngine
+from social_media_studio.scope import EPOCH, bind_owner_brief, resolve_intake
 
 
 def test_new_request_is_not_a_default_task_and_does_not_mutate(tmp_path):
@@ -70,7 +70,7 @@ def test_stale_or_unrelated_task_binding_fails_without_state_mutation(tmp_path):
 
 
 def test_cli_rejects_legacy_workspace_on_all_owner_paths(tmp_path, capsys):
-    from video_studio.cli import main
+    from social_media_studio.cli import main
     workspace = tmp_path / "workspace"
     engine = StudioEngine(workspace)
     engine.create_project("old-local", "old", {"goal": "old", "audience": "test", "deliverables": ["old"]})
@@ -86,7 +86,7 @@ def test_cli_rejects_legacy_workspace_on_all_owner_paths(tmp_path, capsys):
 
 
 def test_knowledge_lookup_only_selects_active_reference_and_binds_source_bytes():
-    from video_studio.scope import knowledge_lookup
+    from social_media_studio.scope import knowledge_lookup
     root = Path(__file__).resolve().parents[1]
     active = knowledge_lookup(repo_root=root)["entries"]
     assert active and all(item["status"] == "ACTIVE_REFERENCE" for item in active)
@@ -124,7 +124,7 @@ def decision_receipt(task_id, decision_id):
 
 
 def test_independent_tasks_bind_independent_decisions_and_reject_stale_action(tmp_path):
-    from video_studio.engine import GateError
+    from social_media_studio.engine import GateError
     engine = StudioEngine(tmp_path)
     brief = bind_owner_brief("fresh", {"goal": "two captions", "audience": "a", "deliverables": ["a", "b"]})
     engine.create_project("fresh", "fresh", brief)
@@ -147,7 +147,7 @@ def test_independent_tasks_bind_independent_decisions_and_reject_stale_action(tm
 
 
 def test_goal_reversion_does_not_restore_old_decision_authority(tmp_path):
-    from video_studio.engine import GateError
+    from social_media_studio.engine import GateError
     engine = StudioEngine(tmp_path)
     brief = bind_owner_brief("fresh", {"goal": "caption", "audience": "a", "deliverables": ["a"]})
     engine.create_project("fresh", "fresh", brief)
@@ -162,7 +162,7 @@ def test_goal_reversion_does_not_restore_old_decision_authority(tmp_path):
 
 
 def test_unrelated_decision_does_not_authorize_task_and_caller_binding_rejected(tmp_path):
-    from video_studio.engine import ContractError, GateError
+    from social_media_studio.engine import ContractError, GateError
     engine = StudioEngine(tmp_path)
     brief = bind_owner_brief("fresh", {"goal": "caption", "audience": "a", "deliverables": ["a"]})
     engine.create_project("fresh", "fresh", brief)

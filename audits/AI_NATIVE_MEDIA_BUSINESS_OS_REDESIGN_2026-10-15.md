@@ -15,7 +15,7 @@ This audit is intentionally broader than a video-model comparison. The product i
 
 Production baseline before redesign:
 
-- repository `D1traverser-debug/video-growth-agent` main `2f2e45eed9175499c86081d00c080e4e7cf9d11f`;
+- repository `D1traverser-debug/social-media-studio` main `2f2e45eed9175499c86081d00c080e4e7cf9d11f`;
 - package/runtime `0.6.0`;
 - capability profile `7`;
 - production CI run `38622448588` / #469 PASS;
@@ -295,13 +295,13 @@ Business loops are durable in `projects/ai-self-media-commercialization/BUSINESS
 
 Production semantics are durable in `docs/media_business_os.md` and executable modules:
 
-- `video_growth_agent/media_graph.py` — stable Context/AssetVersion/Task/Evidence/Decision identities, lineage, promotion pointers, persistence and downstream invalidation;
-- `video_growth_agent/production_os.py` — Shot/Reference/Take/generation/promotion/release admission boundaries;
-- `video_growth_agent/timeline.py` — editor-neutral non-destructive timeline versions and authored platform-variant lineage;
-- `video_growth_agent/business_objects.py` — typed content-portfolio, distinctive-asset, commercial-fit, rights, offer and business-decision contracts;
-- `video_growth_agent/model_registry.py` — provider-neutral, evidence-bound routing;
-- `video_growth_agent/business_metrics.py` — typed platform, production and commercial outcome receipts;
-- `video_growth_agent/owner_behavior_admission.py` — recover-before-escalation and repair-or-block closure.
+- `social_media_studio/legacy/media_graph.py` — stable Context/AssetVersion/Task/Evidence/Decision identities, lineage, promotion pointers, persistence and downstream invalidation;
+- `social_media_studio/legacy/production_os.py` — Shot/Reference/Take/generation/promotion/release admission boundaries;
+- `social_media_studio/legacy/timeline.py` — editor-neutral non-destructive timeline versions and authored platform-variant lineage;
+- `social_media_studio/legacy/business_objects.py` — typed content-portfolio, distinctive-asset, commercial-fit, rights, offer and business-decision contracts;
+- `social_media_studio/legacy/model_registry.py` — provider-neutral, evidence-bound routing;
+- `social_media_studio/legacy/business_metrics.py` — typed platform, production and commercial outcome receipts;
+- `social_media_studio/legacy/owner_behavior_admission.py` — recover-before-escalation and repair-or-block closure.
 
 ## 6. Migration strategy
 

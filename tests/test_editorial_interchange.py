@@ -1,13 +1,13 @@
 import pytest
 
-from video_growth_agent.editorial_interchange import (
+from social_media_studio.legacy.editorial_interchange import (
     EditorialRoundTripReceipt,
     EditorAdapterCapability,
     InterchangeError,
     prepare_editorial_handoff,
     validate_roundtrip,
 )
-from video_growth_agent.media_graph import (
+from social_media_studio.legacy.media_graph import (
     AssetRef,
     AssetVersion,
     ContextRecord,
@@ -15,7 +15,7 @@ from video_growth_agent.media_graph import (
     EvidenceRecord,
     MediaGraph,
 )
-from video_growth_agent.timeline import TimelineClip, TimelineSpec
+from social_media_studio.legacy.timeline import TimelineClip, TimelineSpec
 
 
 def _graph_and_timeline():

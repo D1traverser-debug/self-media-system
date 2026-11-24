@@ -1,8 +1,8 @@
-# Video Growth Agent — Product / Program Orchestration Audit
+# Social Media Studio — Product / Program Orchestration Audit
 
 Date: 2026-10-15
 Status: `CANDIDATE_EVALUATION`
-Scope: Video Growth Agent 0.6.0 candidate + UAOS 2.5.0 / COMMON_CAPABILITIES 1.6.0 production
+Scope: Social Media Studio 0.6.0 candidate + UAOS 2.5.0 / COMMON_CAPABILITIES 1.6.0 production
 
 ## Objective
 
@@ -101,8 +101,8 @@ Character canon blocks only character-identity-dependent downstream assets; it d
 - `docs/product_requirements.md` and `docs/architecture.md`: current Video product/architecture authority.
 - `projects/PROJECT_INDEX.json`: child-owned project discovery authority.
 - integrated Program: `PROGRAM_STATE.json` + `SUBTASK_GRAPH.json`.
-- `video_growth_agent/program_orchestration.py`: domain business graph runtime.
-- `video_growth_agent/data/coordination-policy.json`: coordination contract.
+- `social_media_studio/legacy/program_orchestration.py`: domain business graph runtime.
+- `social_media_studio/legacy/data/coordination-policy.json`: coordination contract.
 - `system_audit.py` and dedicated tests: architecture fitness/eval layer.
 
 ## Acceptance plan

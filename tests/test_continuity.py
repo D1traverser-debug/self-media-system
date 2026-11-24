@@ -1,4 +1,4 @@
-from video_growth_agent.continuity import (
+from social_media_studio.legacy.continuity import (
     ContinuityLedger,
     ContinuityLink,
     ContinuityRule,

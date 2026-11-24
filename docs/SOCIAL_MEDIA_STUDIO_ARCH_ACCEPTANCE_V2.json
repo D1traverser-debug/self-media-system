@@ -1,0 +1,466 @@
+{
+  "schema_version": "2.2-design-only",
+  "authority": "docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md",
+  "status": "ARCHITECTURE_CANDIDATE_NO_RUNTIME_AUTHORITY",
+  "frozen_head": "1cbc3acf0491ecaa297576372f80163d8c255606",
+  "scenarios": [
+    {
+      "id": "S01",
+      "demand": "一句中文搞笑标题",
+      "deliverable_type": "SHORT_COPY",
+      "required_contexts": [
+        "editorial_writing"
+      ],
+      "owner_outcome_oracle": "原生中文、标题任务目标",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不强制视频脚本/红队/封面/持久项目"
+    },
+    {
+      "id": "S02",
+      "demand": "英文Twitter meme短帖",
+      "deliverable_type": "SHORT_COPY",
+      "required_contexts": [
+        "editorial_writing",
+        "platform_packaging"
+      ],
+      "owner_outcome_oracle": "英文语境、平台风格、互动目的",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不自动继承中文标题或旧币叙事"
+    },
+    {
+      "id": "S03",
+      "demand": "X长文原创观点及穿插配图",
+      "deliverable_type": "LONG_ARTICLE",
+      "required_contexts": [
+        "understanding_research",
+        "editorial_writing",
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "独立观点、证据、结构、读者价值、配图位置",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不把视频阶段当文章结构"
+    },
+    {
+      "id": "S04",
+      "demand": "同视频六平台标题简介tag",
+      "deliverable_type": "PLATFORM_PACKAGE",
+      "required_contexts": [
+        "understanding_research",
+        "platform_packaging",
+        "editorial_writing"
+      ],
+      "owner_outcome_oracle": "每平台独立字段、语言、调性、源视频理解",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "禁止标题简介封面重复相同钩子"
+    },
+    {
+      "id": "S05",
+      "demand": "头条号中文图文包装",
+      "deliverable_type": "PLATFORM_PACKAGE",
+      "required_contexts": [
+        "platform_packaging",
+        "editorial_writing"
+      ],
+      "owner_outcome_oracle": "最新平台规格、实用标题、正文",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不因旧枚举无头条号而假装已有执行器"
+    },
+    {
+      "id": "S06",
+      "demand": "单幅16:9独立插画",
+      "deliverable_type": "STATIC_IMAGE",
+      "required_contexts": [
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "单幅叙事、视觉层次、真实像素结果",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不生成拼版/信息图/标题面板"
+    },
+    {
+      "id": "S07",
+      "demand": "同创意3:4和4:3图",
+      "deliverable_type": "MULTI_ASPECT_IMAGE_SET",
+      "required_contexts": [
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "不同构图、同创意、各比例清晰、宽高明确",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不可把4:3误当竖版或简单裁剪"
+    },
+    {
+      "id": "S08",
+      "demand": "只打磨图片提示词暂不生图",
+      "deliverable_type": "PROMPT_SPEC",
+      "required_contexts": [
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "明确创意方向、参考元素、构图/风格约束、适配模型的可执行提示词与反证；仅交付提示词",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "未获授权不得调用生图、不得把提示词冒充已生成成品"
+    },
+    {
+      "id": "S09",
+      "demand": "视频从31秒后局部修复",
+      "deliverable_type": "MEDIA_TRANSFORM",
+      "required_contexts": [
+        "understanding_research",
+        "media_transform"
+      ],
+      "owner_outcome_oracle": "时段与内容限定、前后画质及实际输出QA",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不改变其他镜头/背景音"
+    },
+    {
+      "id": "S10",
+      "demand": "视频裁短、音频严格流复制",
+      "deliverable_type": "MEDIA_TRANSFORM",
+      "required_contexts": [
+        "media_transform"
+      ],
+      "owner_outcome_oracle": "可执行流复制模式、精确技术证明或明确不可实现",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不将AAC重编码当作原音频不变"
+    },
+    {
+      "id": "S11",
+      "demand": "视频画质增强至4K",
+      "deliverable_type": "MEDIA_TRANSFORM",
+      "required_contexts": [
+        "media_transform",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "实际像素、视觉质量、锐化伪影、同步和码率证据",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不把改分辨率标为真实超分成功"
+    },
+    {
+      "id": "S12",
+      "demand": "中英文同视频平台包装",
+      "deliverable_type": "PLATFORM_PACKAGE",
+      "required_contexts": [
+        "editorial_writing",
+        "platform_packaging"
+      ],
+      "owner_outcome_oracle": "两个语种分别母语化、语义一致且非机械直译",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不强迫标签一致"
+    },
+    {
+      "id": "S13",
+      "demand": "从零制作高审美完整视频",
+      "deliverable_type": "ORIGINAL_VIDEO",
+      "required_contexts": [
+        "understanding_research",
+        "editorial_writing",
+        "visual_design",
+        "motion_production",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "真实试听、导演视觉叙事、声画合成、创意验收",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不以PPT动态图和FFmpeg成功代替成片"
+    },
+    {
+      "id": "S14",
+      "demand": "设计一次性头像",
+      "deliverable_type": "STATIC_IMAGE",
+      "required_contexts": [
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "角色形象、构图与用途适配",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不调用永久IPOS典范流程"
+    },
+    {
+      "id": "S15",
+      "demand": "使用已批准的永久原创IP",
+      "deliverable_type": "IDENTITY_ASSET",
+      "required_contexts": [
+        "identity_collaboration",
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "IPOS确切批准包及其版本、使用授权",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得修改IPOS canon"
+    },
+    {
+      "id": "S16",
+      "demand": "陌生图片提问和任务无关历史图片",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "understanding_research"
+      ],
+      "owner_outcome_oracle": "只使用用户当前明确相关输入",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得跨上下文污染"
+    },
+    {
+      "id": "S17",
+      "demand": "生成失败后回到上层构思",
+      "deliverable_type": "STATIC_IMAGE",
+      "required_contexts": [
+        "visual_design",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "区分目标/构图/艺术方向/提示词/模型原因",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得只微调失败图"
+    },
+    {
+      "id": "S18",
+      "demand": "任务中途修改总目标",
+      "deliverable_type": "PLATFORM_PACKAGE",
+      "required_contexts": [
+        "editorial_writing",
+        "platform_packaging"
+      ],
+      "owner_outcome_oracle": "失效相关旧决策与工单、保留无关成果",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不复活旧版本决策"
+    },
+    {
+      "id": "S19",
+      "demand": "同项目两独立制作分支",
+      "deliverable_type": "ORIGINAL_VIDEO",
+      "required_contexts": [
+        "motion_production",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "真正并行、决定归属、产物证据和独立验收",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得一个失败分支饿死另一分支"
+    },
+    {
+      "id": "S20",
+      "demand": "平台工具未连接/收费能力不可用",
+      "deliverable_type": "PLATFORM_PACKAGE",
+      "required_contexts": [
+        "platform_packaging"
+      ],
+      "owner_outcome_oracle": "声明阻塞或可接受降级并核验实际提供商",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得虚构发布或费用授权"
+    },
+    {
+      "id": "S21",
+      "demand": "外部来源变化使知识失效",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "understanding_research"
+      ],
+      "owner_outcome_oracle": "精确依赖失效、重查、保留历史证据",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得继续执行旧知识授权"
+    },
+    {
+      "id": "S22",
+      "demand": "历史50任务自动继承的反例",
+      "deliverable_type": "SHORT_COPY",
+      "required_contexts": [
+        "editorial_writing"
+      ],
+      "owner_outcome_oracle": "无默认旧项目、无默认经营IP约束",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不启动退役任务"
+    },
+    {
+      "id": "S23",
+      "demand": "只有音频降噪但无音轨改变授权",
+      "deliverable_type": "MEDIA_TRANSFORM",
+      "required_contexts": [
+        "media_transform"
+      ],
+      "owner_outcome_oracle": "明确处理模式、可用工具、可听审核",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得声称bitstream复制同时降噪"
+    },
+    {
+      "id": "S24",
+      "demand": "真实视频发布权未授予",
+      "deliverable_type": "ORIGINAL_VIDEO",
+      "required_contexts": [
+        "motion_production",
+        "platform_packaging"
+      ],
+      "owner_outcome_oracle": "可以完成本地候选和审核，发布需新授权",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得自动上传"
+    },
+    {
+      "id": "S25",
+      "demand": "用户只要审计而非修改",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "understanding_research",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "源码证据、发现、适用范围与反证",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得实际修改、删除或发布"
+    },
+    {
+      "id": "S26",
+      "demand": "知识复用在全新题材",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "understanding_research"
+      ],
+      "owner_outcome_oracle": "作用域、反例、迁移测试及独立验证",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得因上一任务成功就晋升通用方法"
+    },
+    {
+      "id": "S27",
+      "demand": "文件CRUD与历史清理",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "精确身份、版本、依赖、权限、无操作或回滚与读回",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得物理删旧任务证据"
+    },
+    {
+      "id": "S28",
+      "demand": "无需持久化的单轮请求",
+      "deliverable_type": "SHORT_COPY",
+      "required_contexts": [
+        "editorial_writing"
+      ],
+      "owner_outcome_oracle": "直接完成并验证结果",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不创建空项目/空DAG"
+    },
+    {
+      "id": "S29",
+      "demand": "在内容系统中设计长期匿名创作者身份",
+      "deliverable_type": "IDENTITY_ASSET",
+      "required_contexts": [
+        "identity_collaboration",
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "使用现行IPOS专业方法研究构思并经用户批准",
+      "forbidden_implicit_effect": "不得把IPOS画成无关业务工作室或自动批准",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S30",
+      "demand": "只做一次性的游戏头像",
+      "deliverable_type": "STATIC_IMAGE",
+      "required_contexts": [
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "临时头像符合构图、风格及用途",
+      "forbidden_implicit_effect": "不得继承长期个人IPOS历史候选",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S31",
+      "demand": "视频使用当前已批准IP角色",
+      "deliverable_type": "IDENTITY_ASSET",
+      "required_contexts": [
+        "identity_collaboration",
+        "motion_production"
+      ],
+      "owner_outcome_oracle": "实际校验身份版本、批准及使用权限",
+      "forbidden_implicit_effect": "不得凭历史快照或虚构bundle证明批准",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S32",
+      "demand": "IPOS尚无最终视觉批准继续研究",
+      "deliverable_type": "IDENTITY_ASSET",
+      "required_contexts": [
+        "identity_collaboration",
+        "understanding_research"
+      ],
+      "owner_outcome_oracle": "合法专业研究继续且不阻塞无关内容",
+      "forbidden_implicit_effect": "不得将文本规格或CI冒充最终身份",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S33",
+      "demand": "旧R39身份接入状态与新私有状态冲突",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "identity_collaboration",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "以实际当前真源消解冲突，历史不销毁",
+      "forbidden_implicit_effect": "不得使用旧快照作为当前决策依据",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S34",
+      "demand": "已批准身份被撤销，其他工作不使用该身份",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "identity_collaboration",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "只失效依赖该身份的下游内容",
+      "forbidden_implicit_effect": "不得全局阻塞或复活被撤销批准",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    }
+  ],
+  "global_invariants": [
+    "NO_CAOS_MUTATION",
+    "NO_IPOS_CANON_MUTATION",
+    "NO_HISTORIC_TASK_AUTOROUTE",
+    "CURRENT_OWNER_GOAL_PRIORITY",
+    "COGNITION_ACROSS_ALL_LEVELS",
+    "TASK_DAG_SEPARATE_FROM_COGNITION_GRAPH",
+    "ARTIFACT_TYPE_SPECIFIC_QA",
+    "NO_FAKE_PROVIDER_AVAILABLE",
+    "NO_NATIVE_TRIGGER_CLAIM",
+    "NO_AUTO_PUBLICATION",
+    "ROLE_NOT_PERMANENT_AGENT",
+    "METHOD_NOT_WORKFLOW_STAGE",
+    "DIRECT_SESSION_WITHOUT_MANDATORY_LEDGER",
+    "CURRENT_SOURCE_REVISION_BEFORE_EFFECT",
+    "INDEPENDENT_OWNER_OUTCOME_NOT_CI"
+  ],
+  "design_schema_invariants": [
+    "Each scenario has exactly one nonempty owner success oracle",
+    "Each scenario has exactly one nonempty forbidden implicit effect",
+    "Every required context maps to a current group ID",
+    "Every deliverable type occurs in the architecture contract",
+    "All scenarios are design-only until independently reviewed",
+    "No runtime outcome is inferred from semantic source coverage",
+    "Internal IPOS identity bounded context with separately-custodied canon and verified consumer-only bundle; no historical R39 authority"
+  ]
+}

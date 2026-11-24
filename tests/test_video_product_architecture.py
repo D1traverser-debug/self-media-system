@@ -17,8 +17,8 @@ def semver_at_least(actual: str, minimum: str) -> bool:
 
 
 def test_video_owns_business_identity_and_caos_is_external_governance():
-    manifest = load("video_growth_agent/data/domain_manifest.json")
-    caps = load("video_growth_agent/data/capabilities.json")
+    manifest = load("social_media_studio/legacy/data/domain_manifest.json")
+    caps = load("social_media_studio/legacy/data/capabilities.json")
 
     governance = manifest["governance"]
     assert governance["system"] == "CAOS"
@@ -28,14 +28,14 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
     assert governance["runtime_controller"] is False
 
     assert manifest["domain_authority"]["project_index"] == "projects/PROJECT_INDEX.json"
-    assert manifest["domain_authority"]["product_requirements"] == "docs/standalone_video_studio.md"
+    assert manifest["domain_authority"]["product_requirements"] == "docs/standalone_social_media_studio.md"
     assert manifest["domain_authority"]["historical_product_requirements_ref"] == "docs/product_requirements.md"
-    assert manifest["domain_authority"]["architecture"] == "docs/standalone_video_studio.md"
-    assert manifest["domain_authority"]["integrated_business_flywheel"] == "video_studio/data/business_feedback.json"
-    assert manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"
+    assert manifest["domain_authority"]["architecture"] == "docs/standalone_social_media_studio.md"
+    assert manifest["domain_authority"]["integrated_business_flywheel"] == "social_media_studio/data/business_feedback.json"
+    assert manifest["runtime"]["entrypoint"] == "social_media_studio.engine.StudioEngine"
     assert manifest["runtime"]["version"] == "1.0.0"
     assert "program_orchestration" not in manifest["runtime"]
-    assert manifest["runtime"]["media_business_os"] == "video_growth_agent/production_os.py"
+    assert manifest["runtime"]["media_business_os"] == "social_media_studio/legacy/production_os.py"
 
     assert caps["profile_version"] >= 12
     assert caps["owner"] == "VIDEO_GROWTH_AGENT"
@@ -103,7 +103,7 @@ def test_retired_integrated_program_preserves_original_ipos_source_evidence_only
 
 
 def test_coordination_policy_separates_business_asset_and_timeline_graphs_and_promotion():
-    policy = load("video_growth_agent/data/coordination-policy.json")
+    policy = load("social_media_studio/legacy/data/coordination-policy.json")
     assert policy["peer_chat_allowed"] is False
     assert policy["artifact_handoffs_required"] is True
     assert policy["dependency_model"]["cycle_policy"] == "REJECT_CONFIGURATION"

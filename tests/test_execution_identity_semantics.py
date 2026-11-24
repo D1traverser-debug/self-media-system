@@ -1,4 +1,4 @@
-from video_growth_agent.execution_attestation import ExecutionAttestation, ExecutionTrustRegistry
+from social_media_studio.legacy.execution_attestation import ExecutionAttestation, ExecutionTrustRegistry
 
 
 def attestation():

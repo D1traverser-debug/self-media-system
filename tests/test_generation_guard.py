@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.generation_guard import (
+from social_media_studio.legacy.generation_guard import (
     assert_generation_brief,
     generation_brief_digest,
     generation_brief_failures,

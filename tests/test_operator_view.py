@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.operator_view import (
+from social_media_studio.legacy.operator_view import (
     OperatorAction,
     OperatorViewError,
     derive_operator_snapshot,

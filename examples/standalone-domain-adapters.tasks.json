@@ -10,7 +10,7 @@
       "editorial-plan"
     ],
     "requirements": {
-      "schema": "video_growth_agent.editorial_planning.EditorialPlan",
+      "schema": "social_media_studio.legacy.editorial_planning.EditorialPlan",
       "episode_id": "E001",
       "series_id": "standalone-adapter-demo",
       "one_beat_one_shot": true
@@ -97,7 +97,7 @@
       "graphic-spec"
     ],
     "requirements": {
-      "schema": "video_growth_agent.programmatic_graphics.GraphicSpec",
+      "schema": "social_media_studio.legacy.programmatic_graphics.GraphicSpec",
       "kind": "TITLE_CARD",
       "duration_seconds": 2,
       "width": 640,

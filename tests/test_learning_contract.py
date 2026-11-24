@@ -10,7 +10,7 @@ def _load(path: str):
 
 
 def test_quality_rubric_requires_final_fidelity_sample():
-    config = _load("video_growth_agent/data/quality-rubric.json")
+    config = _load("social_media_studio/legacy/data/quality-rubric.json")
 
     preview = config["stages"]["VISUAL_PREVIEW"]
     contract = preview["prototype_contract"]
@@ -23,7 +23,7 @@ def test_quality_rubric_requires_final_fidelity_sample():
 
 
 def test_external_learning_enters_technique_library_as_candidates_not_unearned_validation():
-    config = _load("video_growth_agent/data/techniques.json")
+    config = _load("social_media_studio/legacy/data/techniques.json")
 
     techniques = {item["id"]: item for item in config["techniques"]}
     for technique_id in ("T-008", "T-009", "T-010", "T-011", "T-012", "T-013", "T-014"):
@@ -33,7 +33,7 @@ def test_external_learning_enters_technique_library_as_candidates_not_unearned_v
 
 
 def test_learn_stage_actually_schedules_declared_improvement_roles():
-    plan = _load("video_growth_agent/data/execution-plan.json")
+    plan = _load("social_media_studio/legacy/data/execution-plan.json")
     learn = plan["stages"]["LEARN"]["tasks"]
     agents = [task.get("agent") for task in learn]
     assert agents == [
@@ -52,7 +52,7 @@ def test_learn_stage_actually_schedules_declared_improvement_roles():
 
 
 def test_learning_capability_distinguishes_evidence_pipeline_from_autonomous_promotion():
-    profile = _load("video_growth_agent/data/capabilities.json")
+    profile = _load("social_media_studio/legacy/data/capabilities.json")
     caps = {item["capability_id"]: item for item in profile["capabilities"]}
     learning = caps["learning_and_evolution"]
 
@@ -76,7 +76,7 @@ def test_learning_capability_distinguishes_evidence_pipeline_from_autonomous_pro
 
 
 def test_evolution_engineer_is_candidate_builder_not_false_commit_proof():
-    agents = _load("video_growth_agent/data/agents.json")["agents"]
+    agents = _load("social_media_studio/legacy/data/agents.json")["agents"]
     mandate = agents["evolution_engineer"]["mandate"]
     assert "candidate artifact" in mandate
     assert "not proof that production authority has changed" in mandate

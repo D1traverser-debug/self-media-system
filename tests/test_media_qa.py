@@ -2,7 +2,7 @@ import subprocess
 
 import pytest
 
-from video_growth_agent.media_qa import MediaQAChecker
+from social_media_studio.legacy.media_qa import MediaQAChecker
 
 
 @pytest.mark.skipif(not MediaQAChecker.tools_available(), reason="ffmpeg/ffprobe unavailable")

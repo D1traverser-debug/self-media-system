@@ -1,18 +1,18 @@
 from datetime import datetime, timezone
 
-from video_growth_agent.continuity import (
+from social_media_studio.legacy.continuity import (
     ContinuityLink,
     ContinuityRule,
     ContinuitySnapshot,
     assess_continuity,
 )
-from video_growth_agent.editorial_interchange import (
+from social_media_studio.legacy.editorial_interchange import (
     EditorialRoundTripReceipt,
     EditorAdapterCapability,
     prepare_editorial_handoff,
     validate_roundtrip,
 )
-from video_growth_agent.editorial_planning import (
+from social_media_studio.legacy.editorial_planning import (
     BeatSpec,
     ClaimSpec,
     EditorialPlan,
@@ -20,13 +20,13 @@ from video_growth_agent.editorial_planning import (
     ShotIntent,
     materialize_shot_contract,
 )
-from video_growth_agent.experiments import (
+from social_media_studio.legacy.experiments import (
     ExperimentPlan,
     ExperimentVariant,
     VariantObservation,
     conclude_experiment,
 )
-from video_growth_agent.media_graph import (
+from social_media_studio.legacy.media_graph import (
     AssetRef,
     AssetVersion,
     ContextRecord,
@@ -34,21 +34,21 @@ from video_growth_agent.media_graph import (
     EvidenceRecord,
     MediaGraph,
 )
-from video_growth_agent.model_registry import (
+from social_media_studio.legacy.model_registry import (
     EvidenceBoundModelRouter,
     ModelObservation,
     OperationProfile,
     QualityObservation,
     ShotRoutingRequest,
 )
-from video_growth_agent.plan_graph_bridge import register_editorial_plan_asset
-from video_growth_agent.production_os import (
+from social_media_studio.legacy.plan_graph_bridge import register_editorial_plan_asset
+from social_media_studio.legacy.production_os import (
     PromotionEvidence,
     TakeRecord,
     admit_candidate_generation,
     evaluate_take_promotion,
 )
-from video_growth_agent.timeline import TimelineClip, TimelineSpec
+from social_media_studio.legacy.timeline import TimelineClip, TimelineSpec
 
 
 def _quality(value: float):

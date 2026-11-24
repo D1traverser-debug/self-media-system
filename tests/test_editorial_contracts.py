@@ -1,7 +1,7 @@
 import json
 import pytest
 
-from video_studio.domain.editorial import (
+from social_media_studio.domain.editorial import (
     EditorialContractError, inspect_long_article, inspect_platform_package,
 )
 

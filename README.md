@@ -1,34 +1,34 @@
-# Universal Content Studio (repository: Video Growth Agent)
+# 自媒体系统（Social Media Studio）
 
 The repository name is retained for compatibility. This is a CAOS-governed **general digital content system**, not a mandatory video-production pipeline. Its on-demand professional capabilities include original Chinese/English writing and X Articles, platform-native titles/descriptions/tags/cover copy, static/multi-aspect images and prompts, multimedia understanding and editing, exact audio preservation, audiovisual production, and nested Original Identity/IPOS. Each user goal activates only relevant capabilities. The Video runtime remains technically independent of the CAOS codebase; CAOS governs the user's selected work at every material decision/effect.
 
-**Current launch authority:** `STUDIO_ENTRY.md` + `video_studio/data/studio_manifest.json`. **Detailed candidate architecture:** `docs/CONTENT_STUDIO_ARCHITECTURE_V2.md` (not automatically promoted). **No existing video/business project or 50-task plan is active by default.** Read only specific historical sources if they are relevant; do not treat a task sample as a current owner goal.
+**Current launch authority:** `STUDIO_ENTRY.md` + `social_media_studio/data/studio_manifest.json`. **Detailed candidate architecture:** `docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md` (not automatically promoted). **No existing video/business project or 50-task plan is active by default.** Read only specific historical sources if they are relevant; do not treat a task sample as a current owner goal.
 
 ## Current authority
 
 - `STUDIO_ENTRY.md` — only startup and operating entry for new Video work.
-- `docs/standalone_video_studio.md` — Video-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
-- `video_studio/data/studio_manifest.json` — canonical runtime and parent-governance contract; no CAOS runtime/API dependency.
-- `video_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFmpeg/FFprobe QA.
-- `video_studio/adapters.py` — explicit, task-bound adapters for EditorialPlan, ShotContract, IPOS shot binding, IPOS continuity, MediaGraph bootstrap, Timeline, continuity, shot routing, business metrics, supplementary audio QA and deterministic local graphic rendering.
-- `skills/video-growth-agent/SKILL.md` — self-contained Video-owned agent operating instructions.
+- `docs/standalone_social_media_studio.md` — Video-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
+- `social_media_studio/data/studio_manifest.json` — canonical runtime and parent-governance contract; no CAOS runtime/API dependency.
+- `social_media_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFmpeg/FFprobe QA.
+- `social_media_studio/adapters.py` — explicit, task-bound adapters for EditorialPlan, ShotContract, IPOS shot binding, IPOS continuity, MediaGraph bootstrap, Timeline, continuity, shot routing, business metrics, supplementary audio QA and deterministic local graphic rendering.
+- `skills/social-media-studio/SKILL.md` — self-contained Video-owned agent operating instructions.
 - `domain_manifest.json` and `capabilities.json` — Video-owned domain identity and capability contracts consumed by the canonical Studio.
 - `docs/product_requirements.md` — historical 0.8 product-requirements baseline; new operating authority is the standalone contract.
-- `docs/media_business_os.md` — 0.8 media-business domain reference; new execution/governance authority is standalone Video Studio.
+- `docs/media_business_os.md` — 0.8 media-business domain reference; new execution/governance authority is standalone Social Media Studio.
 - `docs/architecture.md` — historical 0.8 architecture reference.
 - `docs/agent_operability_scenarios.md` — historical 0.8 operability scenarios; standalone operating rules live in the new Skill and contract.
 - `docs/provider_benchmark_protocol.md` — owner benchmark method for volatile provider quality/cost evidence.
 - `projects/PROJECT_INDEX.json` — retired historical project/program index; not current task or owner-context authority.
-- `video_studio/data/business_feedback.json` — task-neutral growth/IP/commercial/production feedback relations.
+- `social_media_studio/data/business_feedback.json` — task-neutral growth/IP/commercial/production feedback relations.
 - `audits/EVOLUTION_INDEX.json` — canonical Video evolution-evidence entrypoint.
-- `video_growth_agent/` — Video-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
+- `social_media_studio/legacy/` — Video-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
 
-The `video_studio` package is the sole Video runtime: it owns Video project briefs, task DAGs, leases, artifact history, review receipts, failure recovery and domain execution. CAOS governs session-level requirement interpretation, material decisions, root-cause investigation, cross-domain authorization and independent acceptance when the owner selects Video from CAOS. The Video runtime has no CAOS API, runtime, task-ID or lease dependency. Video domain modules are imported only through the explicit `video_studio.adapters` boundary; the old fixed-stage controller is not an active execution path.
+The `social_media_studio` package is the sole Video runtime: it owns Video project briefs, task DAGs, leases, artifact history, review receipts, failure recovery and domain execution. CAOS governs session-level requirement interpretation, material decisions, root-cause investigation, cross-domain authorization and independent acceptance when the owner selects Video from CAOS. The Video runtime has no CAOS API, runtime, task-ID or lease dependency. Video domain modules are imported only through the explicit `social_media_studio.adapters` boundary; the old fixed-stage controller is not an active execution path.
 
 ## Historical Video 0.8 domain models (not a universal execution chain)
 
-The following historical video-specific structures remain callable only where an explicit Video adapter declares the corresponding work. They do not describe the current general-content workflow. New user content demands route through typed contracts; `video_studio.engine.StudioEngine` is the only durable scheduler, and direct conversational tasks need no project.
+The following historical video-specific structures remain callable only where an explicit Video adapter declares the corresponding work. They do not describe the current general-content workflow. New user content demands route through typed contracts; `social_media_studio.engine.StudioEngine` is the only durable scheduler, and direct conversational tasks need no project.
 
 Historical example chain (not a current default or mandatory production order):
 
@@ -44,7 +44,7 @@ Linked state surfaces remain distinct:
 6. **Experiment/outcome state** — pre-registered tests and typed growth/production/commercial observations.
 7. **Operator projection** — recomputable current-Agent view of outcome, ready/blocking actions, stale evidence and recovery refs; never authority.
 
-The fixed-stage work-order engine is not an active controller. New projects use the project-specific dynamic task graph in `video_studio`; domain logic is called through the single adapter boundary.
+The fixed-stage work-order engine is not an active controller. New projects use the project-specific dynamic task graph in `social_media_studio`; domain logic is called through the single adapter boundary.
 
 Core 0.8 runtime surfaces:
 
@@ -64,7 +64,7 @@ Core 0.8 runtime surfaces:
 
 ## Reusable business domains, no default task
 
-The four business domains remain selectable capabilities, connected by generic evidence feedback in `video_studio/data/business_feedback.json`. A new request creates a new demand-specific brief and graph; no old project, task, subject, platform, IP or source asset is implicitly selected. `projects/PROJECT_INDEX.json` records only retired historical identities. `examples/` contains isolated regression fixtures, not active work. For real work use `STUDIO_ENTRY.md` and `vga-studio intake REQUEST.json`.
+The four business domains remain selectable capabilities, connected by generic evidence feedback in `social_media_studio/data/business_feedback.json`. A new request creates a new demand-specific brief and graph; no old project, task, subject, platform, IP or source asset is implicitly selected. `projects/PROJECT_INDEX.json` records only retired historical identities. `examples/` contains isolated regression fixtures, not active work. For real work use `STUDIO_ENTRY.md` and `sms-studio intake REQUEST.json`.
 
 ## Candidate -> promotion -> release
 
@@ -101,9 +101,9 @@ Missing a high-assurance reviewer blocks only operations that require that tier.
 
 ## CAOS-governed cognition, dogfood and evolution
 
-CAOS parent governance governs the session-level decision and execution discipline: recover the real outcome; compare competing hypotheses and methods; use discriminating tests and counterevidence; inspect exact artifact bytes; diagnose failures at the causal layer; independently replay repairs; and promote learning only with applicability, counterexamples and regression evidence. Video Studio owns the domain task graph and execution records; no CAOS runtime/API call is made.
+CAOS parent governance governs the session-level decision and execution discipline: recover the real outcome; compare competing hypotheses and methods; use discriminating tests and counterevidence; inspect exact artifact bytes; diagnose failures at the causal layer; independently replay repairs; and promote learning only with applicability, counterexamples and regression evidence. Social Media Studio owns the domain task graph and execution records; no CAOS runtime/API call is made.
 
-The standalone release contract now records immutable input lineage, invalidates consumers on source replacement, requires rights evidence across used media lineage, enforces exact-digest FFmpeg/FFprobe QA (full decode, stream timing, true peak and black frames), supports attested human cold reads and requires three evidence-backed Red Team findings when configured. See `docs/standalone_video_studio.md` and the three outcome/task examples.\n\nThe Video domain capability catalog describes verified domain operations; the Studio manifest is the sole runtime authority.
+The standalone release contract now records immutable input lineage, invalidates consumers on source replacement, requires rights evidence across used media lineage, enforces exact-digest FFmpeg/FFprobe QA (full decode, stream timing, true peak and black frames), supports attested human cold reads and requires three evidence-backed Red Team findings when configured. See `docs/standalone_social_media_studio.md` and the three outcome/task examples.\n\nThe Video domain capability catalog describes verified domain operations; the Studio manifest is the sole runtime authority.
 
 
 ### Isolated regression examples
@@ -115,10 +115,10 @@ The examples below exist only to test reusable capabilities; do not resume them 
 This sample produces a silent, candidate-only title card with the real local renderer, then binds canonical FFmpeg/FFprobe QA to the exact registered MP4. It requires a local font file and evidence that the font may be used:
 
 ```bash
-vga-studio --offline-fixture --root ./studio-work init adapter-demo --title "Standalone adapter demo" --brief examples/standalone-domain-adapters.brief.json
-vga-studio --offline-fixture --root ./studio-work plan adapter-demo examples/standalone-domain-adapters.tasks.json
-vga-studio --offline-fixture --root ./studio-work import-asset adapter-demo rights-clearance ./font-license-evidence.txt --kind document --media-type text/plain --rights-status OWNED
-vga-studio --offline-fixture --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED --metadata examples/adapter-demo-font.metadata.json
+sms-studio --offline-fixture --root ./studio-work init adapter-demo --title "Standalone adapter demo" --brief examples/standalone-domain-adapters.brief.json
+sms-studio --offline-fixture --root ./studio-work plan adapter-demo examples/standalone-domain-adapters.tasks.json
+sms-studio --offline-fixture --root ./studio-work import-asset adapter-demo rights-clearance ./font-license-evidence.txt --kind document --media-type text/plain --rights-status OWNED
+sms-studio --offline-fixture --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED --metadata examples/adapter-demo-font.metadata.json
 ```
 
 Claim and complete the authoring task with the exact EditorialPlan JSON, then use `run-adapter` for validation/materialization/rendering and `qa-media` for canonical technical QA. The renderer's receipt explicitly states that the output is silent, candidate-only and not release-authorized.
@@ -128,15 +128,15 @@ Claim and complete the authoring task with the exact EditorialPlan JSON, then us
 After `pip install -e .`:
 
 ```bash
-vga-studio --help
-vga-studio system-audit --repo-root .
+sms-studio --help
+sms-studio system-audit --repo-root .
 pytest -q
 ```
 
-The Video Studio system audit checks the canonical runtime, parent-governance boundary, adapter registry, project/task graph integrity, artifact lineage, release gates and known production-readiness gaps. It fails closed when the active runtime contract drifts.
+The Social Media Studio system audit checks the canonical runtime, parent-governance boundary, adapter registry, project/task graph integrity, artifact lineage, release gates and known production-readiness gaps. It fails closed when the active runtime contract drifts.
 
 CI success is validation evidence, not branch-protection enforcement unless GitHub separately reports branch protection/rulesets as enabled.
 
 ## IP Studio OS integration
 
-The personal-IP character canon is owned by the independent IP Studio OS (IPOS); IPOS does not require a CAOS runtime/API call. The standalone program plan models the owner-approved IPOS Video Identity Bundle as an external versioned input and keeps identity-dependent tasks waiting until G2/G7/G8 and rights/provenance pass. The current `video_studio.adapters` bridge exposes IPOS inspection, import, exact-version shot binding and continuity operations; identity-dependent work remains blocked until an owner-approved bundle exists. Historical IPOS state is evidence only; recover the current approved export from its actual owner when the demand requires identity.
+The personal-IP character canon is owned by the independent IP Studio OS (IPOS); IPOS does not require a CAOS runtime/API call. The standalone program plan models the owner-approved IPOS Video Identity Bundle as an external versioned input and keeps identity-dependent tasks waiting until G2/G7/G8 and rights/provenance pass. The current `social_media_studio.adapters` bridge exposes IPOS inspection, import, exact-version shot binding and continuity operations; identity-dependent work remains blocked until an owner-approved bundle exists. Historical IPOS state is evidence only; recover the current approved export from its actual owner when the demand requires identity.

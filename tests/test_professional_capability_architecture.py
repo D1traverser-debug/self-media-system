@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from video_studio.scope import capability_lookup, resolve_intake
+from social_media_studio.scope import capability_lookup, resolve_intake
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,7 +30,7 @@ def test_professional_coverage_is_separate_from_business_and_tasks(tmp_path):
 
 
 def test_no_fake_registered_route_or_ambiguous_capability():
-    profile = json.loads((ROOT / "video_growth_agent/data/capabilities.json").read_text())
+    profile = json.loads((ROOT / "social_media_studio/legacy/data/capabilities.json").read_text())
     for mutation in ("invent", "omit", "duplicate", "permanent"):
         bad = copy.deepcopy(profile)
         groups = bad["professional_capability_groups"]
@@ -52,12 +52,12 @@ def test_no_fake_registered_route_or_ambiguous_capability():
 
 
 def test_coordination_points_to_live_entry():
-    data = json.loads((ROOT / "video_growth_agent/data/coordination-policy.json").read_text())
+    data = json.loads((ROOT / "social_media_studio/legacy/data/coordination-policy.json").read_text())
     assert data["governance_binding"]["entrypoint"] == "STUDIO_ENTRY.md"
 
 
 def test_identity_capability_is_nested_and_on_demand():
-    from video_studio.scope import capability_lookup
+    from social_media_studio.scope import capability_lookup
     identity = capability_lookup("identity_collaboration")
     item = identity["groups"][0]
     assert "persistent_identity_design" in item["demands"]
