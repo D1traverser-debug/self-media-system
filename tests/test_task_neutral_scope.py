@@ -61,3 +61,19 @@ def test_stale_or_unrelated_task_binding_fails_without_state_mutation(tmp_path):
     with pytest.raises(ValueError):
         engine.revise_task("fresh", "write", {"requirements": {"deliverable_refs": ["old"]}}, reason="test")
     assert engine.list_tasks("fresh")[0]["requirements"]["deliverable_refs"] == ["caption"]
+
+
+def test_cli_rejects_legacy_workspace_on_all_owner_paths(tmp_path, capsys):
+    from video_studio.cli import main
+    workspace = tmp_path / "workspace"
+    engine = StudioEngine(workspace)
+    engine.create_project("old-local", "old", {"goal": "old", "audience": "test", "deliverables": ["old"]})
+    assert main(["--root", str(workspace), "status", "old-local"]) == 2
+    assert main(["--root", str(workspace), "claim", "old-local", "--worker", "w"]) == 2
+    assert main(["--root", str(workspace), "--offline-fixture", "status", "old-local"]) == 0
+    brief = tmp_path / "brief.json"
+    brief.write_text(json.dumps({"goal": "new", "audience": "test", "deliverables": ["caption"]}))
+    assert main(["--root", str(workspace), "init", "fresh", "--brief", str(brief)]) == 0
+    assert resolve_intake(workspace, {"mode": "RESUME", "project_id": "fresh"})["scope_epoch"] == EPOCH
+    assert main(["--root", str(workspace), "--offline-fixture", "status", "fresh"]) == 2
+    assert main(["--root", str(workspace), "status", "fresh"]) == 0

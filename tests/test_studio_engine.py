@@ -157,7 +157,7 @@ def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path
     )
 
     command = [
-        "--root", str(workspace), "transfer-asset",
+        "--root", str(workspace), "--offline-fixture", "transfer-asset",
         "program", "validated-episode-intent", "episode", "validated-episode-intent",
         "--expected-artifact-id", source_artifact["artifact_id"],
         "--expected-version", str(source_artifact["version"]),
@@ -486,7 +486,7 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
         ],
     }), encoding="utf-8")
 
-    assert main(["--root", str(workspace), "import-manifest", "demo", str(manifest)]) == 0
+    assert main(["--root", str(workspace), "--offline-fixture", "import-manifest", "demo", str(manifest)]) == 0
     first_output = json.loads(capsys.readouterr().out)
     assert first_output["asset_count"] == 2
     first_ids = {item["name"]: item["artifact_id"] for item in first_output["artifacts"]}
@@ -494,7 +494,7 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
     engine.add_tasks("demo", [task("read-context", inputs=["program-state", "business-flywheel"])])
     assert engine.list_tasks("demo")[0]["status"] == "READY"
 
-    assert main(["--root", str(workspace), "import-manifest", "demo", str(manifest)]) == 0
+    assert main(["--root", str(workspace), "--offline-fixture", "import-manifest", "demo", str(manifest)]) == 0
     second_output = json.loads(capsys.readouterr().out)
     second_ids = {item["name"]: item["artifact_id"] for item in second_output["artifacts"]}
     assert second_ids == first_ids
@@ -509,7 +509,7 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
             {"name": "missing", "path": "../projects/missing.json"},
         ],
     }), encoding="utf-8")
-    assert main(["--root", str(workspace), "import-manifest", "demo", str(broken)]) == 2
+    assert main(["--root", str(workspace), "--offline-fixture", "import-manifest", "demo", str(broken)]) == 2
     capsys.readouterr()
     with engine._connect("demo") as connection:
         absent = connection.execute(
@@ -525,7 +525,7 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
             {"name": "bad-rights", "path": "../projects/business-flywheel.md", "rights_status": "NOT_A_REAL_STATUS"},
         ],
     }), encoding="utf-8")
-    assert main(["--root", str(workspace), "import-manifest", "demo", str(invalid_rights)]) == 2
+    assert main(["--root", str(workspace), "--offline-fixture", "import-manifest", "demo", str(invalid_rights)]) == 2
     capsys.readouterr()
     with engine._connect("demo") as connection:
         absent = connection.execute(
@@ -711,8 +711,8 @@ def test_cli_exposes_standalone_entry_without_caos_import(tmp_path):
     from video_studio.cli import main
     brief_file = tmp_path / "brief.json"
     brief_file.write_text(json.dumps(brief()), encoding="utf-8")
-    assert main(["--root", str(tmp_path / "ws"), "init", "cli-demo", "--brief", str(brief_file)]) == 0
-    assert main(["--root", str(tmp_path / "ws"), "audit", "cli-demo"]) == 0
+    assert main(["--root", str(tmp_path / "ws"), "--offline-fixture", "init", "cli-demo", "--brief", str(brief_file)]) == 0
+    assert main(["--root", str(tmp_path / "ws"), "--offline-fixture", "audit", "cli-demo"]) == 0
 
 
 def test_graph_rejects_cycles_and_multiple_output_producers(tmp_path):

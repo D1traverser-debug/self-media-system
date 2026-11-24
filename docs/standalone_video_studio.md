@@ -242,30 +242,30 @@ The attestation JSON should identify `reviewer_kind`, `execution_mode`, `blind_r
 
 For each new demand, use `vga-studio intake REQUEST.json` with a JSON object containing the owner's exact goal and mode NEW. For continuation provide mode RESUME and the exact workspace project_id. No default project, previous brief, preset tasks, IP or source media are selected. A retired repository identity is not resumable. The route is a mechanical projection; CAOS session governance and independently verified outcomes remain separate.
 
-Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Initialize a fresh owner project with `init PROJECT --brief BRIEF.json --owner-task`; `requirements.deliverable_refs` on each task must reference exact current brief deliverable names. The local marker is an epoch/identity check, never evidence of cognition. Mechanical offline regression fixtures deliberately do not carry that marker. Only a current owner requirement or verified input can add scope. Examples below are isolated regression fixtures, not task templates or current work.
+Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Initialize a fresh owner project with `init PROJECT --brief BRIEF.json --owner-task`; `requirements.deliverable_refs` on each task must reference exact current brief deliverable names. The local marker is an epoch/identity check, never evidence of cognition. Mechanical offline regression fixtures deliberately do not carry that marker. The CLI defaults to owner scope; `--offline-fixture` requires an explicit separate root and cannot enter an owner ledger. Only a current owner requirement or verified input can add scope. Examples below are isolated regression fixtures, not task templates or current work.
 
 ### 13.2 Episode-specific example
 
 ```bash
 # create a project from an outcome brief
-vga-studio --root ./studio-work init episode-001 --title "Episode 001" --brief examples/technology-explainer.brief.json
+vga-studio --offline-fixture --root ./studio-work init episode-001 --title "Episode 001" --brief examples/technology-explainer.brief.json
 
 # create a dynamic dependency graph
-vga-studio --root ./studio-work plan episode-001 examples/technology-explainer.tasks.json
+vga-studio --offline-fixture --root ./studio-work plan episode-001 examples/technology-explainer.tasks.json
 
 # inspect ready/blocked work
-vga-studio --root ./studio-work status episode-001
-vga-studio --root ./studio-work tasks episode-001
+vga-studio --offline-fixture --root ./studio-work status episode-001
+vga-studio --offline-fixture --root ./studio-work tasks episode-001
 
 # atomically claim the next ready task
-vga-studio --root ./studio-work claim episode-001 --worker researcher-01 --lease-seconds 900
+vga-studio --offline-fixture --root ./studio-work claim episode-001 --worker researcher-01 --lease-seconds 900
 
 # record an artifact-bound independent review
-vga-studio --root ./studio-work review episode-001 ARTIFACT_ID --reviewer reviewer-01 --rubric craft --outcome PASS --dimensions review-dimensions.json --evidence frame://01 --evidence frame://02
+vga-studio --offline-fixture --root ./studio-work review episode-001 ARTIFACT_ID --reviewer reviewer-01 --rubric craft --outcome PASS --dimensions review-dimensions.json --evidence frame://01 --evidence frame://02
 
 # inspect current state and durable event history
-vga-studio --root ./studio-work audit episode-001
-vga-studio --root ./studio-work events episode-001
+vga-studio --offline-fixture --root ./studio-work audit episode-001
+vga-studio --offline-fixture --root ./studio-work events episode-001
 ```
 
 `vga-studio --help` lists brief revision/history, task-contract revision, claim heartbeat, complete, fail, wait-input, decision, failure, resolve-failure, invalidate, reopen, learn and release-check commands. `qa-media` runs the built-in FFmpeg/FFprobe measurement adapter against a claimed `technical_measurement` task, writes a digest-bound QA receipt and completes that measurement task. It checks technical properties only; it cannot approve craft, truth, rights or release.
@@ -309,10 +309,10 @@ The repository includes `examples/standalone-domain-adapters.brief.json` and `ex
 Import a licensed font and its rights evidence before claiming the renderer task:
 
 ```bash
-vga-studio --root ./studio-work init adapter-demo --title "Standalone adapter demo" --brief examples/standalone-domain-adapters.brief.json
-vga-studio --root ./studio-work plan adapter-demo examples/standalone-domain-adapters.tasks.json
-vga-studio --root ./studio-work import-asset adapter-demo rights-clearance ./font-license-evidence.txt --kind document --media-type text/plain --rights-status OWNED
-vga-studio --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED --metadata examples/adapter-demo-font.metadata.json
+vga-studio --offline-fixture --root ./studio-work init adapter-demo --title "Standalone adapter demo" --brief examples/standalone-domain-adapters.brief.json
+vga-studio --offline-fixture --root ./studio-work plan adapter-demo examples/standalone-domain-adapters.tasks.json
+vga-studio --offline-fixture --root ./studio-work import-asset adapter-demo rights-clearance ./font-license-evidence.txt --kind document --media-type text/plain --rights-status OWNED
+vga-studio --offline-fixture --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED --metadata examples/adapter-demo-font.metadata.json
 ```
 
 The example is an adapter integration proof, not a claim that a title card alone is a finished film or that external generative-video providers are connected.

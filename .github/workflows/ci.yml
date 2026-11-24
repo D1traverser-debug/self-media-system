@@ -41,10 +41,10 @@ jobs:
           vga-studio --help > /tmp/vga-studio-help.txt
           test -s /tmp/vga-studio-help.txt
           studio_root="$(mktemp -d)"
-          vga-studio --root "$studio_root" init smoke-episode --title "Standalone Studio smoke" --brief examples/technology-explainer.brief.json > /tmp/studio-init.json
-          vga-studio --root "$studio_root" plan smoke-episode examples/technology-explainer.tasks.json > /tmp/studio-plan.json
-          vga-studio --root "$studio_root" status smoke-episode > /tmp/studio-status.json
-          vga-studio --root "$studio_root" audit smoke-episode > /tmp/studio-audit.json
+          vga-studio --offline-fixture --root "$studio_root" init smoke-episode --title "Standalone Studio smoke" --brief examples/technology-explainer.brief.json > /tmp/studio-init.json
+          vga-studio --offline-fixture --root "$studio_root" plan smoke-episode examples/technology-explainer.tasks.json > /tmp/studio-plan.json
+          vga-studio --offline-fixture --root "$studio_root" status smoke-episode > /tmp/studio-status.json
+          vga-studio --offline-fixture --root "$studio_root" audit smoke-episode > /tmp/studio-audit.json
           python - <<'PY'
           import json
           status = json.load(open('/tmp/studio-status.json', encoding='utf-8'))
@@ -57,12 +57,12 @@ jobs:
       - name: "Regression fixture: historical Program context and parallel readiness"
         run: |
           program_root="$(mktemp -d)"
-          vga-studio --root "$program_root" init ai-self-media-commercialization --title "Integrated Program smoke" --brief examples/ai-self-media-commercialization.brief.json > /tmp/program-init.json
-          vga-studio --root "$program_root" import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json > /tmp/program-context-import.json
-          vga-studio --root "$program_root" plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json > /tmp/program-plan.json
-          vga-studio --root "$program_root" status ai-self-media-commercialization > /tmp/program-status.json
-          vga-studio --root "$program_root" tasks ai-self-media-commercialization > /tmp/program-tasks.json
-          vga-studio --root "$program_root" audit ai-self-media-commercialization > /tmp/program-audit.json
+          vga-studio --offline-fixture --root "$program_root" init ai-self-media-commercialization --title "Integrated Program smoke" --brief examples/ai-self-media-commercialization.brief.json > /tmp/program-init.json
+          vga-studio --offline-fixture --root "$program_root" import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json > /tmp/program-context-import.json
+          vga-studio --offline-fixture --root "$program_root" plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json > /tmp/program-plan.json
+          vga-studio --offline-fixture --root "$program_root" status ai-self-media-commercialization > /tmp/program-status.json
+          vga-studio --offline-fixture --root "$program_root" tasks ai-self-media-commercialization > /tmp/program-tasks.json
+          vga-studio --offline-fixture --root "$program_root" audit ai-self-media-commercialization > /tmp/program-audit.json
           python - <<'PY'
           import json
           status = json.load(open('/tmp/program-status.json', encoding='utf-8'))
@@ -88,9 +88,9 @@ jobs:
           vga-studio --help > /tmp/vga-studio-outside-repo.txt
           python -m video_studio --help > /tmp/video-studio-module-help.txt
           studio_root="$(mktemp -d)"
-          vga-studio --root "$studio_root" init outside-repo-smoke --title "Installed Video Studio smoke" --brief "$GITHUB_WORKSPACE/examples/technology-explainer.brief.json" > /tmp/standalone-init.json
-          vga-studio --root "$studio_root" plan outside-repo-smoke "$GITHUB_WORKSPACE/examples/technology-explainer.tasks.json" > /tmp/standalone-plan.json
-          vga-studio --root "$studio_root" audit outside-repo-smoke > /tmp/standalone-audit.json
+          vga-studio --offline-fixture --root "$studio_root" init outside-repo-smoke --title "Installed Video Studio smoke" --brief "$GITHUB_WORKSPACE/examples/technology-explainer.brief.json" > /tmp/standalone-init.json
+          vga-studio --offline-fixture --root "$studio_root" plan outside-repo-smoke "$GITHUB_WORKSPACE/examples/technology-explainer.tasks.json" > /tmp/standalone-plan.json
+          vga-studio --offline-fixture --root "$studio_root" audit outside-repo-smoke > /tmp/standalone-audit.json
           python - <<'PY'
           import json
           import sys

@@ -44,6 +44,23 @@ def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> None:
         raise ValueError("every governed task must reference exact current deliverables")
 
 
+def read_project_brief(root: str | Path, project_id: str) -> dict[str, Any]:
+    if not isinstance(project_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", project_id):
+        raise ValueError("exact safe project_id required")
+    workspace = Path(root).expanduser().resolve()
+    db = workspace / "projects" / project_id / "studio.sqlite3"
+    if not db.is_file() or not db.resolve().is_relative_to(workspace):
+        raise ValueError("exact workspace project not found")
+    try:
+        with closing(sqlite3.connect(db.resolve().as_uri() + "?mode=ro", uri=True)) as connection:
+            row = connection.execute("SELECT brief_json FROM projects WHERE project_id=?", (project_id,)).fetchone()
+    except sqlite3.Error as exc:
+        raise ValueError("workspace project cannot be read") from exc
+    if row is None:
+        raise ValueError("exact project identity not found")
+    return json.loads(row[0])
+
+
 def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
     """Return a read-only route; never create a task, infer a project, or assert CAOS ran."""
     if not isinstance(request, dict) or request.get("mode") not in {"NEW", "RESUME"}:
@@ -62,15 +79,7 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
         brief = None
     else:
         project_id = _id(request.get("project_id"))
-        workspace = Path(root).expanduser().resolve()
-        db = workspace / "projects" / project_id / "studio.sqlite3"
-        if not db.is_file() or not db.resolve().is_relative_to(workspace):
-            raise ValueError("exact current workspace project not found")
-        with closing(sqlite3.connect(db.resolve().as_uri() + "?mode=ro", uri=True)) as connection:
-            row = connection.execute("SELECT brief_json FROM projects WHERE project_id=?", (project_id,)).fetchone()
-        if row is None:
-            raise ValueError("exact project identity not found")
-        brief = json.loads(row[0])
+        brief = read_project_brief(root, project_id)
         if brief.get("scope_epoch") != EPOCH:
             raise ValueError("pre-cutover task instance is retired; create a fresh owner demand")
         goal = brief["goal"]

@@ -207,12 +207,12 @@ The project is complete only when all requested deliverables exist, open depende
 
 ```bash
 vga-studio --help
-vga-studio --root ./studio-work init episode-001 --title "Episode 001" --brief examples/technology-explainer.brief.json
-vga-studio --root ./studio-work plan episode-001 examples/technology-explainer.tasks.json
-vga-studio --root ./studio-work status episode-001
-vga-studio --root ./studio-work claim episode-001 --worker researcher-01
-vga-studio --root ./studio-work audit episode-001
-vga-studio --root ./studio-work events episode-001
+vga-studio --offline-fixture --root ./studio-work init episode-001 --title "Episode 001" --brief examples/technology-explainer.brief.json
+vga-studio --offline-fixture --root ./studio-work plan episode-001 examples/technology-explainer.tasks.json
+vga-studio --offline-fixture --root ./studio-work status episode-001
+vga-studio --offline-fixture --root ./studio-work claim episode-001 --worker researcher-01
+vga-studio --offline-fixture --root ./studio-work audit episode-001
+vga-studio --offline-fixture --root ./studio-work events episode-001
 ```
 
 Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The Video control-plane core uses Python's standard library. The explicit domain-adapter layer also uses the project-declared Pillow and filelock dependencies; media QA and local graphics rendering require FFmpeg and FFprobe. Existing specialized modules are imported only through the tested adapter bridge, not as a second controller.

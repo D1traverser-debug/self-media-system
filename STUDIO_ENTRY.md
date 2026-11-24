@@ -13,7 +13,7 @@ Turn the owner's actual media goal into a finished, independently checked delive
 
 ## Independence
 
-Video Studio owns Video-domain requirements, project/task state, assets, evidence, production execution and domain learning. When the owner selects Video in a CAOS-governed session, CAOS remains the parent authority for complete-goal recovery, decision quality, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Use the CAOS parent Skill in the active ChatGPT workspace. The CAOS decision loop and execution loop govern session-level reasoning, authorization and independent acceptance. The Video capability catalog is `video_growth_agent/data/capabilities.json`. Do not modify the CAOS repository, Skills or configuration. The Video runtime has no CAOS API/runtime/task-ID/lease dependency; technical independence is not permission to bypass parent governance. All owner-facing Video conversations, decisions and effects remain CAOS-governed. Direct offline mechanical regression tests do not claim CAOS activation. The fixed-stage controller is not an active Video execution path.
+Video Studio owns Video-domain requirements, project/task state, assets, evidence, production execution and domain learning. When the owner selects Video in a CAOS-governed session, CAOS remains the parent authority for complete-goal recovery, decision quality, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Use the CAOS parent Skill in the active ChatGPT workspace. The CAOS decision loop and execution loop govern session-level reasoning, authorization and independent acceptance. The Video capability catalog is `video_growth_agent/data/capabilities.json`. Do not modify the CAOS repository, Skills or configuration. The Video runtime has no CAOS API/runtime/task-ID/lease dependency; technical independence is not permission to bypass parent governance. All owner-facing Video conversations, decisions and effects remain CAOS-governed. The CLI defaults to current-owner scope and rejects retired or unmarked workspaces. Isolated offline mechanical regression requires explicit `--offline-fixture` and a separate root, and does not claim CAOS activation. The fixed-stage controller is not an active Video execution path.
 
 IPOS remains the sole authority for the owner's original character/identity canon. The Studio consumes approved, versioned IPOS exports; it does not create a competing canon.
 
@@ -45,6 +45,8 @@ vga-studio --root WORKSPACE intake REQUEST.json
 # After CAOS-governed interpretation and decision, use the actual current brief and DAG:
 # Each task requirements.deliverable_refs names its current brief deliverable(s).
 vga-studio --root WORKSPACE init PROJECT --brief BRIEF.json --owner-task
+# If the actual demand has context inputs, import its explicit digest-bound manifest:
+# vga-studio --root WORKSPACE import-manifest PROJECT CONTEXT.json
 vga-studio --root WORKSPACE plan PROJECT TASKS.json
 vga-studio --root WORKSPACE resume PROJECT
 ```

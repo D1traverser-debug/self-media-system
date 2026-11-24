@@ -27,6 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="Standalone outcome-driven Video Studio. No CAOS runtime or provider lock-in.",
     )
     parser.add_argument("--root", type=Path, help="workspace root (default: VGA_STUDIO_HOME or ~/.vga-studio)")
+    parser.add_argument("--offline-fixture", action="store_true", help="isolated regression workspace only; never owner work")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("intake", help="resolve only the current owner demand or exact current workspace identity")
@@ -88,7 +89,6 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("resume", help="reconstruct the project handoff from durable Video state without chat memory")
     p.add_argument("project_id")
     p.add_argument("--event-limit", type=int, default=40)
-    p.add_argument("--offline-fixture", action="store_true", help="inspect isolated regression data only")
 
     p = sub.add_parser("tasks", help="list the dynamic task graph")
     p.add_argument("project_id")
@@ -221,16 +221,37 @@ def main(argv: list[str] | None = None) -> int:
             root = args.root or Path(os.environ.get("VGA_STUDIO_HOME", Path.home() / ".vga-studio"))
             _emit(resolve_intake(root, _read_json(args.request)))
             return 0
-        engine = StudioEngine(args.root)
+        from .scope import EPOCH, bind_owner_brief, resolve_intake
+        if args.offline_fixture and args.root is None:
+            raise StudioError("offline regression requires an explicit separate workspace root")
+        import os
+        root = args.root or Path(os.environ.get("VGA_STUDIO_HOME", Path.home() / ".vga-studio"))
+        if command != "init":
+            ids = ([args.source_project_id, args.target_project_id] if command == "transfer-asset"
+                   else [args.project_id])
+            for project_id in ids:
+                if not args.offline_fixture:
+                    resolve_intake(root, {"mode": "RESUME", "project_id": project_id})
+                else:
+                    # Test execution cannot enter a current owner ledger.
+                    from .scope import read_project_brief
+                    if read_project_brief(root, project_id).get("scope_epoch") == EPOCH:
+                        raise StudioError("offline fixture mode cannot access current owner projects")
+        engine = StudioEngine(root)
         if command == "init":
             brief = _read_json(args.brief)
-            if args.owner_task:
-                from .scope import bind_owner_brief
+            if args.offline_fixture:
+                if args.owner_task or "scope_epoch" in brief:
+                    raise StudioError("offline fixture cannot create an owner project")
+            else:
                 brief = bind_owner_brief(args.project_id, brief)
             _emit(engine.create_project(args.project_id, args.title, brief))
         elif command == "revise-brief":
             affected = args.affect_task if args.affect_task else None
-            _emit(engine.revise_brief(args.project_id, _read_json(args.brief), reason=args.reason, affected_task_ids=affected))
+            revised_brief = _read_json(args.brief)
+            if not args.offline_fixture:
+                revised_brief = bind_owner_brief(args.project_id, revised_brief)
+            _emit(engine.revise_brief(args.project_id, revised_brief, reason=args.reason, affected_task_ids=affected))
         elif command == "brief-history":
             _emit(engine.brief_history(args.project_id))
         elif command == "revise-task":
@@ -319,9 +340,6 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "status":
             _emit(engine.status(args.project_id))
         elif command == "resume":
-            if not args.offline_fixture:
-                from .scope import resolve_intake
-                resolve_intake(engine.root, {"mode": "RESUME", "project_id": args.project_id})
             _emit(engine.resume(args.project_id, event_limit=args.event_limit))
         elif command == "tasks":
             _emit(engine.list_tasks(args.project_id))
