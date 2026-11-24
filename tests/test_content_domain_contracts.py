@@ -118,8 +118,15 @@ def test_multi_aspect_variants_keep_separate_identity_and_composition():
     with pytest.raises(ContentContractError):
         inspect_declared_deliverables([{"id": "covers", "type": "MULTI_ASPECT_IMAGE_SET"}])
     with pytest.raises(ContentContractError):
-        inspect_declared_deliverables([{"**": "unused", **item, "variants": [item["variants"][0], item["variants"][0]]}])
+        inspect_declared_deliverables([{**item, "variants": [item["variants"][0], item["variants"][0]]}])
     with pytest.raises(ContentContractError):
         inspect_declared_deliverables([{"id": "covers", "type": "MULTI_ASPECT_IMAGE_SET",
                                        "variants": [item["variants"][0],
                                                     {"id": "other", "shape": item["variants"][0]["shape"]}]}])
+
+
+def test_intake_rejects_conflicting_explicit_deliverable_ids(tmp_path):
+    with pytest.raises(ContentContractError):
+        resolve_intake(tmp_path, {"mode": "NEW", "goal": "make a cover",
+                                  "deliverables": ["something-else"],
+                                  "deliverable_specs": [{"id": "cover", "type": "STATIC_IMAGE"}]})

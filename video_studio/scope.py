@@ -92,7 +92,7 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
     if declarations is not None:
         from .domain.contracts import inspect_declared_deliverables
         typed = inspect_declared_deliverables(
-            declarations, expected_ids=brief.get("deliverables") if mode == "RESUME" else None)
+            declarations, expected_ids=(brief.get("deliverables") if mode == "RESUME" else request.get("deliverables")))
     return {
         "mode": mode, "goal": goal, "project_id": project_id, "brief": brief,
         "typed_deliverables": typed,
