@@ -322,6 +322,17 @@
       "approved_use": "EXACT_CURRENT_BUNDLE_AND_RIGHTS_READBACK_REQUIRED",
       "historical_snapshot": "RETIRED_PROJECT_EVIDENCE_ONLY",
       "runtime_assurance": "NOT_PROVEN_BY_ROUTE_PREVIEW"
+    },
+    "editorial_contract": {
+      "source": "video_studio/domain/editorial.py",
+      "types": [
+        "LONG_ARTICLE",
+        "PLATFORM_PACKAGE"
+      ],
+      "function": "STRUCTURAL_CHECK_NOT_AUTHORING_OR_CREATIVE_ACCEPTANCE",
+      "cli": "vga-studio inspect-editorial SOURCE.json --kind package|article",
+      "platform_policy": "NO_HARDCODED_CURRENT_PLATFORM_LIMITS",
+      "actual_generation": "CURRENT_CHAT_OR_PROVIDER_ONLY_WHEN_AVAILABLE_AND_AUTHORIZED"
     }
   },
   "knowledge_lifecycle": {
