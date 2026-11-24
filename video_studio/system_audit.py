@@ -469,7 +469,14 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     red_team = explainer_brief.get("release_policy", {}).get("review_contracts", {}).get("red-team", {})
     if int(red_team.get("min_findings", 0)) < 3:
         hard_gate_failures.append("technology-explainer: Red Team must require at least three findings")
-    _check(checks, "hard_release_gates", not hard_gate_failures, hard_gate_failures)
+    # These are the *historical explainer/satire* video fixture policies,
+    # not compulsory release gates for an X article, caption or static image.
+    _check(checks, "isolated_historical_video_fixture_release_policy", not hard_gate_failures, {
+        "scope": "HISTORICAL_VIDEO_FIXTURES_ONLY",
+        "source_examples": ["technology-explainer", "news-fictional-media"],
+        "failures": hard_gate_failures,
+        "universal_content_gate": False,
+    })
 
     provider_state = (
         studio_manifest.get("capabilities", {})

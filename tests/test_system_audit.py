@@ -40,3 +40,18 @@ def test_content_architecture_cases_are_audited_as_structure_not_craft():
     assert arch["detail"]["scenario_count"] >= 28
     assert arch["detail"]["verification"] == "STRUCTURE_ONLY_NOT_BUSINESS_OUTCOME"
     assert report["boundary"]["caos_source_mutation_allowed"] is False
+
+
+def test_old_video_red_team_gate_is_not_universal_content_policy():
+    report = run_system_audit(ROOT)
+    checks = {c["id"]: c for c in report["checks"]}
+    assert "hard_release_gates" not in checks
+    fixture = checks["isolated_historical_video_fixture_release_policy"]
+    assert fixture["pass"], fixture
+    assert fixture["detail"]["scope"] == "HISTORICAL_VIDEO_FIXTURES_ONLY"
+    assert fixture["detail"]["universal_content_gate"] is False
+    from video_studio.domain.assurance import build_quality_plan
+    tweet = build_quality_plan([{"id":"post","type":"SHORT_COPY"}])["plans"][0]
+    assert "red-team" not in tweet["criteria"]
+    assert "lookdev" not in tweet["criteria"]
+    assert "full_playback" not in tweet["criteria"]
