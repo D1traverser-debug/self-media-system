@@ -139,6 +139,9 @@ Select a tool only after confirming that the exact operation is available in the
 
 If a required tool is unavailable, record the blocked capability and compare an acceptable alternative. Never claim a generation, edit, render, upload or review occurred unless the exact output exists and can be inspected. Never fabricate provider run IDs, file paths, metadata, citations or review evidence.
 
+
+For complex, high-risk visual sequences, consult the **optional** `references/visual-development.md` method candidate: establish reference contracts, separate exploratory candidates from approved assets, and test representative high-risk shots before committing to costly full production. This does not impose a shot probe on standalone images, short copy, basic edits, or other unrelated deliverables; verify current provider operations and real sample results before accepting the method.
+
 ## 7. Worker execution and artifact custody
 
 Use `sms-studio claim` to atomically claim ready work. Respect the lease and heartbeat it for long operations. The work packet defines the exact scope and current input digests. A worker may not broaden its task or change the owner outcome.

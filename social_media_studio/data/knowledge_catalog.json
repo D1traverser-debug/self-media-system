@@ -16,6 +16,12 @@
       "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
     },
     {
+      "id": "visual-development",
+      "ref": "skills/social-media-studio/references/visual-development.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Complex/quality-critical visual production only; sample and reference contracts are optional methods, not global stage gates; third-party observations are historical and require current verification."
+    },
+    {
       "id": "commercial",
       "ref": "skills/social-media-studio/references/commercial.md",
       "status": "ACTIVE_REFERENCE",
