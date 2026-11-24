@@ -160,6 +160,47 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         capability_gaps.extend(f"{group['id']}: {gap}" for group in coverage["groups"] for gap in group["gaps"])
     except (ValueError, KeyError, TypeError, OSError) as exc:
         _check(checks, "professional_capability_route_integrity", False, str(exc))
+    # Design coverage cannot certify actual craft or native CAOS, but missing
+    # positive/negative oracles must fail before a contract is promoted.
+    from .domain.contracts import DELIVERABLE_TYPES, inspect_declared_deliverables
+    matrix_failures = []
+    try:
+        matrix = _read_json(root / "docs" / "CONTENT_STUDIO_ARCH_ACCEPTANCE_V2.json")
+        groups = {x["id"] for x in _read_json(
+            root / "video_growth_agent" / "data" / "capabilities.json"
+        )["professional_capability_groups"]}
+        seen = set()
+        for case in matrix.get("scenarios", []):
+            case_id = case.get("id")
+            kind = case.get("deliverable_type")
+            if case_id in seen or not isinstance(case_id, str) or not case_id:
+                matrix_failures.append(f"{case_id}:duplicate_or_missing_identity")
+            seen.add(case_id)
+            if kind not in DELIVERABLE_TYPES:
+                matrix_failures.append(f"{case_id}:unknown_deliverable")
+                continue
+            if not isinstance(case.get("owner_outcome_oracle"), str) or not case["owner_outcome_oracle"].strip():
+                matrix_failures.append(f"{case_id}:missing_positive_oracle")
+            if not isinstance(case.get("forbidden_implicit_effect"), str) or not case["forbidden_implicit_effect"].strip():
+                matrix_failures.append(f"{case_id}:missing_negative_oracle")
+            if any(item not in groups for item in case.get("required_contexts", [])):
+                matrix_failures.append(f"{case_id}:unregistered_context")
+            item = {"id": "candidate", "type": kind}
+            if kind == "MULTI_ASPECT_IMAGE_SET":
+                item["variants"] = [
+                    {"id": "portrait", "shape": {"width": 1080, "height": 1440, "orientation": "PORTRAIT"}},
+                    {"id": "landscape", "shape": {"width": 1440, "height": 1080, "orientation": "LANDSCAPE"}},
+                ]
+            preview = inspect_declared_deliverables([item])
+            if preview["effect_authorized"] or preview["quality_verified"] or preview["selected_task_graph"] is not None:
+                matrix_failures.append(f"{case_id}:false_effect_or_quality_assurance")
+        if len(seen) < 28:
+            matrix_failures.append("scenario_coverage_regressed")
+    except (ValueError, TypeError, KeyError, OSError) as exc:
+        matrix_failures.append(f"source_or_contract_error:{exc}")
+    _check(checks, "typed_deliverables_and_architecture_negative_oracles", not matrix_failures,
+           {"scenario_count": len(seen) if "seen" in locals() else 0,
+            "failure_refs": matrix_failures, "verification": "STRUCTURE_ONLY_NOT_BUSINESS_OUTCOME"})
     scripts = pyproject.get("project", {}).get("scripts", {})
     cli_source = (root / "video_studio" / "cli.py").read_text(encoding="utf-8")
     cli_registered = (

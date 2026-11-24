@@ -132,7 +132,8 @@
         "hard_release_gates",
         "task_neutral_intake_and_retirement",
         "knowledge_locator_integrity",
-        "professional_capability_route_integrity"
+        "professional_capability_route_integrity",
+        "typed_deliverables_and_architecture_negative_oracles"
       ],
       "separates_structural_integrity_from_production_readiness": true,
       "no_provider_calls_or_workspace_mutation": true

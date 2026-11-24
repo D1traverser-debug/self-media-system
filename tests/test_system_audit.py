@@ -30,3 +30,13 @@ def test_audit_checks_only_one_installed_video_cli():
 
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert project["project"]["scripts"] == {"vga-studio": "video_studio.cli:main"}
+
+
+def test_content_architecture_cases_are_audited_as_structure_not_craft():
+    report = run_system_audit(ROOT)
+    checks = {item["id"]: item for item in report["checks"]}
+    arch = checks["typed_deliverables_and_architecture_negative_oracles"]
+    assert arch["pass"], arch
+    assert arch["detail"]["scenario_count"] >= 28
+    assert arch["detail"]["verification"] == "STRUCTURE_ONLY_NOT_BUSINESS_OUTCOME"
+    assert report["boundary"]["caos_source_mutation_allowed"] is False
