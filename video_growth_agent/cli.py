@@ -20,6 +20,7 @@ from .programmatic_graphics import (
     validate_shot_graph_bindings,
 )
 from .runtime import StudioRuntime
+from .storage import ProjectStore
 from .techniques import TechniqueLibrary
 
 
@@ -135,6 +136,23 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
+    # One CURRENT owner control plane. Historical project-state commands
+    # require an existing, isolated fixture root and cannot use the repo.
+    readonly = {"audit-packaging", "qa-media", "techniques"}
+    fixture_root = os.environ.get("VGA_LEGACY_FIXTURE_ROOT")
+    if args.cmd not in readonly:
+        if not fixture_root:
+            print("Legacy Video 0.8 control is retired for owner tasks. Use vga-studio.", file=sys.stderr)
+            return 2
+        fixture = Path(fixture_root).expanduser().resolve()
+        repository = Path(__file__).resolve().parents[1]
+        if (not Path(fixture_root).is_absolute() or not fixture.is_dir()
+                or fixture.is_relative_to(repository)
+                or fixture == Path.home().resolve()
+                or fixture == (Path.home() / ".vga-studio").resolve()):
+            print("Legacy fixture root must be an existing separate absolute directory", file=sys.stderr)
+            return 2
+
     if args.cmd == "audit-packaging":
         report = audit_packaging(json.loads(args.case_file.read_text(encoding="utf-8")))
         _json(report)
@@ -198,7 +216,7 @@ def main(argv: list[str] | None = None) -> int:
         _json(receipt)
         return 0 if receipt["qa_hard_pass"] else 2
 
-    runtime = StudioRuntime()
+    runtime = StudioRuntime(store=ProjectStore(Path(fixture_root)))
 
     if args.cmd == "init":
         _json(runtime.create_project(args.project_id, title=args.title).to_dict())

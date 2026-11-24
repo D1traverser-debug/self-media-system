@@ -38,3 +38,37 @@ def test_studio_domain_import_does_not_load_old_controller_modules():
         "assert not loaded, loaded"
     )
     subprocess.run([sys.executable, "-c", code], cwd=ROOT, check=True)
+
+
+def test_legacy_direct_cli_cannot_create_new_owner_project_by_default(tmp_path):
+    import os
+    import subprocess
+    import sys
+    env = dict(os.environ)
+    env.pop("VGA_LEGACY_FIXTURE_ROOT", None)
+    env.pop("VGA_PROJECTS_DIR", None)
+    result = subprocess.run([sys.executable, "-m", "video_growth_agent.cli", "init", "unauthorized"],
+                            cwd=tmp_path, env=env, text=True, capture_output=True, timeout=30)
+    assert result.returncode == 2
+    assert "Legacy Video 0.8 control is retired" in result.stderr
+    assert not (tmp_path / "projects").exists()
+
+
+def test_legacy_cli_only_writes_under_explicit_separate_fixture_root(tmp_path):
+    import os
+    import subprocess
+    import sys
+    fixture = tmp_path / "legacy-fixture"
+    fixture.mkdir()
+    env = dict(os.environ)
+    env.pop("VGA_PROJECTS_DIR", None)
+    env["VGA_LEGACY_FIXTURE_ROOT"] = str(fixture)
+    result = subprocess.run([sys.executable, "-m", "video_growth_agent.cli", "init", "fixture-example"],
+                            cwd=tmp_path, env=env, text=True, capture_output=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    assert (fixture / "fixture-example" / "state.json").is_file()
+    assert not (tmp_path / "projects").exists()
+    env["VGA_LEGACY_FIXTURE_ROOT"] = str(Path(__file__).resolve().parents[1])
+    denied = subprocess.run([sys.executable, "-m", "video_growth_agent.cli", "init", "bad"],
+                            cwd=tmp_path, env=env, text=True, capture_output=True, timeout=30)
+    assert denied.returncode == 2
