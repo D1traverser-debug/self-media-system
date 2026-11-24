@@ -88,6 +88,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("resume", help="reconstruct the project handoff from durable Video state without chat memory")
     p.add_argument("project_id")
     p.add_argument("--event-limit", type=int, default=40)
+    p.add_argument("--offline-fixture", action="store_true", help="inspect isolated regression data only")
 
     p = sub.add_parser("tasks", help="list the dynamic task graph")
     p.add_argument("project_id")
@@ -318,6 +319,9 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "status":
             _emit(engine.status(args.project_id))
         elif command == "resume":
+            if not args.offline_fixture:
+                from .scope import resolve_intake
+                resolve_intake(engine.root, {"mode": "RESUME", "project_id": args.project_id})
             _emit(engine.resume(args.project_id, event_limit=args.event_limit))
         elif command == "tasks":
             _emit(engine.list_tasks(args.project_id))

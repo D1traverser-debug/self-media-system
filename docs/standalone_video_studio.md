@@ -242,7 +242,7 @@ The attestation JSON should identify `reviewer_kind`, `execution_mode`, `blind_r
 
 For each new demand, use `vga-studio intake REQUEST.json` with a JSON object containing the owner's exact goal and mode NEW. For continuation provide mode RESUME and the exact workspace project_id. No default project, previous brief, preset tasks, IP or source media are selected. A retired repository identity is not resumable. The route is a mechanical projection; CAOS session governance and independently verified outcomes remain separate.
 
-Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Only a current owner requirement or verified input can add scope. Examples below are isolated regression fixtures, not task templates or current work.
+Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Initialize a fresh owner project with `init PROJECT --brief BRIEF.json --owner-task`; `requirements.deliverable_refs` on each task must reference exact current brief deliverable names. The local marker is an epoch/identity check, never evidence of cognition. Mechanical offline regression fixtures deliberately do not carry that marker. Only a current owner requirement or verified input can add scope. Examples below are isolated regression fixtures, not task templates or current work.
 
 ### 13.2 Episode-specific example
 

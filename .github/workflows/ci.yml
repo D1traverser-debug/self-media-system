@@ -54,7 +54,7 @@ jobs:
           assert audit['task_count'] == 13, audit
           print('standalone-video-studio-smoke: PASS')
           PY
-      - name: Smoke test integrated Program context and parallel readiness
+      - name: Regression fixture: historical Program context and parallel readiness
         run: |
           program_root="$(mktemp -d)"
           vga-studio --root "$program_root" init ai-self-media-commercialization --title "Integrated Program smoke" --brief examples/ai-self-media-commercialization.brief.json > /tmp/program-init.json
@@ -80,7 +80,7 @@ jobs:
           assert task_map['ipos-video-identity-bundle-import']['status'] == 'PENDING', task_map['ipos-video-identity-bundle-import']
           assert status['task_counts']['READY'] >= 6, status
           assert audit['pass'] is True, audit
-          print('standalone-program-context-smoke: PASS')
+          print('historical-program-regression-fixture: PASS')
           PY
       - name: Smoke test installed Video Studio outside repository
         run: |

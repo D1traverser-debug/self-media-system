@@ -128,8 +128,10 @@
         "runtime_dependency_boundary",
         "domain_adapter_registry_matches_manifest",
         "program_authority_refs_are_digest_bound_inputs",
-        "example_graphs_and_default_program_execution",
-        "hard_release_gates"
+        "isolated_regression_graphs_and_local_execution",
+        "hard_release_gates",
+        "task_neutral_intake_and_retirement",
+        "knowledge_locator_integrity"
       ],
       "separates_structural_integrity_from_production_readiness": true,
       "no_provider_calls_or_workspace_mutation": true

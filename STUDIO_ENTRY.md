@@ -43,7 +43,8 @@ python -m pip install -e .
 vga-studio --root WORKSPACE intake REQUEST.json
 # REQUEST.json contains mode NEW and the exact goal, or mode RESUME and exact project_id.
 # After CAOS-governed interpretation and decision, use the actual current brief and DAG:
-vga-studio --root WORKSPACE init PROJECT --brief BRIEF.json
+# Each task requirements.deliverable_refs names its current brief deliverable(s).
+vga-studio --root WORKSPACE init PROJECT --brief BRIEF.json --owner-task
 vga-studio --root WORKSPACE plan PROJECT TASKS.json
 vga-studio --root WORKSPACE resume PROJECT
 ```
