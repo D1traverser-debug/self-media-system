@@ -33,6 +33,9 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("capabilities", help="inspect professional capability coverage and actual registered routes")
     p.add_argument("--group", help="exact professional capability group ID")
 
+    p = sub.add_parser("quality-plan", help="derive deliverable-specific quality criteria, no PASS assertion")
+    p.add_argument("source", type=Path)
+
     p = sub.add_parser("inspect-visual", help="read-only visual direction, reference-role and prompt-intent contract")
     p.add_argument("source", type=Path)
 
@@ -243,6 +246,14 @@ def main(argv: list[str] | None = None) -> int:
         if command == "capabilities":
             from .scope import capability_lookup
             _emit(capability_lookup(args.group))
+            return 0
+        if command == "quality-plan":
+            from .domain.assurance import build_quality_plan
+            try:
+                result = build_quality_plan(_read_json(args.source))
+            except ValueError as exc:
+                raise StudioError(str(exc)) from exc
+            _emit(result)
             return 0
         if command == "inspect-visual":
             from .domain.creative import inspect_visual_direction

@@ -341,6 +341,13 @@
       "source_digest": "EXPLICIT_ID_OPTIONAL_DIGEST_NOT_AUTOVERIFIED",
       "creative_quality": "ACTUAL_PIXELS_AND_INDEPENDENT_REVIEW_REQUIRED",
       "provider_effect": "NOT_AUTHORIZED_BY_INSPECTOR"
+    },
+    "quality_contract": {
+      "source": "video_studio/domain/assurance.py",
+      "cli": "vga-studio quality-plan DELIVERABLES.json",
+      "policy": "DELIVERABLE_SPECIFIC_NO_FIXED_VIDEO_STAGES",
+      "quality_observed": false,
+      "independent_review_proven": false
     }
   },
   "knowledge_lifecycle": {
