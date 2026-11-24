@@ -17,18 +17,11 @@ Video Studio owns Video-domain requirements, project/task state, assets, evidenc
 
 IPOS remains the sole authority for the owner's original character/identity canon. The Studio consumes approved, versioned IPOS exports; it does not create a competing canon.
 
-## New-task startup
+## Entry, routing and revisitable responsibilities
 
-1. Recover the complete owner goal and every correction, constraint, prohibition and requested deliverable. Separate hard requirements, preferences, examples, assumptions and unknowns.
-2. Inspect current project state and exact source assets. Do not infer ownership, rights, media content or tool availability from filenames or declarations.
-3. Create/update an outcome brief with audience, purpose, format, platform, deliverables, success criteria, constraints, budget/time limits and unresolved questions. A changed brief must be revised through the CLI so affected work is invalidated rather than silently reused.
-4. Build a project-specific dependency graph. Revise the brief with `vga-studio revise-brief` and task contracts with `vga-studio revise-task` when new evidence changes the plan. Do not copy a fixed stage template. Split independent research, creative, asset, sound, production and distribution work where parallel execution is safe.
-5. For material creative or architectural decisions, record competing hypotheses, discriminating evidence, alternatives, counterevidence, selected option, falsifier and rollback.
-6. Prototype the highest-risk quality assumption before expensive full production. Use the smallest sample that can represent the intended final craft.
-7. Execute through `vga-studio` task claims and actual available media tools. Never mark a task complete without its exact declared files and digests.
-8. Review the actual artifacts independently. Reopen upstream decisions when evidence contradicts them; invalidate only dependent descendants.
-9. Release-check the exact final artifact against configured review, rights and disclosure evidence.
-10. Persist reusable learning only with applicability, counterexamples, failure conditions, source evidence and independent replay.
+**Choose the execution surface, not a default workflow.** Recover the full current goal and apply CAOS recursively in either surface. A bounded conversational text, image-planning, critique or simple edit task may be performed with actual available session tools and direct outcome checks; do not create a project or DAG solely to simulate governance. Use the durable Studio ledger when persistence, artifact lineage, parallel dispatch, repeatable tooling or recovery materially requires it. A continuation resolves the exact current workspace identity from authorized evidence, not recency or retired history. The execution surface does not grant authorization or waive any applicable quality, rights, truth or independent acceptance requirement.
+
+Recover the owner outcome, inspect relevant authoritative sources, research and challenge alternatives, select an admissible method, execute with current tools, independently inspect actual results and preserve validated learning. These are recursive responsibilities, not a prescribed order or a requirement to create a work packet for each conversation. Durable work uses the project brief, versioned assets, exact decision receipts and a demand-specific DAG; independent branches may proceed together, and a correction can reopen an earlier decision. A delivery or release requires only the applicable domain-specific gates, not unrelated video-production stages.
 
 For a durable owner task, give `requirements.decision_id` an exact unique ID when planning; after current inputs and decision evidence are available, use `vga-studio decision PROJECT RECEIPT.json` with that `decision_id` and `task_id` plus the existing competing-cause/alternative fields. The engine derives the binding from actual current brief, task contract and input artifact bytes. Unbound/stale branches cannot be claimed or completed; unrelated admitted branches may proceed. Revise a stale task to a new decision ID and reopen it after re-investigation. This local check is not CAOS activation, verified external research, a permission grant, or semantic acceptance. Direct non-task session actions still require CAOS governance and appropriate independent evidence.
 

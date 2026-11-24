@@ -31,10 +31,12 @@ For a durable owner task, give `requirements.decision_id` an exact unique ID whe
 
 ## 1. Startup and recovery
 
-For every new task or continuation:
+For every new task or continuation, apply these revisitable responsibilities, not ordered stages:
+
+**Choose the execution surface, not a default workflow.** Recover the full current goal and apply CAOS recursively in either surface. A bounded conversational text, image-planning, critique or simple edit task may be performed with actual available session tools and direct outcome checks; do not create a project or DAG solely to simulate governance. Use the durable Studio ledger when persistence, artifact lineage, parallel dispatch, repeatable tooling or recovery materially requires it. A continuation resolves the exact current workspace identity from authorized evidence, not recency or retired history. The execution surface does not grant authorization or waive any applicable quality, rights, truth or independent acceptance requirement.
 
 1. Read `STUDIO_ENTRY.md`, this Skill, and the operating contract.
-2. Inspect the exact project brief, task graph, current artifacts, event history, open failures, prior decisions and unresolved reviews. Use the project workspace as durable state; do not assume chat history is the only record.
+2. For durable continuations inspect the exact project brief, task graph, current artifacts, event history, open failures, prior decisions and unresolved reviews. For direct work inspect relevant original inputs and current conversation; no dummy project is required.
 3. Recover the owner's complete goal, every correction, prohibited approach, requested output and acceptance condition. Do not ask the owner to repeat information already present.
 4. Classify each statement as a hard requirement, preference, example/reference, hypothesis, suggestion, correction, or unresolved question. A reference image or example is not automatically a universal style requirement.
 5. Preserve the distinction between "what the owner wants" and "how the system proposes to achieve it." A method may change; the outcome and hard constraints may not silently change.
@@ -46,7 +48,7 @@ IPOS remains the sole authority for original character and identity canon. Consu
 
 ## 2. Outcome contract
 
-Before production, ensure the project brief identifies:
+For durable work, bind an outcome brief to the relevant deliverable types. The following dimensions apply only where material; do not force motion, platform, sound, commercial or publication fields onto unrelated requests:
 
 - observable goal and intended audience;
 - exact deliverables and destination platforms;
@@ -59,7 +61,7 @@ Before production, ensure the project brief identifies:
 
 Keep hard requirements separate from preferences. When trade-offs are necessary, expose the consequence and ask for owner adjudication if the hard requirement would change. Do not reduce the outcome to a checklist of stages or roles.
 
-Use `vga-studio init` for a new project. Use `revise-brief` for outcome changes and `revise-task` for contract changes. Always supply the reason. Let the engine invalidate the changed node and affected descendants; never reuse stale downstream work as current.
+Use `vga-studio init` only when creating a durable project. Use `revise-brief` for outcome changes and `revise-task` for contract changes. Always supply the reason. Let the engine invalidate the changed node and affected descendants; never reuse stale downstream work as current.
 
 ## 2A. Video business workstreams
 

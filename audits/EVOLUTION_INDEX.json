@@ -4,9 +4,12 @@
   "revision": "3.0-candidate",
   "updated_at": "2026-11-24",
   "current_open_items": [
-    "Independent exact-head CI and review",
-    "Real multi-demand CAOS session acceptance",
-    "Knowledge lifecycle and executor quality validation"
+    "Exact candidate HEAD CI and independent review",
+    "Whole-system and all subsystem semantic audit, including real professional methods, roles, quality and cross-group contracts",
+    "Real native CAOS activation and recursive decision/effect/feedback behavior across fresh conversations",
+    "Non-task authorization and effect guards, decision dependency propagation, scheduler failure/wait/retry recovery",
+    "Knowledge lifecycle and independent method promotion, source invalidation and CRUD",
+    "Real independent outcomes for text, images, packaging, media transform and original video production"
   ],
   "current_problem_refs": {
     "TASK_INSTANCE_SCOPE_LEAK": "audits/VIDEO_TASK_NEUTRAL_REFACTOR_2026-11-24.md"
@@ -17,7 +20,7 @@
     "ref": "audits/VIDEO_TASK_NEUTRAL_REFACTOR_2026-11-24.md",
     "status": "CANDIDATE_NOT_PROMOTED",
     "base": "9998060b9946f47b4d50aa5c28db51e3428d4a21",
-    "next_action": "Verify exact candidate head and owner-demand acceptance; no task instance may be reactivated."
+    "next_action": "Read live PR #40 head/CI, verify decision admission and professional coverage, continue remaining architecture and real multi-demand acceptance without reviving task instances."
   },
   "recent_resolved_or_promoted": [
     {
@@ -147,10 +150,7 @@
     }
   ],
   "execution_refs": [
-    "docs/media_business_os.md",
     "docs/provider_benchmark_protocol.md",
-    "docs/agent_operability_scenarios.md",
-    "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json",
     "video_growth_agent/media_graph.py",
     "video_growth_agent/editorial_planning.py",
     "video_growth_agent/plan_graph_bridge.py",
@@ -162,8 +162,6 @@
     "video_growth_agent/experiments.py",
     "video_growth_agent/business_objects.py",
     "video_growth_agent/business_metrics.py",
-    "video_growth_agent/operator_view.py",
-    "video_growth_agent/owner_behavior_admission.py",
     "tests/test_editorial_planning.py",
     "tests/test_plan_graph_bridge.py",
     "tests/test_continuity.py",
@@ -186,12 +184,18 @@
     "video_studio/adapters.py",
     "video_studio/system_audit.py",
     "video_studio/production/handlers.py",
-    "examples/ai-self-media-commercialization.brief.json",
-    "examples/ai-self-media-commercialization.context.json",
-    "examples/ai-self-media-commercialization.tasks.json",
     "tests/test_production_execution.py",
     "tests/test_studio_engine.py",
-    "tests/test_standalone_studio_contract.py"
+    "tests/test_standalone_studio_contract.py",
+    "STUDIO_ENTRY.md",
+    "docs/standalone_video_studio.md",
+    "video_studio/scope.py",
+    "video_studio/data/studio_manifest.json",
+    "video_growth_agent/data/capabilities.json",
+    "video_studio/data/business_feedback.json",
+    "video_studio/production/worker_pool.py",
+    "tests/test_task_neutral_scope.py",
+    "tests/test_professional_capability_architecture.py"
   ],
   "historical_evidence_refs": [
     "audits/VIDEO_0_8_RESUME_CHECKPOINT_2026-10-15.md",

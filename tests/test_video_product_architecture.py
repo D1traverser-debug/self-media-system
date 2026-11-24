@@ -28,7 +28,8 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
     assert governance["runtime_controller"] is False
 
     assert manifest["domain_authority"]["project_index"] == "projects/PROJECT_INDEX.json"
-    assert manifest["domain_authority"]["product_requirements"] == "docs/product_requirements.md"
+    assert manifest["domain_authority"]["product_requirements"] == "docs/standalone_video_studio.md"
+    assert manifest["domain_authority"]["historical_product_requirements_ref"] == "docs/product_requirements.md"
     assert manifest["domain_authority"]["architecture"] == "docs/standalone_video_studio.md"
     assert manifest["domain_authority"]["integrated_business_flywheel"] == "video_studio/data/business_feedback.json"
     assert manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"

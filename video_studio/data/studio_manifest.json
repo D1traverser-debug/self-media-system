@@ -304,7 +304,14 @@
       "patterns": "video_growth_agent/data/coordination-policy.json",
       "parallelism": "ONLY_INDEPENDENT_DECLARED_DEPENDENCIES",
       "loops": "EVIDENCE_TRIGGERED_REDECISION_AND_REVISED_DAG_NOT_FIXED_SEQUENCE"
-    }
+    },
+    "execution_surfaces": {
+      "DIRECT_SESSION": "CURRENT_AVAILABLE_TOOL_AND_OUTCOME_VERIFICATION__NO_MANDATORY_LEDGER",
+      "DURABLE_STUDIO": "VERSIONED_TASKS_ARTIFACTS_DECISIONS_AND_RECOVERY",
+      "selection": "CAOS_GOVERNED_BY_ACTUAL_NEED_NOT_DEFAULT_STAGE",
+      "native_caos_assurance": "NOT_VERIFIED"
+    },
+    "layers_semantics": "RESPONSIBILITY_LEVELS_NOT_SEQUENTIAL_STAGES__CAOS_GOVERNS_ACROSS_ALL_LEVELS"
   },
   "knowledge_lifecycle": {
     "index": "video_studio/data/knowledge_catalog.json",

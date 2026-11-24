@@ -1084,11 +1084,16 @@ class StudioEngine:
                 "inputs": inputs, "assurance": "LOCAL_STRUCTURAL_BINDING_ONLY"}
 
     def _require_task_decision(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> None:
-        from .scope import EPOCH
+        from .scope import EPOCH, validate_task_binding
         brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
         if brief.get("scope_epoch") != EPOCH:
             return  # isolated historical regression compatibility
-        decision_id = _loads(task["requirements_json"], {}).get("decision_id")
+        requirements = _loads(task["requirements_json"], {})
+        try:
+            validate_task_binding(brief, {"requirements": requirements})
+        except ValueError as exc:
+            raise GateError(str(exc)) from exc
+        decision_id = requirements.get("decision_id")
         if not isinstance(decision_id, str) or not _ID.fullmatch(decision_id):
             raise GateError("current owner task requires an exact decision_id")
         row = connection.execute(
@@ -1129,9 +1134,6 @@ class StudioEngine:
                 query += " ORDER BY priority DESC,created_at,task_id"
                 row = None
                 for candidate in connection.execute(query, query_params).fetchall():
-                    from .scope import validate_task_binding
-                    validate_task_binding(_loads(self._project_row(connection, project_id)["brief_json"], {}),
-                                          {"requirements": _loads(candidate["requirements_json"], {})})
                     try:
                         self._require_task_decision(connection, project_id, candidate)
                     except GateError:

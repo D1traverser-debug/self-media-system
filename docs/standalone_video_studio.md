@@ -55,7 +55,9 @@ CAOS governs every owner-facing Video conversation, decision and action, includi
 
 ## 3. Goal recovery and requirement governance
 
-Every project brief should record:
+**Choose the execution surface, not a default workflow.** Recover the full current goal and apply CAOS recursively in either surface. A bounded conversational text, image-planning, critique or simple edit task may be performed with actual available session tools and direct outcome checks; do not create a project or DAG solely to simulate governance. Use the durable Studio ledger when persistence, artifact lineage, parallel dispatch, repeatable tooling or recovery materially requires it. A continuation resolves the exact current workspace identity from authorized evidence, not recency or retired history. The execution surface does not grant authorization or waive any applicable quality, rights, truth or independent acceptance requirement.
+
+Every durable project brief should record the applicable dimensions:
 
 - `goal`: the observable result the owner wants;
 - `audience`: intended viewer and their prior knowledge;
@@ -242,7 +244,7 @@ The attestation JSON should identify `reviewer_kind`, `execution_mode`, `blind_r
 
 ### 13.1 Task-neutral intake and planning
 
-For each new demand, use `vga-studio intake REQUEST.json` with a JSON object containing the owner's exact goal and mode NEW. For continuation provide mode RESUME and the exact workspace project_id. No default project, previous brief, preset tasks, IP or source media are selected. A retired repository identity is not resumable. The route is a mechanical projection; CAOS session governance and independently verified outcomes remain separate.
+For each new durable demand, use `vga-studio intake REQUEST.json` with a JSON object containing the owner's exact goal and mode NEW. For continuation provide mode RESUME and the exact workspace project_id. No default project, previous brief, preset tasks, IP or source media are selected. A retired repository identity is not resumable. The route is a mechanical projection; CAOS session governance and independently verified outcomes remain separate.
 
 Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Initialize a fresh owner project with `init PROJECT --brief BRIEF.json --owner-task`; `requirements.deliverable_refs` on each task must reference exact current brief deliverable names. The local marker is an epoch/identity check, never evidence of cognition. Mechanical offline regression fixtures deliberately do not carry that marker. The CLI defaults to owner scope; `--offline-fixture` requires an explicit separate root and cannot enter an owner ledger. Only a current owner requirement or verified input can add scope. Examples below are isolated regression fixtures, not task templates or current work.
 
