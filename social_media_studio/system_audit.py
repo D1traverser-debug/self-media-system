@@ -28,6 +28,40 @@ def _authority_paths(root: Path, manifest_path: Path, manifest: dict[str, Any]) 
     }
 
 
+def _brand_violations(root: Path) -> list[str]:
+    """Inspect active source identities, not archived video evidence."""
+    paths = [
+        root / "pyproject.toml",
+        root / "README.md",
+        root / "STUDIO_ENTRY.md",
+        root / ".github/workflows/ci.yml",
+        root / "docs/standalone_social_media_studio.md",
+        root / "docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md",
+    ]
+    for folder in ("social_media_studio", "skills/social-media-studio"):
+        directory = root / folder
+        if directory.is_dir():
+            paths.extend(p for p in directory.rglob("*")
+                         if p.is_file() and p.suffix in {".py", ".json", ".md", ".yml", ".toml"})
+    retired = (
+        "video" + "_studio", "video" + "_growth_agent", "vga" + "-",
+        "VGA" + "_", "VIDEO" + "_GROWTH_AGENT",
+        "Video" + " Growth Agent", "Universal" + " Content Studio",
+    )
+    violations = []
+    for candidate in paths:
+        if not candidate.is_file():
+            continue
+        body = candidate.read_text(encoding="utf-8")
+        for token in retired:
+            if token in body:
+                violations.append(f"{candidate.relative_to(root)}: retired identifier {token}")
+    for old in ("video" + "_studio", "video" + "_growth_agent", "skills/video" + "-growth-agent"):
+        if (root / old).exists():
+            violations.append(f"retired top-level path remains: {old}")
+    return sorted(set(violations))
+
+
 def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     """Audit the standalone Social Media Studio contract without invoking CAOS or paid providers.
 
@@ -121,6 +155,18 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         "governance": governance,
     })
 
+    brand_violations = _brand_violations(root)
+    product_identity_ok = (
+        studio_manifest.get("product_name") == "Social Media Studio"
+        and studio_manifest.get("product_name_zh") == "自媒体系统"
+        and studio_manifest.get("owner") == "SOCIAL_MEDIA_STUDIO"
+        and pyproject["project"]["name"] == "social-media-studio"
+        and pyproject["project"]["scripts"] == {"sms-studio": "social_media_studio.cli:main"}
+        and not brand_violations
+    )
+    _check(checks, "social_media_product_identity_no_active_legacy_aliases",
+           product_identity_ok, {"violations": brand_violations})
+
     from .scope import resolve_intake
     index = _read_json(root / "projects" / "PROJECT_INDEX.json")
     admission = studio_manifest.get("task_admission", {})
@@ -133,7 +179,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         and set(admission.get("retired_project_ids", [])) == retired_ids
         and all(item["status"] == "RETIRED_EVIDENCE_ONLY" and not item["default_for_generic_domain_intent"] for item in index["projects"])
     )
-    with tempfile.TemporaryDirectory(prefix="vga-intake-") as scope_root:
+    with tempfile.TemporaryDirectory(prefix="sms-intake-") as scope_root:
         route = resolve_intake(scope_root, {"mode": "NEW", "goal": "Create a short original caption"})
         task_neutral = task_neutral and route["project_id"] is None and route["selected_task_graph"] is None
         for retired_id in retired_ids:
@@ -386,7 +432,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     _check(checks, "program_authority_refs_are_digest_bound_inputs", not authority_failures, authority_failures)
 
     graph_failures: list[str] = []
-    with tempfile.TemporaryDirectory(prefix="vga-standalone-audit-") as temp_root:
+    with tempfile.TemporaryDirectory(prefix="sms-standalone-audit-") as temp_root:
         for project_id, brief_name, tasks_name in (
             ("explainer", "technology-explainer.brief.json", "technology-explainer.tasks.json"),
             ("satire", "news-fictional-media.brief.json", "news-fictional-media.tasks.json"),

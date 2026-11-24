@@ -69,7 +69,7 @@ class PythonFrameRenderer:
         for key in ("LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH", "SYSTEMROOT", "WINDIR", "TEMP", "TMP"):
             if os.environ.get(key):
                 env[key] = os.environ[key]
-        with tempfile.TemporaryDirectory(prefix="vga-frame-", dir=root) as temp_dir:
+        with tempfile.TemporaryDirectory(prefix="sms-frame-", dir=root) as temp_dir:
             temp = Path(temp_dir)
             config_path = temp / "worker-config.json"
             config = {

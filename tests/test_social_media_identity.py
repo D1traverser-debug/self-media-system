@@ -46,3 +46,12 @@ def test_startup_contract_uses_self_media_as_product_scope():
         content = (ROOT / rel).read_text(encoding="utf-8")
         for stale in ("Video-owned", "Video-domain requirements", "Video runtime", "Video work", "Video conversations"):
             assert stale not in content, (rel, stale)
+
+
+def test_repository_audit_detects_retired_runtime_prefix(tmp_path):
+    from social_media_studio.system_audit import _brand_violations
+    assert _brand_violations(ROOT) == []
+    folder = tmp_path / "social_media_studio"
+    folder.mkdir()
+    (folder / "rogue.py").write_text("identifier = " + repr("vga" + "-old"), encoding="utf-8")
+    assert any("rogue.py" in finding for finding in _brand_violations(tmp_path))

@@ -27,7 +27,7 @@ def _run_with_heartbeat(
                 heartbeat_errors.append(exc)
                 return
 
-    heartbeat_thread = Thread(target=keep_lease_alive, name=f"vga-lease-{task_id}", daemon=True)
+    heartbeat_thread = Thread(target=keep_lease_alive, name=f"sms-lease-{task_id}", daemon=True)
     heartbeat_thread.start()
     try:
         result = run_claimed_tool_task(engine, project_id, task_id, worker_id, claim_token)
@@ -98,7 +98,7 @@ def run_ready_tool_tasks(
         if not claims:
             break
 
-        with ThreadPoolExecutor(max_workers=len(claims), thread_name_prefix="vga-tool") as pool:
+        with ThreadPoolExecutor(max_workers=len(claims), thread_name_prefix="sms-tool") as pool:
             futures = {
                 pool.submit(
                     _run_with_heartbeat, engine, project_id, packet,

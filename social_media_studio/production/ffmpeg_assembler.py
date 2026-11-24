@@ -173,7 +173,7 @@ class FfmpegAssembler:
             + f"atrim=duration={spec.duration_seconds:.6f},asplit=2[aacmix][wavmix]"
         )
 
-        with tempfile.TemporaryDirectory(prefix="vga-render-", dir=root) as temp_dir:
+        with tempfile.TemporaryDirectory(prefix="sms-render-", dir=root) as temp_dir:
             filter_script = Path(temp_dir) / "filter-complex.txt"
             filter_script.write_text(";\n".join(filters) + "\n", encoding="utf-8")
             command = ["ffmpeg", "-hide_banner", "-nostdin", "-v", "error", "-xerror", "-n"]

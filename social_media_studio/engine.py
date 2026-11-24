@@ -1600,7 +1600,7 @@ class StudioEngine:
                     )
                     if transferred_rights_refs is not None:
                         metadata["rights_evidence_refs"] = transferred_rights_refs
-                with tempfile.TemporaryDirectory(prefix="vga-cross-project-transfer-") as temp_dir:
+                with tempfile.TemporaryDirectory(prefix="sms-cross-project-transfer-") as temp_dir:
                     snapshot = Path(temp_dir) / source_path.name
                     shutil.copy2(source_path, snapshot)
                     if _sha256(snapshot) != expected_digest or _sha256(source_path) != expected_digest:

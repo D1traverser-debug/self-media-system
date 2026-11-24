@@ -666,7 +666,7 @@ def render_programmatic_graphic(
     output.parent.mkdir(parents=True, exist_ok=True)
     font_digest = ""
     with tempfile.TemporaryDirectory(
-        prefix=".vga-graphic-", dir=output.parent,
+        prefix=".sms-graphic-", dir=output.parent,
     ) as work:
         workdir = Path(work)
         render_temp = workdir / "candidate.mp4"
