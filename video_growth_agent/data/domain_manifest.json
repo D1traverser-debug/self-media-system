@@ -56,17 +56,22 @@
     "media_rule_root": "skills/video-growth-agent/references",
     "canonical_evolution_entrypoint": "audits/EVOLUTION_INDEX.json",
     "integrated_business_flywheel": "video_studio/data/business_feedback.json",
-    "external_identity_authority": {
-      "system": "IP_STUDIO_OS",
-      "contract": "IPOS Video Identity Bundle schema 1.0",
-      "rule": "IPOS is the sole creative identity authority; Video imports exact owner-approved versions locally and never rewrites canon.",
-      "business_membership": "INTERNAL_CONTENT_STUDIO_ORIGINAL_IDENTITY_SUBSYSTEM",
-      "source_custody": "SEPARATE_PRIVATE_IPOS_CANON_AND_INSTALLED_SKILL",
-      "current_owner_state": "READ_CURRENT_AUTHORIZED_IPOS_SOURCE_ON_DEMAND__NO_HISTORIC_SNAPSHOT_PROMOTION"
-    },
     "canonical_runtime_manifest": "video_studio/data/studio_manifest.json",
     "historical_product_requirements_ref": "docs/product_requirements.md",
-    "identity_context": "video_studio/domain/identity.py"
+    "identity_context": "video_studio/domain/identity.py",
+    "internal_original_identity_subsystem": {
+      "subsystem_id": "original_identity_ipos",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "implementation_source": "video_growth_agent/ip_identity.py",
+      "current_design_route": "video_studio/domain/identity.py",
+      "specialist_source_system": "IP_STUDIO_OS",
+      "identity_export_schema": "video_growth_agent/data/ipos_video_identity_bundle.schema.json",
+      "canon_custody": "SEPARATELY_MAINTAINED_PRIVATE_IPOS_OWNER_STATE",
+      "owner_approval_required": true,
+      "studio_mutation_of_canon": false,
+      "historical_external_canonicity_label": "RETIRED_PROJECT_SNAPSHOT_ONLY",
+      "current_authority": "OWNER_APPROVED_CURRENT_IPOS_EXPORT_NOT_HISTORICAL_R39"
+    }
   },
   "retired_active_surface": {
     "continuity_directory_allowed": false,

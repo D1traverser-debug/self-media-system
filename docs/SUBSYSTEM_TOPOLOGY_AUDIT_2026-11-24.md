@@ -24,3 +24,8 @@ Source line inventory, actual import graph, active/legacy distinctions and domai
 ## Adversarial repository checks
 
 All Git-tracked files now get a SHA-256 of their original bytes, and all JSON files are parsed; the audit still does not semantically judge each sentence. The installed CLI has its own CI step. Four negative controls create isolated source copies and verify that an orphan Python module, a live import into old StudioRuntime, a falsely external IPOS/duplicated executor, and a CAOS peer wrongly inheriting Video task authority are all rejected. No real owner files or IPOS state are copied into tests; source checkout files only.
+
+
+## Authority-field correction: internal IPOS, historical R39 remains historical
+
+The currently active domain_manifest previously used an object key named external_identity_authority, even though the object body claimed internal product membership. This ambiguous label could cause exactly the user's prior routing failure. The active key is now internal_original_identity_subsystem with explicit code/source path, internal product ownership, separate private canon custody, user approval and no Video canon write permission. Historical PROGRAM_STATE/IPOS_INTEGRATION_STATE R39 snapshots retain their literal old EXTERNAL_CANON_AUTHORITY_IPOS values because they are immutable historical evidence; their tests are renamed to indicate historical snapshots, not current business ownership. Current subsystem scanner fails if the old active key reappears.

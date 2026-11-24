@@ -195,6 +195,18 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             errors.append(f"cross-system authority mistakenly merged: {item.get('id')}")
     if cat.get("current_runtime") != "video_studio.engine.StudioEngine":
         errors.append("multiple or wrong durable control authority")
+    try:
+        active_domain = json.loads((root / "video_growth_agent/data/domain_manifest.json")
+                                   .read_text(encoding="utf-8"))["domain_authority"]
+        identity_source = active_domain.get("internal_original_identity_subsystem", {})
+        if "external_identity_authority" in active_domain:
+            errors.append("misleading old external identity key remains current authority")
+        if (identity_source.get("product_membership") != "INTERNAL_CONTENT_STUDIO"
+                or identity_source.get("subsystem_id") != "original_identity_ipos"
+                or identity_source.get("studio_mutation_of_canon") is not False):
+            errors.append("internal IPOS product authority contradicts source custody")
+    except (OSError, ValueError, KeyError) as exc:
+        errors.append(f"current IPOS domain authority cannot be verified: {exc}")
     if cat.get("boundaries", {}).get("ipos", {}).get("product_membership") != "INTERNAL_CONTENT_STUDIO":
         errors.append("IPOS product ownership misidentified")
     if owners.get("video_growth_agent/ip_identity.py") != "original_identity_ipos":

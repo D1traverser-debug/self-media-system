@@ -106,7 +106,7 @@ def test_video_domain_problem_recovery_is_video_owned_and_caos_governance_is_ext
     assert prior["production_ci_run"] == 38690550495
 
 
-def test_ipos_r39_is_the_external_identity_authority_and_h1_is_retired():
+def test_historical_ipos_r39_snapshot_is_retained_without_current_authority():
     state = load("projects/ai-self-media-commercialization/PROGRAM_STATE.json")
     integration = load("projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json")
     graph = load("projects/ai-self-media-commercialization/SUBTASK_GRAPH.json")

@@ -61,7 +61,7 @@ def test_generic_intents_never_resume_retired_project_instances():
                and not item["default_for_generic_domain_intent"] for item in index["projects"])
 
 
-def test_integrated_program_couples_four_business_workstreams_and_uses_ipos_as_external_canon_authority():
+def test_retired_integrated_program_preserves_original_ipos_source_evidence_only():
     program = load("projects/ai-self-media-commercialization/PROGRAM_STATE.json")
     flywheel = load("projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json")
     manifest = load("projects/ai-self-media-commercialization/PROJECT_MANIFEST.json")

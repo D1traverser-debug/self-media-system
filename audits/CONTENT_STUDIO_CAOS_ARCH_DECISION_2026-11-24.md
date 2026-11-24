@@ -70,3 +70,7 @@ Compared retaining globally mandatory video lookdev/rough-cut stages (reject for
 
 ## Original-system ownership correction beyond IPOS
 Opened original 2026-11-21 Video full audit, Meme/X cross-system decision record and CAOS parent architecture manual from the user's Library, and checked live peer repository names. X short-form and X Articles are Video's own internal editorial scope; novel, financial-writing and A-share agent systems are CAOS sibling business domains, not members of this Video runtime. Earlier assistant routing these as outside or inheriting cross-project tasks was wrong. Added nested internal capability identities, peer method-only boundaries and type-to-internal-subsystem routing for all ten declared deliverable types. Added research capability as an explicitly unimplemented internal group, not a fake remote provider. This is source-based structural admission, not creative writing quality or live CAOS activation.
+
+
+## Current IPOS namespace ambiguity closed
+Original file video_growth_agent/data/domain_manifest.json had external_identity_authority as its current key despite declaring internal product membership, and legacy historical tests' names reinforced the error. Compared altering historical snapshots (would destroy provenance) vs retaining misleading current key (would preserve drift). Selected renaming current authority to internal_original_identity_subsystem, keeping old R39 values only as historical facts, and failing static source audit on any recurrence. No private canonical files touched.

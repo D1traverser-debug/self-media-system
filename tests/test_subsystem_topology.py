@@ -139,3 +139,15 @@ def test_private_cross_system_peer_cannot_inherit_video_execution_rights(tmp_pat
     report=audit_subsystems(tmp_path)
     assert report["pass"] is False
     assert any("cross-system authority mistakenly merged" in x for x in report["violations"])
+
+
+def test_current_domain_authority_is_internal_ipos_and_old_external_wording_is_historical():
+    dom=json.loads((ROOT/"video_growth_agent/data/domain_manifest.json").read_text())
+    auth=dom["domain_authority"]
+    assert "external_identity_authority" not in auth
+    identity=auth["internal_original_identity_subsystem"]
+    assert identity["product_membership"]=="INTERNAL_CONTENT_STUDIO"
+    assert identity["implementation_source"]=="video_growth_agent/ip_identity.py"
+    assert identity["studio_mutation_of_canon"] is False
+    assert identity["owner_approval_required"] is True
+    assert audit_subsystems(ROOT)["pass"]
