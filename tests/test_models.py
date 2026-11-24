@@ -23,3 +23,10 @@ def test_packaged_runtime_resources_are_single_repository_authority():
     assert data_path("team.md").read_text(encoding="utf-8") == (
         root / "skills/video-growth-agent/references/team.md"
     ).read_text(encoding="utf-8")
+    roles = json.loads(data_path("roles.json").read_text(encoding="utf-8"))
+    assert roles["canonical_prompt_source"] == "video_growth_agent/data/team.md"
+    assert roles["documentation_projection"] == "skills/video-growth-agent/references/team.md"
+    from video_growth_agent.roles import RoleRegistry
+    registry = RoleRegistry()
+    assert set(registry.sections) == {entry["prompt_section"] for entry in roles["roles"].values()}
+    assert "not permanently instantiated agents" in data_path("team.md").read_text(encoding="utf-8")
