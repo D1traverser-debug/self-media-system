@@ -846,6 +846,12 @@ class StudioEngine:
                 new_status = "WAITING_INPUT"
             else:
                 new_status = "READY"
+            # External waiting is an intentional owner/worker dependency, not
+            # the same as waiting for a declared file. Only an explicit reopen
+            # releases it, even if all declared artifact inputs already exist.
+            wait_reason = _loads(row["error_json"], {})
+            if new_status == "READY" and isinstance(wait_reason, dict) and wait_reason.get("explicit_external_wait") is True:
+                new_status = "WAITING_INPUT"
             if new_status != status:
                 connection.execute(
                     "UPDATE tasks SET status=?,updated_at=? WHERE project_id=? AND task_id=?",
@@ -1135,6 +1141,8 @@ class StudioEngine:
                 row = None
                 for candidate in connection.execute(query, query_params).fetchall():
                     try:
+                        if candidate["attempts"] >= candidate["max_attempts"]:
+                            raise GateError("task retry budget exhausted; revise task contract before re-admission")
                         self._require_task_decision(connection, project_id, candidate)
                     except GateError:
                         if task_id is not None:
@@ -1705,9 +1713,10 @@ class StudioEngine:
             self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
             connection.execute(
                 "UPDATE tasks SET status='WAITING_INPUT',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
-                (_json({"reason": reason}), _iso(), project_id, task_id),
+                (_json({"reason": reason, "explicit_external_wait": True}), _iso(), project_id, task_id),
             )
-            self._event(connection, project_id, "TASK", task_id, "TASK_WAITING_INPUT", {"reason": reason})
+            self._event(connection, project_id, "TASK", task_id, "TASK_WAITING_INPUT",
+                        {"reason": reason, "explicit_external_wait": True})
             connection.commit()
 
     def record_decision(self, project_id: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -2348,14 +2357,31 @@ class StudioEngine:
             events = connection.execute("SELECT COUNT(*) AS count FROM events WHERE project_id=?", (project_id,)).fetchone()["count"]
             open_failures = connection.execute("SELECT COUNT(*) AS count FROM failures WHERE project_id=? AND status='OPEN'", (project_id,)).fetchone()["count"]
             decision_blocked = {}
-            for task in connection.execute("SELECT * FROM tasks WHERE project_id=? AND status='READY'", (project_id,)):
+            retry_exhausted = {}
+            explicit_waits = {}
+            rows = connection.execute("SELECT * FROM tasks WHERE project_id=?", (project_id,)).fetchall()
+            for task in rows:
+                detail = _loads(task["error_json"], {})
+                if (task["status"] == "WAITING_INPUT" and isinstance(detail, dict)
+                        and detail.get("explicit_external_wait") is True):
+                    explicit_waits[task["task_id"]] = detail.get("reason", "external dependency")
+                if task["status"] != "READY":
+                    continue
+                if task["attempts"] >= task["max_attempts"]:
+                    retry_exhausted[task["task_id"]] = {
+                        "attempts": task["attempts"], "max_attempts": task["max_attempts"]}
+                    continue
                 try:
                     self._require_task_decision(connection, project_id, task)
                 except GateError as exc:
                     decision_blocked[task["task_id"]] = str(exc)
+        unavailable = set(decision_blocked) | set(retry_exhausted)
         return {"project": project, "task_counts": counts, "ready_tasks": ready,
-                "admitted_ready_tasks": [task_id for task_id in ready if task_id not in decision_blocked],
-                "decision_blocked_tasks": decision_blocked, "open_failures": open_failures, "event_count": events}
+                "admitted_ready_tasks": [task_id for task_id in ready if task_id not in unavailable],
+                "decision_blocked_tasks": decision_blocked,
+                "retry_exhausted_tasks": retry_exhausted,
+                "explicit_external_wait_tasks": explicit_waits,
+                "open_failures": open_failures, "event_count": events}
 
     def resume(self, project_id: str, *, event_limit: int = 40) -> dict[str, Any]:
         """Reconstruct an actionable project handoff from durable Video state only."""
@@ -2397,6 +2423,10 @@ class StudioEngine:
             next_action = "Verify the external capability, rights, availability and cost; obtain owner authorization before any paid operation."
         elif status["decision_blocked_tasks"]:
             next_action = "Re-investigate missing or stale scoped decisions and bind current evidence before claiming affected tasks."
+        elif status["retry_exhausted_tasks"]:
+            next_action = "Repair and revise exhausted task contracts; reopen alone does not grant more attempts."
+        elif status["explicit_external_wait_tasks"]:
+            next_action = "Verify the actual external dependency and explicitly reopen waiting tasks when satisfied."
         elif any(task["status"] == "WAITING_INPUT" for task in tasks):
             next_action = "Import or produce the missing declared inputs, then refresh the task graph."
         elif unfinished:
@@ -2409,6 +2439,8 @@ class StudioEngine:
             "task_counts": status["task_counts"],
             "ready_by_executor": ready_by_executor,
             "decision_blocked_tasks": status["decision_blocked_tasks"],
+            "retry_exhausted_tasks": status["retry_exhausted_tasks"],
+            "explicit_external_wait_tasks": status["explicit_external_wait_tasks"],
             "unfinished_tasks": [
                 {"task_id": task["task_id"], "executor": task["executor"], "status": task["status"],
                  "depends_on": task["depends_on"], "inputs": task["inputs"], "outputs": task["outputs"]}

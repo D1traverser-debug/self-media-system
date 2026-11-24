@@ -1318,3 +1318,48 @@ def test_learning_self_validation_cannot_promote_and_retirement_is_checked(tmp_p
     follow = engine.record_learning("demo", {**payload, "learning_id": "method-two"})
     assert follow["status"] == "CANDIDATE"
     assert [x["learning_id"] for x in engine.list_learning("demo")] == ["method-two"]
+
+
+def test_explicit_external_wait_survives_refresh_and_does_not_starve_unrelated_task(tmp_path):
+    engine = make_engine(tmp_path)
+    engine.add_tasks("demo", [task("awaiting"), task("independent")])
+    packet = engine.claim_next("demo", "worker", task_id="awaiting")
+    engine.wait_for_input("demo", "awaiting", "worker", packet["claim"]["claim_token"],
+                          "owner must supply a new review decision")
+    for _ in range(3):
+        engine.refresh("demo")
+    states = {x["task_id"]: x["status"] for x in engine.list_tasks("demo")}
+    assert states["awaiting"] == "WAITING_INPUT"
+    assert states["independent"] == "READY"
+    assert engine.status("demo")["explicit_external_wait_tasks"]["awaiting"].startswith("owner")
+    assert engine.resume("demo")["explicit_external_wait_tasks"]["awaiting"].startswith("owner")
+    assert engine.claim_next("demo", "worker-next", task_id="awaiting") is None
+    next_packet = engine.claim_next("demo", "worker-next")
+    assert next_packet["task"]["task_id"] == "independent"
+    engine.reopen("demo", "awaiting", "owner supplied the missing decision")
+    assert engine.list_tasks("demo")[0]["status"] in {"READY", "RUNNING"}
+    packet = engine.claim_next("demo", "worker-final", task_id="awaiting")
+    assert packet and packet["task"]["task_id"] == "awaiting"
+
+
+def test_reopen_does_not_reset_exhausted_retry_budget_without_real_contract_revision(tmp_path):
+    from video_studio.engine import GateError
+    engine = make_engine(tmp_path)
+    spec = task("exhausted")
+    spec["max_attempts"] = 1
+    engine.add_tasks("demo", [spec, task("unrelated")])
+    first = engine.claim_next("demo", "worker", task_id="exhausted")
+    engine.fail_task("demo", "exhausted", "worker", first["claim"]["claim_token"],
+                     {"problem": "method not applicable"}, retryable=True)
+    engine.reopen("demo", "exhausted", "retry without a new method is not allowed")
+    assert engine.status("demo")["retry_exhausted_tasks"]["exhausted"]["attempts"] == 1
+    assert "exhausted" not in engine.status("demo")["admitted_ready_tasks"]
+    with pytest.raises(GateError, match="retry budget exhausted"):
+        engine.claim_next("demo", "worker-two", task_id="exhausted")
+    other = engine.claim_next("demo", "worker-two")
+    assert other and other["task"]["task_id"] == "unrelated"
+    engine.revise_task("demo", "exhausted", {"acceptance": {"method": "revised and verified"}},
+                       reason="use a researched alternative method")
+    assert not engine.status("demo")["retry_exhausted_tasks"]
+    permitted = engine.claim_next("demo", "worker-three", task_id="exhausted")
+    assert permitted and permitted["claim"]["attempt"] == 1
