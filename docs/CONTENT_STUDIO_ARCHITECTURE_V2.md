@@ -4,7 +4,7 @@
 **Owner:** VIDEO_GROWTH_AGENT (repository name retained for compatibility)  
 **Frozen implementation baseline:** PR #40, commit 1cbc3acf0491ecaa297576372f80163d8c255606; 370-test exact-head CI 45416359779 PASS.  
 **Governance authority:** owner intent + corrections; CAOS parent Skill and private owner original, read-only; child domain decisions and execution remain Video-owned.  
-**External canon:** original persistent characters belong only to IPOS.  
+**Identity subsystem:** IPOS is a professional identity-design bounded context WITHIN the Content Studio product architecture; its current Skill/private Library source and permanent approved canon have independent source custody. No automatic state duplication.  
 **Scope:** design all architecture dimensions before runtime implementation; no change to CAOS source; no old task reactivation, automatic publication or provider authorization.
 
 ## A. Product boundary and invariants
@@ -58,7 +58,7 @@ Primary comparisons (mechanisms, not mandates):
 - USER: original goal, constraints, preferences, effect authorization, owner acceptance, corrections.
 - CAOS parent: recurring, recursively re-enterable cognitive and execution governance, root-cause diagnosis, source qualification, method challenge, independent overall goal assessment. **Read-only source; no child state ownership.** Native first-mile activation NOT_TESTED.
 - CONTENT STUDIO domain: demands, deliverables, craft judgement, planning, local evidence, asset custody, quality/acceptance and optional platform distribution preparation.
-- IPOS: exclusive authority for permanent original identity canon; Studio may import an owner-approved versioned bundle but cannot rewrite canon. Ordinary one-off avatars/temporary visuals do not imply permanent IPOS involvement.
+- ORIGINAL_IDENTITY / IPOS: the nested specialist context of Content Studio for durable creator identity design; real IPOS workflow and canonical state are separately custodied. Video can import an owner-approved versioned bundle, not rewrite canon. One-off avatars do not imply IPOS involvement.
 - PROVIDER/PLATFORM: actual operations and state, available only through current checked interfaces, not inferred from documentation.
 - INDEPENDENT REVIEWER: distinct actor/context where required, with actual artifact readback; an arbitrary reviewer string is not proof of independence.
 
@@ -68,12 +68,13 @@ The existing L0–L6 labels are **responsibility scopes**, never an execution or
 1. **Demand & Portfolio** — current goal, correction sequence, typed deliverables, versioned acceptance, platforms/locales/constraints, optional program context; owns no generated media.
 2. **Research & Understanding** — source media and text, transcription/scene or claim understanding, evidence/fact provenance, intellectual context, epistemic uncertainty.
 3. **Editorial & Language** — argument, structure, original viewpoint, narrative, long-form article, concise copy, jokes, natural Chinese/English, translation/localization.
-4. **Visual & Identity Craft** — composition, visual hierarchy, art direction, cover/portrait, prompt specification, revision, image generation/edit interfaces; respects separate IPOS canon.
-5. **Motion, Sound & Media Operations** — video concept/shot planning, rendering, editing, clips, crop/reframe, enhancement, restoration, strict audio handling, subtitles.
-6. **Platform Packaging & Growth** — platform-specific variant, title/description/tags/cover copy, publication specifications, packaging hypotheses, analytics and experimental learning.
-7. **Evidence, Asset & Knowledge** — immutable source/output versions, lineage, rights, knowledge status, index, search, import/transfer/invalidation, durable episodes.
-8. **Planning, Execution & Effect** — direct mode or existing StudioEngine, dynamic task dependencies, workers, leases, idempotency, actual tool ports and authorization.
-9. **Quality & Independent Acceptance** — typed oracles, technical and craft reviews, owner-goal evaluation, release/admission separation, failure re-entry.
+4. **Visual Craft** — composition, visual hierarchy, art direction, cover/portrait, prompt specification, revision, image generation/edit interfaces and temporary characters.
+5. **Original Identity / IPOS** — nested durable creator and character design, identity research, design, owner approval, versioned canon, and media continuity; its current Skill and private Library remain identity source authority.
+6. **Motion, Sound & Media Operations** — video concept/shot planning, rendering, editing, clips, crop/reframe, enhancement, restoration, strict audio handling, subtitles.
+7. **Platform Packaging & Growth** — platform-specific variant, title/description/tags/cover copy, publication specifications, packaging hypotheses, analytics and experimental learning.
+8. **Evidence, Asset & Knowledge** — immutable source/output versions, lineage, rights, knowledge status, index, search, import/transfer/invalidation, durable episodes.
+9. **Planning, Execution & Effect** — direct mode or existing StudioEngine, dynamic task dependencies, workers, leases, idempotency, actual tool ports and authorization.
+10. **Quality & Independent Acceptance** — typed oracles, technical and craft reviews, owner-goal evaluation, release/admission separation, failure re-entry.
 
 These are **bounded responsibility contexts**, not nine servers, nine compulsory phases or nine permanent workers. A one-sentence task may require only Demand, Editorial, relevant Quality and direct outcome verification.
 
@@ -179,7 +180,7 @@ Review independence is an evidence claim: distinct task/context or actual human/
 - State machines are scoped: Demand ACTIVE/REVISED/CLOSED; Task PENDING/READY/RUNNING/WAITING_EXTERNAL/BLOCKED/FAILED/COMPLETED/STALE/CANCELLED; Artifact CANDIDATE/ACCEPTED/REJECTED/STALE; Method CANDIDATE/VALIDATED_SCOPE/SUPERSEDED/RETIRED. Never conflate current legacy statuses with target design without migration.
 - Append-only events; monotonic revisions; exact CAS or equivalent concurrency control; leases and retry budgets; cancellation; isolated temp files and atomic promotion; multiple workers never double-complete the same effect.
 - Input and prompt injection boundaries: web/plugin text and user assets are data, not policy. Rights/consent/likeness and disclosure are separately checked. Imported assets never imply an external publication grant.
-- Read-only CAOS and IPOS integration adapters; video code must not access their private source through a generic "knowledge CRUD" write path.
+- Read-only CAOS parent integration and internal IPOS specialist bridge. Video cannot mutate IPOS private state via generic knowledge CRUD; only owner-approved versioned canon export may be used downstream.
 - Trace IDs for Demand, Decision, Task, Effect, Artifact, Review, Method; event causality supports replay, missing-data inspection and reversal. Sensitive private originals stay in private destinations; public repository contains mechanism or sanitized test cases only.
 - Operation budget and provider switching: live constraints, failure rate, source cost, risk and quality ceiling matter; no fabricated price or guarantee. Consider serial, parallel, competing candidate and no-operation decisions.
 - User-visible reporting distinguishes requested result, exact files/links, verified effects, unresolved blockers and next legitimate action. No promise of background work without actual automation.
@@ -329,3 +330,25 @@ The owner's explicit prompt-only requests are not necessarily analysis reports o
 ## Q. Identity correction: multi-aspect outputs are variants, not one image with a ratio
 
 Architecture negative probe S07 requires independent 3:4 portrait and 4:3 landscape deliverables under the same creative intent. The initial pure contract wrongly modeled one `shape` per deliverable and no variant identity; this could hide cropping and artifact lineage defects. The revised contract uses an explicit set DeliverableID with two or more VariantIDs and independently declared pixel dimensions, orientation and distinct ratios. Only the content intent may be shared, not the output bytes, composition, typography review, source digests or release evidence. Single STATIC_IMAGE has one primary shape; multi-aspect set cannot pretend one shape covers all. Further platform/localization variant behavior remains a separate bounded contract to validate.
+
+## R. IPOS belongs INSIDE the content product; source custody stays independent
+
+Owner correction: identity design, avatar, character construction, ongoing IP and eventual digital-human/video production are content-system professional abilities. IPOS must not be drawn as an unrelated peer product. **Product containment does not require moving its private canonical Library, changing its existing installed Skill, copying its personal creator goals, or installing a second scheduler.**
+
+Confirmed original implementation: IPOS 1.4.2 is a skills-only professional workflow with its own user goal, active private checkpoint, authority and isolated rendering rules. Video already contains video_growth_agent/ip_identity.py, IPOS Video Identity Bundle 1.0 Schema, five IPOS domain adapters, and identity-specific test coverage. These are downstream consumers, not the full IPOS creation/runtime engine.
+
+Identity intent modes:
+
+| Identity mode | Demand handling | Authorization and scope |
+|---|---|---|
+| TEMPORARY_CHARACTER | normal Visual Craft, one-off cover/avatar/fictional character | no personal IPOS state, no permanent canon claimed |
+| PERSISTENT_IDENTITY_DESIGN | Original Identity / IPOS nested specialist context | proceed with research/design when allowed; owner alone approves permanent identity, and scoped render permission is separate |
+| APPROVED_CANON_USE | any content task referencing persistent IP | read and independently verify current owner-approved exact-version IPOS bundle before a canon-dependent effect |
+| IDENTITY_DERIVATIVE | approved identity to avatar variants, expression/motion parts | versioned approved source and allowed variation/rights constraints; output is a new artifact, not a canon mutation |
+| NO_IDENTITY | text, media repair, non-character content | do not initialize persistent identity or block unrelated production |
+
+The Video legacy projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json points to an old R39 checkpoint and locator, hence is historical evidence, not an active authority. Do not copy present private IPOS candidates or states to public GitHub. No current owner-approved visual canon bundle was independently verified in this audit; a test fixture cannot act as production permission.
+
+The internal IPOS context has a **separate source-of-truth boundary**: installed Skill / current private canonical state -> explicitly approved, versioned export (bundle digest, canon ID, version, rights, approval and scope) -> Video local media graph/shot continuity consumers. Revocation or a source change invalidates only consuming assets, not unrelated content tasks. Canon creation/approval remains in IPOS and with the user; Video may call specialist work as an internal product responsibility, but must not create a competing identity master.
+
+Counterexamples: a temporary avatar does not boot personal-IP work; a long-lived creator identity belongs to the content product; unapproved identity may be designed but not used as approved canon; stale R39 snapshot cannot prove current approval; one affected shot does not block unrelated tasks; no natural-language text or image-request mention grants render, IPOS state mutation, third-party processing or publication.

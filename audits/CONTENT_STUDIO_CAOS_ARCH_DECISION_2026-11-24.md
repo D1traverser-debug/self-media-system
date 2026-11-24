@@ -39,3 +39,6 @@ A first-party user demand explicitly requests prompt design without generation. 
 
 ## Architecture counterexample: multi-aspect set shape conflation
 After M2 source readback, the first typed domain class represented MULTI_ASPECT_IMAGE_SET with only an optional top-level shape. This contradicted the design's independent VariantID and user ratio constraints. Compared inheriting one shape, creating entirely independent demands, and explicit VariantIDs sharing one content intent. Selected explicit variant identity with per-variant shape, ratio and future artifact review, added source-level negative cases for absent, duplicate and same-ratio variants. Pending real image-generation/crop review, no fake image provider. No change to CAOS or IPOS.
+
+## IPOS root architecture correction
+Original assistant conflated external source custody with external product membership. Read installed IPOS Skill 1.4.2 architecture/workflow and current private canonical state, Video original identity bridge and five adapters/tests. Options: duplicate IPOS in Video (reject competing canon), external unrelated product (reject wrong containment), or nested business subsystem with separately maintained source of truth (selected). New S29-S34 positive/negative oracles. Historical R39 snapshot cannot overwrite current private state. No CAOS or IPOS source mutation.

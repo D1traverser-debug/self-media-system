@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.1-design-only",
+  "schema_version": "2.2-design-only",
   "authority": "docs/CONTENT_STUDIO_ARCHITECTURE_V2.md",
   "status": "ARCHITECTURE_CANDIDATE_NO_RUNTIME_AUTHORITY",
   "frozen_head": "1cbc3acf0491ecaa297576372f80163d8c255606",
@@ -358,6 +358,83 @@
       "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
       "runtime_verified": false,
       "forbidden_implicit_effect": "不创建空项目/空DAG"
+    },
+    {
+      "id": "S29",
+      "demand": "在内容系统中设计长期匿名创作者身份",
+      "deliverable_type": "IDENTITY_ASSET",
+      "required_contexts": [
+        "identity_collaboration",
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "使用现行IPOS专业方法研究构思并经用户批准",
+      "forbidden_implicit_effect": "不得把IPOS画成无关业务工作室或自动批准",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S30",
+      "demand": "只做一次性的游戏头像",
+      "deliverable_type": "STATIC_IMAGE",
+      "required_contexts": [
+        "visual_design"
+      ],
+      "owner_outcome_oracle": "临时头像符合构图、风格及用途",
+      "forbidden_implicit_effect": "不得继承长期个人IPOS历史候选",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S31",
+      "demand": "视频使用当前已批准IP角色",
+      "deliverable_type": "IDENTITY_ASSET",
+      "required_contexts": [
+        "identity_collaboration",
+        "motion_production"
+      ],
+      "owner_outcome_oracle": "实际校验身份版本、批准及使用权限",
+      "forbidden_implicit_effect": "不得凭历史快照或虚构bundle证明批准",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S32",
+      "demand": "IPOS尚无最终视觉批准继续研究",
+      "deliverable_type": "IDENTITY_ASSET",
+      "required_contexts": [
+        "identity_collaboration",
+        "understanding_research"
+      ],
+      "owner_outcome_oracle": "合法专业研究继续且不阻塞无关内容",
+      "forbidden_implicit_effect": "不得将文本规格或CI冒充最终身份",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S33",
+      "demand": "旧R39身份接入状态与新私有状态冲突",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "identity_collaboration",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "以实际当前真源消解冲突，历史不销毁",
+      "forbidden_implicit_effect": "不得使用旧快照作为当前决策依据",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
+    },
+    {
+      "id": "S34",
+      "demand": "已批准身份被撤销，其他工作不使用该身份",
+      "deliverable_type": "ANALYSIS_REPORT",
+      "required_contexts": [
+        "identity_collaboration",
+        "verification_delivery"
+      ],
+      "owner_outcome_oracle": "只失效依赖该身份的下游内容",
+      "forbidden_implicit_effect": "不得全局阻塞或复活被撤销批准",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false
     }
   ],
   "global_invariants": [
@@ -383,6 +460,7 @@
     "Every required context maps to a current group ID",
     "Every deliverable type occurs in the architecture contract",
     "All scenarios are design-only until independently reviewed",
-    "No runtime outcome is inferred from semantic source coverage"
+    "No runtime outcome is inferred from semantic source coverage",
+    "Internal IPOS identity bounded context with separately-custodied canon and verified consumer-only bundle; no historical R39 authority"
   ]
 }
