@@ -230,7 +230,8 @@ def test_json_contract_parsers_fail_closed_on_wrong_shapes():
         shot_contract_from_dict({"references": ["not-an-object"]})
 
 
-def test_cli_render_writes_a_receipt_and_reports_unregistered_candidate(tmp_path, capsys):
+def test_cli_render_writes_a_receipt_and_reports_unregistered_candidate(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("VGA_LEGACY_FIXTURE_ROOT", str(tmp_path))
     require_render_tools()
     from video_growth_agent.cli import main
 
@@ -358,7 +359,8 @@ def test_graph_binding_digest_must_match_promoted_exact_version():
     with pytest.raises(ProgrammaticGraphicsError, match="digest mismatch"):
         register_graph_candidate(graph, shot, make_spec(), {})
 
-def test_cli_preflight_rejects_reference_digest_mismatch_before_render(tmp_path, capsys):
+def test_cli_preflight_rejects_reference_digest_mismatch_before_render(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("VGA_LEGACY_FIXTURE_ROOT", str(tmp_path))
     from video_growth_agent.cli import main
 
     graph = make_graph()
@@ -554,7 +556,8 @@ def test_shot_graph_binding_accepts_scene_between_shot_and_sequence():
     validate_shot_graph_bindings(graph, make_shot())
 
 
-def test_cli_preflight_rejects_sequence_ancestry_mismatch_before_render(tmp_path, capsys):
+def test_cli_preflight_rejects_sequence_ancestry_mismatch_before_render(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("VGA_LEGACY_FIXTURE_ROOT", str(tmp_path))
     from video_growth_agent.cli import main
 
     graph = make_graph()
@@ -638,6 +641,7 @@ def test_atomic_publish_does_not_replace_destination_claimed_during_render(tmp_p
     assert output.read_bytes() == competing_bytes
 
 def test_cli_graph_transaction_preserves_review_update_during_render(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("VGA_LEGACY_FIXTURE_ROOT", str(tmp_path))
     import video_growth_agent.cli as cli_module
 
     graph = make_graph()
@@ -692,6 +696,7 @@ def test_cli_graph_transaction_preserves_review_update_during_render(tmp_path, m
     assert "CANDIDATE_REGISTERED" in capsys.readouterr().out
 
 def test_cli_revalidates_promoted_references_after_concurrent_graph_update(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("VGA_LEGACY_FIXTURE_ROOT", str(tmp_path))
     import video_growth_agent.cli as cli_module
 
     graph = make_graph()
@@ -776,6 +781,7 @@ def test_cli_revalidates_promoted_references_after_concurrent_graph_update(tmp_p
 
 
 def test_cli_receipt_publish_preserves_symlink_target_claimed_during_render(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("VGA_LEGACY_FIXTURE_ROOT", str(tmp_path))
     import video_growth_agent.cli as cli_module
 
     request = {
