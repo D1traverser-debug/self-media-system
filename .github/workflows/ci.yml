@@ -34,6 +34,22 @@ jobs:
           assert report['capability_gaps'], report
           print('standalone-video-studio-system-audit: PASS')
           PY
+      - name: Inspect every internal Content Studio subsystem and tracked source
+        run: |
+          vga-studio subsystems --repo-root . > /tmp/content-subsystems.json
+          python - <<'PY'
+          import json
+          report = json.load(open('/tmp/content-subsystems.json', encoding='utf-8'))
+          assert report["pass"], report["violations"]
+          assert report["all_tracked_bytes_inspected"] is True
+          assert report["code_modules"] == report["owned_modules"]
+          assert report["subsystems"] == 16
+          assert report["domain_adapters"] == 17
+          assert report["production_operations"] == 5
+          assert report["real_creative_quality_verified"] is False
+          assert report["native_caos_selection_verified"] is False
+          print("complete-source-topology-structural-audit: PASS")
+          PY
       - name: Run tests
         run: pytest -q
       - name: Smoke test standalone outcome-driven Video Studio

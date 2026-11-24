@@ -16,6 +16,9 @@ def test_every_python_module_and_registered_executor_has_one_real_internal_owner
     assert report["domain_adapters"] == 17
     assert report["production_operations"] == 5
     assert report["unclassified_paths"] == []
+    assert report["all_tracked_bytes_inspected"] is True
+    assert len(report["all_tracked_file_sha256"]) == report["tracked_files"]
+    assert report["json_documents_parsed"] >= 20
     assert report["semantic_line_by_line_complete"] is False
 
 
@@ -78,3 +81,61 @@ def test_owner_route_discloses_unimplemented_research_instead_of_claiming_tool()
     assert r["routes"][0]["primary_internal_subsystem"] == "research_and_understanding"
     assert r["routes"][0]["actual_executor_verified"] is False
     assert r["routes"][0]["independent_outcome_verified"] is False
+
+
+def _isolated_source_checkout(tmp_path):
+    """Only source bytes and catalog, no user workspace or legacy task instances."""
+    from shutil import copy2
+    cat = json.loads((ROOT/"video_studio/data/subsystem_catalog.json").read_text())
+    for group in cat["subsystems"]:
+        for relative in group["code_paths"]:
+            target = tmp_path/relative
+            target.parent.mkdir(parents=True,exist_ok=True)
+            copy2(ROOT/relative,target)
+    target=tmp_path/"video_studio/data/subsystem_catalog.json"
+    target.parent.mkdir(parents=True,exist_ok=True)
+    copy2(ROOT/"video_studio/data/subsystem_catalog.json",target)
+    return cat
+
+
+def test_new_unowned_module_is_rejected_by_full_code_scan(tmp_path):
+    _isolated_source_checkout(tmp_path)
+    orphan=tmp_path/"video_studio/orphan_renderer.py"
+    orphan.write_text("def pretend_to_render(): return True\n")
+    audit=audit_subsystems(tmp_path)
+    assert audit["pass"] is False
+    assert any("UNOWNED Python module" in x and "orphan_renderer.py" in x
+               for x in audit["violations"])
+
+
+def test_active_import_of_old_controller_is_rejected_not_whitelisted(tmp_path):
+    _isolated_source_checkout(tmp_path)
+    source=tmp_path/"video_studio/domain/editorial.py"
+    source.write_text(source.read_text()+"\nfrom video_growth_agent.runtime import StudioRuntime\n")
+    audit=audit_subsystems(tmp_path)
+    assert audit["pass"] is False
+    assert any("reaches old controller" in x and "video_growth_agent.runtime" in x
+               for x in audit["violations"])
+
+
+def test_false_external_ipos_and_duplicate_executor_ownership_are_rejected(tmp_path):
+    cat=_isolated_source_checkout(tmp_path)
+    catalog_path=tmp_path/"video_studio/data/subsystem_catalog.json"
+    ipos=next(x for x in cat["subsystems"] if x["id"]=="original_identity_ipos")
+    ipos["product_membership"]="EXTERNAL_STUDIO"
+    cat["subsystems"][0]["production_operations"].append("ffmpeg_video_audio_copy")
+    catalog_path.write_text(json.dumps(cat,ensure_ascii=False,indent=2))
+    audit=audit_subsystems(tmp_path)
+    assert audit["pass"] is False
+    assert any("subsystem wrongly external: original_identity_ipos" in x for x in audit["violations"])
+    assert any("duplicate operation ownership" in x for x in audit["violations"])
+
+
+def test_private_cross_system_peer_cannot_inherit_video_execution_rights(tmp_path):
+    cat=_isolated_source_checkout(tmp_path)
+    cat["caos_sibling_business_systems"][0]["task_authority_transfer"]=True
+    (tmp_path/"video_studio/data/subsystem_catalog.json").write_text(
+        json.dumps(cat,ensure_ascii=False,indent=2))
+    report=audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("cross-system authority mistakenly merged" in x for x in report["violations"])

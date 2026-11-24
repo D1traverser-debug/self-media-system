@@ -111,6 +111,17 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
                     errors.append(f"duplicate operation ownership: {op}")
                 mapping[op] = sid
     files = _source_files(root)
+    all_file_sha256: dict[str, str] = {}
+    parsed_json_count = 0
+    for tracked in files:
+        try:
+            raw = (root / tracked).read_bytes()
+            all_file_sha256[tracked] = hashlib.sha256(raw).hexdigest()
+            if tracked.endswith(".json"):
+                json.loads(raw.decode("utf-8"))
+                parsed_json_count += 1
+        except (OSError, UnicodeError, ValueError) as exc:
+            errors.append(f"unreadable or malformed tracked source: {tracked}: {exc}")
     python_files = [x for x in files if x.endswith(".py") and
                     x.startswith(("video_studio/", "video_growth_agent/"))]
     for path in python_files:
@@ -204,6 +215,9 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         "owned_modules": len(owners), "subsystems": len(ids),
         "domain_adapters": len(adapter_map), "production_operations": len(operation_map),
         "unclassified_paths": unclassified, "violations": sorted(set(errors)),
+        "all_tracked_file_sha256": all_file_sha256,
+        "all_tracked_bytes_inspected": len(all_file_sha256) == len(files),
+        "json_documents_parsed": parsed_json_count,
         "dependency_edges": [{"from": a, "to": b, "source": s, "target": t}
                              for a,b,s,t in sorted(cross)],
         "module_sha256": digests,
