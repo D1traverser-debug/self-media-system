@@ -138,7 +138,9 @@ def main(argv: list[str] | None = None) -> int:
 
     # One CURRENT owner control plane. Historical project-state commands
     # require an existing, isolated fixture root and cannot use the repo.
-    readonly = {"audit-packaging", "qa-media", "techniques"}
+    readonly = {"audit-packaging", "techniques"}
+    if args.cmd == "qa-media" and not args.frames_dir:
+        readonly.add("qa-media")
     fixture_root = os.environ.get("VGA_LEGACY_FIXTURE_ROOT")
     if args.cmd not in readonly:
         if not fixture_root:
@@ -152,6 +154,23 @@ def main(argv: list[str] | None = None) -> int:
                 or fixture == (Path.home() / ".vga-studio").resolve()):
             print("Legacy fixture root must be an existing separate absolute directory", file=sys.stderr)
             return 2
+
+    if args.cmd in {"render-graphic", "qa-media"} and args.cmd not in readonly:
+        fixture = Path(fixture_root).expanduser().resolve()
+        side_effect_targets = (
+            [args.output, args.graph] if args.cmd == "render-graphic"
+            else [args.frames_dir]
+        )
+        for target in side_effect_targets:
+            if target is not None and not Path(target).expanduser().resolve().is_relative_to(fixture):
+                print("Legacy output/graph writes must remain inside explicit fixture root", file=sys.stderr)
+                return 2
+
+    if args.cmd == "techniques":
+        library = TechniqueLibrary()
+        _json([tech.__dict__ for tech in library.find(
+            set(args.tag), args.max_cost, validated_only=not args.include_candidates)])
+        return 0
 
     if args.cmd == "audit-packaging":
         report = audit_packaging(json.loads(args.case_file.read_text(encoding="utf-8")))
@@ -263,16 +282,6 @@ def main(argv: list[str] | None = None) -> int:
             payload["frames"] = checker.extract_frames(args.media, args.frames_dir, args.frame_count)
         _json(payload)
         return 0 if report.hard_pass else 2
-    elif args.cmd == "techniques":
-        library = TechniqueLibrary()
-        _json([
-            tech.__dict__
-            for tech in library.find(
-                set(args.tag),
-                args.max_cost,
-                validated_only=not args.include_candidates,
-            )
-        ])
     return 0
 
 

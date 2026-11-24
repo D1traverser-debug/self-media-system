@@ -196,6 +196,7 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
     previous_cli = (root / "video_growth_agent/cli.py").read_text(encoding="utf-8")
     if ('VGA_LEGACY_FIXTURE_ROOT' not in previous_cli or
             'Legacy Video 0.8 control is retired' not in previous_cli or
+            'Legacy output/graph writes must remain inside explicit fixture root' not in previous_cli or
             'StudioRuntime(store=ProjectStore(Path(fixture_root)))' not in previous_cli):
         errors.append("old standalone CLI owner-write entrypoint is not fenced")
     if cat.get("current_runtime") != "video_studio.engine.StudioEngine":
