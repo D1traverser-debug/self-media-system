@@ -260,7 +260,8 @@ def test_current_content_studio_entry_and_product_name_match_nested_identity():
     assert "INSIDE Social Media Studio" in skill
     assert "not a mandatory video-production pipeline" in readme
     assert "Historical example chain" in readme
-    assert "social-media-studio" in manifest["legacy_repository_identity"]
+    assert manifest["repository_slug"] == "social-media-studio"
+    assert "legacy_repository_identity" not in manifest
 
 
 def test_universal_entry_does_not_make_old_video_fixture_red_team_a_global_rule():
