@@ -54,7 +54,7 @@ jobs:
           assert audit['task_count'] == 13, audit
           print('standalone-video-studio-smoke: PASS')
           PY
-      - name: Regression fixture: historical Program context and parallel readiness
+      - name: "Regression fixture: historical Program context and parallel readiness"
         run: |
           program_root="$(mktemp -d)"
           vga-studio --root "$program_root" init ai-self-media-commercialization --title "Integrated Program smoke" --brief examples/ai-self-media-commercialization.brief.json > /tmp/program-init.json
