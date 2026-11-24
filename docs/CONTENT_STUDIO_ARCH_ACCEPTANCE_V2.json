@@ -97,14 +97,14 @@
     {
       "id": "S08",
       "demand": "只打磨图片提示词暂不生图",
-      "deliverable_type": "ANALYSIS_REPORT",
+      "deliverable_type": "PROMPT_SPEC",
       "required_contexts": [
         "visual_design"
       ],
-      "owner_outcome_oracle": "参考理解、创意方向、反证、可执行提示词",
+      "owner_outcome_oracle": "明确创意方向、参考元素、构图/风格约束、适配模型的可执行提示词与反证；仅交付提示词",
       "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
       "runtime_verified": false,
-      "forbidden_implicit_effect": "不得无授权调用生图"
+      "forbidden_implicit_effect": "未获授权不得调用生图、不得把提示词冒充已生成成品"
     },
     {
       "id": "S09",

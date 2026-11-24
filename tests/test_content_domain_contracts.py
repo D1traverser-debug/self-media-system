@@ -86,3 +86,15 @@ def test_contract_rejects_fabricated_fields_duplicate_ids_and_video_defaults():
     route = inspect_declared_deliverables([{"id": "one-line", "type": "SHORT_COPY", "locale": "en-US"}])
     assert route["deliverables"][0]["shape"] is None
     assert route["selected_task_graph"] is None
+
+
+def test_prompt_spec_is_an_independent_non_generation_deliverable(tmp_path):
+    route = resolve_intake(tmp_path, {
+        "mode": "NEW", "goal": "Refine this prompt only; do not generate an image",
+        "deliverable_specs": [{"id": "prompt", "type": "PROMPT_SPEC",
+                               "prohibitions": ["No image generation without a new request"],
+                               "acceptance": {"goal": "clear model-applicable prompt"}}]})
+    assert route["typed_deliverables"]["deliverables"][0]["type"] == "PROMPT_SPEC"
+    assert route["typed_deliverables"]["deliverables"][0]["shape"] is None
+    assert route["typed_deliverables"]["effect_authorized"] is False
+    assert route["selected_task_graph"] is None

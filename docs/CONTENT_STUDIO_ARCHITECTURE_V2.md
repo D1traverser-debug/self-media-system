@@ -96,7 +96,7 @@ Coordination patterns selected by demand: direct single actor; consultative; com
 
 At minimum establish stable **type and identity** distinctions:
 - DemandID / DemandRevisionID: owner goal + ordered corrections, provenance, hard constraints, preferences, prohibitions, assumptions, unknowns, full business outcome oracle.
-- DeliverableID / DeliverableType / DeliverableRevision: exactly requested output, independent contract. Types: SHORT_COPY, LONG_ARTICLE, PLATFORM_PACKAGE, STATIC_IMAGE, MULTI_ASPECT_IMAGE_SET, MEDIA_TRANSFORM, ORIGINAL_VIDEO, IDENTITY_ASSET, ANALYSIS_REPORT, plus extensible typed families; no default video final.
+- DeliverableID / DeliverableType / DeliverableRevision: exactly requested output, independent contract. Types: SHORT_COPY, LONG_ARTICLE, PLATFORM_PACKAGE, PROMPT_SPEC, STATIC_IMAGE, MULTI_ASPECT_IMAGE_SET, MEDIA_TRANSFORM, ORIGINAL_VIDEO, IDENTITY_ASSET, ANALYSIS_REPORT, plus extensible typed families; no default video final.
 - VariantID: Locale×Platform×MediaShape×AspectRatio×DistributionChannel where applicable. A change in one dimension must not silently mutate others. Fields can be absent if irrelevant.
 - ContentIntentID: core semantic promise/story/claim/mood/value; shared across variants without forcing identical surface wording.
 - EvidenceClaimID: source owner, URI/file ID, exact revision/digest, claim scope, confidence and fact/fiction status.
@@ -154,6 +154,7 @@ No one global PASS from static source, green tests or a text-only LLM self-ratin
 - SHORT_COPY: native idiom & language, factuality, originality, tone, hook/reaction purpose, no redundant explanation, precise format, tags only if requested, no involuntary duplicate title/description/cover text.
 - LONG_ARTICLE: credible research, independently sourced factual claims, clear thesis, argument/counterargument, original insight, value to reader, causal logic, emotional progression, nonempty conclusion, planned visual placement and actual publishability. Translation quality independent of English source.
 - PLATFORM_PACKAGE: platform-current restrictions, title/description/tag/cover copy as distinct complementary functions, local language and cultural context, actual media fit, disclosure and honest attention hypothesis. Engagement/CTR not knowable from copy alone; classify forecast vs observed.
+- PROMPT_SPEC: precise creative intent and constraints, reference interpretation, generative model applicability and failure conditions, clear positive instructions, output verification plan; no generated image or video is implied.
 - STATIC_IMAGE / MULTI_ASPECT: pixel inspection, story in one glance, composition, hierarchy, subject/reference fidelity, typography accuracy, safe regions, originality, art quality, per-ratio re-layout, visible QA at intended mobile thumbnail size. Prompt elegance alone is irrelevant.
 - MEDIA_TRANSFORM: exact source event understanding, specified change-only scope, no accidental scene or time change, original audio mode guarantees, technical stream/codec/sync evidence, full or representative-frame perceptual review; verify real output bytes.
 - ORIGINAL_VIDEO: genuine audiovisual narrative, coherent visuals and motion, sound, editing, continuity, art direction, truth/rights, playback QA, final human/independent creative quality. Frame count and FFmpeg success alone insufficient.
@@ -275,7 +276,7 @@ Choose the smallest source layout able to hold these **interfaces**. Directory e
 - \`video_studio/infrastructure/{sqlite,artifact_store,event_log}.py\`: keep existing public StudioEngine facade and transaction semantics; internally extract only after backward-compatibility proof.
 - \`video_studio/adapters/\`: concrete mappings to existing 17 domain adapters, local four production operations, and CURRENT_AVAILABLE external tools. The old giant adapters.py is a compatibility entry until negative import tests pass.
 - \`video_studio/knowledge/\`: scoped method/source retrieval + lifecycle and dependent decision invalidation. The existing knowledge_catalog is a locator, not an authority to change external files.
-- \`video_studio/contracts_by_type/\`: first reusable neutral contracts for SHORT_COPY, LONG_ARTICLE, PLATFORM_PACKAGE, STATIC_IMAGE, MULTI_ASPECT_IMAGE_SET and MEDIA_TRANSFORM; add ORIGINAL_VIDEO quality methods separately after sample tests.
+- \`video_studio/contracts_by_type/\`: first reusable neutral contracts for SHORT_COPY, LONG_ARTICLE, PLATFORM_PACKAGE, PROMPT_SPEC, PROMPT_SPEC, STATIC_IMAGE, MULTI_ASPECT_IMAGE_SET and MEDIA_TRANSFORM; add ORIGINAL_VIDEO quality methods separately after sample tests.
 - \`video_studio/cli.py\`: only persistent CLI; direct ChatGPT session does not require calling it to prove CAOS.
 
 ### N1. Illustrative typed interfaces (design only; not exact future Python API)
@@ -320,3 +321,7 @@ Additional interface-level negative probes before code refactor:
 12. No native Skill-selection trace: assurance remains NOT_TESTED even if model prose looks CAOS-compliant.
 
 **Architecture evidence tiers for this revision:** repo-path inventory READ; 40+ relevant original source modules' import/operations inspected; 28 scenario pairs structurally repaired and mapped; relevant AWS DDD, LangGraph, OpenAI Agents guardrail and FFmpeg originals researched; no independent native Skill trigger run; no complete semantic examination of every historical project; no independent owner-grade original media production. All missing proof stays OPEN.
+
+## P. Ontology counterexample: prompt specification as a first-class deliverable
+
+The owner's explicit prompt-only requests are not necessarily analysis reports or generated media. Negative probe S08 previously forced `ANALYSIS_REPORT`, hiding the no-generation boundary and prompt-specific craft oracle. Competing models: report subtype (wrong primary artifact), implicit static image (false generation obligation), or explicit PROMPT_SPEC. Select **PROMPT_SPEC** with creative-method evaluation and zero provider effects unless separately requested. This change crosses architecture source, acceptance scenarios, typed contract and tests. It must not change user authorization or imply prompt success without real generated-artifact trial.
