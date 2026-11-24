@@ -29,10 +29,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--root", type=Path, help="workspace root (default: VGA_STUDIO_HOME or ~/.vga-studio)")
     sub = parser.add_subparsers(dest="command", required=True)
 
+    p = sub.add_parser("intake", help="resolve only the current owner demand or exact current workspace identity")
+    p.add_argument("request", type=Path)
+
     p = sub.add_parser("init", help="create a project from an outcome brief")
     p.add_argument("project_id")
     p.add_argument("--title", default="")
     p.add_argument("--brief", type=Path, required=True, help="JSON brief with goal, audience and deliverables")
+    p.add_argument("--owner-task", action="store_true", help="bind a fresh task-neutral owner brief; not proof of CAOS activation")
 
     p = sub.add_parser("revise-brief", help="revise the owner outcome and invalidate only affected dependency descendants")
     p.add_argument("project_id")
@@ -210,9 +214,19 @@ def main(argv: list[str] | None = None) -> int:
             report = run_system_audit(args.repo_root)
             _emit(report)
             return 0 if report["pass"] else 2
+        if command == "intake":
+            import os
+            from .scope import resolve_intake
+            root = args.root or Path(os.environ.get("VGA_STUDIO_HOME", Path.home() / ".vga-studio"))
+            _emit(resolve_intake(root, _read_json(args.request)))
+            return 0
         engine = StudioEngine(args.root)
         if command == "init":
-            _emit(engine.create_project(args.project_id, args.title, _read_json(args.brief)))
+            brief = _read_json(args.brief)
+            if args.owner_task:
+                from .scope import bind_owner_brief
+                brief = bind_owner_brief(args.project_id, brief)
+            _emit(engine.create_project(args.project_id, args.title, brief))
         elif command == "revise-brief":
             affected = args.affect_task if args.affect_task else None
             _emit(engine.revise_brief(args.project_id, _read_json(args.brief), reason=args.reason, affected_task_ids=affected))

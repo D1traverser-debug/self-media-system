@@ -101,14 +101,14 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     entry_ok = (
         "video_studio.engine.StudioEngine" in entry
         and "vga-studio" in entry
-        and "ai-self-media-commercialization" in entry
+        and "vga-studio --root WORKSPACE intake REQUEST.json" in entry
         and "import-manifest" in entry
         and "system-audit" in entry
         and studio_manifest.get("system_audit") == "video_studio.system_audit.run_system_audit"
         and governance.get("system") == "CAOS"
         and governance.get("mode") == "CHAT_GOVERNED_EXTERNAL"
         and governance.get("session_governance_required") is True
-        and governance.get("standalone_mode") == "EXPLICIT_OWNER_SELECTION_ONLY"
+        and governance.get("standalone_mode") == "OFFLINE_MECHANICAL_TESTS_ONLY"
         and governance.get("caos_runtime_dependency") is False
         and governance.get("caos_api_dependency") is False
         and governance.get("caos_skill_dependency") is False
@@ -121,6 +121,31 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         "governance": governance,
     })
 
+    from .scope import resolve_intake
+    index = _read_json(root / "projects" / "PROJECT_INDEX.json")
+    admission = studio_manifest.get("task_admission", {})
+    retired_ids = {item["project_id"] for item in index["projects"]}
+    task_neutral = (
+        index.get("default_project_id") is None
+        and admission.get("default_project_id") is None
+        and admission.get("default_task_graph") is None
+        and admission.get("automatic_resume") is False
+        and set(admission.get("retired_project_ids", [])) == retired_ids
+        and all(item["status"] == "RETIRED_EVIDENCE_ONLY" and not item["default_for_generic_domain_intent"] for item in index["projects"])
+    )
+    with tempfile.TemporaryDirectory(prefix="vga-intake-") as scope_root:
+        route = resolve_intake(scope_root, {"mode": "NEW", "goal": "Create a short original caption"})
+        task_neutral = task_neutral and route["project_id"] is None and route["selected_task_graph"] is None
+        for retired_id in retired_ids:
+            try:
+                resolve_intake(scope_root, {"mode": "RESUME", "project_id": retired_id})
+            except ValueError:
+                continue
+            task_neutral = False
+    _check(checks, "task_neutral_intake_and_retirement", task_neutral, sorted(retired_ids))
+    catalog = _read_json(root / "video_studio" / "data" / "knowledge_catalog.json")
+    missing_methods = [item["ref"] for item in catalog["entries"] if not (root / item["ref"]).is_file()]
+    _check(checks, "knowledge_locator_integrity", not missing_methods, missing_methods)
     scripts = pyproject.get("project", {}).get("scripts", {})
     cli_source = (root / "video_studio" / "cli.py").read_text(encoding="utf-8")
     cli_registered = (
@@ -364,7 +389,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
                 graph_failures.append("Program graph audit failed after the real local tool execution smoke")
         except Exception as exc:
             graph_failures.append(f"program: {type(exc).__name__}: {exc}")
-    _check(checks, "example_graphs_and_default_program_execution", not graph_failures, graph_failures)
+    _check(checks, "isolated_regression_graphs_and_local_execution", not graph_failures, graph_failures)
 
     explainer_brief = _read_json(root / "examples" / "technology-explainer.brief.json")
     satire_brief = _read_json(root / "examples" / "news-fictional-media.brief.json")
@@ -389,7 +414,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         capability_gaps.append(
             "No repository-registered generative-video executor. Agent tasks may use a currently available session tool only after operation, availability, rights and cost checks; paid generation requires explicit owner approval."
         )
-    owner_inputs_required.extend(["jensen-source-video", "ipos-ready-for-video-bundle"])
+    # Missing inputs are demand-specific; isolated fixtures cannot create owner obligations.
     owner_inputs_required = sorted(set(owner_inputs_required))
 
     failed_checks = [item for item in checks if not item["pass"]]

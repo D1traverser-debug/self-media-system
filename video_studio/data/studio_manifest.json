@@ -183,7 +183,15 @@
     "route": "video_studio.scope.resolve_intake",
     "project_selection": "EXACT_OWNER_SELECTED_WORKSPACE_ID_ONLY",
     "repository_projects": "RETIRED_EVIDENCE_ONLY",
-    "examples": "REGRESSION_FIXTURES_ONLY"
+    "examples": "REGRESSION_FIXTURES_ONLY",
+    "scope_epoch": "VIDEO_TASK_NEUTRAL_20261124",
+    "retired_project_ids": [
+      "ai-self-media-commercialization",
+      "pilot-001",
+      "pilot-002"
+    ],
+    "owner_brief_marker": "scope_epoch",
+    "task_binding": "requirements.deliverable_refs contains exact current brief deliverables; no inferred CAOS proof"
   },
   "architecture": {
     "authority": "docs/standalone_video_studio.md",

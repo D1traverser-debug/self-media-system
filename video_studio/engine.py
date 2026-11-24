@@ -391,6 +391,9 @@ class StudioEngine:
     def create_project(self, project_id: str, title: str, brief: dict[str, Any]) -> dict[str, Any]:
         project_id = _safe_id(project_id, "project_id")
         self._validate_brief(brief)
+        if "scope_epoch" in brief:
+            from .scope import bind_owner_brief
+            bind_owner_brief(project_id, brief)
         directory = self._project_dir(project_id)
         directory.mkdir(parents=True, exist_ok=False)
         (directory / "assets").mkdir()
@@ -465,6 +468,14 @@ class StudioEngine:
                     raise ContractError(f"unknown affected_task_ids: {unknown}")
                 invalidated = self._descendant_closure(tasks, roots) if roots else set()
                 old_brief = _loads(project["brief_json"], {})
+                if "scope_epoch" in old_brief:
+                    if brief.get("scope_epoch") != old_brief["scope_epoch"]:
+                        raise ContractError("owner task scope epoch cannot change")
+                    if brief.get("deliverables") != old_brief.get("deliverables"):
+                        # A changed outcome must not keep an old deliverable plan current.
+                        invalidated = set(tasks)
+                elif "scope_epoch" in brief:
+                    raise ContractError("retired instance cannot be converted into a current owner task")
                 old_digest = hashlib.sha256(_json(old_brief).encode("utf-8")).hexdigest()
                 new_digest = hashlib.sha256(_json(brief).encode("utf-8")).hexdigest()
                 now = _iso()
@@ -604,7 +615,9 @@ class StudioEngine:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
-                self._project_row(connection, project_id)
+                project = self._project_row(connection, project_id)
+                from .scope import validate_task_binding
+                brief = _loads(project["brief_json"], {})
                 existing_rows = connection.execute(
                     "SELECT task_id,title,kind,executor,depends_on_json,inputs_json,outputs_json,acceptance_json,requirements_json,priority,max_attempts FROM tasks WHERE project_id=?",
                     (project_id,),
@@ -679,6 +692,7 @@ class StudioEngine:
                         "priority": int(raw.get("priority", 0)),
                         "max_attempts": max_attempts,
                     }
+                    validate_task_binding(brief, task)
                     prepared.append(task)
                     graph[task_id] = task
                     new_ids.add(task_id)
@@ -730,6 +744,8 @@ class StudioEngine:
                     "priority": old["priority"], "max_attempts": old["max_attempts"],
                 }
                 revised = {**current, **patch}
+                from .scope import validate_task_binding
+                validate_task_binding(_loads(self._project_row(connection, project_id)["brief_json"], {}), revised)
                 if revised["executor"] not in {"agent", "tool", "human", "external"}:
                     raise ContractError(f"unsupported executor: {revised['executor']}")
                 for field in ("depends_on", "inputs", "outputs"):
@@ -1065,6 +1081,9 @@ class StudioEngine:
                 if row is None:
                     connection.commit()
                     return None
+                from .scope import validate_task_binding
+                validate_task_binding(_loads(self._project_row(connection, project_id)["brief_json"], {}),
+                                      {"requirements": _loads(row["requirements_json"], {})})
                 token = secrets_token = uuid.uuid4().hex + uuid.uuid4().hex
                 lease_until = _iso(now + timedelta(seconds=lease_seconds))
                 connection.execute(

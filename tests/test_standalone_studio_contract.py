@@ -22,7 +22,7 @@ def test_video_studio_is_the_single_runtime_under_caos_parent_governance():
     assert manifest["governance"]["caos_api_dependency"] is False
     assert manifest["governance"]["caos_skill_dependency"] is False
     assert manifest["governance"]["session_governance_required"] is True
-    assert manifest["governance"]["standalone_mode"] == "EXPLICIT_OWNER_SELECTION_ONLY"
+    assert manifest["governance"]["standalone_mode"] == "OFFLINE_MECHANICAL_TESTS_ONLY"
     assert manifest["governance"]["source_mutation"] == "FORBIDDEN"
     assert manifest["execution"]["fixed_stage_machine"] is False
     assert set(manifest["business_workstreams"]) == {"MEDIA_GROWTH", "ORIGINAL_DIGITAL_IP", "COMMERCIALIZATION", "PRODUCTION_SYSTEM"}
@@ -193,7 +193,7 @@ def test_standalone_system_audit_passes_structure_and_reports_unfinished_media_c
     assert report["boundary"]["caos_runtime_dependency"] is False
     assert report["boundary"]["paid_provider_calls_made"] is False
     assert report["boundary"]["automatic_publication"] is False
-    assert report["owner_inputs_required"] == ["ipos-ready-for-video-bundle", "jensen-source-video"]
+    assert report["owner_inputs_required"] == []
     assert any("No repository-registered generative-video executor" in item for item in report["capability_gaps"])
     assert all(item["pass"] for item in report["checks"])
 

@@ -1,0 +1,87 @@
+"""Task-neutral routing. No parent execution, grant or native activation is fabricated."""
+from __future__ import annotations
+
+import json
+import re
+import sqlite3
+from contextlib import closing
+from importlib.resources import files
+from pathlib import Path
+from typing import Any
+
+EPOCH = "VIDEO_TASK_NEUTRAL_20261124"
+
+
+def contract() -> dict[str, Any]:
+    return json.loads(files("video_studio").joinpath("data", "studio_manifest.json").read_text(encoding="utf-8"))
+
+
+def _id(value: Any) -> str:
+    if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", value):
+        raise ValueError("exact safe project_id required")
+    if value.casefold() in {item.casefold() for item in contract()["task_admission"]["retired_project_ids"]}:
+        raise ValueError("retired project instance cannot be resumed or reused")
+    return value
+
+
+def bind_owner_brief(project_id: str, brief: dict[str, Any]) -> dict[str, Any]:
+    _id(project_id)
+    if not isinstance(brief, dict) or not isinstance(brief.get("goal"), str) or not brief["goal"].strip():
+        raise ValueError("exact current owner goal is required")
+    if brief.get("scope_epoch", EPOCH) != EPOCH:
+        raise ValueError("cannot reuse a retired scope epoch")
+    return {**brief, "scope_epoch": EPOCH}
+
+
+def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> None:
+    if brief.get("scope_epoch") != EPOCH:
+        return  # mechanical compatibility and isolated fixture path
+    refs = task.get("requirements", {}).get("deliverable_refs")
+    deliverables = brief.get("deliverables", [])
+    if not isinstance(refs, list) or not refs or any(
+        not isinstance(ref, str) or ref not in deliverables for ref in refs
+    ):
+        raise ValueError("every governed task must reference exact current deliverables")
+
+
+def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
+    """Return a read-only route; never create a task, infer a project, or assert CAOS ran."""
+    if not isinstance(request, dict) or request.get("mode") not in {"NEW", "RESUME"}:
+        raise ValueError("explicit NEW or RESUME mode required")
+    manifest = contract()
+    mode = request["mode"]
+    if mode == "NEW":
+        goal = request.get("goal")
+        if not isinstance(goal, str) or not goal.strip():
+            raise ValueError("NEW requires exact current owner goal")
+        project_id = request.get("project_id")
+        if project_id is not None:
+            project_id = _id(project_id)
+            if (Path(root).expanduser().resolve() / "projects" / project_id).exists():
+                raise ValueError("NEW cannot reuse an existing project")
+        brief = None
+    else:
+        project_id = _id(request.get("project_id"))
+        workspace = Path(root).expanduser().resolve()
+        db = workspace / "projects" / project_id / "studio.sqlite3"
+        if not db.is_file() or not db.resolve().is_relative_to(workspace):
+            raise ValueError("exact current workspace project not found")
+        with closing(sqlite3.connect(db.resolve().as_uri() + "?mode=ro", uri=True)) as connection:
+            row = connection.execute("SELECT brief_json FROM projects WHERE project_id=?", (project_id,)).fetchone()
+        if row is None:
+            raise ValueError("exact project identity not found")
+        brief = json.loads(row[0])
+        if brief.get("scope_epoch") != EPOCH:
+            raise ValueError("pre-cutover task instance is retired; create a fresh owner demand")
+        goal = brief["goal"]
+    return {
+        "mode": mode, "goal": goal, "project_id": project_id, "brief": brief,
+        "scope_epoch": EPOCH, "selected_task_graph": None,
+        "default_project_id": None, "automatic_resume": False,
+        "architecture": manifest["architecture"],
+        "capabilities": manifest["capabilities"],
+        "knowledge_catalog": manifest["knowledge_lifecycle"]["index"],
+        "parent_governance": "REQUIRED_IN_OWNER_SESSION",
+        "native_activation": "NOT_VERIFIED_BY_RUNTIME",
+        "effect_authorized": False,
+    }

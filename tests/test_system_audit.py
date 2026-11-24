@@ -11,7 +11,7 @@ def test_canonical_video_system_audit_passes_structural_contract():
     assert report["structural_status"] == "PASS"
     assert report["production_readiness"] == "PARTIAL"
     assert report["capability_gaps"]
-    assert report["owner_inputs_required"]
+    assert report["owner_inputs_required"] == []
 
 
 def test_audit_distinguishes_caos_session_governance_from_runtime_independence():

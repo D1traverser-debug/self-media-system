@@ -30,7 +30,7 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
     assert manifest["domain_authority"]["project_index"] == "projects/PROJECT_INDEX.json"
     assert manifest["domain_authority"]["product_requirements"] == "docs/product_requirements.md"
     assert manifest["domain_authority"]["architecture"] == "docs/standalone_video_studio.md"
-    assert manifest["domain_authority"]["integrated_business_flywheel"] == "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json"
+    assert manifest["domain_authority"]["integrated_business_flywheel"] == "video_studio/data/business_feedback.json"
     assert manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"
     assert manifest["runtime"]["version"] == "1.0.0"
     assert "program_orchestration" not in manifest["runtime"]
@@ -49,21 +49,15 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
     assert not (ROOT / "UAOS_SKILL.md").exists()
 
 
-def test_generic_growth_commercialization_and_ip_intents_converge_on_integrated_program():
+def test_generic_intents_never_resume_retired_project_instances():
     index = load("projects/PROJECT_INDEX.json")
     assert index["authority"] == "VIDEO_GROWTH_AGENT"
-    assert index["default_project_id"] == "ai-self-media-commercialization"
-    by_id = {item["project_id"]: item for item in index["projects"]}
-
-    integrated = by_id["ai-self-media-commercialization"]
-    aliases = set(integrated["aliases"])
-    assert {"AI自媒体视频商业化", "AI视频涨粉与商业化", "原创数字IP"} <= aliases
-    assert integrated["default_for_generic_domain_intent"] is True
-
-    pilot = by_id["pilot-002"]
-    assert "video-growth:main" in pilot["aliases"]
-    assert pilot["default_for_generic_domain_intent"] is False
-    assert "not a caos governance task identity" in pilot["legacy_alias_semantics"].lower()
+    assert index["default_project_id"] is None
+    assert {item["project_id"] for item in index["projects"]} == {
+        "ai-self-media-commercialization", "pilot-001", "pilot-002"
+    }
+    assert all(item["status"] == "RETIRED_EVIDENCE_ONLY"
+               and not item["default_for_generic_domain_intent"] for item in index["projects"])
 
 
 def test_integrated_program_couples_four_business_workstreams_and_uses_ipos_as_external_canon_authority():
