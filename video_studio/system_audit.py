@@ -201,6 +201,17 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     _check(checks, "typed_deliverables_and_architecture_negative_oracles", not matrix_failures,
            {"scenario_count": len(seen) if "seen" in locals() else 0,
             "failure_refs": matrix_failures, "verification": "STRUCTURE_ONLY_NOT_BUSINESS_OUTCOME"})
+    from .subsystems import audit_subsystems
+    try:
+        topology = audit_subsystems(root)
+        _check(checks, "all_internal_subsystems_owned_and_no_legacy_control_reentry",
+               topology["pass"],
+               {key: topology[key] for key in ("tracked_files","code_modules","owned_modules",
+                  "subsystems","domain_adapters","production_operations","unclassified_paths",
+                  "violations","assurance")})
+    except (ValueError, OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        _check(checks, "all_internal_subsystems_owned_and_no_legacy_control_reentry", False,
+               f"{type(exc).__name__}: {exc}")
     scripts = pyproject.get("project", {}).get("scripts", {})
     cli_source = (root / "video_studio" / "cli.py").read_text(encoding="utf-8")
     cli_registered = (

@@ -133,7 +133,8 @@
         "task_neutral_intake_and_retirement",
         "knowledge_locator_integrity",
         "professional_capability_route_integrity",
-        "typed_deliverables_and_architecture_negative_oracles"
+        "typed_deliverables_and_architecture_negative_oracles",
+        "all_internal_subsystems_owned_and_no_legacy_control_reentry"
       ],
       "separates_structural_integrity_from_production_readiness": true,
       "no_provider_calls_or_workspace_mutation": true
@@ -348,6 +349,15 @@
       "policy": "DELIVERABLE_SPECIFIC_NO_FIXED_VIDEO_STAGES",
       "quality_observed": false,
       "independent_review_proven": false
+    },
+    "internal_subsystem_catalog": {
+      "source": "video_studio/data/subsystem_catalog.json",
+      "scanner": "video_studio/subsystems.py",
+      "policy": "EVERY_FIRST_PARTY_SOURCE_MODULE_EXACTLY_ONE_INTERNAL_OWNER",
+      "control_plane": "ONLY_STUDIO_ENGINE",
+      "product_ipos": "INTERNAL_SOURCE_AND_SPECIFIC_CANON_CUSTODY",
+      "cognition_caos": "EXTERNAL_READ_ONLY_PARENT_AUTHORITY_NOT_PEER_PRODUCT",
+      "assurance": "STRUCTURE_NOT_SEMANTIC_OUTCOME"
     }
   },
   "knowledge_lifecycle": {

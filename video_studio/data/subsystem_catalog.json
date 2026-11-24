@@ -1,0 +1,324 @@
+{
+  "schema_version": "1.0",
+  "kind": "UNIVERSAL_CONTENT_STUDIO_INTERNAL_SUBSYSTEM_TOPOLOGY",
+  "current_runtime": "video_studio.engine.StudioEngine",
+  "installed_cli": "video_studio.cli:main",
+  "product": "Universal Content Studio",
+  "separate_cognition_controller": false,
+  "parent_governance": {
+    "caos_read_only": true,
+    "governs_all_material_decisions": true,
+    "native_activation_proof": "NOT_TESTED"
+  },
+  "subsystems": [
+    {
+      "id": "execution_and_owner_scope",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "CURRENT_DURABLE_CONTROL_PLANE",
+      "code_paths": [
+        "video_studio/__init__.py",
+        "video_studio/__main__.py",
+        "video_studio/cli.py",
+        "video_studio/scope.py",
+        "video_studio/engine.py",
+        "video_studio/adapters.py",
+        "video_studio/production/__init__.py",
+        "video_studio/production/context.py",
+        "video_studio/production/executors.py",
+        "video_studio/production/handlers.py",
+        "video_studio/production/registry.py",
+        "video_studio/production/worker_pool.py",
+        "video_studio/subsystems.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "cognition_and_audit",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_studio/system_audit.py",
+        "video_growth_agent/owner_behavior_admission.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "quality_and_assurance",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_studio/domain/__init__.py",
+        "video_studio/domain/contracts.py",
+        "video_studio/domain/assurance.py",
+        "video_growth_agent/execution_attestation.py",
+        "video_growth_agent/reviewer_providers.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "editorial_and_language",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_studio/domain/editorial.py",
+        "video_growth_agent/editorial_planning.py",
+        "video_growth_agent/editorial_packaging.py",
+        "video_growth_agent/plan_graph_bridge.py"
+      ],
+      "domain_adapters": [
+        "editorial_plan_validate"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "visual_and_static_design",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_studio/domain/creative.py",
+        "video_growth_agent/programmatic_graphics.py",
+        "video_studio/production/frame_worker.py",
+        "video_studio/production/python_frame_renderer.py"
+      ],
+      "domain_adapters": [
+        "programmatic_graphic_render"
+      ],
+      "production_operations": [
+        "python_frame_render"
+      ],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "original_identity_ipos",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_studio/domain/identity.py",
+        "video_growth_agent/ip_identity.py"
+      ],
+      "domain_adapters": [
+        "ipos_bundle_inspect",
+        "ipos_bundle_import",
+        "ipos_shot_bind",
+        "ipos_continuity_snapshot",
+        "ipos_continuity_link"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "motion_and_production",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_growth_agent/production_os.py",
+        "video_growth_agent/continuity.py",
+        "video_growth_agent/timeline.py",
+        "video_growth_agent/editorial_interchange.py",
+        "video_studio/production/contracts.py",
+        "video_studio/production/ffmpeg_assembler.py",
+        "video_growth_agent/generation_guard.py"
+      ],
+      "domain_adapters": [
+        "shot_contract_materialize",
+        "shot_contract_validate",
+        "timeline_validate",
+        "continuity_assess",
+        "episode_intent_validate"
+      ],
+      "production_operations": [
+        "ffmpeg_assemble"
+      ],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "media_understanding_and_transform",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_studio/media.py",
+        "video_studio/production/audio_preserve.py",
+        "video_growth_agent/media_qa.py"
+      ],
+      "domain_adapters": [
+        "extended_media_qa"
+      ],
+      "production_operations": [
+        "ffprobe_media_qa",
+        "ffmpeg_video_audio_copy"
+      ],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "platform_packaging_delivery",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_studio/production/delivery.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [
+        "delivery_package"
+      ],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "business_growth_commercial",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "OPTIONAL_BUSINESS_DOMAIN",
+      "code_paths": [
+        "video_growth_agent/business_metrics.py",
+        "video_growth_agent/business_objects.py",
+        "video_growth_agent/experiments.py",
+        "video_growth_agent/program_orchestration.py"
+      ],
+      "domain_adapters": [
+        "business_outcome_metrics",
+        "business_object_validate"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "provider_capability_routing",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_growth_agent/engine_routing.py",
+        "video_growth_agent/model_registry.py"
+      ],
+      "domain_adapters": [
+        "shot_route"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "source_and_asset_lineage",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_growth_agent/media_graph.py"
+      ],
+      "domain_adapters": [
+        "media_graph_initialize"
+      ],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "knowledge_roles_and_methods",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_growth_agent/roles.py",
+        "video_growth_agent/techniques.py",
+        "video_growth_agent/resources.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "compatibility_data_models",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
+      "code_paths": [
+        "video_growth_agent/models.py",
+        "video_growth_agent/__init__.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "CURRENT_USER_DEMAND_ONLY",
+      "creative_result_verified": false
+    },
+    {
+      "id": "legacy_agent_control_plane",
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "role": "RETIRED_COMPATIBILITY",
+      "code_paths": [
+        "video_growth_agent/cli.py",
+        "video_growth_agent/orchestrator.py",
+        "video_growth_agent/runtime.py",
+        "video_growth_agent/storage.py",
+        "video_growth_agent/studio_agents.py",
+        "video_growth_agent/operator_view.py"
+      ],
+      "domain_adapters": [],
+      "production_operations": [],
+      "active_by_default": false,
+      "activation": "ISOLATED_HISTORICAL_FIXTURE_ONLY",
+      "creative_result_verified": false
+    }
+  ],
+  "boundaries": {
+    "ipos": {
+      "product_membership": "INTERNAL_CONTENT_STUDIO",
+      "design_and_canon_source": "SEPARATELY_CUSTODIED_CURRENT_IPOS_SKILL_PRIVATE_OWNER_STATE",
+      "code_in_this_repository": [
+        "video_growth_agent/ip_identity.py",
+        "video_studio/domain/identity.py",
+        "video_growth_agent/data/ipos_video_identity_bundle.schema.json"
+      ],
+      "owner_approval_required": true,
+      "studio_can_mutate_canon": false
+    },
+    "caos": {
+      "read_only": true,
+      "code_mutation_forbidden": true,
+      "child_controller": false
+    },
+    "legacy_control": {
+      "installed_cli": false,
+      "history_preserved": true,
+      "old_tasks_auto_selected": false
+    },
+    "publication": {
+      "auto_post": false
+    },
+    "review": {
+      "static_structure_not_creative_acceptance": true
+    }
+  },
+  "historical": [
+    "projects/",
+    "examples/",
+    "video_growth_agent/data/workflow.json",
+    "video_growth_agent/data/execution-plan.json",
+    "video_growth_agent/data/agents.json"
+  ]
+}

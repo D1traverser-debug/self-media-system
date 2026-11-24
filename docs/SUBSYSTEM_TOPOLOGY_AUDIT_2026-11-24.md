@@ -1,0 +1,13 @@
+# Complete source-ownership map: internal Content Studio subsystems
+
+State: VERIFIED STATIC SOURCE TOPOLOGY CANDIDATE, not professional semantic completion.
+
+The prior assumption "IPOS is external" confused a separately maintained private canonical-state location with product membership. Actual first-party source already includes ip_identity.py (723 lines), the IPOS export schema, five registered ipos_* adapters, a nested identity route and identity tests. IPOS is an INTERNAL original identity professional subsystem. Its canonical design state and owner approval remain separately custodied. Do not duplicate identity canon, and do not infer existing approved export from a historical snapshot.
+
+The source inventory also finds original internal business objects/metrics/experiments, editorial planning and publishing packaging, visual graphics, motion and shot contracts, continuity and timeline, media graph, technical QA and actual FFmpeg operations, model routing, reviewer execution-attestation, knowledge/roles, one current persistent StudioEngine and an older AgenticStudio/StudioRuntime/Orchestrator plus old CLI. Those are not all separate operating systems, workstreams or permanent agents. Fifteen explicit source ownership boundaries reflect their current responsibility.
+
+Canonical index: video_studio/data/subsystem_catalog.json. Exact source audit: video_studio/subsystems.py. Command: vga-studio subsystems --repo-root . . The audit classifies ALL tracked repository files, scans all first-party Python modules in BOTH source packages, refuses duplicate/unowned modules, resolves real AST import edges, fails if new current Studio code reaches legacy 0.8 control, and compares actual seventeen domain adapters/five local operations against source ownership. It also returns per-module SHA-256 for reproducibility.
+
+Reconciliation: the user goal is the universal content product and all its subsystems. CAOS is the read-only crosscutting cognition authority, IPOS is a nested specialist, and separate IPOS private state is data custody only. Historical projects/examples are preserved as evidence/regression, not auto-routed tasks; the legacy agent controller is preserved for compatibility but is not installed as the current CLI.
+
+This check is exhaustive FILE/PYTHON IMPORT STRUCTURE across this checkout, not claim of line-by-line semantic correctness, external platform status, native CAOS selection or any artistic/owner outcome. Genuine full semantic source audit and real craft trials remain OPEN. Add new specialist modules only with exact catalog owner and tests; do not hide unknown modules in "other".
