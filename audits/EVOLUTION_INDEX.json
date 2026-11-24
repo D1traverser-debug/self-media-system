@@ -11,7 +11,9 @@
     "Owner-controlled IPOS long-term identity visual approval, exact current approved canon export and revocation tests for identity-dependent work; no private source mutation",
     "Knowledge CRUD across project-independent methods, real independent scoped method promotion, source dependency invalidation and transfer/replay; self-attested candidate no longer auto-validates",
     "Risk-specific reviewer independence, native effect authorization, external provider and platform-current support, cost/rights evidence, no automatic publication",
-    "Cross-surface direct-vs-durable real-world recovery, programmatic failure/retry exhaustion, external wait, cross-group parallel conflict, full project source/asset cleanup and release proof"
+    "Cross-surface direct-vs-durable real-world recovery, programmatic failure/retry exhaustion, external wait, cross-group parallel conflict, full project source/asset cleanup and release proof",
+    "Every internal subsystem's actual professional output quality must be independently tested on novel real user tasks; source scan and CI do not prove it",
+    "Legacy control bypass risk after direct CLI deprecation must be regression-tested including all read-only and writing modes"
   ],
   "current_problem_refs": {
     "TASK_INSTANCE_SCOPE_LEAK": "audits/VIDEO_TASK_NEUTRAL_REFACTOR_2026-11-24.md"
@@ -26,9 +28,11 @@
     "base": "9998060b9946f47b4d50aa5c28db51e3428d4a21",
     "candidate_pr": 40,
     "candidate_branch": "refactor/caos-task-neutral-video-20261124",
-    "source_head_before_index_revision": "7ba35ac190f590acaaefe866a951ab251ebdabcb",
-    "latest_ci_assurance": "VERIFY_EXACT_CURRENT_BRANCH_HEAD_SEPARATELY",
-    "next_action": "Continue exact current user goal: causal/semantic audit all child subsystems and actual multi-type outcomes; protect native CAOS/owner identity; provider availability and independent artistic results remain NOT_TESTED. Never auto-promote or revive old task instances."
+    "source_head_before_index_revision": "f5f55837719d9011b011000c0e5993a1b85e4e28",
+    "latest_ci_assurance": "EXACT_HEAD_MUST_BE_INDEPENDENTLY_VERIFIED",
+    "next_action": "Continue exact current user goal: causal/semantic audit all child subsystems and actual multi-type outcomes; protect native CAOS/owner identity; provider availability and independent artistic results remain NOT_TESTED. Never auto-promote or revive old task instances.",
+    "source_topology_ref": "docs/SUBSYSTEM_TOPOLOGY_AUDIT_2026-11-24.md",
+    "all_subsystem_acceptance_ref": "audits/UNIVERSAL_CONTENT_STUDIO_ALL_SUBSYSTEMS_AUDIT_2026-11-24.md"
   },
   "recent_resolved_or_promoted": [
     {
