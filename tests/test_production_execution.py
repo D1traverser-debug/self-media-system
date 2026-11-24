@@ -467,7 +467,7 @@ def test_executor_registry_reports_unknown_tool_tasks_without_claiming_them(tmp_
     from video_studio.production.registry import PRODUCTION_EXECUTORS
 
     assert set(PRODUCTION_EXECUTORS.operations()) == {
-        "python_frame_render", "ffmpeg_assemble", "delivery_package", "ffprobe_media_qa",
+        "python_frame_render", "ffmpeg_assemble", "delivery_package", "ffprobe_media_qa", "ffmpeg_video_audio_copy",
     }
     engine = StudioEngine(tmp_path / "unknown-tool-workspace")
     engine.create_project("unknown-tool", "Unregistered tool demo", _brief())

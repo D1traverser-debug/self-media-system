@@ -834,9 +834,12 @@
         "subtitles"
       ],
       "adapters": [],
-      "operations": [],
+      "operations": [
+        "ffmpeg_video_audio_copy"
+      ],
       "gaps": [
-        "Existing ffmpeg assembly supports some trim/merge/reframe; not a strict original-audio preservation or enhancement contract. No dedicated current executor for those effects."
+        "Existing ffmpeg assembly supports some trim/merge/reframe; not a strict original-audio preservation or enhancement contract. No dedicated current executor for those effects.",
+        "Only video passthrough, geometry crop, and end-trim can prove copied encoded-audio payloads; advanced content restoration, AI enhancement and multitrack transformations remain unavailable."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
       "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"

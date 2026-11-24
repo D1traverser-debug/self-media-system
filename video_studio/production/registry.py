@@ -6,6 +6,7 @@ from .context import ProductionTaskContext
 from .handlers import (
     execute_delivery_package,
     execute_ffmpeg_assemble,
+    execute_ffmpeg_video_audio_copy,
     execute_ffprobe_media_qa,
     execute_python_frame_render,
 )
@@ -55,3 +56,5 @@ PRODUCTION_EXECUTORS.register("python_frame_render", execute_python_frame_render
 PRODUCTION_EXECUTORS.register("ffmpeg_assemble", execute_ffmpeg_assemble)
 PRODUCTION_EXECUTORS.register("delivery_package", execute_delivery_package)
 PRODUCTION_EXECUTORS.register("ffprobe_media_qa", execute_ffprobe_media_qa)
+
+PRODUCTION_EXECUTORS.register("ffmpeg_video_audio_copy", execute_ffmpeg_video_audio_copy)

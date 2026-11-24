@@ -9,6 +9,7 @@ from .context import ProductionTaskContext
 from .contracts import FrameRenderSpec, ProductionContractError, RenderSpec
 from .delivery import create_delivery_package
 from .ffmpeg_assembler import FfmpegAssembler
+from .audio_preserve import AudioIdentityError, AudioPreservingVideoEditor, VideoOnlyEditSpec
 from .python_frame_renderer import PythonFrameRenderer
 
 
@@ -266,3 +267,38 @@ def execute_ffprobe_media_qa(context: ProductionTaskContext) -> dict[str, Any]:
     return run_claimed_media_qa(
         context.engine, context.project_id, context.task_id, context.worker_id, context.claim_token,
     )
+
+
+def execute_ffmpeg_video_audio_copy(context: ProductionTaskContext) -> dict[str, Any]:
+    name = str(context.config.get("edit_spec_input") or "").strip()
+    imported = context.inputs.get(name)
+    if not name or not imported:
+        raise ProductionContractError("edit spec must be declared as a task input")
+    spec = VideoOnlyEditSpec.from_dict(json.loads(Path(str(imported["path"])).read_text(encoding="utf-8")))
+    original = context.inputs.get(spec.source_input)
+    if not original or original.get("kind") not in {"video", "media"}:
+        raise ProductionContractError("source video is missing from declared task inputs")
+    if original.get("rights_status") not in {"OWNED","AUTHORIZED","LICENSED","PUBLIC_DOMAIN"}:
+        raise ProductionContractError("source media rights are not cleared for internal video editing")
+    outcome = AudioPreservingVideoEditor().render(
+        spec, source=Path(str(original["path"])), source_sha256=str(original["sha256"]),
+        output_dir=context.output_dir, expected_outputs=context.outputs)
+    meta=original.get("metadata",{})
+    refs=meta.get("rights_evidence_refs",[]) if isinstance(meta,Mapping) else []
+    outputs={
+        spec.video_output:_output_payload(Path(outcome["video_path"]),kind="video",
+            media_type="video/mp4",rights_status=str(original["rights_status"]),
+            metadata={"production_executor":"ffmpeg_video_audio_copy","candidate_only":True,
+                      "audio_packet_identity":outcome["receipt"]["audio_identity"]["promise"],
+                      "rights_evidence_refs":refs,"render_receipt_ref":spec.receipt_output}),
+        spec.receipt_output:_output_payload(Path(outcome["receipt_path"]),kind="evidence",
+            media_type="application/json",
+            metadata={"production_executor":"ffmpeg_video_audio_copy",
+                      "source_sha256":original["sha256"],
+                      "result_sha256":outcome["receipt"]["output_sha256"]})
+    }
+    completion=context.engine.complete_task(context.project_id,context.task_id,
+        context.worker_id,context.claim_token,outputs,
+        {"production_executor":"ffmpeg_video_audio_copy","candidate_only":True,
+         "identity_receipt":outcome["receipt"]})
+    return {"operation":"ffmpeg_video_audio_copy","completion":completion}

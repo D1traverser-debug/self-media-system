@@ -348,7 +348,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     from .production.registry import PRODUCTION_EXECUTORS
 
     local_operations = set(PRODUCTION_EXECUTORS.operations())
-    expected_operations = {"python_frame_render", "ffmpeg_assemble", "delivery_package", "ffprobe_media_qa"}
+    expected_operations = {"python_frame_render", "ffmpeg_assemble", "delivery_package", "ffprobe_media_qa", "ffmpeg_video_audio_copy"}
     _check(checks, "local_production_executor_registry", local_operations == expected_operations, {
         "registered": sorted(local_operations),
         "expected": sorted(expected_operations),
