@@ -1065,7 +1065,20 @@ class StudioEngine:
             if not path.is_file() or _sha256(path) != item["sha256"]:
                 raise GateError(f"decision input changed: {name}")
             inputs.append({"name": name, "artifact_id": item["artifact_id"], "sha256": item["sha256"]})
+        # Revision identities prevent an old decision from reviving when the
+        # owner changes a goal/contract and later restores identical text.
+        brief_event = connection.execute(
+            "SELECT MAX(event_no) FROM events WHERE project_id=? AND entity_type='PROJECT' AND event_type IN ('PROJECT_CREATED','PROJECT_BRIEF_REVISED')",
+            (project_id,)).fetchone()[0]
+        task_event = connection.execute(
+            """SELECT MAX(event_no) FROM events WHERE project_id=? AND entity_type='TASK' AND entity_id=?
+               AND (event_type IN ('TASK_ADDED','TASK_CONTRACT_REVISED','TASK_REOPENED','TASK_INVALIDATED')
+                    OR event_type LIKE 'TASK_INVALIDATED_BY_%')""",
+            (project_id, task["task_id"])).fetchone()[0]
+        if brief_event is None or task_event is None:
+            raise GateError("decision requires current goal and task event identity")
         return {"project_id": project_id, "task_id": task["task_id"],
+                "brief_event_no": brief_event, "task_event_no": task_event,
                 "brief_sha256": hashlib.sha256(_json(brief).encode("utf-8")).hexdigest(),
                 "task_sha256": hashlib.sha256(_json({key: task[key] for key in fields}).encode("utf-8")).hexdigest(),
                 "inputs": inputs, "assurance": "LOCAL_STRUCTURAL_BINDING_ONLY"}

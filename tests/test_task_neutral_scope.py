@@ -142,3 +142,33 @@ def test_independent_tasks_bind_independent_decisions_and_reject_stale_action(tm
     engine.reopen("fresh", "a", "reconsider")
     with pytest.raises(GateError):
         engine.claim_next("fresh", "new-worker", task_id="a")
+
+
+def test_goal_reversion_does_not_restore_old_decision_authority(tmp_path):
+    from video_studio.engine import GateError
+    engine = StudioEngine(tmp_path)
+    brief = bind_owner_brief("fresh", {"goal": "caption", "audience": "a", "deliverables": ["a"]})
+    engine.create_project("fresh", "fresh", brief)
+    engine.add_tasks("fresh", [{"task_id": "a", "outputs": ["a"], "acceptance": {"quality": "clear"},
+                               "requirements": {"deliverable_refs": ["a"], "decision_id": "d-a"}}])
+    engine.record_decision("fresh", decision_receipt("a", "d-a"))
+    engine.revise_brief("fresh", {**brief, "goal": "different"}, reason="owner changes scope")
+    engine.revise_brief("fresh", brief, reason="owner restores text")
+    engine.reopen("fresh", "a", "new decision required")
+    with pytest.raises(GateError):
+        engine.claim_next("fresh", "writer", task_id="a")
+
+
+def test_unrelated_decision_does_not_authorize_task_and_caller_binding_rejected(tmp_path):
+    from video_studio.engine import ContractError, GateError
+    engine = StudioEngine(tmp_path)
+    brief = bind_owner_brief("fresh", {"goal": "caption", "audience": "a", "deliverables": ["a"]})
+    engine.create_project("fresh", "fresh", brief)
+    engine.add_tasks("fresh", [{"task_id": "a", "outputs": ["a"], "acceptance": {"quality": "clear"},
+                               "requirements": {"deliverable_refs": ["a"], "decision_id": "d-a"}}])
+    receipt = decision_receipt("a", "d-a")
+    with pytest.raises(ContractError):
+        engine.record_decision("fresh", {**receipt, "action_binding": {"fake": True}})
+    with pytest.raises(ContractError):
+        engine.record_decision("fresh", {**receipt, "decision_id": "d-wrong"})
+    assert engine.claim_next("fresh", "writer") is None

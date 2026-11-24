@@ -653,7 +653,7 @@
       "capability_id": "learning_and_evolution",
       "scope": "PRODUCTION_GROWTH_IP_COMMERCIAL_OUTCOME_LEARNING",
       "assurance_ceiling": "HARNESS_WIRED",
-      "invocation_path": "StudioEngine record_learning; no independently verified general promotion",
+      "invocation_path": "StudioEngine record_learning -> evidence and tests/replay -> independent scoped validation and owner promotion; general promotion not independently verified",
       "executor_type": "OWNER_LEARNING_AND_MAINTENANCE_PIPELINE",
       "executor_ref": "video_growth_agent/business_metrics.py + video_growth_agent/experiments.py + video_growth_agent/data/execution-plan.json + skills/video-growth-agent/references/self-learning.md + audits/EVOLUTION_INDEX.json",
       "required_tools": [
@@ -676,7 +676,7 @@
       ],
       "current_route": {
         "status": "PARTIAL_ENGINE",
-        "description": "StudioEngine record_learning; no independently verified general promotion"
+        "description": "StudioEngine record_learning -> evidence and tests/replay -> independent scoped validation and owner promotion; general promotion not independently verified"
       },
       "historical_invocation_path": "typed outcome/production/experiment evidence -> bounded learning candidate -> challenge -> tests/replay -> owner promotion",
       "historical_executor_ref": "video_growth_agent/business_metrics.py + video_growth_agent/experiments.py + video_growth_agent/data/execution-plan.json + skills/video-growth-agent/references/self-learning.md + audits/EVOLUTION_INDEX.json"
