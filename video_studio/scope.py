@@ -92,6 +92,7 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
         "capabilities": manifest["capabilities"],
         "knowledge_catalog": manifest["knowledge_lifecycle"]["index"],
         "capability_catalog": "video_growth_agent/data/capabilities.json",
+        "professional_capability_lookup": "vga-studio capabilities",
         "parent_governance": "REQUIRED_IN_OWNER_SESSION",
         "native_activation": "NOT_VERIFIED_BY_RUNTIME",
         "effect_authorized": False,
@@ -132,3 +133,35 @@ def knowledge_lookup(method_id: str | None = None, *, include_nonactive: bool = 
         result.append(item)
     return {"entries": result, "source_verification": "HASHED_LOCAL_BYTES" if root else "LOCATOR_ONLY",
             "native_caos_activation": "NOT_VERIFIED_BY_RUNTIME", "automatic_task_selection": False}
+
+
+def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Read-only discovery, with no inference of provider access, decision, or task."""
+    from .adapters import SUPPORTED_DOMAIN_ADAPTERS
+    from .production.registry import PRODUCTION_EXECUTORS
+    data = profile if profile is not None else json.loads(
+        files("video_growth_agent").joinpath("data", "capabilities.json").read_text(encoding="utf-8"))
+    groups = data["professional_capability_groups"]
+    ids = [g["id"] for g in groups]
+    if len(ids) != len(set(ids)):
+        raise ValueError("duplicate professional capability group")
+    demands = [d for g in groups for d in g["demands"]]
+    if len(demands) != len(set(demands)):
+        raise ValueError("ambiguous professional demand identity")
+    adapters = {x for g in groups for x in g["adapters"]}
+    operations = {x for g in groups for x in g["operations"]}
+    if adapters != set(SUPPORTED_DOMAIN_ADAPTERS) or operations != set(PRODUCTION_EXECUTORS.operations()):
+        raise ValueError("professional capability routes diverge from actual executor registries")
+    if any(g["activation"] != "DEMAND_SELECTED_ONLY" or not g["gaps"] for g in groups):
+        raise ValueError("professional groups must be demand-selected and disclose limits")
+    if any(not item.get("current_route", {}).get("status") for item in data["capabilities"]):
+        raise ValueError("legacy capability must have explicit current disposition")
+    selected = [g for g in groups if group_id is None or g["id"] == group_id]
+    if not selected:
+        raise ValueError("exact professional capability group not found")
+    return {
+        "groups": selected, "legacy_capabilities": data["capabilities"] if group_id is None else [],
+        "registry_alignment": "VERIFIED_STRUCTURE_ONLY",
+        "selected_task_graph": None, "effect_authorized": False,
+        "native_activation": "NOT_VERIFIED_BY_RUNTIME", "business_outcome_verified": False,
+    }

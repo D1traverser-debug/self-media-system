@@ -131,7 +131,8 @@
         "isolated_regression_graphs_and_local_execution",
         "hard_release_gates",
         "task_neutral_intake_and_retirement",
-        "knowledge_locator_integrity"
+        "knowledge_locator_integrity",
+        "professional_capability_route_integrity"
       ],
       "separates_structural_integrity_from_production_readiness": true,
       "no_provider_calls_or_workspace_mutation": true
@@ -196,7 +197,7 @@
     "task_binding": "requirements.deliverable_refs contains exact current brief deliverables; no inferred CAOS proof"
   },
   "architecture": {
-    "authority": "docs/standalone_video_studio.md",
+    "authority": "video_studio/data/studio_manifest.json",
     "layers": [
       {
         "id": "L0",
@@ -251,7 +252,13 @@
         "Take"
       ],
       "execution_graph": "Per-demand DAG; not media containment or organization hierarchy",
-      "feedback": "Outcome-triggered revisions and new graph generations; no fixed loop or mandatory stage ordering"
+      "feedback": "Outcome-triggered revisions and new graph generations; no fixed loop or mandatory stage ordering",
+      "professional_capabilities": "video_growth_agent/data/capabilities.json#professional_capability_groups",
+      "roles": "video_growth_agent/data/roles.json; reusable responsibility lenses, not task graph or permanent workers",
+      "cognition_dependency": "CAOS read-only parent governance at every material decision/effect, recursively reopen contradicted ancestors; no duplicate cognition controller",
+      "knowledge": "video_studio/data/knowledge_catalog.json; exact source, scope, lifecycle, not execution authority",
+      "execution_resources": "actual domain adapter and production registry; current session external capabilities checked separately",
+      "acceptance": "task-specific domain outcome and independent overall owner outcome, neither CI nor technical QA substitutes"
     },
     "continuous_responsibilities": {
       "owner_goal_fidelity": "ALL_DECISIONS_AND_ACTIONS",
@@ -263,7 +270,33 @@
       "quality_and_independent_acceptance": "ALL_DELIVERABLES",
       "learning_and_failure_reentry": "WHEN_EVIDENCE_CHANGES_OR_METHOD_FAILS"
     },
-    "method_selection": "Contextual capabilities, not mandatory task nodes; each applies at relevant decision/effect boundary."
+    "method_selection": "Contextual capabilities, not mandatory task nodes; each applies at relevant decision/effect boundary.",
+    "recursive_governance": {
+      "coverage": "ALL_LEVELS_ALL_MATERIAL_DECISIONS_AND_EFFECTS",
+      "levels": [
+        "SYSTEM",
+        "DOMAIN",
+        "GROUP",
+        "DEMAND",
+        "TASK",
+        "DECISION",
+        "EFFECT",
+        "REVIEW",
+        "LEARNING"
+      ],
+      "relationship": "ORTHOGONAL_TO_EXECUTION_DEPENDENCY_GRAPH",
+      "decision_reentry": "EARLIEST_CONTRADICTED_PREMISE_AND_DEPENDENTS",
+      "parent_authority": "READ_ONLY_CAOS_SESSION",
+      "runtime_proof": "NOT_VERIFIED"
+    },
+    "organization_policy": {
+      "professional_groups": "ON_DEMAND_CAPABILITY_INDEX_NOT_PERSISTENT_AGENTS",
+      "roles": "ASSIGN_BY_MATERIAL_CRAFT_TOOL_CONTEXT_OR_INDEPENDENCE_DIFFERENCE",
+      "cross_group_handoff": "EXACT_GOAL_REVISION_INPUT_OUTPUT_EVIDENCE_AND_ACCEPTANCE",
+      "patterns": "video_growth_agent/data/coordination-policy.json",
+      "parallelism": "ONLY_INDEPENDENT_DECLARED_DEPENDENCIES",
+      "loops": "EVIDENCE_TRIGGERED_REDECISION_AND_REVISED_DAG_NOT_FIXED_SEQUENCE"
+    }
   },
   "knowledge_lifecycle": {
     "index": "video_studio/data/knowledge_catalog.json",

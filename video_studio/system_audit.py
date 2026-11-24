@@ -149,6 +149,17 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         _check(checks, "knowledge_locator_integrity", True, {"source_count": len(methods["entries"])})
     except (ValueError, OSError, KeyError, TypeError) as exc:
         _check(checks, "knowledge_locator_integrity", False, str(exc))
+    from .scope import capability_lookup
+    try:
+        coverage = capability_lookup(profile=_read_json(root / "video_growth_agent" / "data" / "capabilities.json"))
+        _check(checks, "professional_capability_route_integrity", True, {
+            "groups": len(coverage["groups"]),
+            "registry_alignment": coverage["registry_alignment"],
+            "business_outcome_verified": False,
+        })
+        capability_gaps.extend(f"{group['id']}: {gap}" for group in coverage["groups"] for gap in group["gaps"])
+    except (ValueError, KeyError, TypeError, OSError) as exc:
+        _check(checks, "professional_capability_route_integrity", False, str(exc))
     scripts = pyproject.get("project", {}).get("scripts", {})
     cli_source = (root / "video_studio" / "cli.py").read_text(encoding="utf-8")
     cli_registered = (

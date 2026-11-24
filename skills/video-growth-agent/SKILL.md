@@ -23,6 +23,10 @@ At every Video conversation and every decision/action, apply the current read-on
 
 Read the architecture and continuous responsibilities in the canonical Studio manifest. The repository project index has no default project. All old project/task instances and example graphs are retired evidence or regression fixtures only. Never auto-load, execute, resume or copy them into a new brief. Start from the actual current demand; only an exact non-retired workspace ID selected by the owner can resume. Use `vga-studio intake REQUEST.json` to obtain the task-neutral route. For a durable owner project initialize with `init PROJECT --brief BRIEF.json --owner-task`; every task binds current `requirements.deliverable_refs`. This route is a mechanical locator, not proof that CAOS cognition ran. Select applicable domain capabilities and methods from the knowledge catalog; retrieve original sources on demand.
 
+## Professional capability discovery
+
+Professional capability classification is distinct from business workstreams, media object containment, roles, reusable knowledge, cognition dependencies and task execution. Discover exact groups with `vga-studio capabilities [--group GROUP]`; the output binds the catalog to registered adapters and local operations, discloses missing effects and does not select a task, authorize execution or certify quality. For current owner work, CAOS recursively governs every material choice at every organizational level, including the choice of professional method, reviewer, tool and verification. No group is a compulsory stage or permanent worker. Apply independent domain and overall owner acceptance separately. New evidence may reopen the earliest contradicted premise without invalidating unrelated branches. The existing engine is the only scheduler; use direct session capability for nonpersistent simple work where appropriate.
+
 ## 1. Startup and recovery
 
 For every new task or continuation:

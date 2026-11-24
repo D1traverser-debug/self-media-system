@@ -7,7 +7,7 @@
   "object_graph_semantics": "PROGRAM_BUSINESS_GRAPH__MEDIA_ASSET_CONTEXT_GRAPH__EDITORIAL_TIMELINE_ARE_DISTINCT_BUT_LINKED",
   "dependency_model": {
     "explicit_depends_on_precedence": "EXPLICIT_DEPENDENCIES_OVERRIDE_GLOBAL_LOWER_WAVE_BARRIER",
-    "legacy_fallback": "WHEN_depends_on_IS_ABSENT_USE_EXISTING_LOWER_WAVE_COMPLETION_RULE",
+    "legacy_fallback": "RETIRED_COMPATIBILITY_FIXTURE_ONLY__NO_WAVE_BARRIER_IN_CURRENT_STUDIO",
     "cycle_policy": "REJECT_CONFIGURATION",
     "input_policy": "DECLARED_ARTIFACT_INPUTS_MUST_EXIST_BEFORE_READY"
   },
@@ -74,9 +74,10 @@
     "system": "CAOS",
     "source_repository": "D1traverser-debug/cognition-agent-os",
     "mode": "CHAT_GOVERNED_EXTERNAL",
-    "entrypoint": "CAOS_VIDEO_ENTRY.md",
+    "entrypoint": "STUDIO_ENTRY.md",
     "runtime_dependency": false,
     "source_mutation": "FORBIDDEN",
     "video_domain_authority": "VIDEO_GROWTH_AGENT"
-  }
+  },
+  "current_runtime": "video_studio.engine.StudioEngine"
 }

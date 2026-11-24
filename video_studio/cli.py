@@ -30,6 +30,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--offline-fixture", action="store_true", help="isolated regression workspace only; never owner work")
     sub = parser.add_subparsers(dest="command", required=True)
 
+    p = sub.add_parser("capabilities", help="inspect professional capability coverage and actual registered routes")
+    p.add_argument("--group", help="exact professional capability group ID")
+
     p = sub.add_parser("knowledge", help="locate reusable methods without activating task history")
     p.add_argument("--id", help="exact knowledge method ID")
     p.add_argument("--include-nonactive", action="store_true", help="include candidate and historical evidence")
@@ -220,6 +223,10 @@ def main(argv: list[str] | None = None) -> int:
             report = run_system_audit(args.repo_root)
             _emit(report)
             return 0 if report["pass"] else 2
+        if command == "capabilities":
+            from .scope import capability_lookup
+            _emit(capability_lookup(args.group))
+            return 0
         if command == "knowledge":
             from .scope import knowledge_lookup
             _emit(knowledge_lookup(args.id, include_nonactive=args.include_nonactive, repo_root=args.repo_root))
