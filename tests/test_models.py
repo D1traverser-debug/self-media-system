@@ -28,5 +28,12 @@ def test_packaged_runtime_resources_are_single_repository_authority():
     assert roles["documentation_projection"] == "skills/video-growth-agent/references/team.md"
     from video_growth_agent.roles import RoleRegistry
     registry = RoleRegistry()
-    assert set(registry.sections) == {entry["prompt_section"] for entry in roles["roles"].values()}
+    # Role sections are a subset: generic review protocols are continuous
+    # methods, not permanent roles or mandatory workflow nodes.
+    expected_roles = {entry["prompt_section"] for entry in roles["roles"].values()}
+    assert expected_roles <= set(registry.sections)
+    assert "Blind review protocol" in registry.sections
+    for role_id in roles["roles"]:
+        prompt = registry.get(role_id).prompt
+        assert prompt and "Blind review protocol" not in prompt
     assert "not permanently instantiated agents" in data_path("team.md").read_text(encoding="utf-8")
