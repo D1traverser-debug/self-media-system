@@ -1,4 +1,4 @@
-# Video Production Studio — Canonical Entry
+# Universal Content Studio — Canonical Entry (Video Growth Agent repository)
 
 Status: `ACTIVE_CANDIDATE`
 This file, `STUDIO_ENTRY.md`, is the single startup authority for all Video work.
@@ -9,13 +9,13 @@ Operating manual: `docs/standalone_video_studio.md`
 
 ## Mission
 
-Turn the owner's actual media goal into a finished, independently checked deliverable. The system is outcome-driven, not stage-driven. Each project gets a task graph derived from its brief; independent tasks can run concurrently, and only declared dependencies block work.
+Turn the owner's actual content goal—including independent writing, still images, IP identity, media editing, platform packaging and original video—into an independently checked deliverable. The system is outcome-driven, not stage-driven. Each project gets a task graph derived from its brief; independent tasks can run concurrently, and only declared dependencies block work.
 
 ## Independence
 
 Video Studio owns Video-domain requirements, project/task state, assets, evidence, production execution and domain learning. When the owner selects Video in a CAOS-governed session, CAOS remains the parent authority for complete-goal recovery, decision quality, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Use the CAOS parent Skill in the active ChatGPT workspace. The CAOS decision loop and execution loop govern session-level reasoning, authorization and independent acceptance. The Video capability catalog is `video_growth_agent/data/capabilities.json`. Do not modify the CAOS repository, Skills or configuration. The Video runtime has no CAOS API/runtime/task-ID/lease dependency; technical independence is not permission to bypass parent governance. All owner-facing Video conversations, decisions and effects remain CAOS-governed. The CLI defaults to current-owner scope and rejects retired or unmarked workspaces. Isolated offline mechanical regression requires explicit `--offline-fixture` and a separate root, and does not claim CAOS activation. The fixed-stage controller is not an active Video execution path.
 
-IPOS remains the sole authority for the owner's original character/identity canon. The Studio consumes approved, versioned IPOS exports; it does not create a competing canon.
+**IPOS is a nested specialist domain within this Content Studio**, owning permanent creator/character identity design. Its existing installed Skill and private owner-approved canon are separately maintained; Video imports exact approved versioned bundles downstream but never creates competing canonical state. Temporary avatars are ordinary visual craft and do not inherit the owner's personal IPOS project.
 
 ## Entry, routing and revisitable responsibilities
 
@@ -25,7 +25,7 @@ Recover the owner outcome, inspect relevant authoritative sources, research and 
 
 For a durable owner task, give `requirements.decision_id` an exact unique ID when planning; after current inputs and decision evidence are available, use `vga-studio decision PROJECT RECEIPT.json` with that `decision_id` and `task_id` plus the existing competing-cause/alternative fields. The engine derives the binding from actual current brief, task contract and input artifact bytes. Unbound/stale branches cannot be claimed or completed; unrelated admitted branches may proceed. Revise a stale task to a new decision ID and reopen it after re-investigation. This local check is not CAOS activation, verified external research, a permission grant, or semantic acceptance. Direct non-task session actions still require CAOS governance and appropriate independent evidence.
 
-## Hard release boundaries
+## Hard release boundaries (when releasing an actual video)
 
 A video is not releasable until the exact final bytes pass digest-bound FFmpeg/FFprobe checks (video stream, stream-duration match, true peak, black frames and full decode), every used media asset in recursive lineage has cleared rights plus resolvable evidence, required human reviews are recorded against the exact digest, and the Red Team has at least three evidence-backed findings with no unresolved critical/high risk. Required platform/disclosure, EditorialPlan, timeline and other evidence artifacts must exist. Source-version changes stale their consumers and descendants. These checks never publish automatically.
 
@@ -37,7 +37,7 @@ Professional capability classification is distinct from business workstreams, me
 
 Use `vga-studio knowledge --id METHOD --repo-root REPOSITORY` to locate and hash the exact current reusable method source; historical/candidate sources require `--include-nonactive` and are never execution authority.
 
-The canonical manifest defines authority layers, continuous responsibilities and separate business/media/task axes. Load it and the operating manual. No prior task instance is active by default. The repository project index is retired evidence only. Never resume an old project or reuse its scope without a fresh owner demand; even explicit historical retrieval does not reactivate it. Preserve generic skills, technical adapters, methods and knowledge, not previous work orders.
+The canonical manifest defines authority layers, continuous responsibilities and separate product/business/professional/task axes. Load it and the operating manual. The candidate architecture in `docs/CONTENT_STUDIO_ARCHITECTURE_V2.md` is a design/reference contract, not a second active control authority. For task-specific inspection, `vga-studio inspect-editorial`, `inspect-visual`, and `quality-plan` expose structure or intended reviews only; they cannot claim generation or professional quality. No prior task instance is active by default. The repository project index is retired evidence only. Never resume an old project or reuse its scope without a fresh owner demand; even explicit historical retrieval does not reactivate it. Preserve generic skills, technical adapters, methods and knowledge, not previous work orders.
 
 ```bash
 python -m pip install -e .

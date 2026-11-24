@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 dependencies = ["Pillow>=10.0", "filelock>=3.13"]
 name = "video-growth-agent"
 version = "1.0.0"
-description = "Outcome-driven Video Production Studio for research, media generation, editing, audiovisual QA, release and evidence-based learning"
+description = "CAOS-governed universal content studio for multilingual writing, platform packaging, visual and identity craft, media transformation and original video"
 requires-python = ">=3.11"
 
 [project.scripts]

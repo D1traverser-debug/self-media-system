@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "studio_version": "1.0.0",
-  "product_name": "Video Production Studio",
+  "product_name": "Universal Content Studio",
   "owner": "VIDEO_GROWTH_AGENT",
   "default_entrypoint": "STUDIO_ENTRY.md",
   "cli": "vga-studio",
@@ -373,5 +373,16 @@
       "RETIRED_EVIDENCE_ONLY"
     ],
     "mutation_authority": "VIDEO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
-  }
+  },
+  "legacy_repository_identity": "video-growth-agent",
+  "product_scope": [
+    "LONG_FORM_AND_SHORT_EDITORIAL",
+    "MULTILINGUAL_PLATFORM_PACKAGING",
+    "PROMPT_AND_VISUAL_DESIGN",
+    "STATIC_AND_MULTI_ASPECT_IMAGES",
+    "NESTED_ORIGINAL_IDENTITY_IPOS",
+    "MEDIA_UNDERSTANDING_AND_TRANSFORM",
+    "ORIGINAL_AUDIOVISUAL_CREATION",
+    "OPTIONAL_GROWTH_AND_COMMERCIAL"
+  ]
 }

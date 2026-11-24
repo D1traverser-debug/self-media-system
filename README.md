@@ -1,6 +1,8 @@
-# Video Growth Agent
+# Universal Content Studio (repository: Video Growth Agent)
 
-CAOS-governed Video Production Studio for research, creative development, parallel media production, audiovisual QA, release preparation and evidence-based learning. When Video is selected in a CAOS-governed session, CAOS parent governance is mandatory; the Video runtime remains technically independent.
+The repository name is retained for compatibility. This is a CAOS-governed **general digital content system**, not a mandatory video-production pipeline. Its on-demand professional capabilities include original Chinese/English writing and X Articles, platform-native titles/descriptions/tags/cover copy, static/multi-aspect images and prompts, multimedia understanding and editing, exact audio preservation, audiovisual production, and nested Original Identity/IPOS. Each user goal activates only relevant capabilities. The Video runtime remains technically independent of the CAOS codebase; CAOS governs the user's selected work at every material decision/effect.
+
+**Current launch authority:** `STUDIO_ENTRY.md` + `video_studio/data/studio_manifest.json`. **Detailed candidate architecture:** `docs/CONTENT_STUDIO_ARCHITECTURE_V2.md` (not automatically promoted). **No existing video/business project or 50-task plan is active by default.** Read only specific historical sources if they are relevant; do not treat a task sample as a current owner goal.
 
 ## Current authority
 
@@ -16,7 +18,7 @@ CAOS-governed Video Production Studio for research, creative development, parall
 - `docs/architecture.md` — historical 0.8 architecture reference.
 - `docs/agent_operability_scenarios.md` — historical 0.8 operability scenarios; standalone operating rules live in the new Skill and contract.
 - `docs/provider_benchmark_protocol.md` — owner benchmark method for volatile provider quality/cost evidence.
-- `projects/PROJECT_INDEX.json` — child-owned project/program discovery authority.
+- `projects/PROJECT_INDEX.json` — retired historical project/program index; not current task or owner-context authority.
 - `video_studio/data/business_feedback.json` — task-neutral growth/IP/commercial/production feedback relations.
 - `audits/EVOLUTION_INDEX.json` — canonical Video evolution-evidence entrypoint.
 - `video_growth_agent/` — Video-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
@@ -24,11 +26,11 @@ CAOS-governed Video Production Studio for research, creative development, parall
 
 The `video_studio` package is the sole Video runtime: it owns Video project briefs, task DAGs, leases, artifact history, review receipts, failure recovery and domain execution. CAOS governs session-level requirement interpretation, material decisions, root-cause investigation, cross-domain authorization and independent acceptance when the owner selects Video from CAOS. The Video runtime has no CAOS API, runtime, task-ID or lease dependency. Video domain modules are imported only through the explicit `video_studio.adapters` boundary; the old fixed-stage controller is not an active execution path.
 
-## Video domain model and production architecture
+## Historical Video 0.8 domain models (not a universal execution chain)
 
-Video 0.8 makes the media-business system operable from natural-language/editorial intent through production and learning rather than starting mechanically at the Shot layer.
+The following historical video-specific structures remain callable only where an explicit Video adapter declares the corresponding work. They do not describe the current general-content workflow. New user content demands route through typed contracts; `video_studio.engine.StudioEngine` is the only durable scheduler, and direct conversational tasks need no project.
 
-The current executable chain is:
+Historical example chain (not a current default or mandatory production order):
 
 `EpisodeIntent -> ClaimSpec -> BeatSpec -> ShotIntent -> EditorialPlan -> ShotContract -> ModelRoutingDecision -> CandidateTake -> ContinuityAssessment -> Promotion -> Timeline -> Editor handoff/roundtrip -> PlatformVariant -> Release -> Experiment/Outcome -> LearningCandidate`
 

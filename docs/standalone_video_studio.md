@@ -1,4 +1,4 @@
-# Video Production Studio — Product, Method and Runtime Contract
+# Universal Content Studio — Product, Method and Runtime Contract
 
 Status: `ACTIVE_CANDIDATE_1.0`
 Runtime: `video_studio.engine`
@@ -8,15 +8,15 @@ Manifest: `video_studio/data/studio_manifest.json`
 
 ## 1. Product outcome
 
-Video Studio turns an owner's media goal into finished media and release materials. Its primary success oracle is the delivered work, not the presence of roles, stages, prompts, diagrams, task counts or passing tests.
+Content Studio turns the owner's specific content goal—including independent long/short text, visuals, platform packaging, media repair and original moving media—into the requested output and applicable release materials. Its primary success oracle is the delivered work, not the presence of roles, stages, prompts, diagrams, task counts or passing tests.
 
 Supported work may include cinematic explainers, technology/business documentaries, engineering demonstrations, news × fictional-video satire, meme and entertainment edits, product/brand films, animation, trailers, tutorials, shorts, long-form videos, platform-native derivatives and mixed-media work.
 
 No single visual style, runtime, aspect ratio, duration, model, editor or production method is universal.
 
-## 1.1 Business-domain scope
+## 1.1 Optional business-domain scope
 
-The Studio is the sole active control plane for the complete Video domain, not only a clip renderer. A project graph may cover one workstream or connect several:
+Business workstreams are optional objectives, not the full set of professional content domains. Content Studio includes the nested Original Identity/IPOS specialist for permanent character and creator identity design. Its installed Skill and private canonical state are separately maintained, while Video owns only verified downstream bundle consumption. Ordinary temporary avatars remain general visual craft. The Studio is the sole active durable control plane for Video-owned content work, not only a clip renderer. A project graph may cover one workstream or connect several:
 
 - **MEDIA_GROWTH** — audience/problem research, demand signals, platform strategy, portfolio and series hypotheses, packaging, distribution, retention and audience outcomes.
 - **ORIGINAL_DIGITAL_IP** — video-side use of approved IP, recognition/performance evidence, character/asset usage strategy and licensing-use value. Canon, likeness and identity rights remain owned by IPOS.
@@ -49,7 +49,7 @@ Continuous responsibilities are evaluated at each applicable decision/effect: co
 - **Artifact records** own exact file identity, digest, version, rights and producer lineage.
 - **Review records** own artifact-bound evaluation evidence.
 - **Event log** is append-only operational history.
-- **IPOS** remains the sole authority for original character/identity canon.
+- **IPOS** is an internal professional identity-design bounded context of Content Studio. Its existing private canon and owner approval are separately custodied; approved bundles may be imported into downstream Video only with exact provenance.
 
 CAOS governs every owner-facing Video conversation, decision and action, including revisions, retrieval, method selection, execution and final acceptance. Video Studio owns domain execution, project/task state and artifact records. The runtime has no CAOS imports, API, parent task identity or parent lease; this runtime boundary does not waive the active session's CAOS governance. The fixed-stage controller is not loaded by `vga-studio`. Video domain modules are imported only through `video_studio.adapters` when a task declares a supported adapter.
 

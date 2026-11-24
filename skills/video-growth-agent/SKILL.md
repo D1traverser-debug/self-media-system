@@ -1,9 +1,9 @@
 ---
 name: video-growth-agent
-description: CAOS-governed Video Production Studio for research, creative development, parallel production, audiovisual quality control, release preparation and evidence-based learning. Use for new Video projects and continuation of existing Video work.
+description: CAOS-governed universal digital content studio for X longform/short writing, bilingual platform titles, tags and cover copy, images/prompts/variants, media edits and original video, plus the nested IPOS creative identity domain. Use on the owner's in-scope content tasks and related continuations; no fixed video workflow.
 ---
 
-# Video Production Studio — Video Domain Skill
+# Universal Content Studio — Content Domain Skill (Video Growth Agent)
 
 **Startup authority:** repository-root `STUDIO_ENTRY.md`.
 
@@ -44,7 +44,7 @@ For every new task or continuation, apply these revisitable responsibilities, no
 
 Authority order: current explicit owner instruction and corrections; project-specific owner-approved brief; verified source facts and rights; approved IPOS identity canon; accepted artifact/review evidence; candidate hypotheses and suggestions. Lower authority cannot override higher authority.
 
-IPOS remains the sole authority for original character and identity canon. Consume only the owner's approved, versioned IPOS export. Never silently invent or mutate canon.
+IPOS is a professional identity-design subsystem INSIDE Content Studio, with separately custodied private canonical state and current Skill. Use the IPOS workflow for persistent identity design when selected. Only use an owner-approved, exact-version IPOS export for recurring identity-dependent content; do not invent or mutate canon. A one-time avatar needs no personal IPOS bootstrap.
 
 ## 2. Outcome contract
 
@@ -63,9 +63,9 @@ Keep hard requirements separate from preferences. When trade-offs are necessary,
 
 Use `vga-studio init` only when creating a durable project. Use `revise-brief` for outcome changes and `revise-task` for contract changes. Always supply the reason. Let the engine invalidate the changed node and affected descendants; never reuse stale downstream work as current.
 
-## 2A. Video business workstreams
+## 2A. Optional historical media-business workstreams
 
-Treat Video Growth Agent as a coupled media-business system, not merely a video-rendering pipeline. Determine which workstream(s) the owner's goal actually engages:
+These four business outcome labels are NOT the whole Content Studio product or its professional organization. The internally nested Original Identity/IPOS design domain is available even without a campaign, video or monetization goal. Treat Video Growth Agent's legacy media-business model as optional when the owner selects such a business outcome. Determine which workstream(s) the owner's goal actually engages:
 
 - **MEDIA_GROWTH:** audience/problem evidence, demand, platform positioning, content portfolio, series hypotheses, hooks/packaging, distribution and audience outcomes.
 - **ORIGINAL_DIGITAL_IP:** video-side use and recognition of approved original IP, performance evidence, repeatable asset usage and licensing-use value. IPOS alone owns character identity canon, likeness and identity rights.

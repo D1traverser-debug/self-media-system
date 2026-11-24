@@ -246,3 +246,18 @@ def test_integrated_program_authority_refs_are_digest_bound_task_inputs():
     imported_names = {item["name"] for item in manifest["assets"]}
     assert "jensen-source-video" not in imported_names
     assert "ipos-ready-for-video-bundle" not in imported_names
+
+
+def test_current_content_studio_entry_and_product_name_match_nested_identity():
+    root = ROOT
+    import json
+    entry = (root / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    skill = (root / "skills/video-growth-agent/SKILL.md").read_text(encoding="utf-8")
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    manifest = json.loads((root / "video_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["product_name"] == "Universal Content Studio"
+    assert "nested specialist domain" in entry
+    assert "INSIDE Content Studio" in skill
+    assert "not a mandatory video-production pipeline" in readme
+    assert "Historical example chain" in readme
+    assert "video-growth-agent" in manifest["legacy_repository_identity"]
