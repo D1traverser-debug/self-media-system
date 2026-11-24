@@ -333,6 +333,14 @@
       "cli": "vga-studio inspect-editorial SOURCE.json --kind package|article",
       "platform_policy": "NO_HARDCODED_CURRENT_PLATFORM_LIMITS",
       "actual_generation": "CURRENT_CHAT_OR_PROVIDER_ONLY_WHEN_AVAILABLE_AND_AUTHORIZED"
+    },
+    "visual_contract": {
+      "source": "video_studio/domain/creative.py",
+      "cli": "vga-studio inspect-visual SOURCE.json",
+      "reference_roles": "EXPLICIT_ALLOWED_AND_EXCLUDED_INFLUENCE",
+      "source_digest": "EXPLICIT_ID_OPTIONAL_DIGEST_NOT_AUTOVERIFIED",
+      "creative_quality": "ACTUAL_PIXELS_AND_INDEPENDENT_REVIEW_REQUIRED",
+      "provider_effect": "NOT_AUTHORIZED_BY_INSPECTOR"
     }
   },
   "knowledge_lifecycle": {
