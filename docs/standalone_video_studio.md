@@ -32,6 +32,12 @@ The Studio runtime exposes those explicit adapters through `vga-studio run-adapt
 This is not a claim that every external provider is connected. The repository currently has no trusted external generative-video executor registered. Provider generation remains a tool/session capability operation; the router can select only from supplied, current, evidence-backed engine profiles. The runtime does not invent availability or invoke paid providers implicitly.
 
 
+## 1.2 Architecture: four orthogonal axes
+
+The canonical manifest defines the authority layers L0–L6, optional business domains, optional media containment hierarchy and per-demand execution DAG. None is a mandatory stage sequence. CAOS owns parent cognition, Video owns domain execution; SQLite is the only Video task ledger. Business groups are reusable responsibilities, not permanently running task instances. Group feedback is an evidence-triggered new decision/revision, not a cycle inside one DAG. The generic feedback relations are in `video_studio/data/business_feedback.json`.
+
+Continuous responsibilities are evaluated at each applicable decision/effect: complete owner goal and corrections, CAOS recursive governance, aesthetic and narrative coherence, audience/communication value, rights/truth, exact context and version, independently observed quality, and learning/re-entry. Aesthetic direction remains in scope from concept to final review and upstream revisions; it is not a standalone gate or a task to mark done. Unknowns reopen the earliest affected decision and only invalidate dependent work. There is no default project or default task plan. Old instances are retired; fixtures are for tests only.
+
 ## 2. Authority and independence
 
 - **Owner request and corrections** define the goal and constraints.
@@ -43,7 +49,7 @@ This is not a claim that every external provider is connected. The repository cu
 - **Event log** is append-only operational history.
 - **IPOS** remains the sole authority for original character/identity canon.
 
-CAOS governs session-level cognition and authorization when the owner selects Video from a CAOS-governed session. Video Studio owns domain execution, project/task state and artifact records. The runtime has no CAOS imports, API, parent task identity or parent lease; this runtime boundary does not waive the active session's CAOS governance. The fixed-stage controller is not loaded by `vga-studio`. Video domain modules are imported only through `video_studio.adapters` when a task declares a supported adapter.
+CAOS governs every owner-facing Video conversation, decision and action, including revisions, retrieval, method selection, execution and final acceptance. Video Studio owns domain execution, project/task state and artifact records. The runtime has no CAOS imports, API, parent task identity or parent lease; this runtime boundary does not waive the active session's CAOS governance. The fixed-stage controller is not loaded by `vga-studio`. Video domain modules are imported only through `video_studio.adapters` when a task declares a supported adapter.
 
 ## 3. Goal recovery and requirement governance
 
@@ -232,25 +238,11 @@ The attestation JSON should identify `reviewer_kind`, `execution_mode`, `blind_r
 
 ## 13. Operational commands
 
-### 13.1 Import digest-bound Program context
+### 13.1 Task-neutral intake and planning
 
-A task's `requirements.authority_refs` are descriptive references, not automatically verified inputs. When a worker must rely on a repository document or source file, import it as a Studio artifact and declare its artifact name in the task's `inputs`. The engine then binds the exact artifact ID, version and SHA-256 at claim time and verifies the same bytes at completion.
+For each new demand, use `vga-studio intake REQUEST.json` with a JSON object containing the owner's exact goal and mode NEW. For continuation provide mode RESUME and the exact workspace project_id. No default project, previous brief, preset tasks, IP or source media are selected. A retired repository identity is not resumable. The route is a mechanical projection; CAOS session governance and independently verified outcomes remain separate.
 
-`import-manifest` preflights every listed file before importing any of them. Relative `path` values resolve from the manifest's directory. Re-importing identical bytes with identical type, rights and metadata is a no-op; a changed source or metadata creates a new immutable version and invalidates its consumers.
-
-```bash
-vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI Self-Media Commercialization" --brief examples/ai-self-media-commercialization.brief.json
-vga-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
-vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
-vga-studio --root ./studio-work status ai-self-media-commercialization
-
-# audit the repository contract without relying on the legacy vga controller
-vga-studio system-audit --repo-root .
-```
-
-The standalone repository audit reports structural integrity separately from production readiness. A structural PASS does not imply provider generation, a finished media deliverable or owner approvals have been completed.
-
-The context manifest imports only existing Video/IPOS state and reference documents. It deliberately does not invent or import the missing `jensen-source-video` or `ipos-ready-for-video-bundle`; dependent tasks remain `WAITING_INPUT` while independent Program work can proceed. The legacy subtask graph is labelled as historical context, not as the active scheduler.
+Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Only a current owner requirement or verified input can add scope. Examples below are isolated regression fixtures, not task templates or current work.
 
 ### 13.2 Episode-specific example
 

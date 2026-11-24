@@ -15,7 +15,13 @@ description: CAOS-governed Video Production Studio for research, creative develo
 
 **Operating contract:** `docs/standalone_video_studio.md`.
 
-This Skill owns Video-domain requirements, project state, task graphs, assets, production execution, review, failure recovery and domain learning. When Video is selected in a CAOS-governed ChatGPT session, the CAOS parent Skill governs complete-goal recovery, material decisions, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Do not bypass that parent governance or modify the CAOS repository, Skills or configuration. Video Studio has no CAOS runtime/API/task-ID/lease dependency. Direct standalone use is allowed only when the owner explicitly selects it. The fixed-stage controller is not an active execution path.
+This Skill owns Video-domain requirements, project state, task graphs, assets, production execution, review, failure recovery and domain learning. When Video is selected in a CAOS-governed ChatGPT session, the CAOS parent Skill governs complete-goal recovery, material decisions, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Do not bypass that parent governance or modify the CAOS repository, Skills or configuration. Video Studio has no CAOS runtime/API/task-ID/lease dependency. Direct offline mechanical testing is not an owner-facing Video task; all owner-facing Video work is governed by CAOS. The fixed-stage controller is not an active execution path.
+
+## Continuous responsibilities (not workflow nodes)
+
+At every Video conversation and every decision/action, apply the current read-only CAOS parent Skill. Maintain the complete owner outcome and all corrections across layers. Aesthetic judgment, editorial value, communication/CTR, truth, rights, source provenance, method suitability, context isolation and independent quality review apply wherever relevant, not only inside a named stage. Reassess the chosen approach before committing; reopen the earliest contradicted decision rather than retrying blindly. Scale effort to the task, not a fixed checklist. A short caption or cover request does not inherit a full video-release pipeline.
+
+Read the architecture and continuous responsibilities in the canonical Studio manifest. The repository project index has no default project. All old project/task instances and example graphs are retired evidence or regression fixtures only. Never auto-load, execute, resume or copy them into a new brief. Start from the actual current demand; only an exact non-retired workspace ID selected by the owner can resume. Use `vga-studio intake REQUEST.json` to obtain the task-neutral route. This route is a mechanical locator, not proof that CAOS cognition ran. Select applicable domain capabilities and methods from the knowledge catalog; retrieve original sources on demand.
 
 ## 1. Startup and recovery
 

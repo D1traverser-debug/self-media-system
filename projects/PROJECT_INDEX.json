@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "authority": "VIDEO_GROWTH_AGENT",
   "identity_rule": "VIDEO_BUSINESS_PROJECT_PROGRAM_WORKSTREAM_AND_SUBTASK_IDENTITIES_ARE_VIDEO_OWNED__CAOS_GOVERNANCE_CONTEXT_HAS_NO_VIDEO_TASK_IDENTITY",
-  "default_project_id": "ai-self-media-commercialization",
+  "default_project_id": null,
   "projects": [
     {
       "project_id": "ai-self-media-commercialization",
       "kind": "INTEGRATED_MEDIA_GROWTH_IP_COMMERCIALIZATION_PROGRAM",
-      "status": "ACTIVE",
-      "default_for_generic_domain_intent": true,
+      "status": "RETIRED_EVIDENCE_ONLY",
+      "default_for_generic_domain_intent": false,
       "aliases": [
         "AI自媒体视频商业化与原创数字IP",
         "AI自媒体视频商业化",
@@ -23,12 +23,14 @@
         "projects/ai-self-media-commercialization/PROGRAM_STATE.json",
         "projects/ai-self-media-commercialization/CURRENT_PROGRESS.md"
       ],
-      "resume_ref": "projects/ai-self-media-commercialization/RESUME_ENTRY.md"
+      "resume_ref": "projects/ai-self-media-commercialization/RESUME_ENTRY.md",
+      "automatic_resume": false,
+      "original_status": "ACTIVE"
     },
     {
       "project_id": "pilot-002",
       "kind": "HISTORICAL_EPISODE_PRODUCTION_PROJECT",
-      "status": "HOLD",
+      "status": "RETIRED_EVIDENCE_ONLY",
       "default_for_generic_domain_intent": false,
       "aliases": [
         "pilot-002",
@@ -39,12 +41,14 @@
       "legacy_alias_semantics": "video-growth:main is a historical Video-domain compatibility alias only; it is not a CAOS governance task identity.",
       "state_refs": [
         "projects/pilot-002/PROGRAM_STATE.json"
-      ]
+      ],
+      "automatic_resume": false,
+      "original_status": "HOLD"
     },
     {
       "project_id": "pilot-001",
       "kind": "HISTORICAL_PROJECT_REFERENCE",
-      "status": "HISTORICAL",
+      "status": "RETIRED_EVIDENCE_ONLY",
       "default_for_generic_domain_intent": false,
       "aliases": [
         "pilot-001",
@@ -52,20 +56,22 @@
       ],
       "state_refs": [
         "projects/pilot-001/README.md"
-      ]
+      ],
+      "automatic_resume": false,
+      "original_status": "HISTORICAL"
     }
   ],
   "resolution_rules": [
-    "Exact project_id or exact legacy alias wins over generic intent.",
-    "Generic Video/AI-video/growth/commercialization/original-IP intent without another exact project reference resolves to default_project_id.",
-    "Repository search rank, newest file and chat memory do not select a project.",
-    "CAOS governance does not recreate these Video project identities as parent tasks."
+    "No default project or active repository task.",
+    "All listed entries are retired evidence; an explicit request may retrieve evidence, not resume old execution.",
+    "New work derives only from current owner demand and exact approved inputs.",
+    "Continuation selects a non-retired exact Studio workspace identity; no alias or search rank can select a task."
   ],
-  "updated_at": "2026-11-14T16:20:00+08:00",
+  "updated_at": "2026-11-24",
   "governance": {
     "system": "CAOS",
     "mode": "CHAT_GOVERNED_EXTERNAL",
-    "entrypoint": "CAOS_VIDEO_ENTRY.md",
+    "entrypoint": "STUDIO_ENTRY.md",
     "runtime_dependency": false,
     "source_repository": "D1traverser-debug/cognition-agent-os",
     "source_mutation": "FORBIDDEN"

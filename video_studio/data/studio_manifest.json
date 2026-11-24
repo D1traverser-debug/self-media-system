@@ -28,13 +28,17 @@
     "system": "CAOS",
     "mode": "CHAT_GOVERNED_EXTERNAL",
     "session_governance_required": true,
-    "standalone_mode": "EXPLICIT_OWNER_SELECTION_ONLY",
+    "standalone_mode": "OFFLINE_MECHANICAL_TESTS_ONLY",
     "caos_runtime_dependency": false,
     "caos_api_dependency": false,
     "caos_skill_dependency": false,
     "parent_task_or_lease_dependency": false,
     "source_mutation": "FORBIDDEN",
-    "domain_authority": "VIDEO_GROWTH_AGENT"
+    "domain_authority": "VIDEO_GROWTH_AGENT",
+    "session_scope": "ALL_VIDEO_CONVERSATION_DECISIONS_AND_ACTIONS",
+    "source_repository": "D1traverser-debug/cognition-agent-os",
+    "skill": "cognition-parent-chatgpt-intake",
+    "activation_assurance": "NATIVE_TRIGGER_NOT_PROVEN_BY_LOCAL_RUNTIME"
   },
   "decision_method": [
     "COMPETING_HYPOTHESES",
@@ -171,5 +175,101 @@
     "fixed_stage_orchestrator": "NOT_LOADED_BY_STUDIO_RUNTIME",
     "require_artifact_receipts": true
   },
-  "system_audit": "video_studio.system_audit.run_system_audit"
+  "system_audit": "video_studio.system_audit.run_system_audit",
+  "task_admission": {
+    "default_project_id": null,
+    "default_task_graph": null,
+    "automatic_resume": false,
+    "route": "video_studio.scope.resolve_intake",
+    "project_selection": "EXACT_OWNER_SELECTED_WORKSPACE_ID_ONLY",
+    "repository_projects": "RETIRED_EVIDENCE_ONLY",
+    "examples": "REGRESSION_FIXTURES_ONLY"
+  },
+  "architecture": {
+    "authority": "docs/standalone_video_studio.md",
+    "layers": [
+      {
+        "id": "L0",
+        "owner": "USER",
+        "responsibility": "Full outcome, constraints, authorizations and corrections"
+      },
+      {
+        "id": "L1",
+        "owner": "CAOS_READ_ONLY",
+        "responsibility": "Recursive decision and execution governance, research, challenge, independent overall acceptance"
+      },
+      {
+        "id": "L2",
+        "owner": "VIDEO_STUDIO",
+        "responsibility": "Domain intent, quality direction, professional capabilities and cross-workstream orchestration"
+      },
+      {
+        "id": "L3",
+        "owner": "VIDEO_STUDIO",
+        "responsibility": "Per-demand project, deliverable decomposition, dynamic dependency graph and task contracts"
+      },
+      {
+        "id": "L4",
+        "owner": "STUDIO_ENGINE",
+        "responsibility": "Claims, leases, dependencies, versioned inputs, worker and adapter dispatch"
+      },
+      {
+        "id": "L5",
+        "owner": "EXECUTORS",
+        "responsibility": "Actual research, creative work, media operations and evidence"
+      },
+      {
+        "id": "L6",
+        "owner": "VIDEO_STUDIO_AND_CAOS_DISTINCT_AUTHORITIES",
+        "responsibility": "Domain result validation and independent owner outcome verification"
+      }
+    ],
+    "orthogonal_axes": {
+      "business_domains": [
+        "MEDIA_GROWTH",
+        "ORIGINAL_DIGITAL_IP",
+        "COMMERCIALIZATION",
+        "PRODUCTION_SYSTEM"
+      ],
+      "media_object_hierarchy": [
+        "Program",
+        "Series",
+        "Episode",
+        "Sequence",
+        "Scene",
+        "Shot",
+        "Take"
+      ],
+      "execution_graph": "Per-demand DAG; not media containment or organization hierarchy",
+      "feedback": "Outcome-triggered revisions and new graph generations; no fixed loop or mandatory stage ordering"
+    },
+    "continuous_responsibilities": {
+      "owner_goal_fidelity": "ALL_DECISIONS_AND_ACTIONS",
+      "caos_governance": "ALL_DECISIONS_AND_ACTIONS",
+      "professional_aesthetic_judgment": "ALL_RELEVANT_CREATIVE_DECISIONS_AND_REVISIONS",
+      "audience_and_communication_value": "ALL_RELEVANT_EDITORIAL_AND_PACKAGING_DECISIONS",
+      "truth_rights_authorization": "ALL_APPLICABLE_EFFECTS",
+      "source_version_context_isolation": "ALL_RETRIEVAL_AND_HANDOFFS",
+      "quality_and_independent_acceptance": "ALL_DELIVERABLES",
+      "learning_and_failure_reentry": "WHEN_EVIDENCE_CHANGES_OR_METHOD_FAILS"
+    },
+    "method_selection": "Contextual capabilities, not mandatory task nodes; each applies at relevant decision/effect boundary."
+  },
+  "knowledge_lifecycle": {
+    "index": "video_studio/data/knowledge_catalog.json",
+    "active_statuses": [
+      "ACTIVE_REFERENCE",
+      "VERIFIED_OPERATION"
+    ],
+    "candidate_status": "CANDIDATE_REQUIRES_REVALIDATION",
+    "retired_status": "RETIRED_EVIDENCE_ONLY",
+    "rules": [
+      "Exact source/version before use",
+      "No historical project facts as new-task constraints",
+      "Source changes invalidate dependent claims",
+      "Promotion requires scoped independent replay",
+      "Retirement removes active authority, not provenance",
+      "No physical delete without authority and reference checks"
+    ]
+  }
 }

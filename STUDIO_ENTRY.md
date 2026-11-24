@@ -13,7 +13,7 @@ Turn the owner's actual media goal into a finished, independently checked delive
 
 ## Independence
 
-Video Studio owns Video-domain requirements, project/task state, assets, evidence, production execution and domain learning. When the owner selects Video in a CAOS-governed session, CAOS remains the parent authority for complete-goal recovery, decision quality, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Use the CAOS parent Skill in the active ChatGPT workspace. The CAOS decision loop and execution loop govern session-level reasoning, authorization and independent acceptance. The Video capability catalog is `video_growth_agent/data/capabilities.json`. Do not modify the CAOS repository, Skills or configuration. The Video runtime has no CAOS API/runtime/task-ID/lease dependency; technical independence is not permission to bypass parent governance. Direct standalone operation is available only when the owner explicitly selects it. The fixed-stage controller is not an active Video execution path.
+Video Studio owns Video-domain requirements, project/task state, assets, evidence, production execution and domain learning. When the owner selects Video in a CAOS-governed session, CAOS remains the parent authority for complete-goal recovery, decision quality, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Use the CAOS parent Skill in the active ChatGPT workspace. The CAOS decision loop and execution loop govern session-level reasoning, authorization and independent acceptance. The Video capability catalog is `video_growth_agent/data/capabilities.json`. Do not modify the CAOS repository, Skills or configuration. The Video runtime has no CAOS API/runtime/task-ID/lease dependency; technical independence is not permission to bypass parent governance. All owner-facing Video conversations, decisions and effects remain CAOS-governed. Direct offline mechanical regression tests do not claim CAOS activation. The fixed-stage controller is not an active Video execution path.
 
 IPOS remains the sole authority for the owner's original character/identity canon. The Studio consumes approved, versioned IPOS exports; it does not create a competing canon.
 
@@ -34,43 +34,27 @@ IPOS remains the sole authority for the owner's original character/identity cano
 
 A video is not releasable until the exact final bytes pass digest-bound FFmpeg/FFprobe checks (video stream, stream-duration match, true peak, black frames and full decode), every used media asset in recursive lineage has cleared rights plus resolvable evidence, required human reviews are recorded against the exact digest, and the Red Team has at least three evidence-backed findings with no unresolved critical/high risk. Required platform/disclosure, EditorialPlan, timeline and other evidence artifacts must exist. Source-version changes stale their consumers and descendants. These checks never publish automatically.
 
-## Default Program and quick start
+## Task-neutral intake and hierarchy
 
-For generic Video business/system work, the default Program is `ai-self-media-commercialization` in `projects/PROJECT_INDEX.json`. Its canonical outcome brief and 50-task parallel work graph are the canonical current Program plan. The context manifest imports the existing Video-owned state and reference documents as immutable, digest-bound artifacts; it does not import the missing Jensen/Alice source video or fabricate an owner-approved IPOS bundle.
+The canonical manifest defines authority layers, continuous responsibilities and separate business/media/task axes. Load it and the operating manual. No prior task instance is active by default. The repository project index is retired evidence only. Never resume an old project or reuse its scope without a fresh owner demand; even explicit historical retrieval does not reactivate it. Preserve generic skills, technical adapters, methods and knowledge, not previous work orders.
 
 ```bash
 python -m pip install -e .
-
-# Initialize the standalone Program control plane
-vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI Self-Media Commercialization" --brief examples/ai-self-media-commercialization.brief.json
-
-# Import exact source/context files before planning; paths resolve from the manifest directory
-vga-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
-
-# Transfer the exact validated Program handoff into an Episode project:
-vga-studio --root ./studio-work transfer-asset ai-self-media-commercialization validated-episode-intent episode-001 validated-episode-intent --expected-artifact-id ARTIFACT_ID --expected-version 1 --expected-sha256 SHA256
-
-# Add the canonical 50-task graph and inspect which independent lanes are ready
-vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
-vga-studio --root ./studio-work status ai-self-media-commercialization
-vga-studio --root ./studio-work tasks ai-self-media-commercialization
+vga-studio --root WORKSPACE intake REQUEST.json
+# REQUEST.json contains mode NEW and the exact goal, or mode RESUME and exact project_id.
+# After CAOS-governed interpretation and decision, use the actual current brief and DAG:
+vga-studio --root WORKSPACE init PROJECT --brief BRIEF.json
+vga-studio --root WORKSPACE plan PROJECT TASKS.json
+vga-studio --root WORKSPACE resume PROJECT
 ```
 
-The Program can run independent growth, advertiser, production-economics, provider-capability and Jensen fact-audit work in parallel. Tasks requiring the exact `jensen-source-video` or `ipos-ready-for-video-bundle` intentionally remain `WAITING_INPUT` until those exact owner-controlled assets are supplied. The fixed-stage 0.8 task graph is not an active scheduler or controller.
-
-For an episode-specific project, use the technology-explainer example instead:
-
-```bash
-vga-studio --root ./studio-work init episode-001 --title "Episode 001" --brief examples/technology-explainer.brief.json
-vga-studio --root ./studio-work plan episode-001 examples/technology-explainer.tasks.json
-vga-studio --root ./studio-work status episode-001
-```
+The intake response must not be treated as native CAOS activation proof. Every decision/action uses CAOS; professional aesthetic judgment and goal fidelity are cross-cutting responsibilities, not finished stages. Each demand chooses only relevant capabilities and tasks. Research, critique, execution, re-entry and learning follow evidence, not a compulsory sequence.
 
 A claim returns a bounded work packet, exact input artifact digests and a lease token. Complete the task only after the declared output files have been written inside the project workspace:
 
 ```bash
-vga-studio --root ./studio-work claim ai-self-media-commercialization --worker growth-agent-01 --executor agent --task-id growth-baseline-and-topic-hypotheses
-vga-studio --root ./studio-work complete ai-self-media-commercialization growth-baseline-and-topic-hypotheses --worker growth-agent-01 --token CLAIM_TOKEN --outputs growth.outputs.json
+vga-studio --root WORKSPACE claim PROJECT --worker WORKER --executor agent --task-id TASK
+vga-studio --root WORKSPACE complete PROJECT TASK --worker WORKER --token TOKEN --outputs OUTPUTS.json
 ```
 
 Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-studio --help` for the complete command set. Use `vga-studio run-adapter PROJECT TASK_ID --worker ID --token TOKEN` for a task that declares a supported `requirements.domain_adapter` contract. This connects EditorialPlan, ShotContract, IPOS, Timeline, continuity, routing, business metrics, supplementary audio QA and local programmatic graphics to the standalone artifact ledger.

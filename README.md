@@ -17,7 +17,7 @@ CAOS-governed Video Production Studio for research, creative development, parall
 - `docs/agent_operability_scenarios.md` — historical 0.8 operability scenarios; standalone operating rules live in the new Skill and contract.
 - `docs/provider_benchmark_protocol.md` — owner benchmark method for volatile provider quality/cost evidence.
 - `projects/PROJECT_INDEX.json` — child-owned project/program discovery authority.
-- `projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json` — growth/IP/commercial/production feedback loops.
+- `video_studio/data/business_feedback.json` — task-neutral growth/IP/commercial/production feedback relations.
 - `audits/EVOLUTION_INDEX.json` — canonical Video evolution-evidence entrypoint.
 - `video_growth_agent/` — Video-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
@@ -60,19 +60,9 @@ Core 0.8 runtime surfaces:
 - `operator_view.py` — non-authoritative CURRENT_AGENT projection;
 - `owner_behavior_admission.py` — Video-domain recovery, root-scope analysis, typed evolution and repair-closure rules.
 
-## Integrated Media Business Program
+## Reusable business domains, no default task
 
-Generic AI-video/media-growth/commercialization/original-IP requests resolve to `ai-self-media-commercialization` unless an exact child project is supplied.
-
-The Program keeps four business views:
-- `MEDIA_GROWTH`
-- `ORIGINAL_DIGITAL_IP`
-- `COMMERCIALIZATION`
-- `PRODUCTION_SYSTEM`
-
-They are evidence-coupled rather than isolated. Audience evidence changes portfolio hypotheses; portfolio/series strategy informs IP and advertiser fit; promoted IP assets affect packaging/recognition/production; commercial deliverables and rights can affect verified product-asset needs; production cost/retry/reuse evidence feeds future format investment. Editorial truth and audience trust remain hard constraints.
-
-Historical Pilot projects remain separately resumable and retain their own adapter/runtime identity plus rejected/process-invalid evidence.
+The four business domains remain selectable capabilities, connected by generic evidence feedback in `video_studio/data/business_feedback.json`. A new request creates a new demand-specific brief and graph; no old project, task, subject, platform, IP or source asset is implicitly selected. `projects/PROJECT_INDEX.json` records only retired historical identities. `examples/` contains isolated regression fixtures, not active work. For real work use `STUDIO_ENTRY.md` and `vga-studio intake REQUEST.json`.
 
 ## Candidate -> promotion -> release
 
@@ -114,15 +104,9 @@ CAOS parent governance governs the session-level decision and execution discipli
 The standalone release contract now records immutable input lineage, invalidates consumers on source replacement, requires rights evidence across used media lineage, enforces exact-digest FFmpeg/FFprobe QA (full decode, stream timing, true peak and black frames), supports attested human cold reads and requires three evidence-backed Red Team findings when configured. See `docs/standalone_video_studio.md` and the three outcome/task examples.\n\nThe Video domain capability catalog describes verified domain operations; the Studio manifest is the sole runtime authority.
 
 
-### Integrated media-business program example
+### Isolated regression examples
 
-The program-level DAG covers MEDIA_GROWTH, ORIGINAL_DIGITAL_IP, COMMERCIALIZATION and PRODUCTION_SYSTEM. It keeps growth, advertiser mapping, production economics, provider benchmarking and fact research independent; IPOS identity work waits for the approved bundle; the Jensen/Alice media audit waits for exact source bytes; competitive commercial/topic/portfolio candidates fan out before human adjudication.
-
-```bash
-vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI Self-Media Commercialization" --brief examples/ai-self-media-commercialization.brief.json
-vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
-vga-studio --root ./studio-work status ai-self-media-commercialization
-```
+The examples below exist only to test reusable capabilities; do not resume them or substitute them for an owner demand.
 
 ### Run the standalone domain-adapter proof
 
@@ -153,4 +137,4 @@ CI success is validation evidence, not branch-protection enforcement unless GitH
 
 ## IP Studio OS integration
 
-The personal-IP character canon is owned by the independent IP Studio OS (IPOS); IPOS does not require a CAOS runtime/API call. The standalone program plan models the owner-approved IPOS Video Identity Bundle as an external versioned input and keeps identity-dependent tasks waiting until G2/G7/G8 and rights/provenance pass. The current `video_studio.adapters` bridge exposes IPOS inspection, import, exact-version shot binding and continuity operations; identity-dependent work remains blocked until an owner-approved bundle exists. See `projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json`.
+The personal-IP character canon is owned by the independent IP Studio OS (IPOS); IPOS does not require a CAOS runtime/API call. The standalone program plan models the owner-approved IPOS Video Identity Bundle as an external versioned input and keeps identity-dependent tasks waiting until G2/G7/G8 and rights/provenance pass. The current `video_studio.adapters` bridge exposes IPOS inspection, import, exact-version shot binding and continuity operations; identity-dependent work remains blocked until an owner-approved bundle exists. Historical IPOS state is evidence only; recover the current approved export from its actual owner when the demand requires identity.

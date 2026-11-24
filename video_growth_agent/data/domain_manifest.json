@@ -4,7 +4,7 @@
   "agent_id": "video",
   "domain_id": "video",
   "owner": "VIDEO_GROWTH_AGENT",
-  "status": "VIDEO_DOMAIN_ACTIVE__STUDIO_RUNTIME_1_0_0",
+  "status": "DOMAIN_CAPABILITY_PROJECTION_ONLY",
   "governance": {
     "system": "CAOS",
     "source_repository": "D1traverser-debug/cognition-agent-os",
@@ -51,19 +51,17 @@
     "provider_benchmark_protocol": "docs/provider_benchmark_protocol.md",
     "project_root": "projects",
     "project_index": "projects/PROJECT_INDEX.json",
-    "project_discovery": "projects/PROJECT_INDEX.json -> exact child state refs",
-    "business_identity": "projects/PROJECT_INDEX.json plus exact Program/Series/Episode/Sequence/Scene/Shot/Take/project/workstream/subtask state",
+    "project_discovery": "Explicit owner-selected project in Studio workspace; repository index has no default or active task",
+    "business_identity": "Studio workspace exact project/task IDs; media object hierarchy is optional domain model",
     "media_rule_root": "skills/video-growth-agent/references",
     "canonical_evolution_entrypoint": "audits/EVOLUTION_INDEX.json",
-    "generic_program_state_pattern": "projects/<project>/PROGRAM_STATE.json",
-    "integrated_default_program": "projects/ai-self-media-commercialization/PROGRAM_STATE.json",
-    "integrated_business_flywheel": "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json",
+    "integrated_business_flywheel": "video_studio/data/business_feedback.json",
     "external_identity_authority": {
       "system": "IP_STUDIO_OS",
       "contract": "IPOS Video Identity Bundle schema 1.0",
-      "integration_state": "projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json",
       "rule": "IPOS is the sole creative identity authority; Video imports exact owner-approved versions locally and never rewrites canon."
-    }
+    },
+    "canonical_runtime_manifest": "video_studio/data/studio_manifest.json"
   },
   "retired_active_surface": {
     "continuity_directory_allowed": false,

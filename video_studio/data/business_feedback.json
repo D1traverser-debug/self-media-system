@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "REUSABLE_RELATIONS_NOT_TASKS",
+  "relations": [
+    {
+      "id": "AUDIENCE_TO_PORTFOLIO",
+      "from": "audience evidence",
+      "to": "content hypotheses"
+    },
+    {
+      "id": "PORTFOLIO_TO_IP",
+      "from": "content direction",
+      "to": "IP usage hypotheses"
+    },
+    {
+      "id": "IP_TO_GROWTH",
+      "from": "approved IP performance",
+      "to": "packaging strategy"
+    },
+    {
+      "id": "PORTFOLIO_TO_COMMERCIAL",
+      "from": "audience and portfolio",
+      "to": "commercial fit"
+    },
+    {
+      "id": "COMMERCIAL_TO_PRODUCTION",
+      "from": "approved obligations and rights",
+      "to": "production constraints"
+    },
+    {
+      "id": "IP_TO_PRODUCTION",
+      "from": "approved versioned identity bundle",
+      "to": "shot constraints"
+    },
+    {
+      "id": "PRODUCTION_TO_PORTFOLIO",
+      "from": "cost quality and reuse evidence",
+      "to": "format and resource choices"
+    },
+    {
+      "id": "PERFORMANCE_TO_IP",
+      "from": "recognition and feedback",
+      "to": "IPOS learning candidate"
+    },
+    {
+      "id": "COMMERCIAL_OUTCOME_TO_OFFER",
+      "from": "actual commercial outcome",
+      "to": "offer and rights hypothesis"
+    },
+    {
+      "id": "ALL_OUTCOMES_TO_EVOLUTION",
+      "from": "independent result and counterevidence",
+      "to": "method candidate or retirement"
+    }
+  ],
+  "activation": "Only when relevant to owner outcome; create explicit versioned handoff and revisit affected decision. No permanent tasks or automatic cycle."
+}
