@@ -471,8 +471,9 @@ class StudioEngine:
                 if "scope_epoch" in old_brief:
                     if brief.get("scope_epoch") != old_brief["scope_epoch"]:
                         raise ContractError("owner task scope epoch cannot change")
-                    if brief.get("deliverables") != old_brief.get("deliverables"):
-                        # A changed outcome must not keep an old deliverable plan current.
+                    if brief != old_brief:
+                        # Until a task-level semantic dependency oracle proves a narrower
+                        # change set, the whole owner brief is the governing upstream input.
                         invalidated = set(tasks)
                 elif "scope_epoch" in brief:
                     raise ContractError("retired instance cannot be converted into a current owner task")

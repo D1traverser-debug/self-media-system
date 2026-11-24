@@ -77,3 +77,31 @@ def test_cli_rejects_legacy_workspace_on_all_owner_paths(tmp_path, capsys):
     assert resolve_intake(workspace, {"mode": "RESUME", "project_id": "fresh"})["scope_epoch"] == EPOCH
     assert main(["--root", str(workspace), "--offline-fixture", "status", "fresh"]) == 2
     assert main(["--root", str(workspace), "status", "fresh"]) == 0
+
+
+def test_knowledge_lookup_only_selects_active_reference_and_binds_source_bytes():
+    from video_studio.scope import knowledge_lookup
+    root = Path(__file__).resolve().parents[1]
+    active = knowledge_lookup(repo_root=root)["entries"]
+    assert active and all(item["status"] == "ACTIVE_REFERENCE" for item in active)
+    assert all(len(item["source_sha256"]) == 64 for item in active)
+    assert all(item["execution_verified"] is False for item in active)
+    assert not any(item["ref"].startswith("projects/") for item in active)
+    with pytest.raises(ValueError):
+        knowledge_lookup("workflow")
+    historical = knowledge_lookup("workflow", include_nonactive=True, repo_root=root)["entries"][0]
+    assert historical["status"] == "LEGACY_REFERENCE_ONLY"
+    with pytest.raises(ValueError):
+        knowledge_lookup("no-such-method")
+
+
+def test_goal_change_cannot_leave_old_owner_task_current(tmp_path):
+    engine = StudioEngine(tmp_path)
+    brief = bind_owner_brief("fresh", {"goal": "caption", "audience": "a", "deliverables": ["caption"]})
+    engine.create_project("fresh", "fresh", brief)
+    tasks = [{"task_id": name, "outputs": [name], "acceptance": {"quality": "clear"},
+              "requirements": {"deliverable_refs": ["caption"]}} for name in ("research", "write")]
+    engine.add_tasks("fresh", tasks)
+    new = {**brief, "goal": "caption with no historical claims"}
+    result = engine.revise_brief("fresh", new, reason="owner correction", affected_task_ids=["write"])
+    assert set(result["invalidated_tasks"]) == {"research", "write"}

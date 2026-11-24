@@ -143,9 +143,12 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
                 continue
             task_neutral = False
     _check(checks, "task_neutral_intake_and_retirement", task_neutral, sorted(retired_ids))
-    catalog = _read_json(root / "video_studio" / "data" / "knowledge_catalog.json")
-    missing_methods = [item["ref"] for item in catalog["entries"] if not (root / item["ref"]).is_file()]
-    _check(checks, "knowledge_locator_integrity", not missing_methods, missing_methods)
+    from .scope import knowledge_lookup
+    try:
+        methods = knowledge_lookup(include_nonactive=True, repo_root=root)
+        _check(checks, "knowledge_locator_integrity", True, {"source_count": len(methods["entries"])})
+    except (ValueError, OSError, KeyError, TypeError) as exc:
+        _check(checks, "knowledge_locator_integrity", False, str(exc))
     scripts = pyproject.get("project", {}).get("scripts", {})
     cli_source = (root / "video_studio" / "cli.py").read_text(encoding="utf-8")
     cli_registered = (

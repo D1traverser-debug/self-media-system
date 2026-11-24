@@ -1,6 +1,7 @@
 """Task-neutral routing. No parent execution, grant or native activation is fabricated."""
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import sqlite3
@@ -90,7 +91,44 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
         "architecture": manifest["architecture"],
         "capabilities": manifest["capabilities"],
         "knowledge_catalog": manifest["knowledge_lifecycle"]["index"],
+        "capability_catalog": "video_growth_agent/data/capabilities.json",
         "parent_governance": "REQUIRED_IN_OWNER_SESSION",
         "native_activation": "NOT_VERIFIED_BY_RUNTIME",
         "effect_authorized": False,
     }
+
+
+def knowledge_lookup(method_id: str | None = None, *, include_nonactive: bool = False,
+                     repo_root: str | Path | None = None) -> dict[str, Any]:
+    """Locate reusable sources by exact stable identity; never select a task or grant authority."""
+    catalog = json.loads(files("video_studio").joinpath("data", "knowledge_catalog.json").read_text(encoding="utf-8"))
+    entries = catalog["entries"]
+    active = {"ACTIVE_REFERENCE", "VERIFIED_OPERATION"}
+    known_statuses = active | {"CANDIDATE_REQUIRES_REVALIDATION", "LEGACY_REFERENCE_ONLY", "RETIRED_EVIDENCE_ONLY"}
+    ids = set()
+    for entry in entries:
+        key = entry["id"]
+        ref = Path(entry["ref"])
+        if key in ids or entry["status"] not in known_statuses or ref.is_absolute() or ".." in ref.parts:
+            raise ValueError("invalid or ambiguous knowledge catalog")
+        if entry["status"] in active and ref.parts[0] in {"projects", "examples", "archive"}:
+            raise ValueError("historic task evidence cannot be active knowledge authority")
+        ids.add(key)
+    selected = [entry for entry in entries if (method_id is None or entry["id"] == method_id)
+                and (include_nonactive or entry["status"] in active)]
+    if method_id is not None and not selected:
+        raise ValueError("exact active method not found; nonactive evidence requires explicit inclusion")
+    root = Path(repo_root).expanduser().resolve() if repo_root is not None else None
+    result = []
+    for entry in selected:
+        item = dict(entry)
+        item["authority"] = "METHOD_REFERENCE_ONLY"
+        item["execution_verified"] = False
+        if root is not None:
+            source = (root / entry["ref"]).resolve()
+            if not source.is_relative_to(root) or not source.is_file():
+                raise ValueError(f"knowledge source unavailable: {entry['id']}")
+            item["source_sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+        result.append(item)
+    return {"entries": result, "source_verification": "HASHED_LOCAL_BYTES" if root else "LOCATOR_ONLY",
+            "native_caos_activation": "NOT_VERIFIED_BY_RUNTIME", "automatic_task_selection": False}

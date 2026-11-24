@@ -280,6 +280,13 @@
       "Promotion requires scoped independent replay",
       "Retirement removes active authority, not provenance",
       "No physical delete without authority and reference checks"
-    ]
+    ],
+    "lookup": "vga-studio knowledge",
+    "nonactive_statuses": [
+      "CANDIDATE_REQUIRES_REVALIDATION",
+      "LEGACY_REFERENCE_ONLY",
+      "RETIRED_EVIDENCE_ONLY"
+    ],
+    "mutation_authority": "VIDEO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
   }
 }

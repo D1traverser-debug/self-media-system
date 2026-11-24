@@ -36,6 +36,8 @@ A video is not releasable until the exact final bytes pass digest-bound FFmpeg/F
 
 ## Task-neutral intake and hierarchy
 
+Use `vga-studio knowledge --id METHOD --repo-root REPOSITORY` to locate and hash the exact current reusable method source; historical/candidate sources require `--include-nonactive` and are never execution authority.
+
 The canonical manifest defines authority layers, continuous responsibilities and separate business/media/task axes. Load it and the operating manual. No prior task instance is active by default. The repository project index is retired evidence only. Never resume an old project or reuse its scope without a fresh owner demand; even explicit historical retrieval does not reactivate it. Preserve generic skills, technical adapters, methods and knowledge, not previous work orders.
 
 ```bash
