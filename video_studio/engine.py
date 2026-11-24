@@ -1250,6 +1250,10 @@ class StudioEngine:
                 raise ClaimError("claim ownership does not match")
             if _parse_time(row["lease_until"]) < now:
                 raise ClaimError("claim lease has expired")
+            try:
+                self._require_task_decision(connection, project_id, row)
+            except GateError as exc:
+                raise ClaimError(str(exc)) from exc
             connection.execute(
                 "UPDATE tasks SET lease_until=?,updated_at=? WHERE project_id=? AND task_id=?",
                 (until, _iso(now), project_id, task_id),
@@ -2293,7 +2297,15 @@ class StudioEngine:
         with closing(self._connect(project_id)) as connection:
             events = connection.execute("SELECT COUNT(*) AS count FROM events WHERE project_id=?", (project_id,)).fetchone()["count"]
             open_failures = connection.execute("SELECT COUNT(*) AS count FROM failures WHERE project_id=? AND status='OPEN'", (project_id,)).fetchone()["count"]
-        return {"project": project, "task_counts": counts, "ready_tasks": ready, "open_failures": open_failures, "event_count": events}
+            decision_blocked = {}
+            for task in connection.execute("SELECT * FROM tasks WHERE project_id=? AND status='READY'", (project_id,)):
+                try:
+                    self._require_task_decision(connection, project_id, task)
+                except GateError as exc:
+                    decision_blocked[task["task_id"]] = str(exc)
+        return {"project": project, "task_counts": counts, "ready_tasks": ready,
+                "admitted_ready_tasks": [task_id for task_id in ready if task_id not in decision_blocked],
+                "decision_blocked_tasks": decision_blocked, "open_failures": open_failures, "event_count": events}
 
     def resume(self, project_id: str, *, event_limit: int = 40) -> dict[str, Any]:
         """Reconstruct an actionable project handoff from durable Video state only."""
@@ -2318,8 +2330,9 @@ class StudioEngine:
                 (project_id,),
             ).fetchall()
         ready_by_executor: dict[str, list[str]] = {}
+        admitted = set(status["admitted_ready_tasks"])
         for task in tasks:
-            if task["status"] == "READY":
+            if task["task_id"] in admitted:
                 ready_by_executor.setdefault(task["executor"], []).append(task["task_id"])
         unfinished = [task for task in tasks if task["status"] not in {"COMPLETED", "CANCELLED"}]
         if failure_rows:
@@ -2332,6 +2345,8 @@ class StudioEngine:
             next_action = "Obtain the required owner/human decision or review; do not synthesize an approval."
         elif ready_by_executor.get("external"):
             next_action = "Verify the external capability, rights, availability and cost; obtain owner authorization before any paid operation."
+        elif status["decision_blocked_tasks"]:
+            next_action = "Re-investigate missing or stale scoped decisions and bind current evidence before claiming affected tasks."
         elif any(task["status"] == "WAITING_INPUT" for task in tasks):
             next_action = "Import or produce the missing declared inputs, then refresh the task graph."
         elif unfinished:
@@ -2343,6 +2358,7 @@ class StudioEngine:
             "project_status": "TASK_GRAPH_COMPLETE" if not unfinished else "IN_PROGRESS",
             "task_counts": status["task_counts"],
             "ready_by_executor": ready_by_executor,
+            "decision_blocked_tasks": status["decision_blocked_tasks"],
             "unfinished_tasks": [
                 {"task_id": task["task_id"], "executor": task["executor"], "status": task["status"],
                  "depends_on": task["depends_on"], "inputs": task["inputs"], "outputs": task["outputs"]}

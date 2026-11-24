@@ -135,6 +135,8 @@ def test_independent_tasks_bind_independent_decisions_and_reject_stale_action(tm
     with pytest.raises(GateError):
         engine.claim_next("fresh", "worker", task_id="a")
     engine.record_decision("fresh", decision_receipt("b", "d-b"))
+    assert engine.status("fresh")["admitted_ready_tasks"] == ["b"]
+    assert set(engine.status("fresh")["decision_blocked_tasks"]) == {"a"}
     assert engine.claim_next("fresh", "worker")["task"]["task_id"] == "b"
     engine.record_decision("fresh", decision_receipt("a", "d-a"))
     assert engine.claim_next("fresh", "worker")["task"]["task_id"] == "a"

@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Event, Thread
 from typing import Any
 
-from ..engine import StudioEngine
+from ..engine import GateError, StudioEngine
 from .executors import run_claimed_tool_task, tool_executor_for_task
 from .registry import PRODUCTION_EXECUTORS
 
@@ -72,7 +72,8 @@ def run_ready_tool_tasks(
         reclaimed_expired_claims.extend(engine.reclaim_expired_claims(project_id))
         tasks = engine.list_tasks(project_id)
         ready_tools = [item for item in tasks if item.get("status") == "READY" and item.get("executor") == "tool"]
-        candidates = [item for item in ready_tools if tool_executor_for_task(item)]
+        admitted = set(engine.status(project_id)["admitted_ready_tasks"])
+        candidates = [item for item in ready_tools if item["task_id"] in admitted and tool_executor_for_task(item)]
         for item in ready_tools:
             if not tool_executor_for_task(item):
                 unregistered_by_id[item["task_id"]] = {
@@ -83,9 +84,14 @@ def run_ready_tool_tasks(
             break
 
         claims: list[dict[str, Any]] = []
-        for index, task in enumerate(candidates[:max_workers], start=1):
+        for index, task in enumerate(candidates, start=1):
+            if len(claims) >= max_workers:
+                break
             worker_id = f"{worker_prefix}-{round_number}-{index}"
-            packet = engine.claim_next(project_id, worker_id, lease_seconds, executor="tool", task_id=task["task_id"])
+            try:
+                packet = engine.claim_next(project_id, worker_id, lease_seconds, executor="tool", task_id=task["task_id"])
+            except GateError:
+                continue  # the decision changed since projection; leave this branch open
             if packet:
                 claims.append(packet)
                 claimed_total.append({"task_id": task["task_id"], "worker_id": worker_id})
@@ -111,17 +117,19 @@ def run_ready_tool_tasks(
                     })
 
     remaining_tasks = engine.list_tasks(project_id)
+    final_admission = engine.status(project_id)
+    admitted = set(final_admission["admitted_ready_tasks"])
     task_counts: dict[str, int] = {}
     ready_by_executor: dict[str, list[str]] = {}
     for item in remaining_tasks:
         state = item.get("status", "UNKNOWN")
         task_counts[state] = task_counts.get(state, 0) + 1
-        if state == "READY":
+        if state == "READY" and item["task_id"] in admitted:
             ready_by_executor.setdefault(item.get("executor", "unknown"), []).append(item["task_id"])
     remaining_ready = [
         {"task_id": item["task_id"], "title": item.get("title")}
         for item in remaining_tasks
-        if item.get("status") == "READY" and item.get("executor") == "tool"
+        if item["task_id"] in admitted and item.get("executor") == "tool"
         and tool_executor_for_task(item)
     ]
     all_tasks_complete = bool(remaining_tasks) and all(item["status"] == "COMPLETED" for item in remaining_tasks)
@@ -148,6 +156,9 @@ def run_ready_tool_tasks(
     elif ready_by_executor.get("external"):
         scheduler_status = "AWAITING_EXTERNAL_CAPABILITY"
         next_action = "Verify capability, rights, availability and cost; obtain owner authorization before paid execution."
+    elif final_admission["decision_blocked_tasks"]:
+        scheduler_status = "BLOCKED_CURRENT_DECISION_REQUIRED"
+        next_action = "Re-investigate and bind current scoped decisions; unrelated admitted work remains eligible."
     elif task_counts.get("WAITING_INPUT", 0):
         scheduler_status = "WAITING_INPUT"
         next_action = "Import or produce missing declared inputs, then refresh the graph."
@@ -178,6 +189,7 @@ def run_ready_tool_tasks(
         "failed": failed,
         "task_counts": task_counts,
         "ready_by_executor": ready_by_executor,
+        "decision_blocked_tasks": final_admission["decision_blocked_tasks"],
         "ready_tool_tasks_without_registered_executor": list(unregistered_by_id.values()),
         "remaining_ready_registered_tool_tasks": remaining_ready,
         "project_status": project_status,

@@ -781,3 +781,39 @@ def test_worker_pool_reclaims_expired_tool_lease_before_ready_task_filtering(tmp
     task = engine.list_tasks("expired-lease")[0]
     assert task["status"] == "COMPLETED"
     assert task["attempts"] == 2
+
+
+def test_owner_decision_blocked_branch_does_not_starve_real_registered_tool(tmp_path):
+    from video_studio.scope import bind_owner_brief
+    engine = StudioEngine(tmp_path / "owner-workspace")
+    project = "owner-parallel"
+    engine.create_project(project, project, bind_owner_brief(project, _brief()))
+    assets = _source_assets(tmp_path)
+    for name, (path, kind, media_type, rights) in assets.items():
+        engine.import_asset(project, name, path, kind=kind, media_type=media_type, rights_status=rights)
+    tasks = []
+    for index in (1, 2):
+        spec_name = f"timeline-{index}"
+        spec = json.loads((tmp_path / "production-timeline.json").read_text(encoding="utf-8"))
+        spec.update(project_id=project, video_output=f"video-{index}", audio_output=f"audio-{index}", receipt_output=f"receipt-{index}")
+        spec_path = tmp_path / f"{spec_name}.json"
+        spec_path.write_text(json.dumps(spec), encoding="utf-8")
+        engine.import_asset(project, spec_name, spec_path, kind="document", media_type="application/json", rights_status="NOT_APPLICABLE")
+        tasks.append({"task_id": f"render-{index}", "kind": "production_render", "executor": "tool",
+                      "inputs": [spec_name, "shot-01", "shot-02", "audio-mix", "captions"],
+                      "outputs": [f"video-{index}", f"audio-{index}", f"receipt-{index}"],
+                      "requirements": {"deliverable_refs": ["final-video"], "decision_id": f"decision-{index}",
+                                       "production": {"operation": "ffmpeg_assemble", "render_spec_input": spec_name}},
+                      "acceptance": {"render": "actual local audiovisual candidate"}})
+    engine.add_tasks(project, tasks)
+    engine.record_decision(project, {"task_id": "render-2", "decision_id": "decision-2",
+        "question": "Fixture method selection", "scope": "render-2", "source_refs": ["fixture-spec"],
+        "hypotheses": [{"id": "a", "discriminator": "probe A"}, {"id": "b", "discriminator": "probe B"}],
+        "alternatives": [{"id": "a"}, {"id": "b"}], "selected_option": "a",
+        "falsifier": "no usable output", "rollback": "reopen"})
+    result = run_ready_tool_tasks(engine, project, max_workers=1)
+    assert result["scheduler_status"] == "BLOCKED_CURRENT_DECISION_REQUIRED", result
+    assert {item["task_id"] for item in result["completed"]} == {"render-2"}
+    assert set(result["decision_blocked_tasks"]) == {"render-1"}
+    assert set(engine.resume(project)["decision_blocked_tasks"]) == {"render-1"}
+    assert not result["release_authorized"]
