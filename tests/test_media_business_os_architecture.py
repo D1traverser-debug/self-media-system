@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from video_growth_agent import (
-    EvidenceBoundModelRouter,
+from video_growth_agent.model_registry import EvidenceBoundModelRouter
+from video_growth_agent.production_os import (
     ShotContract,
     admit_candidate_generation,
     evaluate_take_promotion,
@@ -21,15 +21,20 @@ def version_at_least(actual: str, minimum: str) -> bool:
     )
 
 
-def test_media_business_os_is_primary_architecture_and_legacy_stage_machine_is_adapter():
+def test_video_studio_is_the_only_runtime_and_domain_modules_are_adapter_bound():
     manifest = load("video_growth_agent/data/domain_manifest.json")
-    plan = load("video_growth_agent/data/execution-plan.json")
-    assert manifest["domain_authority"]["architecture"] == "docs/media_business_os.md"
-    assert plan["policy"]["architecture_role"] == "LEGACY_AND_SPECIALIZED_EPISODE_EXECUTION_ADAPTER_UNDER_MEDIA_BUSINESS_OS"
-    text = (ROOT / "docs/media_business_os.md").read_text(encoding="utf-8")
-    assert "Program -> Series -> Episode -> Sequence -> Scene -> Shot -> Take" in text
-    assert "The legacy stage/work-order engine remains a historical/specialized compatibility adapter" in text
-    assert "Status: `PRODUCTION_0_8_0`" in text
+    studio = load("video_studio/data/studio_manifest.json")
+    assert manifest["runtime"]["version"] == "1.0.0"
+    assert manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"
+    assert manifest["domain_authority"]["runtime_root"] == "video_studio"
+    assert manifest["domain_authority"]["architecture"] == "docs/standalone_video_studio.md"
+    assert studio["runtime"] == "video_studio.engine.StudioEngine"
+    assert studio["domain_adapter_policy"]["control_plane"] == "video_studio"
+    assert "legacy_adapter_bundle_version" not in manifest["runtime"]
+    text = (ROOT / "docs/standalone_video_studio.md").read_text(encoding="utf-8")
+    assert "sole active control plane" in text
+    assert "single tested adapter boundary" in text
+    assert "fixed-stage `StudioOrchestrator` is not an active controller" in text
 
 
 def test_current_program_has_explicit_cross_workstream_flywheel():

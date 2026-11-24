@@ -1,6 +1,9 @@
 import pytest
 
-from video_growth_agent import ArtifactRecord, GateBlocked, ProjectStore, StudioRuntime
+from video_growth_agent.models import ArtifactRecord
+from video_growth_agent.orchestrator import GateBlocked
+from video_growth_agent.storage import ProjectStore
+from video_growth_agent.runtime import StudioRuntime
 
 
 def test_direct_runtime_advance_cannot_bypass_learn_work_orders(tmp_path):

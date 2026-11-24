@@ -150,3 +150,19 @@ def test_provider_deprecation_blocks_even_if_quality_is_high():
     decision = router.route(_request(), [retired], now=datetime(2026, 10, 15, tzinfo=timezone.utc))
     assert decision.blocked
     assert "ENGINE_DEPRECATED" in decision.assessments[0].reasons
+
+
+
+def test_quality_bounds_use_decimal_input_values_without_float_drift():
+    observation = QualityObservation(
+        4.7, "video-quality-v1", "precision-regression-v1", 0.1,
+        "OWNER_BENCHMARK", ("quality://precision",),
+    )
+    assert observation.lower_bound == 4.6
+    assert observation.upper_bound == 4.8
+
+    below_floor = QualityObservation(
+        4.69999999999, "video-quality-v1", "precision-regression-v1", 0.1,
+        "OWNER_BENCHMARK", ("quality://precision-below",),
+    )
+    assert below_floor.lower_bound < 4.6

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Mapping
 
 Lane = str
@@ -47,11 +48,15 @@ class QualityObservation:
 
     @property
     def lower_bound(self) -> float:
-        return max(0.0, float(self.value) - float(self.uncertainty))
+        # Preserve the decimal values supplied by the benchmark instead of
+        # introducing binary-float drift at hard quality thresholds.
+        value = Decimal(str(self.value)) - Decimal(str(self.uncertainty))
+        return float(max(Decimal("0"), value))
 
     @property
     def upper_bound(self) -> float:
-        return min(5.0, float(self.value) + float(self.uncertainty))
+        value = Decimal(str(self.value)) + Decimal(str(self.uncertainty))
+        return float(min(Decimal("5"), value))
 
     def comparable_with(self, other: "QualityObservation") -> bool:
         return (

@@ -29,9 +29,11 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
 
     assert manifest["domain_authority"]["project_index"] == "projects/PROJECT_INDEX.json"
     assert manifest["domain_authority"]["product_requirements"] == "docs/product_requirements.md"
-    assert manifest["domain_authority"]["architecture"] == "docs/media_business_os.md"
+    assert manifest["domain_authority"]["architecture"] == "docs/standalone_video_studio.md"
     assert manifest["domain_authority"]["integrated_business_flywheel"] == "projects/ai-self-media-commercialization/BUSINESS_FLYWHEEL.json"
-    assert manifest["runtime"]["program_orchestration"] == "video_growth_agent/program_orchestration.py"
+    assert manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"
+    assert manifest["runtime"]["version"] == "1.0.0"
+    assert "program_orchestration" not in manifest["runtime"]
     assert manifest["runtime"]["media_business_os"] == "video_growth_agent/production_os.py"
 
     assert caps["profile_version"] >= 12

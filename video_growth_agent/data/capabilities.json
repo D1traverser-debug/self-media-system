@@ -472,7 +472,7 @@
       "capability_id": "programmatic_motion_graphics_render",
       "scope": "NON_CHARACTER_INFORMATION_GRAPHICS__KINETIC_TYPOGRAPHY__DATA_CARDS__BAR_CHARTS__QUOTE_CARDS",
       "assurance_ceiling": "SESSION_EXECUTABLE",
-      "invocation_path": "vga render-graphic REQUEST.json --output candidate.mp4 [--graph MediaGraph.json]",
+      "invocation_path": "vga-studio run-adapter PROJECT TASK_ID --worker ID --token TOKEN",
       "executor_type": "LOCAL_FFMPEG_PROGRAMMATIC_GRAPHICS_RENDERER",
       "executor_ref": "video_growth_agent/programmatic_graphics.py + video_growth_agent/media_qa.py + video_growth_agent/media_graph.py",
       "required_tools": [
@@ -580,7 +580,7 @@
     "system": "CAOS",
     "source_repository": "D1traverser-debug/cognition-agent-os",
     "mode": "CHAT_GOVERNED_EXTERNAL",
-    "entrypoint": "CAOS_VIDEO_ENTRY.md",
+    "entrypoint": "STUDIO_ENTRY.md",
     "runtime_dependency": false,
     "source_mutation": "FORBIDDEN",
     "domain_authority": "VIDEO_GROWTH_AGENT"

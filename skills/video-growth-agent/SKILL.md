@@ -1,9 +1,9 @@
 ---
 name: video-growth-agent
-description: Standalone outcome-driven media studio for research, creative development, parallel production, audiovisual quality control, release preparation and evidence-based learning. Use for new Video projects and continuation of existing Video work.
+description: CAOS-governed Video Production Studio for research, creative development, parallel production, audiovisual quality control, release preparation and evidence-based learning. Use for new Video projects and continuation of existing Video work.
 ---
 
-# Video Growth Agent — Standalone Studio
+# Video Production Studio — Video Domain Skill
 
 **Startup authority:** repository-root `STUDIO_ENTRY.md`.
 
@@ -15,7 +15,7 @@ description: Standalone outcome-driven media studio for research, creative devel
 
 **Operating contract:** `docs/standalone_video_studio.md`.
 
-This Skill owns its complete Video-domain method and workflow. It must not rely on CAOS, a parent agent, hidden chat memory, a parent task ID, a parent lease, a governance API, or a second orchestration controller. The old `vga` / 0.8 system is a compatibility library only. New Video work enters through `video_studio`.
+This Skill owns Video-domain requirements, project state, task graphs, assets, production execution, review, failure recovery and domain learning. When Video is selected in a CAOS-governed ChatGPT session, the CAOS parent Skill governs complete-goal recovery, material decisions, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Do not bypass that parent governance or modify the CAOS repository, Skills or configuration. Video Studio has no CAOS runtime/API/task-ID/lease dependency. Direct standalone use is allowed only when the owner explicitly selects it. The fixed-stage controller is not an active execution path.
 
 ## 1. Startup and recovery
 
@@ -61,6 +61,11 @@ Treat Video Growth Agent as a coupled media-business system, not merely a video-
 Connect these workstreams only through explicit evidence and decisions. Audience evidence can revise portfolio hypotheses; IP performance can revise packaging or licensing strategy; sponsor obligations can change format and production requirements; production cost, failure, reuse and quality evidence can change future investment. Keep separate objective evidence for trust/truth, usefulness/story, retention, IP recognition, audiovisual craft, qualified growth, commercial value, rights, cost and learning. Never collapse them into a single vanity score.
 
 The `video_studio` engine is the control plane for durable work, not a claim that all business-domain models have been rewritten. When Program/Series/Episode/Shot/Timeline, continuity, provider routing, business metrics or IP identity semantics are required, use the corresponding Video-owned specialized module only through an explicit, verified adapter. Register resulting state and files as versioned Studio artifacts. Never restore the old fixed-stage `StudioOrchestrator` as the new controller.
+
+Execute deterministic domain work through `vga-studio run-adapter PROJECT TASK_ID --worker ID --token TOKEN` after claiming a task whose `requirements.domain_adapter.name` selects a supported adapter. Current adapters cover EditorialPlan validation, ShotContract materialization/validation, IPOS bundle inspection/import, MediaGraph bootstrap, TimelineSpec validation, continuity assessment, shot routing, business outcome metrics, supplementary loudness/silence QA and local programmatic-graphics rendering. Inputs must be declared Studio artifacts; outputs are registered with immutable lineage. Graphic rendering creates candidate-only silent media, never promoted or released media.
+
+Do not claim an external generative-video provider is connected merely because a router or capability declaration exists. No trusted external generative-video executor is currently registered. Check current-session provider/tool capability, exact operation constraints, rights, pricing and availability before generation or any paid action.
+
 
 ## 3. Research and evidence
 
@@ -149,9 +154,19 @@ Use separate rubrics appropriate to the project. Common dimensions:
 - rights, likeness, consent, product truth, provenance and synthetic disclosure;
 - platform fit, cover, title, copy and export package.
 
-Technical QA and editorial/craft QA are different. FFprobe can measure streams, duration, dimensions and frame rate; it cannot prove a film is compelling, funny, accurate, legally cleared or commercially effective.
+Technical QA and editorial/craft QA are different. FFmpeg/FFprobe can measure streams, duration, dimensions, frame rate, stream timing, full decode, black frames and true peak; they cannot prove a film is compelling, funny, accurate, legally cleared or commercially effective.
 
 Bind every review to the exact artifact ID and SHA-256. Conflicting PASS and FAIL verdicts block release. Replaced bytes invalidate prior review authority. Run `release-check` on the exact final deliverable with required rubrics, rights and platform evidence. Release admission is not publication; upload or paid external actions require owner authorization.
+
+## 8A. Non-negotiable media release gates
+
+For a video release, the exact final artifact must have an FFmpeg/FFprobe receipt bound to its artifact ID and SHA-256. The mandatory checks are video stream, stream-duration agreement, true peak, black-frame detection and full decode. The brief may add duration, resolution and frame-rate requirements but cannot remove those checks. Missing tools, unavailable measurements, stale receipts or digest mismatch fail closed.
+
+The final media and every used media asset in its recursive artifact lineage must have an allowed rights status and resolvable rights evidence. A source version change invalidates every consumer and dependent descendant. No UNKNOWN rights, unreviewed likeness, unverified music/voice/font, unsupported product-truth claim or unresolved disclosure gap may be waved through.
+
+When the brief requires a human cold read, the review receipt must attest to a human reviewer, independent cold-read mode, blind review, the exact inspected digest and a unique context ID. These are auditable attestations, not cryptographic proof of human identity or independent cognition.
+
+When the brief requires Red Team, require at least three concrete findings, each with evidence, severity and disposition. If `require_resolvable_evidence_refs` is enabled, review-level and finding-level evidence references must resolve to current registered artifact IDs/names; free-form URIs do not count. A PASS cannot coexist with unresolved critical/high findings. Required evidence artifacts must exist, be current and use an allowed evidence/document/report/decision/timeline/domain-state kind.
 
 ## 9. Failure, repair and recovery loop
 
@@ -194,4 +209,4 @@ vga-studio --root ./studio-work audit episode-001
 vga-studio --root ./studio-work events episode-001
 ```
 
-Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The canonical package uses only Python standard-library runtime dependencies; optional media QA requires FFprobe. Existing 0.8 modules are compatibility adapters, not the new Studio's control plane.
+Read `docs/standalone_video_studio.md` for the complete JSON contracts and runtime semantics. The Video control-plane core uses Python's standard library. The explicit domain-adapter layer also uses the project-declared Pillow and filelock dependencies; media QA and local graphics rendering require FFmpeg and FFprobe. Existing specialized modules are imported only through the tested adapter bridge, not as a second controller.

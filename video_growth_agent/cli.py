@@ -20,7 +20,6 @@ from .programmatic_graphics import (
     validate_shot_graph_bindings,
 )
 from .runtime import StudioRuntime
-from .system_audit import run_system_audit
 from .techniques import TechniqueLibrary
 
 
@@ -134,15 +133,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--graph", type=Path, help="optional canonical MediaGraph JSON store")
 
-    p = sub.add_parser("system-audit")
-    p.add_argument("--repo-root", type=Path)
-
     args = parser.parse_args(argv)
-
-    if args.cmd == "system-audit":
-        report = run_system_audit(args.repo_root)
-        _json(report)
-        return 0 if report["pass"] else 2
 
     if args.cmd == "audit-packaging":
         report = audit_packaging(json.loads(args.case_file.read_text(encoding="utf-8")))

@@ -4,12 +4,12 @@
   "agent_id": "video",
   "domain_id": "video",
   "owner": "VIDEO_GROWTH_AGENT",
-  "status": "VIDEO_DOMAIN_RUNTIME_ACTIVE",
+  "status": "VIDEO_DOMAIN_ACTIVE__STUDIO_RUNTIME_1_0_0",
   "governance": {
     "system": "CAOS",
     "source_repository": "D1traverser-debug/cognition-agent-os",
     "mode": "CHAT_GOVERNED_EXTERNAL",
-    "entrypoint": "CAOS_VIDEO_ENTRY.md",
+    "entrypoint": "STUDIO_ENTRY.md",
     "skill": "cognition-parent-chatgpt-intake",
     "runtime_dependency": false,
     "source_mutation": "FORBIDDEN",
@@ -18,11 +18,11 @@
     "runtime_controller": false
   },
   "skill": {
-    "entrypoint": "CAOS_VIDEO_ENTRY.md"
+    "entrypoint": "STUDIO_ENTRY.md"
   },
   "runtime": {
-    "version": "0.8.0",
-    "entrypoint": "video_growth_agent/runtime.py",
+    "version": "1.0.0",
+    "entrypoint": "video_studio.engine.StudioEngine",
     "media_graph": "video_growth_agent/media_graph.py",
     "editorial_planning": "video_growth_agent/editorial_planning.py",
     "plan_graph_bridge": "video_growth_agent/plan_graph_bridge.py",
@@ -37,23 +37,16 @@
     "operator_view": "video_growth_agent/operator_view.py",
     "owner_behavior_admission": "video_growth_agent/owner_behavior_admission.py",
     "root_scope_admission": "video_growth_agent/owner_behavior_admission.py:require_root_scope_admission",
-    "episode_workflow": "video_growth_agent/data/workflow.json",
-    "execution_plan": "video_growth_agent/data/execution-plan.json",
-    "agent_registry": "video_growth_agent/data/agents.json",
-    "program_orchestration": "video_growth_agent/program_orchestration.py",
-    "coordination_policy": "video_growth_agent/data/coordination-policy.json",
-    "legacy_adapter_bundle_version": "0.7.0",
-    "system_audit": "vga system-audit --repo-root .",
+    "system_audit": "vga-studio system-audit --repo-root .",
     "ip_identity": "video_growth_agent/ip_identity.py",
     "ipos_video_identity_bundle_schema": "video_growth_agent/data/ipos_video_identity_bundle.schema.json",
     "programmatic_graphics": "video_growth_agent/programmatic_graphics.py",
     "programmatic_graphics_assurance": "SESSION_EXECUTABLE__SILENT_CANDIDATE_ONLY__NO_PROMOTION"
   },
   "domain_authority": {
-    "runtime_root": "video_growth_agent",
+    "runtime_root": "video_studio",
     "product_requirements": "docs/product_requirements.md",
-    "architecture": "docs/media_business_os.md",
-    "architecture_compatibility_view": "docs/architecture.md",
+    "architecture": "docs/standalone_video_studio.md",
     "agent_operability_scenarios": "docs/agent_operability_scenarios.md",
     "provider_benchmark_protocol": "docs/provider_benchmark_protocol.md",
     "project_root": "projects",
@@ -69,12 +62,8 @@
       "system": "IP_STUDIO_OS",
       "contract": "IPOS Video Identity Bundle schema 1.0",
       "integration_state": "projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json",
-      "rule": "IPOS is the sole creative identity authority; Video imports exact owner-approved versions locally and does not call CAOS or rewrite canon."
+      "rule": "IPOS is the sole creative identity authority; Video imports exact owner-approved versions locally and never rewrites canon."
     }
-  },
-  "compatibility": {
-    "legacy_episode_adapter_bundle": "0.7.0",
-    "rule": "LEGACY_ADAPTER_RESOURCE_VERSION_MAY_TRAIL_CORE_RUNTIME_WHEN_ITS_CONTRACT_IS_UNCHANGED__BUNDLE_VERSIONS_MUST_REMAIN_INTERNALLY_ALIGNED_AND_CURRENT_SYSTEM_AUDIT_VERIFIED"
   },
   "retired_active_surface": {
     "continuity_directory_allowed": false,
