@@ -20,7 +20,7 @@ AUDIO_PROMISES = frozenset({"BITSTREAM_IDENTITY", "PCM_IDENTITY", "PERCEPTUAL_SI
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
 _ALLOWED_FIELDS = frozenset({
     "id", "type", "locale", "platform", "shape", "source_refs", "constraints",
-    "acceptance", "prohibitions",
+    "acceptance", "prohibitions", "variants",
 })
 
 
@@ -69,12 +69,37 @@ class MediaShape:
 
 
 @dataclass(frozen=True)
+class DeliverableVariant:
+    id: str
+    locale: str | None
+    platform: str | None
+    shape: MediaShape | None
+
+    @classmethod
+    def from_mapping(cls, value: Mapping[str, Any]) -> "DeliverableVariant":
+        if not isinstance(value, Mapping) or set(value) - {"id", "locale", "platform", "shape"}:
+            raise ContentContractError("variant must declare only id/locale/platform/shape")
+        identifier = _nonempty(value.get("id"), "variant id")
+        if not _ID.fullmatch(identifier):
+            raise ContentContractError("variant id must be a safe stable identifier")
+        locale = _nonempty(value["locale"], "variant locale") if value.get("locale") is not None else None
+        platform = _nonempty(value["platform"], "variant platform") if value.get("platform") is not None else None
+        shape = MediaShape.from_mapping(value["shape"]) if value.get("shape") is not None else None
+        return cls(identifier, locale, platform, shape)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"id": self.id, "locale": self.locale, "platform": self.platform,
+                "shape": self.shape.as_dict() if self.shape is not None else None}
+
+
+@dataclass(frozen=True)
 class DeliverableContract:
     id: str
     type: str
     locale: str | None
     platform: str | None
     shape: MediaShape | None
+    variants: tuple[DeliverableVariant, ...]
     source_refs: tuple[str, ...]
     prohibitions: tuple[str, ...]
     constraints: dict[str, Any]
@@ -102,6 +127,23 @@ class DeliverableContract:
             if kind not in {"STATIC_IMAGE", "MULTI_ASPECT_IMAGE_SET", "MEDIA_TRANSFORM",
                             "ORIGINAL_VIDEO", "IDENTITY_ASSET"}:
                 raise ContentContractError("pixel shape requires a visual or media deliverable")
+        raw_variants = value.get("variants", [])
+        if not isinstance(raw_variants, list):
+            raise ContentContractError("variants must be a list")
+        variants = tuple(DeliverableVariant.from_mapping(item) for item in raw_variants)
+        variant_ids = [item.id for item in variants]
+        if len(variant_ids) != len(set(variant_ids)):
+            raise ContentContractError("variant IDs must be unique within each deliverable")
+        if kind == "MULTI_ASPECT_IMAGE_SET":
+            if shape is not None or len(variants) < 2:
+                raise ContentContractError("multi-aspect image set requires 2+ named variants and no single top-level shape")
+            if any(item.shape is None for item in variants):
+                raise ContentContractError("each multi-aspect image variant needs its own explicit shape")
+            ratios = [item.shape.ratio for item in variants if item.shape is not None]
+            if len(ratios) != len(set(ratios)):
+                raise ContentContractError("multi-aspect variants must have distinct aspect ratios")
+        elif kind == "STATIC_IMAGE" and len(variants) > 1:
+            raise ContentContractError("multiple named image variants require a set deliverable")
         constraints = value.get("constraints", {})
         acceptance = value.get("acceptance", {})
         if not isinstance(constraints, dict) or not isinstance(acceptance, dict):
@@ -111,7 +153,7 @@ class DeliverableContract:
             raise ContentContractError("original_audio_promise must be a supported MEDIA_TRANSFORM mode")
         return cls(
             id=identifier, type=kind, locale=value.get("locale"), platform=value.get("platform"),
-            shape=shape, source_refs=_text_list(value.get("source_refs", []), "source_refs"),
+            shape=shape, variants=variants, source_refs=_text_list(value.get("source_refs", []), "source_refs"),
             prohibitions=_text_list(value.get("prohibitions", []), "prohibitions"),
             constraints=dict(constraints), acceptance=dict(acceptance),
         )
@@ -119,7 +161,8 @@ class DeliverableContract:
     def as_dict(self) -> dict[str, Any]:
         return {"id": self.id, "type": self.type, "locale": self.locale,
                 "platform": self.platform, "shape": self.shape.as_dict() if self.shape else None,
-                "source_refs": list(self.source_refs), "prohibitions": list(self.prohibitions),
+                "variants": [item.as_dict() for item in self.variants],
+            "source_refs": list(self.source_refs), "prohibitions": list(self.prohibitions),
                 "constraints": dict(self.constraints), "acceptance": dict(self.acceptance),
                 "acceptance_assurance": "UNVERIFIED"}
 

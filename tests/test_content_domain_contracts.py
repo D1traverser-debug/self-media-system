@@ -17,6 +17,11 @@ def test_every_architecture_scenario_has_a_typed_route_without_effect(tmp_path):
     for scenario in matrix["scenarios"]:
         assert scenario["forbidden_implicit_effect"] and scenario["owner_outcome_oracle"]
         item = {"id": "result", "type": scenario["deliverable_type"]}
+        if item["type"] == "MULTI_ASPECT_IMAGE_SET":
+            item["variants"] = [
+                {"id": "portrait", "shape": {"width": 1080, "height": 1440, "orientation": "PORTRAIT"}},
+                {"id": "landscape", "shape": {"width": 1440, "height": 1080, "orientation": "LANDSCAPE"}},
+            ]
         preview = resolve_intake(tmp_path, {
             "mode": "NEW", "goal": scenario["demand"], "deliverable_specs": [item]})
         assert preview["project_id"] is None
@@ -98,3 +103,23 @@ def test_prompt_spec_is_an_independent_non_generation_deliverable(tmp_path):
     assert route["typed_deliverables"]["deliverables"][0]["shape"] is None
     assert route["typed_deliverables"]["effect_authorized"] is False
     assert route["selected_task_graph"] is None
+
+
+def test_multi_aspect_variants_keep_separate_identity_and_composition():
+    item = {"id": "covers", "type": "MULTI_ASPECT_IMAGE_SET",
+            "variants": [
+                {"id": "tall", "shape": {"width": 1080, "height": 1440, "orientation": "PORTRAIT"}},
+                {"id": "wide", "shape": {"width": 1440, "height": 1080, "orientation": "LANDSCAPE"}},
+            ]}
+    preview = inspect_declared_deliverables([item])
+    variants = preview["deliverables"][0]["variants"]
+    assert [v["id"] for v in variants] == ["tall", "wide"]
+    assert [v["shape"]["aspect_ratio"] for v in variants] == ["3:4", "4:3"]
+    with pytest.raises(ContentContractError):
+        inspect_declared_deliverables([{"id": "covers", "type": "MULTI_ASPECT_IMAGE_SET"}])
+    with pytest.raises(ContentContractError):
+        inspect_declared_deliverables([{"**": "unused", **item, "variants": [item["variants"][0], item["variants"][0]]}])
+    with pytest.raises(ContentContractError):
+        inspect_declared_deliverables([{"id": "covers", "type": "MULTI_ASPECT_IMAGE_SET",
+                                       "variants": [item["variants"][0],
+                                                    {"id": "other", "shape": item["variants"][0]["shape"]}]}])

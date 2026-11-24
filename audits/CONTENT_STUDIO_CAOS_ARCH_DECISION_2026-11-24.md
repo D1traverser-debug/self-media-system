@@ -36,3 +36,6 @@ Read the source imports and public operations of video_studio core, handlers, re
 
 ## Architecture classification counterexample: prompt-only outputs
 A first-party user demand explicitly requests prompt design without generation. Previously the scenario matrix classified it as ANALYSIS_REPORT. This misclassified a standalone deliverable and could cause invalid QA or unwanted provider effects. Compared report subtype, unfulfilled STATIC_IMAGE and PROMPT_SPEC. Selected PROMPT_SPEC, updated architecture, scenario S08, pure type enum and negative test. Existing source and rights checks remain applicable; generation is not inferred or authorized.
+
+## Architecture counterexample: multi-aspect set shape conflation
+After M2 source readback, the first typed domain class represented MULTI_ASPECT_IMAGE_SET with only an optional top-level shape. This contradicted the design's independent VariantID and user ratio constraints. Compared inheriting one shape, creating entirely independent demands, and explicit VariantIDs sharing one content intent. Selected explicit variant identity with per-variant shape, ratio and future artifact review, added source-level negative cases for absent, duplicate and same-ratio variants. Pending real image-generation/crop review, no fake image provider. No change to CAOS or IPOS.
