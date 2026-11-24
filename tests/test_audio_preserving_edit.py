@@ -76,3 +76,64 @@ def test_disallowed_edit_and_untrusted_source_are_blocked(tmp_path):
         AudioPreservingVideoEditor().render(spec("PASSTHROUGH"),source=source,
             source_sha256="0"*64,output_dir=tmp_path/"bad",
             expected_outputs={"result","proof"})
+
+
+def test_real_owner_scoped_studio_claim_dispatch_complete_and_audio_receipt(tmp_path):
+    import json
+    from video_studio.engine import StudioEngine
+    from video_studio.scope import bind_owner_brief
+    from video_studio.production.worker_pool import run_ready_tool_tasks
+
+    project="audio-crop-demand"
+    engine=StudioEngine(tmp_path/"workspace")
+    brief=bind_owner_brief(project, {
+        "goal":"Crop original video without modifying encoded audio",
+        "audience":"original owner","deliverables":["edited-video","audio-identity-report"],
+        "deliverable_specs":[
+            {"id":"edited-video","type":"MEDIA_TRANSFORM",
+             "constraints":{"original_audio_promise":"BITSTREAM_IDENTITY"}},
+            {"id":"audio-identity-report","type":"ANALYSIS_REPORT"},
+        ]})
+    engine.create_project(project,project,brief)
+    video=source_clip(tmp_path)
+    specfile=tmp_path/"edit.json"
+    specfile.write_text(json.dumps({
+        "schema_version":"1.0","source_input":"source-clip",
+        "mode":"CROP","crop":{"width":120,"height":80,"x":20,"y":20},
+        "audio_promise":"BITSTREAM_IDENTITY",
+        "video_output":"edited-video","receipt_output":"audio-identity-report",
+    }),encoding="utf-8")
+    engine.import_asset(project,"source-clip",video,kind="video",
+        media_type="video/mp4",rights_status="OWNED")
+    engine.import_asset(project,"edit-spec",specfile,kind="document",
+        media_type="application/json",rights_status="NOT_APPLICABLE")
+    engine.add_tasks(project,[{
+        "task_id":"crop-video-only","title":"Crop while retaining encoded audio",
+        "kind":"media_transform","executor":"tool",
+        "inputs":["source-clip","edit-spec"],
+        "outputs":["edited-video","audio-identity-report"],
+        "requirements":{"deliverable_refs":["edited-video","audio-identity-report"],
+            "decision_id":"crop-decision",
+            "production":{"operation":"ffmpeg_video_audio_copy","edit_spec_input":"edit-spec"}},
+        "acceptance":{"audio":"exact original encoded packet payloads","video":"crop to declared geometry"},
+    }])
+    assert set(engine.status(project)["decision_blocked_tasks"])=={"crop-video-only"}
+    engine.record_decision(project,{
+        "task_id":"crop-video-only","decision_id":"crop-decision",
+        "question":"How to crop video without changing audio?",
+        "scope":"actual video-only edit","source_refs":["source-clip","edit-spec"],
+        "hypotheses":[{"id":"h1","discriminator":"reencoded audio would change packet hash"},
+                      {"id":"h2","discriminator":"stream copy should preserve packet hash"}],
+        "alternatives":[{"id":"copy"},{"id":"reencode"}],"selected_option":"copy",
+        "falsifier":"any payload mismatch or stream loss",
+        "rollback":"do not promote edited candidate; reopen source method",
+    })
+    outcome=run_ready_tool_tasks(engine,project,max_workers=1)
+    assert outcome["failed"]==[],outcome
+    assert len(outcome["completed"])==1,outcome
+    assert engine.status(project)["task_counts"]=={"COMPLETED":1}
+    finish=engine.list_tasks(project)[0]["result"]
+    assert finish["production_executor"]=="ffmpeg_video_audio_copy"
+    assert finish["identity_receipt"]["audio_identity"]["promise"]=="BITSTREAM_IDENTITY"
+    assert finish["identity_receipt"]["owner_outcome_verified"] is False
+    assert finish["identity_receipt"]["candidate_only"] is True
