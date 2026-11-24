@@ -2,7 +2,7 @@
   "schema_version": "1.2",
   "project_id": "pilot-002",
   "display_name_zh": "Pilot 002｜AI视频涨粉与商业化旧主项目",
-  "owner": "VIDEO_GROWTH_AGENT",
+  "owner": "SOCIAL_MEDIA_STUDIO",
   "business_identity_authority": "projects/pilot-002/PROGRAM_STATE.json::project_id",
   "legacy_aliases": [
     "video-growth:main",

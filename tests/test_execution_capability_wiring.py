@@ -40,9 +40,9 @@ def test_legacy_parent_runtime_artifacts_are_removed_but_video_capabilities_surv
     assert not (ROOT / "tests/test_uaos_current.py").exists()
     profile = read_json("social_media_studio/legacy/data/capabilities.json")
     capability_ids = {item["capability_id"] for item in profile["capabilities"]}
-    assert "video_domain_problem_recovery_and_evolution_admission" in capability_ids
+    assert "social_media_domain_problem_recovery_and_evolution_admission" in capability_ids
     assert len(capability_ids) >= 20
-    assert profile["owner"] == "VIDEO_GROWTH_AGENT"
+    assert profile["owner"] == "SOCIAL_MEDIA_STUDIO"
     assert profile["assurance_taxonomy"] == [
         "DECLARED_ONLY",
         "HARNESS_WIRED",

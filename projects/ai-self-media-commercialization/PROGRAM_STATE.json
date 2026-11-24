@@ -2,7 +2,7 @@
   "schema_version": "1.3",
   "program_id": "ai-self-media-commercialization",
   "display_name_zh": "AI自媒体视频增长、商业化与原创数字IP",
-  "owner": "VIDEO_GROWTH_AGENT",
+  "owner": "SOCIAL_MEDIA_STUDIO",
   "status": "ACTIVE",
   "business_identity_authority": "projects/ai-self-media-commercialization/PROGRAM_STATE.json::program_id",
   "product_ref": "docs/product_requirements.md",

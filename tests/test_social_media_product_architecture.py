@@ -16,7 +16,7 @@ def semver_at_least(actual: str, minimum: str) -> bool:
     return left + (0,) * (width - len(left)) >= right + (0,) * (width - len(right))
 
 
-def test_video_owns_business_identity_and_caos_is_external_governance():
+def test_social_media_owns_business_identity_and_caos_is_external_governance():
     manifest = load("social_media_studio/legacy/data/domain_manifest.json")
     caps = load("social_media_studio/legacy/data/capabilities.json")
 
@@ -33,16 +33,16 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
     assert manifest["domain_authority"]["architecture"] == "docs/standalone_social_media_studio.md"
     assert manifest["domain_authority"]["integrated_business_flywheel"] == "social_media_studio/data/business_feedback.json"
     assert manifest["runtime"]["entrypoint"] == "social_media_studio.engine.StudioEngine"
-    assert manifest["runtime"]["version"] == "1.0.0"
+    assert manifest["runtime"]["version"] == "2.0.0"
     assert "program_orchestration" not in manifest["runtime"]
     assert manifest["runtime"]["media_business_os"] == "social_media_studio/legacy/production_os.py"
 
     assert caps["profile_version"] >= 12
-    assert caps["owner"] == "VIDEO_GROWTH_AGENT"
+    assert caps["owner"] == "SOCIAL_MEDIA_STUDIO"
     assert caps["governance_binding"]["system"] == "CAOS"
     assert caps["governance_binding"]["runtime_dependency"] is False
     assert caps["governance_binding"]["source_mutation"] == "FORBIDDEN"
-    assert "video_domain_problem_recovery_and_evolution_admission" in {
+    assert "social_media_domain_problem_recovery_and_evolution_admission" in {
         item["capability_id"] for item in caps["capabilities"]
     }
     assert not any(key.lower().startswith("uaos_") for key in caps)
@@ -52,7 +52,7 @@ def test_video_owns_business_identity_and_caos_is_external_governance():
 
 def test_generic_intents_never_resume_retired_project_instances():
     index = load("projects/PROJECT_INDEX.json")
-    assert index["authority"] == "VIDEO_GROWTH_AGENT"
+    assert index["authority"] == "SOCIAL_MEDIA_STUDIO"
     assert index["default_project_id"] is None
     assert {item["project_id"] for item in index["projects"]} == {
         "ai-self-media-commercialization", "pilot-001", "pilot-002"
@@ -68,7 +68,7 @@ def test_retired_integrated_program_preserves_original_ipos_source_evidence_only
     integration = load("projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json")
 
     assert program["program_id"] == "ai-self-media-commercialization"
-    assert program["owner"] == "VIDEO_GROWTH_AGENT"
+    assert program["owner"] == "SOCIAL_MEDIA_STUDIO"
     assert set(program["workstreams"]) == {
         "MEDIA_GROWTH",
         "ORIGINAL_DIGITAL_IP",
@@ -136,7 +136,7 @@ def test_media_business_docs_reject_vendor_lockin_scalar_quality_and_stage_role_
 def test_pilot002_is_exact_historical_project_and_rejection_truth_survives_migration():
     pilot = load("projects/pilot-002/PROGRAM_STATE.json")
     assert pilot["project_id"] == "pilot-002"
-    assert pilot["owner"] == "VIDEO_GROWTH_AGENT"
+    assert pilot["owner"] == "SOCIAL_MEDIA_STUDIO"
     assert "video-growth:main" in pilot["legacy_aliases"]
     assert "not a caos governance task identity" in pilot["legacy_alias_semantics"].lower()
     assert "controller_authority" not in pilot

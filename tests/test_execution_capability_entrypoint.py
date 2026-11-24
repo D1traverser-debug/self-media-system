@@ -16,8 +16,8 @@ def test_caos_entry_and_capability_profile_require_current_session_handshake():
     assert "independent acceptance" in skill.lower()
     assert profile["governance_binding"]["entrypoint"] == "STUDIO_ENTRY.md"
     assert profile["execution_readiness_contract"] == "2.0"
-    assert profile["owner"] == "VIDEO_GROWTH_AGENT"
-    assert profile["domain_id"] == "video"
+    assert profile["owner"] == "SOCIAL_MEDIA_STUDIO"
+    assert profile["domain_id"] == "social_media"
     assert profile["governance_binding"]["system"] == "CAOS"
     assert profile["governance_binding"]["mode"] == "CHAT_GOVERNED_EXTERNAL"
     assert profile["governance_binding"]["runtime_dependency"] is False

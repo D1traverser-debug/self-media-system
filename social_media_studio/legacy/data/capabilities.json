@@ -3,7 +3,7 @@
   "profile_version": 14,
   "execution_readiness_contract": "2.0",
   "owner": "SOCIAL_MEDIA_STUDIO",
-  "domain_id": "video",
+  "domain_id": "social_media",
   "repository": "D1traverser-debug/social-media-studio",
   "policy": "CURRENT_SESSION_HANDSHAKE__DIRECT_DOMAIN__CHILD_OWNS_MEDIA_BUSINESS_GRAPH__EDITORIAL_INTENT_TO_EXECUTION_TRACEABLE__CANDIDATE_GENERATION_SEPARATE_FROM_PROMOTION__RELEASE_FAIL_CLOSED__ARTIFACT_IDENTITY_BOUND__OPERATOR_VIEW_NON_AUTHORITATIVE__NO_PARALLEL_CONTROLLER",
   "architecture_experience_semantics": "MATERIAL_ARCHITECTURE_AND_AGENT_EXPERIENCE_CHANGES_REQUIRE_CURRENT_AGENT_DOGFOOD__CONCERN_APPROPRIATE_STRUCTURAL_TEMPORAL_CAUSAL_OR_COGNITIVE_VIEWS__FAILURE_RECOVERY_AND_RESUME_PATHS",
@@ -393,7 +393,7 @@
       "historical_executor_ref": "social_media_studio/legacy/operator_view.py"
     },
     {
-      "capability_id": "video_domain_problem_recovery_and_evolution_admission",
+      "capability_id": "social_media_domain_problem_recovery_and_evolution_admission",
       "scope": "VIDEO_DOMAIN_RECOVERY__ROOT_SCOPE__TYPED_EVOLUTION__PROBLEM_TO_ACTION_CLOSURE",
       "assurance_ceiling": "HARNESS_WIRED",
       "invocation_path": "Existing domain method; current engine has separate decision/failure/learning records, semantic enforcement remains open",
@@ -718,7 +718,7 @@
     "Live published-episode growth/IP/commercial outcome verification remains open after executable architecture validation.",
     "Programmatic graphics is now executable only for constrained non-character typography/data/quote explainer shots. It is a silent synthetic candidate route, not cinematic AI-video generation, real/product-truth evidence, IPOS identity rendering, final sound or automatic release."
   ],
-  "video_domain_governance_realization": "OWNER_NATIVE_RECOVERY__ROOT_SCOPE_ADMISSION__TYPED_EVOLUTION_DISPOSITION__DURABLE_CAUSAL_EVIDENCE__PROBLEM_REPAIR_OR_BLOCK_CLOSURE",
+  "social_media_domain_governance_realization": "OWNER_NATIVE_RECOVERY__ROOT_SCOPE_ADMISSION__TYPED_EVOLUTION_DISPOSITION__DURABLE_CAUSAL_EVIDENCE__PROBLEM_REPAIR_OR_BLOCK_CLOSURE",
   "governance_binding": {
     "system": "CAOS",
     "source_repository": "D1traverser-debug/cognition-agent-os",

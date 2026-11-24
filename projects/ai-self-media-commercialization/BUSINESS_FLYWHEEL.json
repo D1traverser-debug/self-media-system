@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "program_id": "ai-self-media-commercialization",
-  "owner": "VIDEO_GROWTH_AGENT",
+  "owner": "SOCIAL_MEDIA_STUDIO",
   "purpose": "Make growth, original IP, commercialization and production one evidence-coupled media business system rather than four adjacent silos.",
   "loops": [
     {
@@ -166,7 +166,7 @@
         "tests_or_replay",
         "domain_rule_promotion_or_rejection"
       ],
-      "decision_owner": "VIDEO_GROWTH_AGENT",
+      "decision_owner": "SOCIAL_MEDIA_STUDIO",
       "rule": "Durable changes require scoped evidence, counterexamples and regression/replay; provider observations remain volatile."
     }
   ],
@@ -355,7 +355,7 @@
         "workstream-outcome-refresh-pack"
       ],
       "mode": "CANDIDATE_ONLY__COUNTEREXAMPLES_AND_INDEPENDENT_REPLAY_REQUIRED",
-      "decision_owner": "VIDEO_GROWTH_AGENT"
+      "decision_owner": "SOCIAL_MEDIA_STUDIO"
     }
   }
 }

@@ -24,7 +24,7 @@ def version_at_least(actual: str, minimum: str) -> bool:
 def test_social_media_studio_is_the_only_runtime_and_domain_modules_are_adapter_bound():
     manifest = load("social_media_studio/legacy/data/domain_manifest.json")
     studio = load("social_media_studio/data/studio_manifest.json")
-    assert manifest["runtime"]["version"] == "1.0.0"
+    assert manifest["runtime"]["version"] == "2.0.0"
     assert manifest["runtime"]["entrypoint"] == "social_media_studio.engine.StudioEngine"
     assert manifest["domain_authority"]["runtime_root"] == "social_media_studio"
     assert manifest["domain_authority"]["architecture"] == "docs/standalone_social_media_studio.md"
@@ -75,9 +75,9 @@ def test_video_domain_problem_recovery_is_video_owned_and_caos_governance_is_ext
     assert caps["governance_binding"]["mode"] == "CHAT_GOVERNED_EXTERNAL"
     assert caps["governance_binding"]["runtime_dependency"] is False
     assert manifest["governance"]["source_mutation"] == "FORBIDDEN"
-    assert "ROOT_SCOPE_ADMISSION" in caps["video_domain_governance_realization"]
-    assert "TYPED_EVOLUTION_DISPOSITION" in caps["video_domain_governance_realization"]
-    assert evolution["owner"] == "DOMAIN:video"
+    assert "ROOT_SCOPE_ADMISSION" in caps["social_media_domain_governance_realization"]
+    assert "TYPED_EVOLUTION_DISPOSITION" in caps["social_media_domain_governance_realization"]
+    assert evolution["owner"] == "DOMAIN:social_media"
     assert evolution["governance_binding"]["system"] == "CAOS"
     assert evolution["governance_binding"]["runtime_dependency"] is False
 
