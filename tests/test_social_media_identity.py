@@ -31,7 +31,8 @@ def test_no_retired_product_identifiers_in_active_files():
         "Universal" + " Content Studio",
     )
     included = [ROOT / x for x in (
-        "pyproject.toml", "README.md", "STUDIO_ENTRY.md", ".github/workflows/ci.yml",\n        "docs/standalone_social_media_studio.md", "docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md",
+        "pyproject.toml", "README.md", "STUDIO_ENTRY.md", ".github/workflows/ci.yml",
+        "docs/standalone_social_media_studio.md", "docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md",
     )]
     for folder in ("social_media_studio", "skills/social-media-studio"):
         included += [p for p in (ROOT / folder).rglob("*") if p.is_file() and p.suffix in (".py", ".json", ".md", ".yml")]
