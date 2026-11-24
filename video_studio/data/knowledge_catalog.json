@@ -6,8 +6,8 @@
     {
       "id": "agent-studio",
       "ref": "skills/video-growth-agent/references/agent-studio.md",
-      "status": "ACTIVE_REFERENCE",
-      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Generic mechanisms may be studied and adapted; historical fixed-stage implementation is not current authority."
     },
     {
       "id": "benchmark-policy",
@@ -48,8 +48,8 @@
     {
       "id": "runtime",
       "ref": "skills/video-growth-agent/references/runtime.md",
-      "status": "ACTIVE_REFERENCE",
-      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Generic mechanisms may be studied and adapted; historical fixed-stage implementation is not current authority."
     },
     {
       "id": "self-learning",
@@ -66,8 +66,8 @@
     {
       "id": "workflow",
       "ref": "skills/video-growth-agent/references/workflow.md",
-      "status": "ACTIVE_REFERENCE",
-      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Generic mechanisms may be studied and adapted; historical fixed-stage implementation is not current authority."
     },
     {
       "id": "capability-inventory",
@@ -84,7 +84,8 @@
     {
       "id": "provider-benchmark",
       "ref": "docs/provider_benchmark_protocol.md",
-      "status": "ACTIVE_REFERENCE"
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Use only where relevant to current goal; verify current source and applicability."
     },
     {
       "id": "professional-aesthetics",
@@ -127,6 +128,54 @@
       "ref": "projects/ai-self-media-commercialization/PRODUCTION_AND_COST_STRATEGY.md",
       "status": "CANDIDATE_REQUIRES_REVALIDATION",
       "scope": "Extract general method only; no historical identity, subject or task state"
+    },
+    {
+      "id": "quality-rubric",
+      "ref": "video_growth_agent/data/quality-rubric.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Quality dimensions as task-specific calibration"
+    },
+    {
+      "id": "coordination-policy",
+      "ref": "video_growth_agent/data/coordination-policy.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Reusable coordination patterns, not fixed stage order"
+    },
+    {
+      "id": "professional-roles",
+      "ref": "video_growth_agent/data/roles.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Reusable professional lenses, no permanent agents"
+    },
+    {
+      "id": "agent-capability-profiles",
+      "ref": "video_growth_agent/data/agents.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Declared capabilities, not execution or required workflow"
+    },
+    {
+      "id": "historical-domain-model",
+      "ref": "docs/media_business_os.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Reusable media-domain models and historical evidence"
+    },
+    {
+      "id": "historical-architecture",
+      "ref": "docs/architecture.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Historical mechanisms; no execution authority"
+    },
+    {
+      "id": "historical-product-contract",
+      "ref": "docs/product_requirements.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Historical product constraints, never default user scope"
+    },
+    {
+      "id": "historical-scenarios",
+      "ref": "docs/agent_operability_scenarios.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Historical scenario and counterexample evidence"
     }
   ]
 }

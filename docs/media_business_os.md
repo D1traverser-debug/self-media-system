@@ -1,6 +1,6 @@
 # AI-Native Media Business OS
 
-> **Current authority (2026-11-16):** This document is retained as a Video 0.8 domain/product reference. New Video work is governed by `STUDIO_ENTRY.md`, `skills/video-growth-agent/SKILL.md` and `docs/standalone_video_studio.md`, with the standalone `video_studio` runtime. Any CAOS-governance wording below describes the historical 0.8 operating arrangement only; it is not a dependency or authority for new Studio work.
+> **Historical domain reference (retired execution authority, 2026-11-24):** Preserve reusable domain logic, media contracts and engineering evidence. All project-specific state, default project routing, fixed-stage task mandates and legacy controller references below are historical only. Current authority is `STUDIO_ENTRY.md`, `video_studio/data/studio_manifest.json` and `docs/standalone_video_studio.md`; every owner-facing Video decision/action is governed by read-only CAOS. No default task exists.
 
 
 Status: `PRODUCTION_0_8_0`

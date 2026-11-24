@@ -1,5 +1,7 @@
 # Production Intelligence — Distilled External Methods
 
+> **Scope — 2026-11-24:** Reusable methods, not permanent tasks or vendor mandates. Admit by current need, primary evidence, counterexamples and independent replay. Current authority: `STUDIO_ENTRY.md` and the canonical Studio manifest.
+
 ## Status and admission boundary
 This file stores portable mechanisms distilled from external production systems. It is not a vendor recommendation list and it is not project state.
 

@@ -1,6 +1,8 @@
 # Generation Governance
 
-Current architecture: `docs/media_business_os.md`  
+> **Scope — 2026-11-24:** Reusable admission, provenance, candidate and release principles. Apply only to relevant current effects; prior provider or stage-specific assumptions require revalidation. Current authority: `STUDIO_ENTRY.md` and the canonical Studio manifest.
+
+Current architecture: `docs/standalone_video_studio.md`  
 Provider benchmark method: `docs/provider_benchmark_protocol.md`
 
 ## Core boundary

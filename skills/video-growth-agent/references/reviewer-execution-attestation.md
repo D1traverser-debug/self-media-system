@@ -1,5 +1,7 @@
 # Reviewer Execution Attestation
 
+> **Scope — 2026-11-24:** Reusable proof of separation and exact artifact identity. Legacy work-order or stage identities are historical implementation details; use the current task/lease and independent review contracts. Current authority: `STUDIO_ENTRY.md` and the canonical Studio manifest.
+
 ## Purpose
 A role name, prompt, approval row or completed work-order file does not prove that an independent reviewer execution occurred. Critical review therefore separates four evidence classes:
 
