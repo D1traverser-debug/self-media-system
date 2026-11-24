@@ -190,7 +190,17 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("task_id")
     p.add_argument("--reason", required=True)
 
-    p = sub.add_parser("learn", help="record a scoped method candidate or validated method")
+    p = sub.add_parser("learning", help="read exact project-local learning candidates without promoting them")
+    p.add_argument("project_id")
+    p.add_argument("--include-retired", action="store_true")
+
+    p = sub.add_parser("retire-learning", help="retire a scoped method candidate; preserve immutable history")
+    p.add_argument("project_id")
+    p.add_argument("learning_id")
+    p.add_argument("--reason", required=True)
+    p.add_argument("--expected-status", choices=["CANDIDATE", "VALIDATED"], default="CANDIDATE")
+
+    p = sub.add_parser("learn", help="record a scoped learning candidate; self-attested evidence is not validation")
     p.add_argument("project_id")
     p.add_argument("payload", type=Path)
 
@@ -424,6 +434,11 @@ def main(argv: list[str] | None = None) -> int:
             _emit(engine.invalidate(args.project_id, args.task_id, args.reason))
         elif command == "reopen":
             _emit({"reopened_tasks": engine.reopen(args.project_id, args.task_id, args.reason)})
+        elif command == "learning":
+            _emit(engine.list_learning(args.project_id, include_retired=args.include_retired))
+        elif command == "retire-learning":
+            _emit(engine.retire_learning(args.project_id, args.learning_id,
+                                         reason=args.reason, expected_status=args.expected_status))
         elif command == "learn":
             _emit(engine.record_learning(args.project_id, _read_json(args.payload)))
         elif command == "qa-media":

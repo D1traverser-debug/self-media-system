@@ -2273,14 +2273,13 @@ class StudioEngine:
         if missing:
             raise ContractError(f"learning candidate missing fields: {missing}")
         learning_id = _safe_id(payload.get("learning_id") or "l_" + uuid.uuid4().hex[:16], "learning_id")
-        independently_validated = (
-            payload.get("independent_replay_pass") is True
-            and bool(payload.get("validation_evidence_refs"))
-            and bool(payload.get("counterexample_trials"))
-        )
-        status = "VALIDATED" if independently_validated else "CANDIDATE"
+        # Input text or caller-asserted replay metadata is NOT independent proof.
+        # Promotion requires a separate, currently unavailable independent
+        # method-result oracle, not a Boolean or unresolvable reference string.
+        status = "CANDIDATE"
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            self._project_row(connection, project_id)
             connection.execute(
                 "INSERT INTO learning(project_id,learning_id,status,payload_json,created_at,updated_at) VALUES(?,?,?,?,?,?)",
                 (project_id, learning_id, status, _json(payload), _iso(), _iso()),
@@ -2288,6 +2287,55 @@ class StudioEngine:
             self._event(connection, project_id, "LEARNING", learning_id, "LEARNING_RECORDED", {"status": status, "payload": payload})
             connection.commit()
         return {"learning_id": learning_id, "status": status, "payload": payload}
+
+    def list_learning(self, project_id: str, *, include_retired: bool = False) -> list[dict[str, Any]]:
+        """Read exact project-local method candidates without granting global method authority."""
+        with closing(self._connect(project_id)) as connection:
+            self._project_row(connection, project_id)
+            if include_retired:
+                rows = connection.execute(
+                    "SELECT * FROM learning WHERE project_id=? ORDER BY created_at,learning_id",
+                    (project_id,),
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    "SELECT * FROM learning WHERE project_id=? AND status NOT IN ('RETIRED','SUPERSEDED')"
+                    " ORDER BY created_at,learning_id", (project_id,),
+                ).fetchall()
+        return [{"learning_id": row["learning_id"], "status": row["status"],
+                 "payload": _loads(row["payload_json"], {}),
+                 "created_at": row["created_at"], "updated_at": row["updated_at"]}
+                for row in rows]
+
+    def retire_learning(self, project_id: str, learning_id: str, *, reason: str,
+                        expected_status: str = "CANDIDATE") -> dict[str, Any]:
+        """CAS retirement of an unpromoted method, preserving immutable method and event evidence."""
+        learning_id = _safe_id(learning_id, "learning_id")
+        if not isinstance(reason, str) or not reason.strip():
+            raise ContractError("learning retirement requires a nonempty reason")
+        if expected_status not in {"CANDIDATE", "VALIDATED"}:
+            raise ContractError("unsupported expected learning status")
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            self._project_row(connection, project_id)
+            row = connection.execute(
+                "SELECT status FROM learning WHERE project_id=? AND learning_id=?",
+                (project_id, learning_id),
+            ).fetchone()
+            if row is None:
+                raise ProjectNotFound(learning_id)
+            if row["status"] != expected_status:
+                raise GateError("learning status has changed; refresh before retirement")
+            connection.execute(
+                "UPDATE learning SET status='RETIRED',updated_at=?"
+                " WHERE project_id=? AND learning_id=? AND status=?",
+                (_iso(), project_id, learning_id, expected_status),
+            )
+            self._event(connection, project_id, "LEARNING", learning_id, "LEARNING_RETIRED",
+                        {"old_status": expected_status, "status": "RETIRED", "reason": reason})
+            connection.commit()
+        return {"learning_id": learning_id, "status": "RETIRED", "reason": reason,
+                "source_history_retained": True, "other_methods_changed": False}
 
     def status(self, project_id: str) -> dict[str, Any]:
         project = self.project(project_id)

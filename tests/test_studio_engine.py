@@ -701,7 +701,7 @@ def test_learning_stays_candidate_until_independent_replay_and_counterexample_tr
         "validation_evidence_refs": ["review://method-review"],
         "counterexample_trials": ["fixture://handheld-documentary"],
     })
-    assert validated["status"] == "VALIDATED"
+    assert validated["status"] == "CANDIDATE"  # unresolvable review:// refs are self-attestation, not proof
 
 
 def test_cli_exposes_standalone_entry_without_caos_import(tmp_path):
@@ -1280,3 +1280,41 @@ def test_consultative_advice_cannot_claim_decision_authority(tmp_path):
     }}
     with pytest.raises(ContractError, match="must be advisory_only"):
         engine.add_tasks("demo", [advisory])
+
+
+def test_learning_self_validation_cannot_promote_and_retirement_is_checked(tmp_path):
+    from video_studio.engine import GateError, ContractError, ProjectNotFound
+    engine = make_engine(tmp_path)
+    payload = {
+        "learning_id": "method-one",
+        "method": "only if the actual media supports this method",
+        "applicability": ["some owner-approved media"],
+        "counterexamples": ["real negative case"],
+        "failure_conditions": ["source unavailable"],
+        "evidence_refs": ["made-up://source"],
+        "replay_refs": ["made-up://replay"],
+        "independent_replay_pass": True,
+        "validation_evidence_refs": ["made-up://independent-review"],
+        "counterexample_trials": ["made-up://negative"],
+    }
+    result = engine.record_learning("demo", payload)
+    assert result["status"] == "CANDIDATE"
+    assert engine.list_learning("demo")[0]["learning_id"] == "method-one"
+    with pytest.raises(GateError, match="status has changed"):
+        engine.retire_learning("demo", "method-one", reason="material source invalidation",
+                               expected_status="VALIDATED")
+    assert engine.list_learning("demo")[0]["status"] == "CANDIDATE"
+    with pytest.raises(ContractError):
+        engine.retire_learning("demo", "method-one", reason="")
+    with pytest.raises(ProjectNotFound):
+        engine.retire_learning("demo", "unknown-method", reason="not found")
+    result = engine.retire_learning("demo", "method-one", reason="evidence cannot be verified")
+    assert result["status"] == "RETIRED"
+    assert engine.list_learning("demo") == []
+    assert engine.list_learning("demo", include_retired=True)[0]["status"] == "RETIRED"
+    assert any(x["event_type"] == "LEARNING_RETIRED" for x in engine.events("demo"))
+    with pytest.raises(GateError):
+        engine.retire_learning("demo", "method-one", reason="duplicate retire")
+    follow = engine.record_learning("demo", {**payload, "learning_id": "method-two"})
+    assert follow["status"] == "CANDIDATE"
+    assert [x["learning_id"] for x in engine.list_learning("demo")] == ["method-two"]
