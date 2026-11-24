@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0-design-only",
+  "schema_version": "2.1-design-only",
   "authority": "docs/CONTENT_STUDIO_ARCHITECTURE_V2.md",
   "status": "ARCHITECTURE_CANDIDATE_NO_RUNTIME_AUTHORITY",
   "frozen_head": "1cbc3acf0491ecaa297576372f80163d8c255606",
@@ -11,12 +11,10 @@
       "required_contexts": [
         "editorial_writing"
       ],
-      "owner_outcome_oracle": [
-        "原生中文、标题任务目标",
-        "不强制视频脚本/红队/封面/持久项目"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "原生中文、标题任务目标",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不强制视频脚本/红队/封面/持久项目"
     },
     {
       "id": "S02",
@@ -26,12 +24,10 @@
         "editorial_writing",
         "platform_packaging"
       ],
-      "owner_outcome_oracle": [
-        "英文语境、平台风格、互动目的",
-        "不自动继承中文标题或旧币叙事"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "英文语境、平台风格、互动目的",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不自动继承中文标题或旧币叙事"
     },
     {
       "id": "S03",
@@ -42,12 +38,10 @@
         "editorial_writing",
         "visual_design"
       ],
-      "owner_outcome_oracle": [
-        "独立观点、证据、结构、读者价值、配图位置",
-        "不把视频阶段当文章结构"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "独立观点、证据、结构、读者价值、配图位置",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不把视频阶段当文章结构"
     },
     {
       "id": "S04",
@@ -58,12 +52,10 @@
         "platform_packaging",
         "editorial_writing"
       ],
-      "owner_outcome_oracle": [
-        "每平台独立字段、语言、调性、源视频理解",
-        "禁止标题简介封面重复相同钩子"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "每平台独立字段、语言、调性、源视频理解",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "禁止标题简介封面重复相同钩子"
     },
     {
       "id": "S05",
@@ -73,12 +65,10 @@
         "platform_packaging",
         "editorial_writing"
       ],
-      "owner_outcome_oracle": [
-        "最新平台规格、实用标题、正文",
-        "不因旧枚举无头条号而假装已有执行器"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "最新平台规格、实用标题、正文",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不因旧枚举无头条号而假装已有执行器"
     },
     {
       "id": "S06",
@@ -87,12 +77,10 @@
       "required_contexts": [
         "visual_design"
       ],
-      "owner_outcome_oracle": [
-        "单幅叙事、视觉层次、真实像素结果",
-        "不生成拼版/信息图/标题面板"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "单幅叙事、视觉层次、真实像素结果",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不生成拼版/信息图/标题面板"
     },
     {
       "id": "S07",
@@ -101,12 +89,10 @@
       "required_contexts": [
         "visual_design"
       ],
-      "owner_outcome_oracle": [
-        "不同构图、同创意、各比例清晰、宽高明确",
-        "不可把4:3误当竖版或简单裁剪"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "不同构图、同创意、各比例清晰、宽高明确",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不可把4:3误当竖版或简单裁剪"
     },
     {
       "id": "S08",
@@ -115,12 +101,10 @@
       "required_contexts": [
         "visual_design"
       ],
-      "owner_outcome_oracle": [
-        "参考理解、创意方向、反证、可执行提示词",
-        "不得无授权调用生图"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "参考理解、创意方向、反证、可执行提示词",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得无授权调用生图"
     },
     {
       "id": "S09",
@@ -130,12 +114,10 @@
         "understanding_research",
         "media_transform"
       ],
-      "owner_outcome_oracle": [
-        "时段与内容限定、前后画质及实际输出QA",
-        "不改变其他镜头/背景音"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "时段与内容限定、前后画质及实际输出QA",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不改变其他镜头/背景音"
     },
     {
       "id": "S10",
@@ -144,12 +126,10 @@
       "required_contexts": [
         "media_transform"
       ],
-      "owner_outcome_oracle": [
-        "可执行流复制模式、精确技术证明或明确不可实现",
-        "不将AAC重编码当作原音频不变"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "可执行流复制模式、精确技术证明或明确不可实现",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不将AAC重编码当作原音频不变"
     },
     {
       "id": "S11",
@@ -159,12 +139,10 @@
         "media_transform",
         "verification_delivery"
       ],
-      "owner_outcome_oracle": [
-        "实际像素、视觉质量、锐化伪影、同步和码率证据",
-        "不把改分辨率标为真实超分成功"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "实际像素、视觉质量、锐化伪影、同步和码率证据",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不把改分辨率标为真实超分成功"
     },
     {
       "id": "S12",
@@ -174,12 +152,10 @@
         "editorial_writing",
         "platform_packaging"
       ],
-      "owner_outcome_oracle": [
-        "两个语种分别母语化、语义一致且非机械直译",
-        "不强迫标签一致"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "两个语种分别母语化、语义一致且非机械直译",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不强迫标签一致"
     },
     {
       "id": "S13",
@@ -192,12 +168,10 @@
         "motion_production",
         "verification_delivery"
       ],
-      "owner_outcome_oracle": [
-        "真实试听、导演视觉叙事、声画合成、创意验收",
-        "不以PPT动态图和FFmpeg成功代替成片"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "真实试听、导演视觉叙事、声画合成、创意验收",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不以PPT动态图和FFmpeg成功代替成片"
     },
     {
       "id": "S14",
@@ -206,12 +180,10 @@
       "required_contexts": [
         "visual_design"
       ],
-      "owner_outcome_oracle": [
-        "角色形象、构图与用途适配",
-        "不调用永久IPOS典范流程"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "角色形象、构图与用途适配",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不调用永久IPOS典范流程"
     },
     {
       "id": "S15",
@@ -221,12 +193,10 @@
         "identity_collaboration",
         "visual_design"
       ],
-      "owner_outcome_oracle": [
-        "IPOS确切批准包及其版本、使用授权",
-        "不得修改IPOS canon"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "IPOS确切批准包及其版本、使用授权",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得修改IPOS canon"
     },
     {
       "id": "S16",
@@ -235,12 +205,10 @@
       "required_contexts": [
         "understanding_research"
       ],
-      "owner_outcome_oracle": [
-        "只使用用户当前明确相关输入",
-        "不得跨上下文污染"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "只使用用户当前明确相关输入",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得跨上下文污染"
     },
     {
       "id": "S17",
@@ -250,12 +218,10 @@
         "visual_design",
         "verification_delivery"
       ],
-      "owner_outcome_oracle": [
-        "区分目标/构图/艺术方向/提示词/模型原因",
-        "不得只微调失败图"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "区分目标/构图/艺术方向/提示词/模型原因",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得只微调失败图"
     },
     {
       "id": "S18",
@@ -265,12 +231,10 @@
         "editorial_writing",
         "platform_packaging"
       ],
-      "owner_outcome_oracle": [
-        "失效相关旧决策与工单、保留无关成果",
-        "不复活旧版本决策"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "失效相关旧决策与工单、保留无关成果",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不复活旧版本决策"
     },
     {
       "id": "S19",
@@ -280,12 +244,10 @@
         "motion_production",
         "verification_delivery"
       ],
-      "owner_outcome_oracle": [
-        "真正并行、决定归属、产物证据和独立验收",
-        "不得一个失败分支饿死另一分支"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "真正并行、决定归属、产物证据和独立验收",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得一个失败分支饿死另一分支"
     },
     {
       "id": "S20",
@@ -294,12 +256,10 @@
       "required_contexts": [
         "platform_packaging"
       ],
-      "owner_outcome_oracle": [
-        "声明阻塞或可接受降级并核验实际提供商",
-        "不得虚构发布或费用授权"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "声明阻塞或可接受降级并核验实际提供商",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得虚构发布或费用授权"
     },
     {
       "id": "S21",
@@ -308,12 +268,10 @@
       "required_contexts": [
         "understanding_research"
       ],
-      "owner_outcome_oracle": [
-        "精确依赖失效、重查、保留历史证据",
-        "不得继续执行旧知识授权"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "精确依赖失效、重查、保留历史证据",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得继续执行旧知识授权"
     },
     {
       "id": "S22",
@@ -322,12 +280,10 @@
       "required_contexts": [
         "editorial_writing"
       ],
-      "owner_outcome_oracle": [
-        "无默认旧项目、无默认经营IP约束",
-        "不启动退役任务"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "无默认旧项目、无默认经营IP约束",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不启动退役任务"
     },
     {
       "id": "S23",
@@ -336,12 +292,10 @@
       "required_contexts": [
         "media_transform"
       ],
-      "owner_outcome_oracle": [
-        "明确处理模式、可用工具、可听审核",
-        "不得声称bitstream复制同时降噪"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "明确处理模式、可用工具、可听审核",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得声称bitstream复制同时降噪"
     },
     {
       "id": "S24",
@@ -351,12 +305,10 @@
         "motion_production",
         "platform_packaging"
       ],
-      "owner_outcome_oracle": [
-        "可以完成本地候选和审核，发布需新授权",
-        "不得自动上传"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "可以完成本地候选和审核，发布需新授权",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得自动上传"
     },
     {
       "id": "S25",
@@ -366,12 +318,10 @@
         "understanding_research",
         "verification_delivery"
       ],
-      "owner_outcome_oracle": [
-        "源码证据、发现、适用范围与反证",
-        "不得实际修改、删除或发布"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "源码证据、发现、适用范围与反证",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得实际修改、删除或发布"
     },
     {
       "id": "S26",
@@ -380,12 +330,10 @@
       "required_contexts": [
         "understanding_research"
       ],
-      "owner_outcome_oracle": [
-        "作用域、反例、迁移测试及独立验证",
-        "不得因上一任务成功就晋升通用方法"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "作用域、反例、迁移测试及独立验证",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得因上一任务成功就晋升通用方法"
     },
     {
       "id": "S27",
@@ -394,12 +342,10 @@
       "required_contexts": [
         "verification_delivery"
       ],
-      "owner_outcome_oracle": [
-        "精确身份、版本、依赖、权限、无操作或回滚与读回",
-        "不得物理删旧任务证据"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "精确身份、版本、依赖、权限、无操作或回滚与读回",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得物理删旧任务证据"
     },
     {
       "id": "S28",
@@ -408,12 +354,10 @@
       "required_contexts": [
         "editorial_writing"
       ],
-      "owner_outcome_oracle": [
-        "直接完成并验证结果",
-        "不创建空项目/空DAG"
-      ],
-      "design_coverage": "REQUIRES_REVIEW",
-      "runtime_verified": false
+      "owner_outcome_oracle": "直接完成并验证结果",
+      "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不创建空项目/空DAG"
     }
   ],
   "global_invariants": [
@@ -432,5 +376,13 @@
     "DIRECT_SESSION_WITHOUT_MANDATORY_LEDGER",
     "CURRENT_SOURCE_REVISION_BEFORE_EFFECT",
     "INDEPENDENT_OWNER_OUTCOME_NOT_CI"
+  ],
+  "design_schema_invariants": [
+    "Each scenario has exactly one nonempty owner success oracle",
+    "Each scenario has exactly one nonempty forbidden implicit effect",
+    "Every required context maps to a current group ID",
+    "Every deliverable type occurs in the architecture contract",
+    "All scenarios are design-only until independently reviewed",
+    "No runtime outcome is inferred from semantic source coverage"
   ]
 }
