@@ -24,7 +24,8 @@ def test_professional_coverage_is_separate_from_business_and_tasks(tmp_path):
         assert route["selected_task_graph"] is None
         assert route["project_id"] is None
         assert route["architecture"]["recursive_governance"]["coverage"] == "ALL_LEVELS_ALL_MATERIAL_DECISIONS_AND_EFFECTS"
-    assert capability_lookup("media_transform")["groups"][0]["operations"] == []
+    assert capability_lookup("media_transform")["groups"][0]["operations"] == ["ffmpeg_video_audio_copy"]
+    assert "ffmpeg_video_audio_copy" not in groups["verification_delivery"]["operations"]
     assert "original_audio_preservation" in groups["media_transform"]["demands"]
 
 

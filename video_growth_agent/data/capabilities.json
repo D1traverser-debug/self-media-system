@@ -838,7 +838,7 @@
         "ffmpeg_video_audio_copy"
       ],
       "gaps": [
-        "Existing ffmpeg assembly supports some trim/merge/reframe; not a strict original-audio preservation or enhancement contract. No dedicated current executor for those effects.",
+        "Original FFmpegAssembler reencodes audio. A separate, narrowly-scoped ffmpeg_video_audio_copy operation proves encoded-audio packet identity for eligible source media, not general audio restoration or arbitrary video editing.",
         "Only video passthrough, geometry crop, and end-trim can prove copied encoded-audio payloads; advanced content restoration, AI enhancement and multitrack transformations remain unavailable."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
