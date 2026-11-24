@@ -61,12 +61,12 @@ Distilled rule: **production provenance and approval authority are different evi
 
 ## Fixed defect 4 — repository contained two machine-readable config authorities
 
-The runtime and installed package actually loaded `video_growth_agent/data/*`, while the repository also carried root `config/*` mirrors and documentation pointed readers at them. Most happened to match, but `techniques.json` had already diverged at the blob/format level. This was an authority-split waiting to become behavioral drift.
+The runtime and installed package actually loaded `social_media_studio/legacy/data/*`, while the repository also carried root `config/*` mirrors and documentation pointed readers at them. Most happened to match, but `techniques.json` had already diverged at the blob/format level. This was an authority-split waiting to become behavioral drift.
 
 Fix:
 
 - removed root `config/workflow.json`, `config/roles.json`, `config/quality-rubric.json` and `config/techniques.json`;
-- declared `video_growth_agent/data/` the sole machine-readable runtime resource authority;
+- declared `social_media_studio/legacy/data/` the sole machine-readable runtime resource authority;
 - updated Skill, README, workflow reference, tests, Owner Adapter and architecture manifest accordingly;
 - retained only the `team.md` Skill/package distribution mirror because both surfaces require it, and added machine equality checking;
 - RoleRegistry now declares its local packaged prompt source and the canonical Skill prompt source explicitly.
@@ -81,7 +81,7 @@ Fix:
 
 - generalized Agent Studio, reviewer-attestation and production-intelligence references;
 - project-specific facts remain under `projects/*` and task continuity state;
-- the hygiene Harness scans every Markdown file under `skills/video-growth-agent/` for project-state pollution and stale root-config references.
+- the hygiene Harness scans every Markdown file under `skills/social-media-studio/` for project-state pollution and stale root-config references.
 
 Distilled rule: **global Skill stores portable mechanism; project state stays in project authority.**
 
@@ -120,7 +120,7 @@ The repository relied on tests for local behavior but lacked a single command th
 
 Fix:
 
-- added `video_growth_agent/system_audit.py`;
+- added `social_media_studio/legacy/system_audit.py`;
 - added `vga system-audit --repo-root .` for repository + package checks and `vga system-audit` for installed-package checks;
 - CI runs repository hygiene before pytest, then reruns installed-package audit/CLI smoke outside the repository;
 - Harness checks Agent registry/plan validity, dead profiles, producer self-approval configuration, workflow/reviewer coverage, team prompt mirror equality, capability semantics, assurance taxonomy, Skill Git-blob pointer integrity, architecture-manifest authority, root-config absence and continuity hygiene.
@@ -265,7 +265,7 @@ The connected GitHub control surface does not expose branch-ref deletion. Theref
 
 ## Concurrent-main reconciliation
 
-During the earlier maintenance branch, `main` received `d6b5472e4bc756e19bb4eaaaa462bd6a8c00021e` (`Declare Video Growth Agent product architecture`) adding `continuity/AGENT_MANIFEST.json`. The maintenance process did not overwrite it. Its architecture intent was preserved, while stale references to removed root `config` authority were corrected to `video_growth_agent/data/` and the system-audit Harness was added to its declared validation surface.
+During the earlier maintenance branch, `main` received `d6b5472e4bc756e19bb4eaaaa462bd6a8c00021e` (`Declare Social Media Studio product architecture`) adding `continuity/AGENT_MANIFEST.json`. The maintenance process did not overwrite it. Its architecture intent was preserved, while stale references to removed root `config` authority were corrected to `social_media_studio/legacy/data/` and the system-audit Harness was added to its declared validation surface.
 
 Every promotion must be reconciled against the latest observed `main` and use compare-and-swap rather than force-overwriting concurrent work.
 

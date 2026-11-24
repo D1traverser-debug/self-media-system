@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "authority": "SOCIAL_MEDIA_STUDIO",
+  "selection": "Retrieve original exact source on demand; catalog is a locator, not execution proof.",
+  "entries": [
+    {
+      "id": "agent-studio",
+      "ref": "skills/social-media-studio/references/agent-studio.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Generic mechanisms may be studied and adapted; historical fixed-stage implementation is not current authority."
+    },
+    {
+      "id": "benchmark-policy",
+      "ref": "skills/social-media-studio/references/benchmark-policy.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+    },
+    {
+      "id": "visual-development",
+      "ref": "skills/social-media-studio/references/visual-development.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Complex/quality-critical visual production only; sample and reference contracts are optional methods, not global stage gates; third-party observations are historical and require current verification."
+    },
+    {
+      "id": "commercial",
+      "ref": "skills/social-media-studio/references/commercial.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+    },
+    {
+      "id": "generation-governance",
+      "ref": "skills/social-media-studio/references/generation-governance.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+    },
+    {
+      "id": "production-intelligence",
+      "ref": "skills/social-media-studio/references/production-intelligence.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+    },
+    {
+      "id": "quality-gates",
+      "ref": "skills/social-media-studio/references/quality-gates.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+    },
+    {
+      "id": "reviewer-execution-attestation",
+      "ref": "skills/social-media-studio/references/reviewer-execution-attestation.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+    },
+    {
+      "id": "runtime",
+      "ref": "skills/social-media-studio/references/runtime.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Generic mechanisms may be studied and adapted; historical fixed-stage implementation is not current authority."
+    },
+    {
+      "id": "self-learning",
+      "ref": "skills/social-media-studio/references/self-learning.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+    },
+    {
+      "id": "team",
+      "ref": "skills/social-media-studio/references/team.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+    },
+    {
+      "id": "workflow",
+      "ref": "skills/social-media-studio/references/workflow.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Generic mechanisms may be studied and adapted; historical fixed-stage implementation is not current authority."
+    },
+    {
+      "id": "capability-inventory",
+      "ref": "social_media_studio/legacy/data/capabilities.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Declared capabilities; verify actual operation and evidence"
+    },
+    {
+      "id": "technique-library",
+      "ref": "social_media_studio/legacy/data/techniques.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Reusable techniques; verify applicability"
+    },
+    {
+      "id": "provider-benchmark",
+      "ref": "docs/provider_benchmark_protocol.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Use only where relevant to current goal; verify current source and applicability."
+    },
+    {
+      "id": "professional-aesthetics",
+      "ref": "docs/standalone_social_media_studio.md",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Continuous aesthetic direction, narrative coherence, mobile readability and evidence-based review"
+    },
+    {
+      "id": "DESIGN_RESEARCH_METHOD_V2",
+      "ref": "projects/ai-self-media-commercialization/DESIGN_RESEARCH_METHOD_V2.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Extract general method only; no historical identity, subject or task state"
+    },
+    {
+      "id": "GPT_IMAGE_PROMPTING_METHOD_V2",
+      "ref": "projects/ai-self-media-commercialization/GPT_IMAGE_PROMPTING_METHOD_V2.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Extract general method only; no historical identity, subject or task state"
+    },
+    {
+      "id": "GPT_IMAGE_POSITIVE_MORPH_LANGUAGE_RULE_V1",
+      "ref": "projects/ai-self-media-commercialization/GPT_IMAGE_POSITIVE_MORPH_LANGUAGE_RULE_V1.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Extract general method only; no historical identity, subject or task state"
+    },
+    {
+      "id": "HUMAN_CORE_CONSTRUCTION_STACK_V2",
+      "ref": "projects/ai-self-media-commercialization/HUMAN_CORE_CONSTRUCTION_STACK_V2.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Extract general method only; no historical identity, subject or task state"
+    },
+    {
+      "id": "EDITORIAL_PACKAGING",
+      "ref": "projects/ai-self-media-commercialization/EDITORIAL_PACKAGING.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Extract general method only; no historical identity, subject or task state"
+    },
+    {
+      "id": "PRODUCTION_AND_COST_STRATEGY",
+      "ref": "projects/ai-self-media-commercialization/PRODUCTION_AND_COST_STRATEGY.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Extract general method only; no historical identity, subject or task state"
+    },
+    {
+      "id": "quality-rubric",
+      "ref": "social_media_studio/legacy/data/quality-rubric.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Quality dimensions as task-specific calibration"
+    },
+    {
+      "id": "coordination-policy",
+      "ref": "social_media_studio/legacy/data/coordination-policy.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Reusable coordination patterns, not fixed stage order"
+    },
+    {
+      "id": "professional-roles",
+      "ref": "social_media_studio/legacy/data/roles.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Reusable professional lenses, no permanent agents"
+    },
+    {
+      "id": "agent-capability-profiles",
+      "ref": "social_media_studio/legacy/data/agents.json",
+      "status": "ACTIVE_REFERENCE",
+      "scope": "Declared capabilities, not execution or required workflow"
+    },
+    {
+      "id": "historical-domain-model",
+      "ref": "docs/media_business_os.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Reusable media-domain models and historical evidence"
+    },
+    {
+      "id": "historical-architecture",
+      "ref": "docs/architecture.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Historical mechanisms; no execution authority"
+    },
+    {
+      "id": "historical-product-contract",
+      "ref": "docs/product_requirements.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Historical product constraints, never default user scope"
+    },
+    {
+      "id": "historical-scenarios",
+      "ref": "docs/agent_operability_scenarios.md",
+      "status": "LEGACY_REFERENCE_ONLY",
+      "scope": "Historical scenario and counterexample evidence"
+    }
+  ]
+}

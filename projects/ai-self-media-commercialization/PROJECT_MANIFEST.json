@@ -60,7 +60,7 @@
     "gpt_image_prompting_method": "GPT_IMAGE_PROMPTING_METHOD_V2.md",
     "human_core_stack": "HUMAN_CORE_CONSTRUCTION_STACK_V2.md",
     "ipos_integration_state": "IPOS_INTEGRATION_STATE.json",
-    "ipos_bundle_schema": "../../video_growth_agent/data/ipos_video_identity_bundle.schema.json",
+    "ipos_bundle_schema": "../../social_media_studio/legacy/data/ipos_video_identity_bundle.schema.json",
     "legacy_subtask_graph": "SUBTASK_GRAPH.json"
   },
   "workstreams": {

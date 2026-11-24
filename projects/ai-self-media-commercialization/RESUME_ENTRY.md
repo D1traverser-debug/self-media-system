@@ -16,7 +16,7 @@ Program ID: ai-self-media-commercialization
 
 IP Studio OS (IPOS) is the sole creative authority for the user's personal-IP identity, character carrier, avatar, visual canon, voice/performance canon and reusable identity assets. IPOS is an independent system: it completes its own research, strategy, character design, prompt compilation, authorized rendering, QA, correction, versioning and export. It does not need to invoke CAOS or depend on a CAOS runtime/API/session.
 
-The Video system is a downstream production consumer and evidence contributor. It does not create a competing character bible, revive a video-local face design, or rewrite IPOS canon. The interface is the portable IPOS Video Identity Bundle (schema 1.0), imported locally by video_growth_agent.ip_identity into MediaGraph and bound to ShotContract and continuity.
+The Video system is a downstream production consumer and evidence contributor. It does not create a competing character bible, revive a video-local face design, or rewrite IPOS canon. The interface is the portable IPOS Video Identity Bundle (schema 1.0), imported locally by social_media_studio.legacy.ip_identity into MediaGraph and bound to ShotContract and continuity.
 
 ## Current IPOS truth — R39
 
@@ -33,8 +33,8 @@ Current state:
 
 ## Current Video integration state
 
-- Contract: video_growth_agent/data/ipos_video_identity_bundle.schema.json, schema_version 1.0.
-- Adapter: video_growth_agent/ip_identity.py.
+- Contract: social_media_studio/legacy/data/ipos_video_identity_bundle.schema.json, schema_version 1.0.
+- Adapter: social_media_studio/legacy/ip_identity.py.
 - Runtime targets: MediaGraph immutable asset import, ShotContract reference binding, continuity rules/snapshots, and fail-closed generation admission.
 - Version changes invalidate only downstream assets/tasks that consumed the superseded IPOS asset version.
 - Current bundle state: NO_APPROVED_BUNDLE_AVAILABLE.
@@ -138,9 +138,9 @@ The CLI `vga render-graphic REQUEST.json --output candidate.mp4 [--graph MediaGr
 Outputs and MediaGraph registrations remain CANDIDATE only. No promotion/release authority, no IPOS identity rendering, no product-truth claim, no paid provider or network dependency. Human/editorial, rights, continuity, promotion and release gates remain mandatory. IPOS R39 remains the sole identity authority with no approved bundle yet. CAOS source remains untouched.
 
 
-## Standalone Video Studio — current continuation point (2026-11-17)
+## Standalone Social Media Studio — current continuation point (2026-11-17)
 
-Default generic Video entry is now `STUDIO_ENTRY.md`; canonical runtime is `video_studio/`; CLI is `vga-studio`. Continue from branch `refactor/video-production-integrated-20261117`, verified implementation head `1893dfc911e4673ef2c7d01f34c502d39ffcad09`.
+Default generic Video entry is now `STUDIO_ENTRY.md`; canonical runtime is `social_media_studio/`; CLI is `sms-studio`. Continue from branch `refactor/video-production-integrated-20261117`, verified implementation head `1893dfc911e4673ef2c7d01f34c502d39ffcad09`.
 
 Exact-head PR CI run `44034062243` and push CI run `44034068441` passed: 347 tests, standalone system audit, standalone CLI smoke, integrated 50-task Program context/readiness smoke, local tool-execution smoke and installed agentic CLI smoke. Structural status PASS; production readiness deliberately remains PARTIAL.
 
@@ -149,8 +149,8 @@ Read these first:
 2. `examples/ai-self-media-commercialization.brief.json`
 3. `examples/ai-self-media-commercialization.context.json`
 4. `examples/ai-self-media-commercialization.tasks.json`
-5. `video_studio/system_audit.py`
-6. `docs/standalone_video_studio.md`
+5. `social_media_studio/system_audit.py`
+6. `docs/standalone_social_media_studio.md`
 
 The default Program context is imported as immutable, digest-bound artifacts. The manifest preflights all entries and identical re-imports are idempotent. Task authority references are bound as actual task inputs. Rights clearance requires a completed human rights-review task and exact artifact/digest/evidence matches. The current DAG also verifies typed CommercialFit, exact IPOS bundle/import provenance, and the Program-to-Episode EpisodeIntent handoff. Cross-workstream feedback artifacts are checked against their actual producer tasks.
 

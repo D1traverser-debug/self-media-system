@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-POLICY = ROOT / "skills/video-growth-agent/references/self-learning.md"
+POLICY = ROOT / "skills/social-media-studio/references/self-learning.md"
 
 
 def test_ad_hoc_session_material_is_not_implicitly_a_learning_source():

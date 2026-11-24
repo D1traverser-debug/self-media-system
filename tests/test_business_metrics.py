@@ -1,4 +1,4 @@
-from video_growth_agent.business_metrics import (
+from social_media_studio.legacy.business_metrics import (
     CommercialOutcome,
     EpisodeOutcomeReceipt,
     PlatformPerformanceReceipt,

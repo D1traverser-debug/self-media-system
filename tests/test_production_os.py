@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.production_os import (
+from social_media_studio.legacy.production_os import (
     GenerationAdmission,
     PlatformVariant,
     ProductionAdmissionError,

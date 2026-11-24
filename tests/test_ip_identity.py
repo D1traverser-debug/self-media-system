@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from video_growth_agent.continuity import ContinuityRule
-from video_growth_agent.ip_identity import (
+from social_media_studio.legacy.continuity import ContinuityRule
+from social_media_studio.legacy.ip_identity import (
     IPIdentityIntegrationError,
     admit_ipos_bound_candidate_generation,
     bind_ipos_identity_to_shot,
@@ -11,13 +11,13 @@ from video_growth_agent.ip_identity import (
     import_ipos_bundle,
     inspect_ipos_bundle,
 )
-from video_growth_agent.media_graph import (
+from social_media_studio.legacy.media_graph import (
     AssetRef,
     AssetVersion,
     ContextRecord,
     MediaGraph,
 )
-from video_growth_agent.production_os import (
+from social_media_studio.legacy.production_os import (
     ShotContract,
     admit_candidate_generation,
 )

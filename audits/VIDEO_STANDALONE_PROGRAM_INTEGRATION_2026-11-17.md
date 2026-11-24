@@ -1,15 +1,15 @@
-# Standalone Video Studio — Integrated Program and Production Contract Audit
+# Standalone Social Media Studio — Integrated Program and Production Contract Audit
 
 Date: 2026-11-17
 Owner: DOMAIN:video
 Candidate: V-20261117-01-STANDALONE-VIDEO-STUDIO-INTEGRATED-PROGRAM
 Branch: `refactor/video-production-integrated-20261117`
 Verified implementation head: `1893dfc911e4673ef2c7d01f34c502d39ffcad09`
-Exact-head CI: [PR run 44034062243](https://github.com/D1traverser-debug/video-growth-agent/actions/runs/44034062243) and [push run 44034068441](https://github.com/D1traverser-debug/video-growth-agent/actions/runs/44034068441)
+Exact-head CI: [PR run 44034062243](https://github.com/D1traverser-debug/social-media-studio/actions/runs/44034062243) and [push run 44034068441](https://github.com/D1traverser-debug/social-media-studio/actions/runs/44034068441)
 
 ## 1. Decision
 
-The standalone Video Studio is now the default generic Video execution entry. The new native `video_studio` package owns the standalone control plane and `vga-studio` CLI. The historical `vga` command remains a compatibility interface. The runtime has no CAOS runtime/API/Skill dependency and does not modify CAOS.
+The standalone Social Media Studio is now the default generic Video execution entry. The new native `social_media_studio` package owns the standalone control plane and `sms-studio` CLI. The historical `vga` command remains a compatibility interface. The runtime has no CAOS runtime/API/Skill dependency and does not modify CAOS.
 
 The integrated Program is `ai-self-media-commercialization`, a 50-task graph spanning media growth, original digital IP, commercialization and production. It imports repository-owned context through immutable SHA-256-bound artifacts and leaves missing owner-controlled inputs explicitly blocked.
 
@@ -33,7 +33,7 @@ A repeated import of the same file could create a new artifact version and stale
 
 A user needed to import several context files before planning. Repeated single-file commands were cumbersome and could leave a partially imported context set if a later path or metadata entry failed.
 
-**Change:** `vga-studio import-manifest` validates the complete manifest, unique artifact names, path existence, regular-file status, metadata and rights enums, and task-output name collisions before the first mutation. Relative paths resolve from the manifest directory. The manifest import is idempotent through the engine's artifact identity rules.
+**Change:** `sms-studio import-manifest` validates the complete manifest, unique artifact names, path existence, regular-file status, metadata and rights enums, and task-output name collisions before the first mutation. Relative paths resolve from the manifest directory. The manifest import is idempotent through the engine's artifact identity rules.
 
 ### 2.4 Program authority references were descriptive rather than execution-bound
 
@@ -47,7 +47,7 @@ The context manifest intentionally does not fabricate the Jensen/Alice source vi
 
 Individual tests and smoke commands did not provide one stable command distinguishing structural integrity from actual production readiness.
 
-**Change:** `vga-studio system-audit --repo-root .` checks standalone entry/governance, runtime dependency boundaries, adapter registration, local production executors, digest-bound Program authority inputs, example graph execution/readiness and hard release gates. It performs no paid provider call and mutates no user workspace.
+**Change:** `sms-studio system-audit --repo-root .` checks standalone entry/governance, runtime dependency boundaries, adapter registration, local production executors, digest-bound Program authority inputs, example graph execution/readiness and hard release gates. It performs no paid provider call and mutates no user workspace.
 
 The audit now also checks exact equality across the 17 supported, implemented and manifest-declared domain adapters; all 6 Program tool tasks resolve to registered executors; all 10 Business Flywheel loops reference existing tasks and producer-owned handoff artifacts; and the 50-task DAG has 85 valid dependency edges with no cycles or unbound task-produced inputs. The only three unresolved inputs are intentional owner/external inputs: the IPOS READY_FOR_VIDEO bundle, Jensen/Alice source video and episode outcome receipt.
 
@@ -68,12 +68,12 @@ The documented default entry now initializes the integrated Program, imports its
 
 ```bash
 python -m pip install -e .
-vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI Self-Media Commercialization" --brief examples/ai-self-media-commercialization.brief.json
-vga-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
-vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
-vga-studio --root ./studio-work status ai-self-media-commercialization
-vga-studio --root ./studio-work tasks ai-self-media-commercialization
-vga-studio system-audit --repo-root .
+sms-studio --root ./studio-work init ai-self-media-commercialization --title "AI Self-Media Commercialization" --brief examples/ai-self-media-commercialization.brief.json
+sms-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
+sms-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
+sms-studio --root ./studio-work status ai-self-media-commercialization
+sms-studio --root ./studio-work tasks ai-self-media-commercialization
+sms-studio system-audit --repo-root .
 ```
 
 Independent growth, advertiser, production-economics, provider-benchmark and Jensen fact-research tasks can run without waiting for unavailable media or identity assets. Tasks that require exact owner-controlled media remain WAITING_INPUT. IPOS import remains dependency-gated behind the MediaGraph bootstrap and exact approved bundle.
@@ -83,8 +83,8 @@ Independent growth, advertiser, production-economics, provider-benchmark and Jen
 Exact code head `1893dfc911e4673ef2c7d01f34c502d39ffcad09`, PR CI run `44034062243` and push CI run `44034068441`:
 
 - pytest: **347 passed**;
-- standalone Video Studio system audit: PASS;
-- standalone Video Studio CLI smoke: PASS;
+- standalone Social Media Studio system audit: PASS;
+- standalone Social Media Studio CLI smoke: PASS;
 - integrated 50-task Program context/readiness smoke: PASS;
 - Program local tool-execution smoke: PASS;
 - installed agentic CLI smoke: PASS.

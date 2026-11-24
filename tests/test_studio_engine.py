@@ -8,7 +8,7 @@ import threading
 
 import pytest
 
-from video_studio.engine import ClaimError, ContractError, StudioEngine
+from social_media_studio.engine import ClaimError, ContractError, StudioEngine
 
 
 def brief():
@@ -140,7 +140,7 @@ def test_identical_asset_reimport_is_idempotent_and_preserves_completed_consumer
 
 
 def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path, capsys):
-    from video_studio.cli import main
+    from social_media_studio.cli import main
 
     workspace = tmp_path / "workspace"
     engine = StudioEngine(workspace)
@@ -157,7 +157,7 @@ def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path
     )
 
     command = [
-        "--root", str(workspace), "transfer-asset",
+        "--root", str(workspace), "--offline-fixture", "transfer-asset",
         "program", "validated-episode-intent", "episode", "validated-episode-intent",
         "--expected-artifact-id", source_artifact["artifact_id"],
         "--expected-version", str(source_artifact["version"]),
@@ -457,7 +457,7 @@ def test_cross_project_media_transfer_preserves_and_resolves_rights_evidence(tmp
 
 
 def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(tmp_path, capsys):
-    from video_studio.cli import main
+    from social_media_studio.cli import main
 
     workspace = tmp_path / "workspace"
     engine = StudioEngine(workspace)
@@ -486,7 +486,7 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
         ],
     }), encoding="utf-8")
 
-    assert main(["--root", str(workspace), "import-manifest", "demo", str(manifest)]) == 0
+    assert main(["--root", str(workspace), "--offline-fixture", "import-manifest", "demo", str(manifest)]) == 0
     first_output = json.loads(capsys.readouterr().out)
     assert first_output["asset_count"] == 2
     first_ids = {item["name"]: item["artifact_id"] for item in first_output["artifacts"]}
@@ -494,7 +494,7 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
     engine.add_tasks("demo", [task("read-context", inputs=["program-state", "business-flywheel"])])
     assert engine.list_tasks("demo")[0]["status"] == "READY"
 
-    assert main(["--root", str(workspace), "import-manifest", "demo", str(manifest)]) == 0
+    assert main(["--root", str(workspace), "--offline-fixture", "import-manifest", "demo", str(manifest)]) == 0
     second_output = json.loads(capsys.readouterr().out)
     second_ids = {item["name"]: item["artifact_id"] for item in second_output["artifacts"]}
     assert second_ids == first_ids
@@ -509,7 +509,7 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
             {"name": "missing", "path": "../projects/missing.json"},
         ],
     }), encoding="utf-8")
-    assert main(["--root", str(workspace), "import-manifest", "demo", str(broken)]) == 2
+    assert main(["--root", str(workspace), "--offline-fixture", "import-manifest", "demo", str(broken)]) == 2
     capsys.readouterr()
     with engine._connect("demo") as connection:
         absent = connection.execute(
@@ -525,7 +525,7 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
             {"name": "bad-rights", "path": "../projects/business-flywheel.md", "rights_status": "NOT_A_REAL_STATUS"},
         ],
     }), encoding="utf-8")
-    assert main(["--root", str(workspace), "import-manifest", "demo", str(invalid_rights)]) == 2
+    assert main(["--root", str(workspace), "--offline-fixture", "import-manifest", "demo", str(invalid_rights)]) == 2
     capsys.readouterr()
     with engine._connect("demo") as connection:
         absent = connection.execute(
@@ -701,18 +701,18 @@ def test_learning_stays_candidate_until_independent_replay_and_counterexample_tr
         "validation_evidence_refs": ["review://method-review"],
         "counterexample_trials": ["fixture://handheld-documentary"],
     })
-    assert validated["status"] == "VALIDATED"
+    assert validated["status"] == "CANDIDATE"  # unresolvable review:// refs are self-attestation, not proof
 
 
 def test_cli_exposes_standalone_entry_without_caos_import(tmp_path):
-    source = (Path(__file__).parents[1] / "video_studio" / "engine.py").read_text(encoding="utf-8")
+    source = (Path(__file__).parents[1] / "social_media_studio" / "engine.py").read_text(encoding="utf-8")
     assert "import caos" not in source.lower()
     assert "caos_runtime" not in source.lower()
-    from video_studio.cli import main
+    from social_media_studio.cli import main
     brief_file = tmp_path / "brief.json"
     brief_file.write_text(json.dumps(brief()), encoding="utf-8")
-    assert main(["--root", str(tmp_path / "ws"), "init", "cli-demo", "--brief", str(brief_file)]) == 0
-    assert main(["--root", str(tmp_path / "ws"), "audit", "cli-demo"]) == 0
+    assert main(["--root", str(tmp_path / "ws"), "--offline-fixture", "init", "cli-demo", "--brief", str(brief_file)]) == 0
+    assert main(["--root", str(tmp_path / "ws"), "--offline-fixture", "audit", "cli-demo"]) == 0
 
 
 def test_graph_rejects_cycles_and_multiple_output_producers(tmp_path):
@@ -795,7 +795,7 @@ def test_builtin_ffprobe_qa_measures_real_media_and_completes_a_claimed_task(tmp
     import shutil
     import subprocess
 
-    from video_studio.media import run_claimed_media_qa
+    from social_media_studio.media import run_claimed_media_qa
 
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
         pytest.skip("FFmpeg/ffprobe are not installed")
@@ -912,7 +912,7 @@ def test_repeated_media_qa_uses_new_immutable_receipt_path(tmp_path):
     import shutil
     import subprocess
 
-    from video_studio.media import run_claimed_media_qa
+    from social_media_studio.media import run_claimed_media_qa
 
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
         pytest.skip("FFmpeg/ffprobe are not installed")
@@ -1280,3 +1280,86 @@ def test_consultative_advice_cannot_claim_decision_authority(tmp_path):
     }}
     with pytest.raises(ContractError, match="must be advisory_only"):
         engine.add_tasks("demo", [advisory])
+
+
+def test_learning_self_validation_cannot_promote_and_retirement_is_checked(tmp_path):
+    from social_media_studio.engine import GateError, ContractError, ProjectNotFound
+    engine = make_engine(tmp_path)
+    payload = {
+        "learning_id": "method-one",
+        "method": "only if the actual media supports this method",
+        "applicability": ["some owner-approved media"],
+        "counterexamples": ["real negative case"],
+        "failure_conditions": ["source unavailable"],
+        "evidence_refs": ["made-up://source"],
+        "replay_refs": ["made-up://replay"],
+        "independent_replay_pass": True,
+        "validation_evidence_refs": ["made-up://independent-review"],
+        "counterexample_trials": ["made-up://negative"],
+    }
+    result = engine.record_learning("demo", payload)
+    assert result["status"] == "CANDIDATE"
+    assert engine.list_learning("demo")[0]["learning_id"] == "method-one"
+    with pytest.raises(GateError, match="status has changed"):
+        engine.retire_learning("demo", "method-one", reason="material source invalidation",
+                               expected_status="VALIDATED")
+    assert engine.list_learning("demo")[0]["status"] == "CANDIDATE"
+    with pytest.raises(ContractError):
+        engine.retire_learning("demo", "method-one", reason="")
+    with pytest.raises(ProjectNotFound):
+        engine.retire_learning("demo", "unknown-method", reason="not found")
+    result = engine.retire_learning("demo", "method-one", reason="evidence cannot be verified")
+    assert result["status"] == "RETIRED"
+    assert engine.list_learning("demo") == []
+    assert engine.list_learning("demo", include_retired=True)[0]["status"] == "RETIRED"
+    assert any(x["event_type"] == "LEARNING_RETIRED" for x in engine.events("demo"))
+    with pytest.raises(GateError):
+        engine.retire_learning("demo", "method-one", reason="duplicate retire")
+    follow = engine.record_learning("demo", {**payload, "learning_id": "method-two"})
+    assert follow["status"] == "CANDIDATE"
+    assert [x["learning_id"] for x in engine.list_learning("demo")] == ["method-two"]
+
+
+def test_explicit_external_wait_survives_refresh_and_does_not_starve_unrelated_task(tmp_path):
+    engine = make_engine(tmp_path)
+    engine.add_tasks("demo", [task("awaiting"), task("independent")])
+    packet = engine.claim_next("demo", "worker", task_id="awaiting")
+    engine.wait_for_input("demo", "awaiting", "worker", packet["claim"]["claim_token"],
+                          "owner must supply a new review decision")
+    for _ in range(3):
+        engine.refresh("demo")
+    states = {x["task_id"]: x["status"] for x in engine.list_tasks("demo")}
+    assert states["awaiting"] == "WAITING_INPUT"
+    assert states["independent"] == "READY"
+    assert engine.status("demo")["explicit_external_wait_tasks"]["awaiting"].startswith("owner")
+    assert engine.resume("demo")["explicit_external_wait_tasks"]["awaiting"].startswith("owner")
+    assert engine.claim_next("demo", "worker-next", task_id="awaiting") is None
+    next_packet = engine.claim_next("demo", "worker-next")
+    assert next_packet["task"]["task_id"] == "independent"
+    engine.reopen("demo", "awaiting", "owner supplied the missing decision")
+    assert engine.list_tasks("demo")[0]["status"] in {"READY", "RUNNING"}
+    packet = engine.claim_next("demo", "worker-final", task_id="awaiting")
+    assert packet and packet["task"]["task_id"] == "awaiting"
+
+
+def test_reopen_does_not_reset_exhausted_retry_budget_without_real_contract_revision(tmp_path):
+    from social_media_studio.engine import GateError
+    engine = make_engine(tmp_path)
+    spec = task("exhausted")
+    spec["max_attempts"] = 1
+    engine.add_tasks("demo", [spec, task("unrelated")])
+    first = engine.claim_next("demo", "worker", task_id="exhausted")
+    engine.fail_task("demo", "exhausted", "worker", first["claim"]["claim_token"],
+                     {"problem": "method not applicable"}, retryable=True)
+    engine.reopen("demo", "exhausted", "retry without a new method is not allowed")
+    assert engine.status("demo")["retry_exhausted_tasks"]["exhausted"]["attempts"] == 1
+    assert "exhausted" not in engine.status("demo")["admitted_ready_tasks"]
+    with pytest.raises(GateError, match="retry budget exhausted"):
+        engine.claim_next("demo", "worker-two", task_id="exhausted")
+    other = engine.claim_next("demo", "worker-two")
+    assert other and other["task"]["task_id"] == "unrelated"
+    engine.revise_task("demo", "exhausted", {"acceptance": {"method": "revised and verified"}},
+                       reason="use a researched alternative method")
+    assert not engine.status("demo")["retry_exhausted_tasks"]
+    permitted = engine.claim_next("demo", "worker-three", task_id="exhausted")
+    assert permitted and permitted["claim"]["attempt"] == 1

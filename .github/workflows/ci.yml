@@ -16,15 +16,15 @@ jobs:
           sudo apt-get install -y ffmpeg fonts-dejavu-core
       - name: Install package and tests
         run: pip install -e . pytest==9.1.1
-      - name: Run standalone Video Studio system audit
+      - name: Run standalone Social Media Studio system audit
         run: |
-          vga-studio system-audit --repo-root . > /tmp/standalone-video-studio-system-audit.json || true
+          sms-studio system-audit --repo-root . > /tmp/standalone-social-media-studio-system-audit.json || true
           python - <<'PY'
           import json
-          report = json.load(open('/tmp/standalone-video-studio-system-audit.json', encoding='utf-8'))
+          report = json.load(open('/tmp/standalone-social-media-studio-system-audit.json', encoding='utf-8'))
           if report['pass'] is not True:
               print(json.dumps(report, indent=2, ensure_ascii=False))
-              raise SystemExit('standalone Video Studio system audit failed')
+              raise SystemExit('standalone Social Media Studio system audit failed')
           assert report['structural_status'] == 'PASS', report
           assert report['production_readiness'] == 'PARTIAL', report
           assert report['boundary']['caos_session_governance_required'] is True, report
@@ -32,19 +32,35 @@ jobs:
           assert report['boundary']['caos_source_mutation_allowed'] is False, report
           assert report['boundary']['paid_provider_calls_made'] is False, report
           assert report['capability_gaps'], report
-          print('standalone-video-studio-system-audit: PASS')
+          print('standalone-social-media-studio-system-audit: PASS')
+          PY
+      - name: Inspect every internal Social Media Studio subsystem and tracked source
+        run: |
+          sms-studio subsystems --repo-root . > /tmp/content-subsystems.json
+          python - <<'PY'
+          import json
+          report = json.load(open('/tmp/content-subsystems.json', encoding='utf-8'))
+          assert report["pass"], report["violations"]
+          assert report["all_tracked_bytes_inspected"] is True
+          assert report["code_modules"] == report["owned_modules"]
+          assert report["subsystems"] == 16
+          assert report["domain_adapters"] == 17
+          assert report["production_operations"] == 5
+          assert report["real_creative_quality_verified"] is False
+          assert report["native_caos_selection_verified"] is False
+          print("complete-source-topology-structural-audit: PASS")
           PY
       - name: Run tests
         run: pytest -q
-      - name: Smoke test standalone outcome-driven Video Studio
+      - name: Smoke test standalone outcome-driven Social Media Studio
         run: |
-          vga-studio --help > /tmp/vga-studio-help.txt
-          test -s /tmp/vga-studio-help.txt
+          sms-studio --help > /tmp/sms-studio-help.txt
+          test -s /tmp/sms-studio-help.txt
           studio_root="$(mktemp -d)"
-          vga-studio --root "$studio_root" init smoke-episode --title "Standalone Studio smoke" --brief examples/technology-explainer.brief.json > /tmp/studio-init.json
-          vga-studio --root "$studio_root" plan smoke-episode examples/technology-explainer.tasks.json > /tmp/studio-plan.json
-          vga-studio --root "$studio_root" status smoke-episode > /tmp/studio-status.json
-          vga-studio --root "$studio_root" audit smoke-episode > /tmp/studio-audit.json
+          sms-studio --offline-fixture --root "$studio_root" init smoke-episode --title "Standalone Studio smoke" --brief examples/technology-explainer.brief.json > /tmp/studio-init.json
+          sms-studio --offline-fixture --root "$studio_root" plan smoke-episode examples/technology-explainer.tasks.json > /tmp/studio-plan.json
+          sms-studio --offline-fixture --root "$studio_root" status smoke-episode > /tmp/studio-status.json
+          sms-studio --offline-fixture --root "$studio_root" audit smoke-episode > /tmp/studio-audit.json
           python - <<'PY'
           import json
           status = json.load(open('/tmp/studio-status.json', encoding='utf-8'))
@@ -52,17 +68,17 @@ jobs:
           assert set(status['ready_tasks']) == {'research', 'creative-directions'}, status
           assert audit['pass'] is True, audit
           assert audit['task_count'] == 13, audit
-          print('standalone-video-studio-smoke: PASS')
+          print('standalone-social-media-studio-smoke: PASS')
           PY
-      - name: Smoke test integrated Program context and parallel readiness
+      - name: "Regression fixture: historical Program context and parallel readiness"
         run: |
           program_root="$(mktemp -d)"
-          vga-studio --root "$program_root" init ai-self-media-commercialization --title "Integrated Program smoke" --brief examples/ai-self-media-commercialization.brief.json > /tmp/program-init.json
-          vga-studio --root "$program_root" import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json > /tmp/program-context-import.json
-          vga-studio --root "$program_root" plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json > /tmp/program-plan.json
-          vga-studio --root "$program_root" status ai-self-media-commercialization > /tmp/program-status.json
-          vga-studio --root "$program_root" tasks ai-self-media-commercialization > /tmp/program-tasks.json
-          vga-studio --root "$program_root" audit ai-self-media-commercialization > /tmp/program-audit.json
+          sms-studio --offline-fixture --root "$program_root" init ai-self-media-commercialization --title "Integrated Program smoke" --brief examples/ai-self-media-commercialization.brief.json > /tmp/program-init.json
+          sms-studio --offline-fixture --root "$program_root" import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json > /tmp/program-context-import.json
+          sms-studio --offline-fixture --root "$program_root" plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json > /tmp/program-plan.json
+          sms-studio --offline-fixture --root "$program_root" status ai-self-media-commercialization > /tmp/program-status.json
+          sms-studio --offline-fixture --root "$program_root" tasks ai-self-media-commercialization > /tmp/program-tasks.json
+          sms-studio --offline-fixture --root "$program_root" audit ai-self-media-commercialization > /tmp/program-audit.json
           python - <<'PY'
           import json
           status = json.load(open('/tmp/program-status.json', encoding='utf-8'))
@@ -80,35 +96,35 @@ jobs:
           assert task_map['ipos-video-identity-bundle-import']['status'] == 'PENDING', task_map['ipos-video-identity-bundle-import']
           assert status['task_counts']['READY'] >= 6, status
           assert audit['pass'] is True, audit
-          print('standalone-program-context-smoke: PASS')
+          print('historical-program-regression-fixture: PASS')
           PY
-      - name: Smoke test installed Video Studio outside repository
+      - name: Smoke test installed Social Media Studio outside repository
         run: |
           cd /tmp
-          vga-studio --help > /tmp/vga-studio-outside-repo.txt
-          python -m video_studio --help > /tmp/video-studio-module-help.txt
+          sms-studio --help > /tmp/sms-studio-outside-repo.txt
+          python -m social_media_studio --help > /tmp/social-media-studio-module-help.txt
           studio_root="$(mktemp -d)"
-          vga-studio --root "$studio_root" init outside-repo-smoke --title "Installed Video Studio smoke" --brief "$GITHUB_WORKSPACE/examples/technology-explainer.brief.json" > /tmp/standalone-init.json
-          vga-studio --root "$studio_root" plan outside-repo-smoke "$GITHUB_WORKSPACE/examples/technology-explainer.tasks.json" > /tmp/standalone-plan.json
-          vga-studio --root "$studio_root" audit outside-repo-smoke > /tmp/standalone-audit.json
+          sms-studio --offline-fixture --root "$studio_root" init outside-repo-smoke --title "Installed Social Media Studio smoke" --brief "$GITHUB_WORKSPACE/examples/technology-explainer.brief.json" > /tmp/standalone-init.json
+          sms-studio --offline-fixture --root "$studio_root" plan outside-repo-smoke "$GITHUB_WORKSPACE/examples/technology-explainer.tasks.json" > /tmp/standalone-plan.json
+          sms-studio --offline-fixture --root "$studio_root" audit outside-repo-smoke > /tmp/standalone-audit.json
           python - <<'PY'
           import json
           import sys
-          import video_studio
-          import video_studio.adapters
-          from video_studio.engine import StudioEngine
+          import social_media_studio
+          import social_media_studio.adapters
+          from social_media_studio.engine import StudioEngine
 
-          assert video_studio.StudioEngine is StudioEngine
+          assert social_media_studio.StudioEngine is StudioEngine
           blocked = {
-              "video_growth_agent.runtime",
-              "video_growth_agent.orchestrator",
-              "video_growth_agent.studio_agents",
-              "video_growth_agent.program_orchestration",
-              "video_growth_agent.storage",
+              "social_media_studio.legacy.runtime",
+              "social_media_studio.legacy.orchestrator",
+              "social_media_studio.legacy.studio_agents",
+              "social_media_studio.legacy.program_orchestration",
+              "social_media_studio.legacy.storage",
           }
           assert not blocked.intersection(sys.modules)
           report = json.load(open('/tmp/standalone-audit.json', encoding='utf-8'))
           assert report['pass'] is True, report
           assert report['task_count'] == 13, report
-          print('installed-video-studio-outside-repo: PASS')
+          print('installed-social-media-studio-outside-repo: PASS')
           PY

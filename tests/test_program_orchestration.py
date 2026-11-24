@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from video_growth_agent.program_orchestration import ProgramGraph, ProgramOrchestrator
+from social_media_studio.legacy.program_orchestration import ProgramGraph, ProgramOrchestrator
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

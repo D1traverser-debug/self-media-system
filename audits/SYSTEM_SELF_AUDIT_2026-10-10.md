@@ -1,8 +1,8 @@
-# Video Growth Agent — System Self-Audit — 2026-10-10
+# Social Media Studio — System Self-Audit — 2026-10-10
 
 Status: ACTIVE MAINTENANCE EVIDENCE  
 Scope: owner/runtime governance only; no Pilot 002 business-stage advancement or media generation  
-Trigger: explicit user request to apply the Universal Continuity critique–distill–learn–evolve system to the Video Growth Agent itself
+Trigger: explicit user request to apply the Universal Continuity critique–distill–learn–evolve system to the Social Media Studio itself
 
 ## 1. Method
 
@@ -70,7 +70,7 @@ Accepted. It is the smallest approach that turns declarations into enforceable c
 
 ### Patch A — Process proof now covers every planned stage
 
-`video_growth_agent/runtime.py`
+`social_media_studio/legacy/runtime.py`
 
 - removed the fragile hard-coded process-enforced stage list;
 - process enforcement is now derived from `execution-plan.json`;
@@ -84,7 +84,7 @@ Regressions:
 
 ### Patch B — Pre-generation PASS is evidence-bound
 
-`video_growth_agent/generation_guard.py`
+`social_media_studio/legacy/generation_guard.py`
 
 - the generation authoring contract has an exact stable digest;
 - inline challenge status is not authorization;
@@ -111,7 +111,7 @@ The hard gate now requires:
 
 ### Patch D — Trusted executor registrations must declare evidence semantics
 
-`video_growth_agent/execution_attestation.py` and `video_growth_agent/data/executors.json`
+`social_media_studio/legacy/execution_attestation.py` and `social_media_studio/legacy/data/executors.json`
 
 A future trusted executor must explicitly declare:
 
@@ -127,8 +127,8 @@ Regression: `tests/test_execution_identity_semantics.py` rejects an executor who
 ### Patch E — Capability/governance truth was refreshed
 
 - `continuity/EXECUTION_CAPABILITIES.json` profile advanced to v4 and now describes the generalized base-runtime process gate, three independent pregen reviewer evidence requirements and truthful provider/local identity separation.
-- `skills/video-growth-agent/references/generation-governance.md` now explicitly forbids the combined Art/Creative shortcut.
-- `skills/video-growth-agent/references/reviewer-execution-attestation.md` separates provider-issued evidence from owner-local correlation identity.
+- `skills/social-media-studio/references/generation-governance.md` now explicitly forbids the combined Art/Creative shortcut.
+- `skills/social-media-studio/references/reviewer-execution-attestation.md` separates provider-issued evidence from owner-local correlation identity.
 
 ## 6. Remaining hard blockers
 

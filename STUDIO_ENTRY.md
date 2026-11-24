@@ -1,83 +1,71 @@
-# Video Production Studio — Canonical Entry
+# 自媒体系统 — Social Media Studio · Canonical Entry
 
 Status: `ACTIVE_CANDIDATE`
-This file, `STUDIO_ENTRY.md`, is the single startup authority for all Video work.
-Runtime: `video_studio.engine.StudioEngine`
-CLI: `vga-studio`
-Manifest: `video_studio/data/studio_manifest.json`
-Operating manual: `docs/standalone_video_studio.md`
+This file, `STUDIO_ENTRY.md`, is the single startup authority for all self-media work.
+Runtime: `social_media_studio.engine.StudioEngine`
+CLI: `sms-studio`
+Manifest: `social_media_studio/data/studio_manifest.json`
+Operating manual: `docs/standalone_social_media_studio.md`
 
 ## Mission
 
-Turn the owner's actual media goal into a finished, independently checked deliverable. The system is outcome-driven, not stage-driven. Each project gets a task graph derived from its brief; independent tasks can run concurrently, and only declared dependencies block work.
+Turn the owner's actual content goal—including independent writing, still images, IP identity, media editing, platform packaging and original video—into an independently checked deliverable. The system is outcome-driven, not stage-driven. Direct tasks need no artificial project or graph. Durable projects use a task graph derived from the specific brief; independent tasks can run concurrently, and only declared dependencies block work.
 
 ## Independence
 
-Video Studio owns Video-domain requirements, project/task state, assets, evidence, production execution and domain learning. When the owner selects Video in a CAOS-governed session, CAOS remains the parent authority for complete-goal recovery, decision quality, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Use the CAOS parent Skill in the active ChatGPT workspace. The CAOS decision loop and execution loop govern session-level reasoning, authorization and independent acceptance. The Video capability catalog is `video_growth_agent/data/capabilities.json`. Do not modify the CAOS repository, Skills or configuration. The Video runtime has no CAOS API/runtime/task-ID/lease dependency; technical independence is not permission to bypass parent governance. Direct standalone operation is available only when the owner explicitly selects it. The fixed-stage controller is not an active Video execution path.
+Social Media Studio owns self-media requirements, project/task state, assets, evidence, production execution and domain learning. When the owner selects Social Media Studio in a CAOS-governed session, CAOS remains the parent authority for complete-goal recovery, decision quality, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Use the CAOS parent Skill in the active ChatGPT workspace. The CAOS decision loop and execution loop govern session-level reasoning, authorization and independent acceptance. The self-media capability catalog is `social_media_studio/legacy/data/capabilities.json`; the source-owned internal subsystem catalog is `social_media_studio/data/subsystem_catalog.json`. Use `sms-studio subsystems --repo-root .` to inspect all declared internal modules and live imports. X short posts and X Articles are internal editorial capabilities. Other CAOS business systems offer only scoped read-only methods; they cannot supply self-media task authority. Do not modify the CAOS repository, Skills or configuration. The Social Media Studio runtime has no CAOS API/runtime/task-ID/lease dependency; technical independence is not permission to bypass parent governance. All owner-facing self-media conversations, decisions and effects remain CAOS-governed. The CLI defaults to current-owner scope and rejects retired or unmarked workspaces. Isolated offline mechanical regression requires explicit `--offline-fixture` and a separate root, and does not claim CAOS activation. The fixed-stage controller is not an active self-media execution path.
 
-IPOS remains the sole authority for the owner's original character/identity canon. The Studio consumes approved, versioned IPOS exports; it does not create a competing canon.
+**IPOS is a nested specialist domain within this Social Media Studio**, owning permanent creator/character identity design. Its existing installed Skill and private owner-approved canon are separately maintained; Social Media Studio imports exact approved versioned bundles downstream but never creates competing canonical state. Temporary avatars are ordinary visual craft and do not inherit the owner's personal IPOS project.
 
-## New-task startup
+## Entry, routing and revisitable responsibilities
 
-1. Recover the complete owner goal and every correction, constraint, prohibition and requested deliverable. Separate hard requirements, preferences, examples, assumptions and unknowns.
-2. Inspect current project state and exact source assets. Do not infer ownership, rights, media content or tool availability from filenames or declarations.
-3. Create/update an outcome brief with audience, purpose, format, platform, deliverables, success criteria, constraints, budget/time limits and unresolved questions. A changed brief must be revised through the CLI so affected work is invalidated rather than silently reused.
-4. Build a project-specific dependency graph. Revise the brief with `vga-studio revise-brief` and task contracts with `vga-studio revise-task` when new evidence changes the plan. Do not copy a fixed stage template. Split independent research, creative, asset, sound, production and distribution work where parallel execution is safe.
-5. For material creative or architectural decisions, record competing hypotheses, discriminating evidence, alternatives, counterevidence, selected option, falsifier and rollback.
-6. Prototype the highest-risk quality assumption before expensive full production. Use the smallest sample that can represent the intended final craft.
-7. Execute through `vga-studio` task claims and actual available media tools. Never mark a task complete without its exact declared files and digests.
-8. Review the actual artifacts independently. Reopen upstream decisions when evidence contradicts them; invalidate only dependent descendants.
-9. Release-check the exact final artifact against configured review, rights and disclosure evidence.
-10. Persist reusable learning only with applicability, counterexamples, failure conditions, source evidence and independent replay.
+**Choose the execution surface, not a default workflow.** Recover the full current goal and apply CAOS recursively in either surface. A bounded conversational text, image-planning, critique or simple edit task may be performed with actual available session tools and direct outcome checks; do not create a project or DAG solely to simulate governance. Use the durable Studio ledger when persistence, artifact lineage, parallel dispatch, repeatable tooling or recovery materially requires it. A continuation resolves the exact current workspace identity from authorized evidence, not recency or retired history. The execution surface does not grant authorization or waive any applicable quality, rights, truth or independent acceptance requirement.
 
-## Hard release boundaries
+Recover the owner outcome, inspect relevant authoritative sources, research and challenge alternatives, select an admissible method, execute with current tools, independently inspect actual results and preserve validated learning. These are recursive responsibilities, not a prescribed order or a requirement to create a work packet for each conversation. Durable work uses the project brief, versioned assets, exact decision receipts and a demand-specific DAG; independent branches may proceed together, and a correction can reopen an earlier decision. A delivery or release requires only the applicable domain-specific gates, not unrelated video-production stages.
 
-A video is not releasable until the exact final bytes pass digest-bound FFmpeg/FFprobe checks (video stream, stream-duration match, true peak, black frames and full decode), every used media asset in recursive lineage has cleared rights plus resolvable evidence, required human reviews are recorded against the exact digest, and the Red Team has at least three evidence-backed findings with no unresolved critical/high risk. Required platform/disclosure, EditorialPlan, timeline and other evidence artifacts must exist. Source-version changes stale their consumers and descendants. These checks never publish automatically.
+For a durable owner task, give `requirements.decision_id` an exact unique ID when planning; after current inputs and decision evidence are available, use `sms-studio decision PROJECT RECEIPT.json` with that `decision_id` and `task_id` plus the existing competing-cause/alternative fields. The engine derives the binding from actual current brief, task contract and input artifact bytes. Unbound/stale branches cannot be claimed or completed; unrelated admitted branches may proceed. Revise a stale task to a new decision ID and reopen it after re-investigation. This local check is not CAOS activation, verified external research, a permission grant, or semantic acceptance. Direct non-task session actions still require CAOS governance and appropriate independent evidence.
 
-## Default Program and quick start
+## Hard release boundaries (when releasing an actual video)
 
-For generic Video business/system work, the default Program is `ai-self-media-commercialization` in `projects/PROJECT_INDEX.json`. Its canonical outcome brief and 50-task parallel work graph are the canonical current Program plan. The context manifest imports the existing Video-owned state and reference documents as immutable, digest-bound artifacts; it does not import the missing Jensen/Alice source video or fabricate an owner-approved IPOS bundle.
+For an actual video release, exact final bytes must pass applicable digest-bound FFmpeg/FFprobe technical checks (video stream, stream-duration match, true peak, black frames and full decode); used media assets in recorded lineage require cleared rights and resolvable evidence. **Only when the current owner brief requires human cold review, Red Team, EditorialPlan, timeline or platform-specific documentation** must those specialized receipts exist and satisfy their declared criteria. When Red Team is required, its review contract demands at least three evidence-backed findings and no unresolved critical/high risk. A simple video crop does not inherit an unrelated historical explainer storyboard or Red Team requirement. Source-version changes invalidate affected dependents. Release eligibility never authorizes public posting.
+
+## Professional capability discovery and recursive governance
+
+Professional capability classification is distinct from business workstreams, media object containment, roles, reusable knowledge, cognition dependencies and task execution. Discover exact groups with `sms-studio capabilities [--group GROUP]`; the output binds the catalog to registered adapters and local operations, discloses missing effects and does not select a task, authorize execution or certify quality. For current owner work, CAOS recursively governs every material choice at every organizational level, including the choice of professional method, reviewer, tool and verification. No group is a compulsory stage or permanent worker. Apply independent domain and overall owner acceptance separately. New evidence may reopen the earliest contradicted premise without invalidating unrelated branches. The existing engine is the only scheduler; use direct session capability for nonpersistent simple work where appropriate.
+
+## Task-neutral intake and hierarchy
+
+Use `sms-studio knowledge --id METHOD --repo-root REPOSITORY` to locate and hash the exact current reusable method source; historical/candidate sources require `--include-nonactive` and are never execution authority.
+
+The canonical manifest defines authority layers, continuous responsibilities and separate product/business/professional/task axes. Load it and the operating manual. The candidate architecture in `docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md` is a design/reference contract, not a second active control authority. For task-specific inspection, `sms-studio inspect-editorial`, `inspect-visual`, and `quality-plan` expose structure or intended reviews only; they cannot claim generation or professional quality. No prior task instance is active by default. The repository project index is retired evidence only. Never resume an old project or reuse its scope without a fresh owner demand; even explicit historical retrieval does not reactivate it. Preserve generic skills, technical adapters, methods and knowledge, not previous work orders.
 
 ```bash
 python -m pip install -e .
-
-# Initialize the standalone Program control plane
-vga-studio --root ./studio-work init ai-self-media-commercialization --title "AI Self-Media Commercialization" --brief examples/ai-self-media-commercialization.brief.json
-
-# Import exact source/context files before planning; paths resolve from the manifest directory
-vga-studio --root ./studio-work import-manifest ai-self-media-commercialization examples/ai-self-media-commercialization.context.json
-
-# Transfer the exact validated Program handoff into an Episode project:
-vga-studio --root ./studio-work transfer-asset ai-self-media-commercialization validated-episode-intent episode-001 validated-episode-intent --expected-artifact-id ARTIFACT_ID --expected-version 1 --expected-sha256 SHA256
-
-# Add the canonical 50-task graph and inspect which independent lanes are ready
-vga-studio --root ./studio-work plan ai-self-media-commercialization examples/ai-self-media-commercialization.tasks.json
-vga-studio --root ./studio-work status ai-self-media-commercialization
-vga-studio --root ./studio-work tasks ai-self-media-commercialization
+sms-studio --root WORKSPACE intake REQUEST.json
+# REQUEST.json contains mode NEW and the exact goal, or mode RESUME and exact project_id.
+# After CAOS-governed interpretation and decision, use the actual current brief and DAG:
+# Each task requirements.deliverable_refs names its current brief deliverable(s).
+sms-studio --root WORKSPACE init PROJECT --brief BRIEF.json --owner-task
+# If the actual demand has context inputs, import its explicit digest-bound manifest:
+# sms-studio --root WORKSPACE import-manifest PROJECT CONTEXT.json
+sms-studio --root WORKSPACE plan PROJECT TASKS.json
+sms-studio --root WORKSPACE resume PROJECT
 ```
 
-The Program can run independent growth, advertiser, production-economics, provider-capability and Jensen fact-audit work in parallel. Tasks requiring the exact `jensen-source-video` or `ipos-ready-for-video-bundle` intentionally remain `WAITING_INPUT` until those exact owner-controlled assets are supplied. The fixed-stage 0.8 task graph is not an active scheduler or controller.
-
-For an episode-specific project, use the technology-explainer example instead:
-
-```bash
-vga-studio --root ./studio-work init episode-001 --title "Episode 001" --brief examples/technology-explainer.brief.json
-vga-studio --root ./studio-work plan episode-001 examples/technology-explainer.tasks.json
-vga-studio --root ./studio-work status episode-001
-```
+The intake response must not be treated as native CAOS activation proof. Every decision/action uses CAOS; professional aesthetic judgment and goal fidelity are cross-cutting responsibilities, not finished stages. Each demand chooses only relevant capabilities and tasks. Research, critique, execution, re-entry and learning follow evidence, not a compulsory sequence.
 
 A claim returns a bounded work packet, exact input artifact digests and a lease token. Complete the task only after the declared output files have been written inside the project workspace:
 
 ```bash
-vga-studio --root ./studio-work claim ai-self-media-commercialization --worker growth-agent-01 --executor agent --task-id growth-baseline-and-topic-hypotheses
-vga-studio --root ./studio-work complete ai-self-media-commercialization growth-baseline-and-topic-hypotheses --worker growth-agent-01 --token CLAIM_TOKEN --outputs growth.outputs.json
+sms-studio --root WORKSPACE claim PROJECT --worker WORKER --executor agent --task-id TASK
+sms-studio --root WORKSPACE complete PROJECT TASK --worker WORKER --token TOKEN --outputs OUTPUTS.json
 ```
 
-Use `vga-studio qa-media` for a claimed technical-measurement task and `vga-studio --help` for the complete command set. Use `vga-studio run-adapter PROJECT TASK_ID --worker ID --token TOKEN` for a task that declares a supported `requirements.domain_adapter` contract. This connects EditorialPlan, ShotContract, IPOS, Timeline, continuity, routing, business metrics, supplementary audio QA and local programmatic graphics to the standalone artifact ledger.
+Use `sms-studio qa-media` for a claimed technical-measurement task and `sms-studio --help` for the complete command set. Use `sms-studio run-adapter PROJECT TASK_ID --worker ID --token TOKEN` for a task that declares a supported `requirements.domain_adapter` contract. This connects EditorialPlan, ShotContract, IPOS, Timeline, continuity, routing, business metrics, supplementary audio QA and local programmatic graphics to the standalone artifact ledger.
 
 The local tool registry does not directly call external generative-video providers. Agent tasks may use a currently connected session tool only after checking its exact operation, availability, rights, cost and output constraints; any paid generation requires explicit owner approval. A provider result is not complete until its actual file and receipt are imported and digest-registered. No provider capability is assumed permanent or silently inferred from a router profile.
 
-Run `vga-studio system-audit --repo-root .` for the repository audit. It separates structural integrity from production readiness: a structural PASS may still report missing provider execution, source media or owner approvals. `vga-studio` is the only installed CLI; `python -m video_studio` invokes the same runtime module.
+Run `sms-studio system-audit --repo-root .` for the repository audit. It separates structural integrity from production readiness: a structural PASS may still report missing provider execution, source media or owner approvals. `sms-studio` is the only installed CLI; `python -m social_media_studio` invokes the same runtime module.
 
 ## Completion rule
 

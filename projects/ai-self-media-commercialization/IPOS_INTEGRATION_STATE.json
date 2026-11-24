@@ -30,7 +30,7 @@
   "contract": {
     "name": "IPOS Video Identity Bundle",
     "schema_version": "1.0",
-    "schema_ref": "video_growth_agent/data/ipos_video_identity_bundle.schema.json",
+    "schema_ref": "social_media_studio/legacy/data/ipos_video_identity_bundle.schema.json",
     "issuer": "IP_STUDIO_OS",
     "required_readiness": [
       "OWNER_APPROVED",
@@ -43,8 +43,8 @@
     ]
   },
   "video_consumer": {
-    "repository": "D1traverser-debug/video-growth-agent",
-    "adapter": "video_growth_agent/ip_identity.py",
+    "repository": "D1traverser-debug/social-media-studio",
+    "adapter": "social_media_studio/legacy/ip_identity.py",
     "target": "MediaGraph + ShotContract + ContinuitySnapshot/Rule + generation admission",
     "exact_version_binding": true,
     "downstream_invalidation_on_canon_update": true,

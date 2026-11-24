@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.engine_routing import (
+from social_media_studio.legacy.engine_routing import (
     CostAwareShotRouter,
     EngineProfile,
     ShotRequest,

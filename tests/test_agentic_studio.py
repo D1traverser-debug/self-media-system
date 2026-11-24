@@ -1,10 +1,10 @@
 import pytest
 
-from video_growth_agent.models import ArtifactRecord
-from video_growth_agent.orchestrator import GateBlocked
-from video_growth_agent.storage import ProjectStore
-from video_growth_agent.runtime import StudioRuntime
-from video_growth_agent.studio_agents import AgentRegistry, AgenticStudio, ExecutionPlanner
+from social_media_studio.legacy.models import ArtifactRecord
+from social_media_studio.legacy.orchestrator import GateBlocked
+from social_media_studio.legacy.storage import ProjectStore
+from social_media_studio.legacy.runtime import StudioRuntime
+from social_media_studio.legacy.studio_agents import AgentRegistry, AgenticStudio, ExecutionPlanner
 
 
 def make_studio(tmp_path):

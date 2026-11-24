@@ -24,8 +24,8 @@ The previous Video-local H1/S1+S3/A2 face-shell path is superseded and historica
 ## IPOS-to-Video integration
 
 The IPOS Video Identity Bundle contract (schema 1.0) and deterministic import adapter are merged to Video mainline:
-- contract: video_growth_agent/data/ipos_video_identity_bundle.schema.json;
-- adapter: video_growth_agent/ip_identity.py;
+- contract: social_media_studio/legacy/data/ipos_video_identity_bundle.schema.json;
+- adapter: social_media_studio/legacy/ip_identity.py;
 - integration state: IPOS_INTEGRATION_STATE.json;
 - design/authority rules: docs/media_business_os.md and WORKFLOW_INTEGRATION.md.
 
@@ -83,7 +83,7 @@ Updated: 2026-11-14 20:04+08:00
 
 A bounded local graphics renderer is under review in PR #33:
 - audit: `audits/VIDEO_LOCAL_PROGRAMMATIC_GRAPHICS_RENDERER_2026-11-14.md`;
-- implementation: `video_growth_agent/programmatic_graphics.py`;
+- implementation: `social_media_studio/legacy/programmatic_graphics.py`;
 - CLI: `vga render-graphic REQUEST.json --output candidate.mp4 [--graph MediaGraph.json]`;
 - supports title/quote/stat cards and bar charts for explicitly admitted non-character information shots;
 - FFmpeg renders a silent MP4; Pillow/FreeType measures the actual selected font so all text is pixel-fitted, and unfit text fails before output;
@@ -151,7 +151,7 @@ Verified renderer/graph transaction code head: `46bbb7beb5a9da28e39662aba56c4d4c
 
 The local programmatic graphics renderer is merged into `main`.
 
-- PR: https://github.com/D1traverser-debug/video-growth-agent/pull/33
+- PR: https://github.com/D1traverser-debug/social-media-studio/pull/33
 - Merge commit: `af4dec1a9ec2fff659e3e20d7f21cf9bdbe159ea`
 - Mainline CI run: `43598791702` — PASS
 - Verification: 263 tests, repository system hygiene audit, installed CLI smoke all PASS.
@@ -177,16 +177,16 @@ This section supersedes older status statements below when they conflict.
 Historical checkpoints that say PR #33 is open or under review describe earlier states only; the merged mainline evidence above is authoritative.
 
 
-## Standalone Video Studio integration — exact-head verified (2026-11-17)
+## Standalone Social Media Studio integration — exact-head verified (2026-11-17)
 
-The integrated standalone Video Studio is now the default generic Video execution entry. It is not a CAOS runtime and does not modify or require CAOS code.
+The integrated standalone Social Media Studio is now the default generic Video execution entry. It is not a CAOS runtime and does not modify or require CAOS code.
 
-- Entry: `STUDIO_ENTRY.md`; implementation: `video_studio/`; CLI: `vga-studio`.
+- Entry: `STUDIO_ENTRY.md`; implementation: `social_media_studio/`; CLI: `sms-studio`.
 - Default Program: `ai-self-media-commercialization`, with a 50-task graph spanning growth, original IP, commercialization and production, including typed CommercialFit validation, digest-bound Program-to-Episode handoff validation and explicit IPOS bundle readiness/provenance validation.
 - Context import: `examples/ai-self-media-commercialization.context.json` imports exact existing Video/IPOS reference files as immutable SHA-256-bound artifacts. It does not fabricate the missing Jensen source video or an approved IPOS bundle.
 - The new `import-manifest` command preflights all paths/metadata before mutation. Identical imports are idempotent and preserve completed consumers.
 - Rights clearance now binds the reviewer to the artifact producer and a completed human review task, and checks exact source artifact IDs, digests, rights status and registered evidence references.
-- `vga-studio system-audit --repo-root .` audits standalone governance, dependency boundaries, adapter registration, Program authority bindings, example graph execution and hard release gates.
+- `sms-studio system-audit --repo-root .` audits standalone governance, dependency boundaries, adapter registration, Program authority bindings, example graph execution and hard release gates.
 
 Exact implementation head: `1893dfc911e4673ef2c7d01f34c502d39ffcad09`.
 Exact-head CI: PR run `44034062243` and push run `44034068441` — **347 tests passed**, standalone system audit PASS, standalone CLI smoke PASS, integrated 50-task Program context/readiness smoke PASS, local tool-execution smoke PASS, installed agentic CLI smoke PASS.

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "description": "Digest-bound read-only context for the standalone AI self-media commercialization Program. Paths resolve from this manifest's directory. Owner media and approved IPOS bundles are intentionally not included.",
+  "description": "Historical integrated Program regression fixture; no current owner task, scope, authority or production input.",
   "assets": [
     {
       "name": "program-state",
@@ -10,7 +10,8 @@
       "rights_status": "NOT_APPLICABLE",
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
-        "context_role": "current_program_state"
+        "context_role": "current_program_state",
+        "fixture_only": true
       }
     },
     {
@@ -21,7 +22,8 @@
       "rights_status": "NOT_APPLICABLE",
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
-        "context_role": "project_registry"
+        "context_role": "project_registry",
+        "fixture_only": true
       }
     },
     {
@@ -32,7 +34,8 @@
       "rights_status": "NOT_APPLICABLE",
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
-        "context_role": "cross_workstream_model"
+        "context_role": "cross_workstream_model",
+        "fixture_only": true
       }
     },
     {
@@ -44,7 +47,8 @@
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
         "context_role": "historical_0_8_graph_reference",
-        "not_current_controller": true
+        "not_current_controller": true,
+        "fixture_only": true
       }
     },
     {
@@ -55,7 +59,8 @@
       "rights_status": "NOT_APPLICABLE",
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
-        "context_role": "audience_and_account_positioning"
+        "context_role": "audience_and_account_positioning",
+        "fixture_only": true
       }
     },
     {
@@ -66,7 +71,8 @@
       "rights_status": "NOT_APPLICABLE",
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
-        "context_role": "production_economics_and_cost_constraints"
+        "context_role": "production_economics_and_cost_constraints",
+        "fixture_only": true
       }
     },
     {
@@ -78,7 +84,8 @@
       "metadata": {
         "authority": "IPOS",
         "context_role": "identity_authority_state_snapshot",
-        "canon_mutation_prohibited": true
+        "canon_mutation_prohibited": true,
+        "fixture_only": true
       }
     },
     {
@@ -90,7 +97,8 @@
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
         "context_role": "candidate_editorial_case",
-        "candidate_only": true
+        "candidate_only": true,
+        "fixture_only": true
       }
     },
     {
@@ -101,7 +109,8 @@
       "rights_status": "NOT_APPLICABLE",
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
-        "context_role": "provider_capability_benchmark_protocol"
+        "context_role": "provider_capability_benchmark_protocol",
+        "fixture_only": true
       }
     },
     {
@@ -112,8 +121,9 @@
       "rights_status": "NOT_APPLICABLE",
       "metadata": {
         "authority": "VIDEO_GROWTH_AGENT",
-        "context_role": "active_standalone_program_planning_authority",
-        "graph_version": "49_TASKS"
+        "context_role": "historical_task_graph_fixture",
+        "graph_version": "49_TASKS",
+        "fixture_only": true
       }
     }
   ]

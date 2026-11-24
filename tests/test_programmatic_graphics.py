@@ -4,7 +4,7 @@ import shutil
 
 import pytest
 
-from video_growth_agent.media_graph import (
+from social_media_studio.legacy.media_graph import (
     AssetRef,
     ContextRecord,
     DecisionRecord,
@@ -13,7 +13,7 @@ from video_growth_agent.media_graph import (
     MediaGraphStore,
     AssetVersion,
 )
-from video_growth_agent.programmatic_graphics import (
+from social_media_studio.legacy.programmatic_graphics import (
     ChartDatum,
     GraphicSpec,
     ProgrammaticGraphicsError,
@@ -24,7 +24,7 @@ from video_growth_agent.programmatic_graphics import (
     validate_shot_graph_bindings,
     _drawtext,
 )
-from video_growth_agent.production_os import ReferenceBinding, ShotContract
+from social_media_studio.legacy.production_os import ReferenceBinding, ShotContract
 
 FONT = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
 
@@ -230,9 +230,10 @@ def test_json_contract_parsers_fail_closed_on_wrong_shapes():
         shot_contract_from_dict({"references": ["not-an-object"]})
 
 
-def test_cli_render_writes_a_receipt_and_reports_unregistered_candidate(tmp_path, capsys):
+def test_cli_render_writes_a_receipt_and_reports_unregistered_candidate(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("SMS_LEGACY_FIXTURE_ROOT", str(tmp_path))
     require_render_tools()
-    from video_growth_agent.cli import main
+    from social_media_studio.legacy.cli import main
 
     request = {
         "font_path": str(FONT),
@@ -284,23 +285,23 @@ def test_cli_render_writes_a_receipt_and_reports_unregistered_candidate(tmp_path
 def test_capability_registry_and_domain_manifest_advertise_only_bounded_scope():
     root = Path(__file__).resolve().parents[1]
     capabilities = json.loads(
-        (root / "video_growth_agent/data/capabilities.json").read_text(encoding="utf-8")
+        (root / "social_media_studio/legacy/data/capabilities.json").read_text(encoding="utf-8")
     )
     entry = next(
         item for item in capabilities["capabilities"]
         if item["capability_id"] == "programmatic_motion_graphics_render"
     )
     assert entry["assurance_ceiling"] == "SESSION_EXECUTABLE"
-    assert entry["executor_ref"].startswith("video_growth_agent/programmatic_graphics.py")
+    assert entry["executor_ref"].startswith("social_media_studio/legacy/programmatic_graphics.py")
     assert "NO_AUTOMATIC_PROMOTION_OR_RELEASE" in entry["safe_degraded_modes"]
     assert next(
         item for item in capabilities["capabilities"]
         if item["capability_id"] == "quality_critical_generation_gateway"
     )["assurance_ceiling"] == "DECLARED_ONLY"
     manifest = json.loads(
-        (root / "video_growth_agent/data/domain_manifest.json").read_text(encoding="utf-8")
+        (root / "social_media_studio/legacy/data/domain_manifest.json").read_text(encoding="utf-8")
     )
-    assert manifest["runtime"]["programmatic_graphics"] == "video_growth_agent/programmatic_graphics.py"
+    assert manifest["runtime"]["programmatic_graphics"] == "social_media_studio/legacy/programmatic_graphics.py"
 
 def test_current_agent_operability_scenario_documents_graphics_route():
     root = Path(__file__).resolve().parents[1]
@@ -358,8 +359,9 @@ def test_graph_binding_digest_must_match_promoted_exact_version():
     with pytest.raises(ProgrammaticGraphicsError, match="digest mismatch"):
         register_graph_candidate(graph, shot, make_spec(), {})
 
-def test_cli_preflight_rejects_reference_digest_mismatch_before_render(tmp_path, capsys):
-    from video_growth_agent.cli import main
+def test_cli_preflight_rejects_reference_digest_mismatch_before_render(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("SMS_LEGACY_FIXTURE_ROOT", str(tmp_path))
+    from social_media_studio.legacy.cli import main
 
     graph = make_graph()
     ref = AssetRef("source-asset", "v3")
@@ -554,8 +556,9 @@ def test_shot_graph_binding_accepts_scene_between_shot_and_sequence():
     validate_shot_graph_bindings(graph, make_shot())
 
 
-def test_cli_preflight_rejects_sequence_ancestry_mismatch_before_render(tmp_path, capsys):
-    from video_growth_agent.cli import main
+def test_cli_preflight_rejects_sequence_ancestry_mismatch_before_render(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("SMS_LEGACY_FIXTURE_ROOT", str(tmp_path))
+    from social_media_studio.legacy.cli import main
 
     graph = make_graph()
     graph.add_context(ContextRecord("sequence-02", "SEQUENCE", "episode-01"))
@@ -592,7 +595,7 @@ def test_cli_preflight_rejects_sequence_ancestry_mismatch_before_render(tmp_path
 
 def test_failed_render_preserves_destination_created_by_concurrent_invocation(tmp_path, monkeypatch):
     from types import SimpleNamespace
-    import video_growth_agent.programmatic_graphics as renderer
+    import social_media_studio.legacy.programmatic_graphics as renderer
 
     output = tmp_path / "concurrent-candidate.mp4"
     other_invocation_bytes = b"candidate owned by another invocation"
@@ -620,7 +623,7 @@ def test_render_receipt_qa_path_points_to_published_candidate(tmp_path):
 
 def test_atomic_publish_does_not_replace_destination_claimed_during_render(tmp_path, monkeypatch):
     require_render_tools()
-    import video_growth_agent.programmatic_graphics as renderer
+    import social_media_studio.legacy.programmatic_graphics as renderer
 
     output = tmp_path / "publish-race.mp4"
     competing_bytes = b"candidate published by competing invocation"
@@ -638,7 +641,8 @@ def test_atomic_publish_does_not_replace_destination_claimed_during_render(tmp_p
     assert output.read_bytes() == competing_bytes
 
 def test_cli_graph_transaction_preserves_review_update_during_render(tmp_path, monkeypatch, capsys):
-    import video_growth_agent.cli as cli_module
+    monkeypatch.setenv("SMS_LEGACY_FIXTURE_ROOT", str(tmp_path))
+    import social_media_studio.legacy.cli as cli_module
 
     graph = make_graph()
     graph_path = tmp_path / "media-graph.json"
@@ -692,7 +696,8 @@ def test_cli_graph_transaction_preserves_review_update_during_render(tmp_path, m
     assert "CANDIDATE_REGISTERED" in capsys.readouterr().out
 
 def test_cli_revalidates_promoted_references_after_concurrent_graph_update(tmp_path, monkeypatch, capsys):
-    import video_growth_agent.cli as cli_module
+    monkeypatch.setenv("SMS_LEGACY_FIXTURE_ROOT", str(tmp_path))
+    import social_media_studio.legacy.cli as cli_module
 
     graph = make_graph()
     ref = AssetRef("source-asset", "v3")
@@ -776,7 +781,8 @@ def test_cli_revalidates_promoted_references_after_concurrent_graph_update(tmp_p
 
 
 def test_cli_receipt_publish_preserves_symlink_target_claimed_during_render(tmp_path, monkeypatch, capsys):
-    import video_growth_agent.cli as cli_module
+    monkeypatch.setenv("SMS_LEGACY_FIXTURE_ROOT", str(tmp_path))
+    import social_media_studio.legacy.cli as cli_module
 
     request = {
         "font_path": str(FONT),
@@ -824,7 +830,7 @@ def test_cli_receipt_publish_preserves_symlink_target_claimed_during_render(tmp_
 
 def test_renderer_uses_staged_font_snapshot_even_if_source_is_removed(tmp_path, monkeypatch):
     import hashlib
-    import video_growth_agent.programmatic_graphics as renderer
+    import social_media_studio.legacy.programmatic_graphics as renderer
 
     source_font = tmp_path / "mutable-font.ttf"
     source_font.write_bytes(FONT.read_bytes())
@@ -851,7 +857,7 @@ def test_renderer_uses_staged_font_snapshot_even_if_source_is_removed(tmp_path, 
 
 def test_renderer_font_digest_matches_exact_staged_bytes_when_source_changes(tmp_path, monkeypatch):
     import hashlib
-    import video_growth_agent.programmatic_graphics as renderer
+    import social_media_studio.legacy.programmatic_graphics as renderer
 
     source_font = tmp_path / "replaceable-font.ttf"
     original_bytes = FONT.read_bytes()

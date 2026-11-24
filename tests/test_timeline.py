@@ -1,6 +1,6 @@
 import pytest
 
-from video_growth_agent.media_graph import (
+from social_media_studio.legacy.media_graph import (
     AssetRef,
     AssetVersion,
     ContextRecord,
@@ -8,7 +8,7 @@ from video_growth_agent.media_graph import (
     EvidenceRecord,
     MediaGraph,
 )
-from video_growth_agent.timeline import (
+from social_media_studio.legacy.timeline import (
     TimelineClip,
     TimelineError,
     TimelineSpec,

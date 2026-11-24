@@ -6,7 +6,7 @@ import shutil
 
 import pytest
 
-from video_growth_agent.media_graph import (
+from social_media_studio.legacy.media_graph import (
     AssetRef,
     AssetVersion,
     ContextRecord,
@@ -14,8 +14,8 @@ from video_growth_agent.media_graph import (
     EvidenceRecord,
     MediaGraph,
 )
-from video_growth_agent.timeline import TimelineClip, TimelineSpec
-from video_studio.adapters import (
+from social_media_studio.legacy.timeline import TimelineClip, TimelineSpec
+from social_media_studio.adapters import (
     DomainAdapterError,
     assess_shot_continuity,
     editorial_plan_from_dict,
@@ -24,8 +24,8 @@ from video_studio.adapters import (
     run_claimed_domain_adapter,
     timeline_spec_from_dict,
 )
-from video_studio.cli import build_parser
-from video_studio.engine import StudioEngine
+from social_media_studio.cli import build_parser
+from social_media_studio.engine import StudioEngine
 
 
 def _editorial_payload():

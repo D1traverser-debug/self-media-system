@@ -1,8 +1,8 @@
 {
   "schema_version": "1.1",
   "program_id": "ai-self-media-commercialization",
-  "owner": "VIDEO_GROWTH_AGENT",
-  "policy_ref": "video_growth_agent/data/coordination-policy.json",
+  "owner": "SOCIAL_MEDIA_STUDIO",
+  "policy_ref": "social_media_studio/legacy/data/coordination-policy.json",
   "graph_status": "SUPERSEDED_0_8_REFERENCE__NOT_CURRENT_PLANNING_AUTHORITY",
   "nodes": [
     {

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from video_growth_agent.media_graph import (
+from social_media_studio.legacy.media_graph import (
     AssetRef,
     AssetVersion,
     ContextRecord,

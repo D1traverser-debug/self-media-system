@@ -1,8 +1,8 @@
-# CAOS Governance Takeover — Video Growth Agent
+# CAOS Governance Takeover — Social Media Studio
 
 Date: 2026-11-14
 Status: PROMOTED__MAINLINE_CI_VERIFIED
-Video repository: `D1traverser-debug/video-growth-agent`
+Video repository: `D1traverser-debug/social-media-studio`
 Base revision: `d44ea379f99a96f4a07ae021c35e7f094df7b29a`
 Candidate branch: `migration/caos-video-governance-20261114`
 Candidate PR: #25 — merged
@@ -27,7 +27,7 @@ The integration is deliberately `CHAT_GOVERNED_EXTERNAL`, with no CAOS runtime/A
 ## Migration actions
 
 - Replaced the parent-bound manifest with a Video-owned domain manifest and explicit external CAOS governance boundary.
-- Moved the Video capability inventory into `video_growth_agent/data/capabilities.json`, preserving Video-owned capability declarations and assurance taxonomy.
+- Moved the Video capability inventory into `social_media_studio/legacy/data/capabilities.json`, preserving Video-owned capability declarations and assurance taxonomy.
 - Removed the active `.uaos/` adapter, manifest and capability profile, `UAOS_SKILL.md`, and the UAOS-specific test.
 - Added `CAOS_VIDEO_ENTRY.md` and repointed the package skill to the CAOS-governed Video entry.
 - Removed parent-controller identity and runtime-upcall assumptions from Video coordination and project state.

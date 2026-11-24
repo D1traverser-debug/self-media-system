@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from video_growth_agent.model_registry import EvidenceBoundModelRouter
-from video_growth_agent.production_os import (
+from social_media_studio.legacy.model_registry import EvidenceBoundModelRouter
+from social_media_studio.legacy.production_os import (
     ShotContract,
     admit_candidate_generation,
     evaluate_take_promotion,
@@ -21,17 +21,17 @@ def version_at_least(actual: str, minimum: str) -> bool:
     )
 
 
-def test_video_studio_is_the_only_runtime_and_domain_modules_are_adapter_bound():
-    manifest = load("video_growth_agent/data/domain_manifest.json")
-    studio = load("video_studio/data/studio_manifest.json")
-    assert manifest["runtime"]["version"] == "1.0.0"
-    assert manifest["runtime"]["entrypoint"] == "video_studio.engine.StudioEngine"
-    assert manifest["domain_authority"]["runtime_root"] == "video_studio"
-    assert manifest["domain_authority"]["architecture"] == "docs/standalone_video_studio.md"
-    assert studio["runtime"] == "video_studio.engine.StudioEngine"
-    assert studio["domain_adapter_policy"]["control_plane"] == "video_studio"
+def test_social_media_studio_is_the_only_runtime_and_domain_modules_are_adapter_bound():
+    manifest = load("social_media_studio/legacy/data/domain_manifest.json")
+    studio = load("social_media_studio/data/studio_manifest.json")
+    assert manifest["runtime"]["version"] == "2.0.0"
+    assert manifest["runtime"]["entrypoint"] == "social_media_studio.engine.StudioEngine"
+    assert manifest["domain_authority"]["runtime_root"] == "social_media_studio"
+    assert manifest["domain_authority"]["architecture"] == "docs/standalone_social_media_studio.md"
+    assert studio["runtime"] == "social_media_studio.engine.StudioEngine"
+    assert studio["domain_adapter_policy"]["control_plane"] == "social_media_studio"
     assert "legacy_adapter_bundle_version" not in manifest["runtime"]
-    text = (ROOT / "docs/standalone_video_studio.md").read_text(encoding="utf-8")
+    text = (ROOT / "docs/standalone_social_media_studio.md").read_text(encoding="utf-8")
     assert "sole active control plane" in text
     assert "single tested adapter boundary" in text
     assert "fixed-stage `StudioOrchestrator` is not an active controller" in text
@@ -49,9 +49,9 @@ def test_current_program_has_explicit_cross_workstream_flywheel():
 
 
 def test_provider_architecture_is_capability_evidence_based_not_named_default():
-    caps = load("video_growth_agent/data/capabilities.json")
+    caps = load("social_media_studio/legacy/data/capabilities.json")
     router = next(item for item in caps["capabilities"] if item["capability_id"] == "evidence_bound_model_routing")
-    assert router["executor_ref"].startswith("video_growth_agent/model_registry.py")
+    assert router["executor_ref"].startswith("social_media_studio/legacy/model_registry.py")
     assert "current_provider_observations" in router["required_tools"]
     assert EvidenceBoundModelRouter
     benchmark = (ROOT / "docs/provider_benchmark_protocol.md").read_text(encoding="utf-8")
@@ -67,17 +67,17 @@ def test_candidate_generation_promotion_release_are_three_distinct_api_boundarie
 
 
 def test_video_domain_problem_recovery_is_video_owned_and_caos_governance_is_external():
-    caps = load("video_growth_agent/data/capabilities.json")
-    manifest = load("video_growth_agent/data/domain_manifest.json")
+    caps = load("social_media_studio/legacy/data/capabilities.json")
+    manifest = load("social_media_studio/legacy/data/domain_manifest.json")
     evolution = load("audits/EVOLUTION_INDEX.json")
 
     assert caps["governance_binding"]["system"] == "CAOS"
     assert caps["governance_binding"]["mode"] == "CHAT_GOVERNED_EXTERNAL"
     assert caps["governance_binding"]["runtime_dependency"] is False
     assert manifest["governance"]["source_mutation"] == "FORBIDDEN"
-    assert "ROOT_SCOPE_ADMISSION" in caps["video_domain_governance_realization"]
-    assert "TYPED_EVOLUTION_DISPOSITION" in caps["video_domain_governance_realization"]
-    assert evolution["owner"] == "DOMAIN:video"
+    assert "ROOT_SCOPE_ADMISSION" in caps["social_media_domain_governance_realization"]
+    assert "TYPED_EVOLUTION_DISPOSITION" in caps["social_media_domain_governance_realization"]
+    assert evolution["owner"] == "DOMAIN:social_media"
     assert evolution["governance_binding"]["system"] == "CAOS"
     assert evolution["governance_binding"]["runtime_dependency"] is False
 
@@ -106,7 +106,7 @@ def test_video_domain_problem_recovery_is_video_owned_and_caos_governance_is_ext
     assert prior["production_ci_run"] == 38690550495
 
 
-def test_ipos_r39_is_the_external_identity_authority_and_h1_is_retired():
+def test_historical_ipos_r39_snapshot_is_retained_without_current_authority():
     state = load("projects/ai-self-media-commercialization/PROGRAM_STATE.json")
     integration = load("projects/ai-self-media-commercialization/IPOS_INTEGRATION_STATE.json")
     graph = load("projects/ai-self-media-commercialization/SUBTASK_GRAPH.json")

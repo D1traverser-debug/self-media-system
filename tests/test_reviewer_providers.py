@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from video_growth_agent.reviewer_providers import (
+from social_media_studio.legacy.reviewer_providers import (
     GeminiReviewerAdapter,
     OpenRouterVisionReviewerAdapter,
     ReviewerRequest,

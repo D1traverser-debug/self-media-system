@@ -4,21 +4,21 @@ build-backend = "setuptools.build_meta"
 
 [project]
 dependencies = ["Pillow>=10.0", "filelock>=3.13"]
-name = "video-growth-agent"
-version = "1.0.0"
-description = "Outcome-driven Video Production Studio for research, media generation, editing, audiovisual QA, release and evidence-based learning"
+name = "social-media-studio"
+version = "2.0.0"
+description = "CAOS-governed Social Media Studio for multilingual writing, platform packaging, visual and identity craft, media transformation and original video"
 requires-python = ">=3.11"
 
 [project.scripts]
-vga-studio = "video_studio.cli:main"
+sms-studio = "social_media_studio.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["video_growth_agent*", "video_studio*"]
+include = ["social_media_studio*"]
 exclude = ["tests*", "skills*", "projects*"]
 
 [tool.setuptools.package-data]
-video_growth_agent = ["data/*.json", "data/*.md"]
-video_studio = ["data/*.json"]
+"social_media_studio.legacy" = ["data/*.json", "data/*.md"]
+"social_media_studio" = ["data/*.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

@@ -10,7 +10,7 @@ def _load(path: str):
 
 
 def test_produce_tasks_never_declare_approval_roles():
-    plan = _load("video_growth_agent/data/execution-plan.json")
+    plan = _load("social_media_studio/legacy/data/execution-plan.json")
     offenders = []
     for stage, spec in plan["stages"].items():
         for task in spec.get("tasks", []):
@@ -20,8 +20,8 @@ def test_produce_tasks_never_declare_approval_roles():
 
 
 def test_workflow_required_roles_are_review_roles_not_producer_roles():
-    plan = _load("video_growth_agent/data/execution-plan.json")
-    workflow = _load("video_growth_agent/data/workflow.json")
+    plan = _load("social_media_studio/legacy/data/execution-plan.json")
+    workflow = _load("social_media_studio/legacy/data/workflow.json")
     workflow_by_stage = {stage["id"]: stage for stage in workflow["stages"]}
 
     for stage, spec in plan["stages"].items():
@@ -37,4 +37,4 @@ def test_workflow_required_roles_are_review_roles_not_producer_roles():
 def test_runtime_config_has_single_repository_authority():
     assert not (ROOT / "config").exists()
     for name in ("workflow.json", "roles.json", "quality-rubric.json", "techniques.json"):
-        assert (ROOT / "video_growth_agent/data" / name).is_file()
+        assert (ROOT / "social_media_studio/legacy/data" / name).is_file()

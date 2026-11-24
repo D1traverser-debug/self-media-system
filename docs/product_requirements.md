@@ -1,6 +1,6 @@
-# Video Growth Agent — Product Requirements Baseline
+# Social Media Studio — Product Requirements Baseline
 
-> **Current authority (2026-11-16):** This document is retained as a Video 0.8 domain/product reference. New Video work is governed by `STUDIO_ENTRY.md`, `skills/video-growth-agent/SKILL.md` and `docs/standalone_video_studio.md`, with the standalone `video_studio` runtime. Any CAOS-governance wording below describes the historical 0.8 operating arrangement only; it is not a dependency or authority for new Studio work.
+> **Historical domain reference (retired execution authority, 2026-11-24):** Preserve reusable domain logic, media contracts and engineering evidence. All project-specific state, default project routing, fixed-stage task mandates and legacy controller references below are historical only. Current authority is `STUDIO_ENTRY.md`, `social_media_studio/data/studio_manifest.json` and `docs/standalone_social_media_studio.md`; every owner-facing Video decision/action is governed by read-only CAOS. No default task exists.
 
 
 Status: `CANDIDATE_0_8_0`
@@ -12,7 +12,7 @@ Architecture experience ref: `docs/agent_operability_scenarios.md`
 
 ## 1. Product outcome
 
-Video Growth Agent is one AI-native media business operating system. It turns evidence about audience needs, editorial questions and distinctive IP into repeatable high-quality media, measurable growth, sponsor/rights value and durable production learning.
+Social Media Studio is one AI-native media business operating system. It turns evidence about audience needs, editorial questions and distinctive IP into repeatable high-quality media, measurable growth, sponsor/rights value and durable production learning.
 
 It must be operable by a current Agent from durable state: the Agent can discover authority, understand the outcome, identify all admissible next actions, preserve editorial-to-production lineage, detect stale work, recover from failures/session interruption and distinguish comparable evidence from unresolved tradeoffs without relying on hidden chat memory.
 

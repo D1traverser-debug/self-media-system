@@ -56,28 +56,28 @@ Primary causal audit: `audits/VIDEO_AGENT_OPERABILITY_REDESIGN_2026-10-15.md`.
 
 ## Candidate runtime already implemented
 
-- `video_growth_agent/editorial_planning.py`
+- `social_media_studio/legacy/editorial_planning.py`
   - `EpisodeIntent`, `ClaimSpec`, `BeatSpec`, `ShotIntent`, versioned `EditorialPlan`;
   - evidence/truth checks, beat DAG, impact comparison;
   - explicit `materialize_shot_contract()` boundary.
-- `video_growth_agent/plan_graph_bridge.py`
+- `social_media_studio/legacy/plan_graph_bridge.py`
   - editorial-plan versions enter existing MediaGraph as upstream versioned assets so downstream invalidation can reuse one dependency graph.
-- `video_growth_agent/production_os.py`
+- `social_media_studio/legacy/production_os.py`
   - ShotContract now binds editorial plan / beat / source claim / continuity / value-vector context.
-- `video_growth_agent/continuity.py`
+- `social_media_studio/legacy/continuity.py`
   - dimension-level continuity rules rather than one opaque continuity score.
-- `video_growth_agent/model_registry.py`
+- `social_media_studio/legacy/model_registry.py`
   - operation profiles for legal capability combinations;
   - evidence-bound `QualityObservation` with rubric/calibration scope/uncertainty;
   - hard floors use lower bounds;
   - production selection uses Pareto-front + explicit priority instead of weighted scalar collapse.
-- `video_growth_agent/experiments.py`
+- `social_media_studio/legacy/experiments.py`
   - preregistered hypothesis, changed/fixed variables, metric semantics, guardrails, observation/stop rules;
   - multi-variable test cannot claim single-variable causal attribution;
   - `NO_CLEAR_WINNER` / `INCONCLUSIVE` supported.
-- `video_growth_agent/editorial_interchange.py`
+- `social_media_studio/legacy/editorial_interchange.py`
   - internal timeline/version + asset digests + adapter evidence + external project/composition identity + roundtrip receipt.
-- `video_growth_agent/operator_view.py`
+- `social_media_studio/legacy/operator_view.py`
   - derived current-Agent operating projection; intentionally non-authoritative and unable to promote/mutate business truth.
 - package top-level current routing surface was adjusted so legacy scalar router remains compatibility code rather than the preferred public entry.
 
@@ -144,4 +144,4 @@ First action on resume: fetch PR #15 latest head and latest workflow run, then f
 
 ## Resume phrase for user
 
-`继承 视频系统 0.8。读取 video-growth-agent PR #15、audits/VIDEO_0_8_RESUME_CHECKPOINT_2026-10-15.md、EVOLUTION_INDEX 和 VIDEO_AGENT_OPERABILITY_REDESIGN_2026-10-15.md，从最新 CI 失败断点继续；不要推进 H1/A2。`
+`继承 视频系统 0.8。读取 social-media-studio PR #15、audits/VIDEO_0_8_RESUME_CHECKPOINT_2026-10-15.md、EVOLUTION_INDEX 和 VIDEO_AGENT_OPERABILITY_REDESIGN_2026-10-15.md，从最新 CI 失败断点继续；不要推进 H1/A2。`

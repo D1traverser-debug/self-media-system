@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pytest
 
-from video_growth_agent.models import Approval, ArtifactRecord, AssetRecord, QACheck, QAReport
-from video_growth_agent.orchestrator import GateBlocked
-from video_growth_agent.storage import ProjectStore
-from video_growth_agent.runtime import StudioRuntime
-from video_growth_agent.studio_agents import AgenticStudio
+from social_media_studio.legacy.models import Approval, ArtifactRecord, AssetRecord, QACheck, QAReport
+from social_media_studio.legacy.orchestrator import GateBlocked
+from social_media_studio.legacy.storage import ProjectStore
+from social_media_studio.legacy.runtime import StudioRuntime
+from social_media_studio.legacy.studio_agents import AgenticStudio
 
 
 def runtime(tmp_path: Path) -> StudioRuntime:
@@ -68,7 +68,7 @@ def test_current_prompts_are_approval_role_scoped_not_producer_scoped(tmp_path):
 
 
 def _record_fake_qa_receipt(rt, project_id: str, media_uri: str, hard_pass: bool, sha256: str | None = None):
-    from video_growth_agent.models import QACheck, QAReport
+    from social_media_studio.legacy.models import QACheck, QAReport
     statuses = {"video_stream":"PASS","stream_duration_match":"PASS","true_peak":"PASS" if hard_pass else "FAIL","black_frames":"PASS"}
     checks = tuple(QACheck(check_id, status, "test") for check_id, status in statuses.items())
     metadata = {"checker":"ffmpeg-ffprobe-v0.2"}
@@ -100,16 +100,16 @@ def test_manual_technical_qa_artifact_cannot_forge_machine_pass(tmp_path):
 
 
 def test_release_accepts_digest_match_when_persistent_uri_differs(tmp_path):
-    from video_growth_agent.models import QACheck, QAReport
+    from social_media_studio.legacy.models import QACheck, QAReport
     rt = runtime(tmp_path); rt.create_project("digest"); state = rt.state("digest"); state.stage = "RELEASE"; state.artifacts["final_media"] = ArtifactRecord("final_media", "library://final", "RELEASE", kind="media", digest="abc123"); state.artifacts["publish_pack"] = ArtifactRecord("publish_pack", "file://publish.md", "RELEASE"); state.approvals["RELEASE"] = {"showrunner": Approval("showrunner", "PASS")}; rt.store.save(state); rt.record_qa("digest", QAReport(media_uri="/mnt/data/materialized-final.mp4", checks=tuple(QACheck(check_id, "PASS", "test") for check_id in ("video_stream", "stream_duration_match", "true_peak", "black_frames")), metadata={"checker": "ffmpeg-ffprobe-v0.2", "sha256": "abc123"})); state = rt.state("digest"); state.stage = "RELEASE"; rt.store.save(state); assert rt.gate_report("digest")["machine_failures"] == []
 
 
 def test_default_project_store_never_targets_installed_package(monkeypatch, tmp_path):
-    monkeypatch.chdir(tmp_path); monkeypatch.delenv("VGA_PROJECTS_DIR", raising=False); store = ProjectStore(); assert store.root == tmp_path / "projects"
+    monkeypatch.chdir(tmp_path); monkeypatch.delenv("SMS_PROJECTS_DIR", raising=False); store = ProjectStore(); assert store.root == tmp_path / "projects"
 
 
 def test_empty_or_untrusted_qa_receipt_cannot_pass_machine_gate(tmp_path):
-    from video_growth_agent.models import QAReport
+    from social_media_studio.legacy.models import QAReport
     rt = runtime(tmp_path); rt.create_project("untrusted"); state = rt.state("untrusted"); state.stage = "TECH_QA"; state.artifacts["final_candidate"] = ArtifactRecord("final_candidate", "file://candidate.mp4", "TECH_QA", kind="media"); state.approvals["TECH_QA"] = {"technical_director": Approval("technical_director", "PASS")}; rt.store.save(state); rt.record_qa("untrusted", QAReport(media_uri="file://candidate.mp4", checks=())); state = rt.state("untrusted"); state.stage = "TECH_QA"; rt.store.save(state); assert "latest_media_qa_hard_pass" in rt.gate_report("untrusted")["machine_failures"]
 
 

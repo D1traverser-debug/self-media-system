@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from video_growth_agent.model_registry import (
+from social_media_studio.legacy.model_registry import (
     EvidenceBoundModelRouter,
     ModelObservation,
     OperationProfile,
