@@ -223,3 +223,100 @@ The accompanying \`docs/CONTENT_STUDIO_ARCH_ACCEPTANCE_V2.json\` encodes represe
 - Existing tests and branch CI cover structural contracts/fixtures. They do not prove complete source semantic audit, native fresh-chat selection, or real end-to-end owner goals.
 
 **Promotion condition:** design source and cross-reference accepted against this matrix, no unresolved architectural contradiction, exact revision pinned, rollback identified. Until then this file is an architectural candidate with no override power.
+
+
+## M. Source-to-boundary migration and implementation map (design contract)
+
+The module inventory below was obtained from exact original GitHub file bytes at 1cbc3acf0491ecaa297576372f80163d8c255606. "Read" means imports/public operations were examined, not an assertion of complete line-by-line semantic audit. Keep these original paths in the source ledger until migrated and independently regression-tested.
+
+| Existing source | Current ownership / diagnosed risk | Target operation / migration decision | Protection test |
+|---|---|---|---|
+| video_studio/cli.py (436 lines) | single real CLI; direct/durable split mostly prose | keep thin CLI; delegate typed demand entry, evidence and command ports; avoid novel second CLI | installed smoke; no other launch path |
+| video_studio/scope.py (168) | task-neutral intake, project epoch, capability/knowledge locator; accepts text goals | adapt to typed DemandContract & route decision without choosing a historical task | exact current owner request / no stale examples |
+| video_studio/engine.py (~2459) | durable aggregate for state, graph, decisions, assets, review, release | **decompose behind preserved StudioEngine API** into typed demand, graph/admission, artifact/event store, review/quality, knowledge/evidence services only after pinned behavioral fixtures | same public methods, migration and concurrency replay |
+| video_studio/system_audit.py (454) | current structural audit; cannot prove creative quality | add source/import/authority graph and real operation registry checks; differentiate design/system/real-outcome reports | expected current paths/registries, no green-PASS overclaim |
+| video_studio/adapters.py (1091) | 17 registered adapters, heterogeneous domain logic | keep compatibility bridge, later group by capability port and version without unreviewed business semantic changes | 17 adapter positive/negative fixtures, input digest, rights |
+| video_studio/media.py (284) | FFprobe/FFmpeg technical measurement | preserve technical QA port; add typed media/audio transformation oracle, do not conflate artistic review | real-media probes and negative streams |
+| video_studio/production/{registry,handlers,executors,worker_pool}.py | 4 operations, actual FFmpeg execution, leases, worker concurrency | retain local executor registry; add operation metadata, exact rights/approval constraints, effect receipts and idempotency | two real tools in parallel, stale decision, timeout, retry |
+| video_studio/production/{contracts,ffmpeg_assembler}.py | video-only RenderSpec; current audio amix/AAC transform | preserve existing assembler for TRANSFORM_AUDIO_AND_VIDEO; introduce distinct AUDIO_STREAM_COPY and other media edit operations **only after feasibility proof** | bitstream/PCM/hash controls, time range, error/fallback |
+| video_studio/production/{frame_worker,python_frame_renderer,delivery}.py | constrained local graphics and archive | retain as typed local ports; delivery is not platform posting, frame render is not general image generation | font/cost/rights, exact output paths, archive traversal |
+| video_growth_agent/{editorial_planning,production_os,plan_graph_bridge}.py | scene/shot editorial types, only applicable to some projects | expose via MediaComposition/ShotContract port; NOT universal article/short-copy plan | simple copy never constructs ShotContract |
+| video_growth_agent/{continuity,timeline,editorial_interchange}.py | video continuity, metadata timeline, external NLE interchange | keep optional MediaTimeline port; no generic content schema pollution | metadata roundtrip/source versions |
+| video_growth_agent/{media_graph,ip_identity}.py | media provenance, approved external IP bridge | retain provenance and IPOS Anti-Corruption-Layer; map to generic artifact IDs; leave canon in IPOS | missing approved identity blocks only canon-dependent work |
+| video_growth_agent/{business_objects,business_metrics,experiments}.py | integrated growth/commercial objective types | optional BusinessContext port with explicit owner activation | one-line caption no sponsor/finance needs |
+| video_growth_agent/{model_registry,engine_routing}.py | source-constrained shot/engine routing, not provider execution | convert capability metadata to checked ProviderOperationSnapshot; no fictitious access | unavailable provider and cost denied |
+| video_growth_agent/{programmatic_graphics,media_qa}.py | capable but narrower graphics/technical QA | keep scoped renderer; don't promote to cinematic original-video production | real frames, typographic clipping, target digest |
+| video_growth_agent/editorial_packaging.py (426) | hardcoded news×video satire and limited platform list | reclassify to HISTORICAL_NARROW_AUDIT; build separate neutral EditorialPackageContract and platform adapters | ordinary cat video, article, Headline vs Description |
+| video_growth_agent/{runtime,studio_agents,orchestrator,storage,models}.py | old fixed-stage 0.8 controller and file store | retire **active control authority**; preserve offline regression and transferable craft mechanisms; no simultaneous production scheduler | direct/installed CLI never imports old controller for owner workflow |
+| video_growth_agent/program_orchestration.py | old 4-workstream ProgramGraph | optional business semantic source, historical task graph retired | no fixed Program demands |
+| video_growth_agent/{roles,techniques,resources}.py | role prompt sections and static technique discovery | preserve knowledge reference and role labels; separate always-applicable methods from selectable actors, add version/validity | blind review is a method, not a "new agent" |
+| video_growth_agent/{reviewer_providers,execution_attestation,generation_guard}.py | isolated reviewer and generation preflight contracts, no guaranteed native tool use | optional assurance/provider ports with real execution evidence; no self-attested independence promotion | disconnected provider fails closed |
+| video_growth_agent/owner_behavior_admission.py | older domain root-scope style | preserve as historical method to compare against parent CAOS; no second cognitive controller | only actual parent selected governance applies |
+| video_growth_agent/data/{workflow,execution-plan,quality-rubric}.json | fixed video stages/lookdev; tempting global default | mark scope-limited historical methods; build DeliverableType- and risk-specific rubrics before any active replacement | one-line title no LOOKDEV or three reviews |
+| video_growth_agent/data/{capabilities,roles,agents,coordination-policy}.json | generic capability declarations plus historical references; 9 groups are categories | one registry per concept: exact operation vs role vs method vs team pattern, with cross-reference but no duplicate authority | 17+4 operation reflection; role prompt sync |
+| video_studio/data/{studio_manifest,knowledge_catalog,business_feedback}.json | active authority/knowledge/business relations | keep one promoted manifest as current locator after design gate; stable IDs, scoped method state, no default task | exact-path readback, source dependency invalidation |
+| skills/video-growth-agent and docs/standalone_video_studio.md | possible duplicate entry rules | consolidate to one root entry/manifest and method-specific references; avoid copied contradictions | installed Skill vs source conformance test |
+| projects/, examples/, historical audits | old tasks, outputs, prompts and regression data | leave source evidence intact; exclude from NEW route; use explicit migration/extraction with method applicability tests | no legacy current project from search or defaults |
+
+**Extract rather than copy:** A narrowly successful method from a historical pilot is a METHOD_CANDIDATE with source/conditions. Do not copy project briefs, specific people, title ideas, brand identity, platform settings or completed task objects into a new demand.
+
+## N. Target module responsibilities and ports (not a commitment to unnecessary files)
+
+Choose the smallest source layout able to hold these **interfaces**. Directory examples are descriptive; a source file is created only when a real separation is justified and regression tests exist.
+
+- \`video_studio/domain/contracts.py\`: pure models DemandContract, DeliverableContract, ContentIntent, Variant, SourceClaim, ReviewContract. No SQLite/network/provider import.
+- \`video_studio/domain/decisions.py\`: Video-local decision dependency and effect-snapshot contract, never a copied CAOS parent runtime; support invalidation from source/goal/method changes.
+- \`video_studio/domain/capabilities.py\`: operation typed metadata; keep old registries as adapters.
+- \`video_studio/application/intake.py\`: compare direct vs durable, derive goal revision and bounded context plan, expose why a group is selected. No automatic task effect.
+- \`video_studio/application/planning.py\`: typed deliverable-to-task decomposition, optional DAG; only real dependencies.
+- \`video_studio/application/coordination.py\`: bounded consult/compete/review/adjudicate patterns, not permanent agent manager.
+- \`video_studio/application/assurance.py\`: per-deliverable oracle assembly, artifact and evidence version checks, independent-review request/receipt verification.
+- \`video_studio/ports/{readers,providers,media,platforms,knowledge,identity,review}.py\`: Protocol/ABC contracts with effect scopes, output evidence, idempotency and permissions. Adapter code depends on these ports; domain contracts never import external providers.
+- \`video_studio/infrastructure/{sqlite,artifact_store,event_log}.py\`: keep existing public StudioEngine facade and transaction semantics; internally extract only after backward-compatibility proof.
+- \`video_studio/adapters/\`: concrete mappings to existing 17 domain adapters, local four production operations, and CURRENT_AVAILABLE external tools. The old giant adapters.py is a compatibility entry until negative import tests pass.
+- \`video_studio/knowledge/\`: scoped method/source retrieval + lifecycle and dependent decision invalidation. The existing knowledge_catalog is a locator, not an authority to change external files.
+- \`video_studio/contracts_by_type/\`: first reusable neutral contracts for SHORT_COPY, LONG_ARTICLE, PLATFORM_PACKAGE, STATIC_IMAGE, MULTI_ASPECT_IMAGE_SET and MEDIA_TRANSFORM; add ORIGINAL_VIDEO quality methods separately after sample tests.
+- \`video_studio/cli.py\`: only persistent CLI; direct ChatGPT session does not require calling it to prove CAOS.
+
+### N1. Illustrative typed interfaces (design only; not exact future Python API)
+
+\`DemandContract {id, revision, original_goal_ref, correction_refs, required_deliverables[], owner_constraints[], preferences[], prohibitions[], expected_business_outcome, authorization, unknowns}\`
+
+\`DeliverableContract {id, demand_rev, type, content_intent_id?, locale?, platform?, shape?, aspect?, constraints, source_refs, expected_artifacts[], quality_oracles[], source_truth_policy, rights_policy}\`
+
+\`CapabilityOperation {id, exact_operation, valid_input_types, output_types, applicability, forbidden_assumptions[], provider_snapshot?, effect_scope, permissions, cost_ceiling?, assurance_ceiling, known_gaps}\`
+
+\`DecisionEffectBinding {decision_id, demand_rev, affected_task_revision?, relevant_source_digests[], method_version?, exact_operation, effect_grant?, falsifier, rollback, prior_event_anchor}\`
+
+\`EvidenceReceipt {actual_executor, request_id, external_operation_id?, source_digests, result_artifact_id?, output_sha256?, measured_properties, test_environment, independent_reviewer?, confidence, open_issues[]}\`
+
+\`QualityOracle {deliverable_type, target, required_properties[], test_method, observation_refs[], independent_assessor?, result, failure_scope, reentry_target}\`
+
+Migration adapters translate existing brief \`goal,audience,deliverables[]\` to typed contracts only if the resulting output and permissions remain semantically equivalent; otherwise create a new explicit owner-scoped revision and invalidate dependents.
+
+### N2. Contract evolution and concurrency
+- Source and operation schema versions are explicit, with upgrade readers for old versions. Do not write over immutable old evidence or use a same-path copy to falsely pass provenance tests.
+- Import from source→current scope requires source owner evidence, artifact ID+hash and rights. Cross-project import copies exact source version with transfer receipt and reverse invalidation.
+- A revised DemandContract increments the goal event/revision; completed decisions based on that event become stale. A task revision does not alter unrelated tasks. Reverting text still has a new revision identity.
+- Reclaiming expired leases, WAITING_EXTERNAL, retry exhaustion, provider response uncertainty and owner cancellation have separate machine-observable states. Idempotency keys and read-before-retry defend against duplicated external effects.
+- Typed technical QA is reusable, but release/approval is the permission boundary. No "complete task" implicitly publishes, licenses or deletes.
+
+## O. Design negative probes and acceptance strength
+
+The 28 scenario pairs in \`docs/CONTENT_STUDIO_ARCH_ACCEPTANCE_V2.json\` are architectural requirements. Every scenario must have both a positive oracle and an explicit forbidden implicit effect; none is a report of successful media generation.
+
+Additional interface-level negative probes before code refactor:
+1. Wrong deliverable type tries a video-only media QA or lookdev gate: FAIL architecture routing.
+2. A method says "ACTIVE" but underlying source version moved or is historical: FAIL admission until revalidation.
+3. An agent fills every decision receipt field but sources/alternatives are fabricated: DO NOT infer cognitive validity; require source evidence/independent challenge appropriate to risk.
+4. A reusable role ID equals the current tool provider but no actual provider is connected: FAIL effect authorization.
+5. Simulated "human review" from a renamed model role: FAIL independence where real separation is required.
+6. A revision removes a premise then later restores the same string: old decision authorization remains invalid.
+7. One parallel branch loses its lease or source: unrelated admitted branch proceeds, affected dependents stale.
+8. A video effect changes the soundtrack while the owner specified BITSTREAM_IDENTITY: FAIL regardless of playback quality.
+9. An external distribution action is attempted from a content-package "complete" event: FAIL without publication grant.
+10. A single editorial task defaults to Program/Series/Episode or old creative director lookdev: FAIL.
+11. User sends an irrelevant reference photo; no project/input relation grants it artifact status.
+12. No native Skill-selection trace: assurance remains NOT_TESTED even if model prose looks CAOS-compliant.
+
+**Architecture evidence tiers for this revision:** repo-path inventory READ; 40+ relevant original source modules' import/operations inspected; 28 scenario pairs structurally repaired and mapped; relevant AWS DDD, LangGraph, OpenAI Agents guardrail and FFmpeg originals researched; no independent native Skill trigger run; no complete semantic examination of every historical project; no independent owner-grade original media production. All missing proof stays OPEN.
