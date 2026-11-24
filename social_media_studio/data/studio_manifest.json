@@ -176,9 +176,9 @@
   },
   "domain_adapter_policy": {
     "control_plane": "social_media_studio",
-    "video_domain_modules": "VIDEO_OWNED_DOMAIN_LOGIC__EXPLICIT_ADAPTERS_ONLY",
     "fixed_stage_orchestrator": "NOT_LOADED_BY_STUDIO_RUNTIME",
-    "require_artifact_receipts": true
+    "require_artifact_receipts": true,
+    "specialist_domain_modules": "SOCIAL_MEDIA_OWNED_DOMAIN_LOGIC__EXPLICIT_ADAPTERS_ONLY"
   },
   "system_audit": "social_media_studio.system_audit.run_system_audit",
   "task_admission": {
@@ -384,7 +384,6 @@
     ],
     "mutation_authority": "VIDEO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
   },
-  "legacy_repository_identity": "social-media-studio",
   "product_scope": [
     "LONG_FORM_AND_SHORT_EDITORIAL",
     "MULTILINGUAL_PLATFORM_PACKAGING",
@@ -395,5 +394,6 @@
     "ORIGINAL_AUDIOVISUAL_CREATION",
     "OPTIONAL_GROWTH_AND_COMMERCIAL"
   ],
-  "product_name_zh": "自媒体系统"
+  "product_name_zh": "自媒体系统",
+  "repository_slug": "social-media-studio"
 }

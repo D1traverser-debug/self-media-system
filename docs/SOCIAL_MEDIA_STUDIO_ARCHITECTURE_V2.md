@@ -1,9 +1,9 @@
 # Social Media Studio — Architecture Contract v2 (DESIGN CANDIDATE)
 
 **Status:** ARCHITECTURE_CANDIDATE / NOT_PROMOTED / NO_RUNTIME_AUTHORITY  
-**Owner:** VIDEO_GROWTH_AGENT (repository name retained for compatibility)  
+**Owner:** SOCIAL_MEDIA_STUDIO (self-media system identity)  
 **Frozen implementation baseline:** PR #40, commit 1cbc3acf0491ecaa297576372f80163d8c255606; 370-test exact-head CI 45416359779 PASS.  
-**Governance authority:** owner intent + corrections; CAOS parent Skill and private owner original, read-only; child domain decisions and execution remain Video-owned.  
+**Governance authority:** owner intent + corrections; CAOS parent Skill and private owner original, read-only; child domain decisions and execution remain self-media-owned.  
 **Identity subsystem:** IPOS is a professional identity-design bounded context WITHIN the Social Media Studio product architecture; its current Skill/private Library source and permanent approved canon have independent source custody. No automatic state duplication.  
 **Scope:** design all architecture dimensions before runtime implementation; no change to CAOS source; no old task reactivation, automatic publication or provider authorization.
 
@@ -13,8 +13,8 @@ The product is a **general digital content creation, transformation and multi-pl
 
 Non-negotiable architecture properties:
 1. **One goal authority:** the owner's original demand plus ordered corrections; an example, past project, viral trend or prior assistant plan does not acquire authority.
-2. **One parent cognition authority:** read-only CAOS guidance across all levels and every substantive decision/effect, including routing, diagnosis, method research, tool choice, code change, review and learning. The Video runtime cannot certify native ChatGPT Skill selection or mental quality. No copied CAOS Host.
-3. **One Video durable task ledger:** StudioEngine's current per-project SQLite and append-only event history; no second planner/controller for the same project. Direct session work needs no artificial project.
+2. **One parent cognition authority:** read-only CAOS guidance across all levels and every substantive decision/effect, including routing, diagnosis, method research, tool choice, code change, review and learning. The Social Media Studio runtime cannot certify native ChatGPT Skill selection or mental quality. No copied CAOS Host.
+3. **One Social Media Studio durable task ledger:** StudioEngine's current per-project SQLite and append-only event history; no second planner/controller for the same project. Direct session work needs no artificial project.
 4. **Independent bounded domains:** business objectives, professional craft, optional media containment, temporary work groups, methods, task DAG, cognition dependencies, artifact lineage and post-release business feedback are NOT one graph.
 5. **Only current scope:** old project IDs, old 50-task graph, prior IP goals and other historical work orders are RETIRED_EVIDENCE_ONLY; original files remain traceable and never auto-select work.
 6. **Source-before-authority:** exact source owner, ID, version/commit or byte hash, applicability, and active/obsolete lifecycle; snapshots and library filenames do not prove current truth.
@@ -37,7 +37,7 @@ Non-negotiable architecture properties:
 **H5 — all tasks need a multi-agent graph.** Falsified by simple copy and local edits. A graph is warranted only when declared dependencies, persistent state, cross-actor handoffs, repeatability or costly risks require it.
 
 Alternatives:
-- A. Rebuild a monolithic CAOS+Video all-purpose controller: reject duplicate authority, excess coupling and unverifiable native enforcement.
+- A. Rebuild a monolithic CAOS+Social Media Studio all-purpose controller: reject duplicate authority, excess coupling and unverifiable native enforcement.
 - B. Split professional teams into permanent microservices/agents: defer; introduces distributed task truth and gratuitous chat/handoff overhead before real demand.
 - C. Keep the current video/business ontology and add handlers to each exception: reject; perpetuates fixed workflow and low-quality creative assumptions.
 - D. **Selected conditional design:** a *modular domain-centered core with ports/adapters*, one optional durable engine, independent domain contracts, on-demand specialist composition, and CAOS governing actual ChatGPT interaction. Reuse the proven engine/asset/QA modules; adapt/replace overfit domain and policy interfaces; remove obsolete active authorities without deleting evidence.
@@ -58,7 +58,7 @@ Primary comparisons (mechanisms, not mandates):
 - USER: original goal, constraints, preferences, effect authorization, owner acceptance, corrections.
 - CAOS parent: recurring, recursively re-enterable cognitive and execution governance, root-cause diagnosis, source qualification, method challenge, independent overall goal assessment. **Read-only source; no child state ownership.** Native first-mile activation NOT_TESTED.
 - CONTENT STUDIO domain: demands, deliverables, craft judgement, planning, local evidence, asset custody, quality/acceptance and optional platform distribution preparation.
-- ORIGINAL_IDENTITY / IPOS: the nested specialist context of Social Media Studio for durable creator identity design; real IPOS workflow and canonical state are separately custodied. Video can import an owner-approved versioned bundle, not rewrite canon. One-off avatars do not imply IPOS involvement.
+- ORIGINAL_IDENTITY / IPOS: the nested specialist context of Social Media Studio for durable creator identity design; real IPOS workflow and canonical state are separately custodied. Social Media Studio can import an owner-approved versioned bundle, not rewrite canon. One-off avatars do not imply IPOS involvement.
 - PROVIDER/PLATFORM: actual operations and state, available only through current checked interfaces, not inferred from documentation.
 - INDEPENDENT REVIEWER: distinct actor/context where required, with actual artifact readback; an arbitrary reviewer string is not proof of independence.
 
@@ -79,7 +79,7 @@ The existing L0–L6 labels are **responsibility scopes**, never an execution or
 These are **bounded responsibility contexts**, not nine servers, nine compulsory phases or nine permanent workers. A one-sentence task may require only Demand, Editorial, relevant Quality and direct outcome verification.
 
 ### C3. Orthogonal graphs
-- **Cognition/justification graph:** question → hypotheses/alternatives → sourced decision → dependent conclusions/effects; can cycle via falsification/research. CAOS parent governs; Video stores local evidence for Video effects. This is NOT the task DAG.
+- **Cognition/justification graph:** question → hypotheses/alternatives → sourced decision → dependent conclusions/effects; can cycle via falsification/research. CAOS parent governs; Social Media Studio stores local evidence for self-media effects. This is NOT the task DAG.
 - **Work dependency graph:** finite DAG of actual executable tasks, explicit inputs/outputs, readiness and concurrency. Revision creates a new generation; cycles occur between generations, not within one DAG.
 - **Composition/containment:** Article→Section→Paragraph, Campaign→Post/Variant, Video→Sequence→Shot→Take as applicable. Do not impose the full Program→Episode→Take hierarchy on an image or social caption.
 - **Artifact provenance DAG:** source version/byte digest → transformations → output variants → review receipts. Integrity and rights follow exact dependent edges.
@@ -134,7 +134,7 @@ Every provider adapter declares:
 - quality assurance = UNTESTED / FIXTURE_TESTED / REAL_ARTIFACT_VERIFIED / USER_OUTCOME_VERIFIED by operation and task type;
 - explicit failure/degradation policy and independent readback. No provider claims implied by Skill text.
 
-**Operations are typed.** A format transformation is not AI upscaling; FFprobe success is not semantic video understanding; a story prompt is not a good scene; an image rendering interface is not aesthetic direction. Current four production operations and seventeen domain adapters keep their exact scope. Legacy 0.8 orchestrator is evidence only.
+**Operations are typed.** A format transformation is not AI upscaling; FFprobe success is not semantic video understanding; a story prompt is not a good scene; an image rendering interface is not aesthetic direction. Current five production operations and seventeen domain adapters keep their exact scope. Legacy 0.8 orchestrator is evidence only.
 
 ### F1. Audio preservation: three independent promises
 - BITSTREAM_IDENTITY: exact audio payload bytes/codec stream unchanged; only offer when container, cut boundaries and mux support it; prove stream hashes/packet identity as applicable. A remux can preserve encoded audio without making output-file bytes identical.
@@ -168,7 +168,7 @@ Review independence is an evidence claim: distinct task/context or actual human/
 
 ## H. Sources, knowledge, skills and lifecycle
 
-- **Source strata:** owner original and corrections (goal), CAOS private source/installed Skill (parent governance), Video exact main/PR/test (implementation), active owner Project ledger (state), relevant private assets (raw evidence), external platform/provider sources (volatile capability), historical examples (training/regression only). Never merge strata into one "current" search index.
+- **Source strata:** owner original and corrections (goal), CAOS private source/installed Skill (parent governance), Social Media Studio source revision/PR/test (implementation), active owner Project ledger (state), relevant private assets (raw evidence), external platform/provider sources (volatile capability), historical examples (training/regression only). Never merge strata into one "current" search index.
 - **Memory strata:** working context; episodic events; semantic source-versioned facts; procedural independently tested methods; invalidated/superseded history.
 - **Knowledge states:** DISCOVERED → SOURCE_VERIFIED → CANDIDATE → TRIALLED → VALIDATED_SCOPE → ACTIVE_SCOPE, with QUARANTINED, SUPERSEDED and RETIRED branches. Transitions require evidence, conditions, negative trials, decision owner and readback; no model self-asserted independent replay.
 - **CRUD:** exact ID/path, owner/permissions, prior version/hash, dependency graph, prospective effect, no-op detection, transaction/backup/recovery, independent provider readback. Retire authority separately from irreversible deletion. No CAOS write; no cross-system file auto-mutation.
@@ -180,7 +180,7 @@ Review independence is an evidence claim: distinct task/context or actual human/
 - State machines are scoped: Demand ACTIVE/REVISED/CLOSED; Task PENDING/READY/RUNNING/WAITING_EXTERNAL/BLOCKED/FAILED/COMPLETED/STALE/CANCELLED; Artifact CANDIDATE/ACCEPTED/REJECTED/STALE; Method CANDIDATE/VALIDATED_SCOPE/SUPERSEDED/RETIRED. Never conflate current legacy statuses with target design without migration.
 - Append-only events; monotonic revisions; exact CAS or equivalent concurrency control; leases and retry budgets; cancellation; isolated temp files and atomic promotion; multiple workers never double-complete the same effect.
 - Input and prompt injection boundaries: web/plugin text and user assets are data, not policy. Rights/consent/likeness and disclosure are separately checked. Imported assets never imply an external publication grant.
-- Read-only CAOS parent integration and internal IPOS specialist bridge. Video cannot mutate IPOS private state via generic knowledge CRUD; only owner-approved versioned canon export may be used downstream.
+- Read-only CAOS parent integration and internal IPOS specialist bridge. Social Media Studio cannot mutate IPOS private state via generic knowledge CRUD; only owner-approved versioned canon export may be used downstream.
 - Trace IDs for Demand, Decision, Task, Effect, Artifact, Review, Method; event causality supports replay, missing-data inspection and reversal. Sensitive private originals stay in private destinations; public repository contains mechanism or sanitized test cases only.
 - Operation budget and provider switching: live constraints, failure rate, source cost, risk and quality ceiling matter; no fabricated price or guarantee. Consider serial, parallel, competing candidate and no-operation decisions.
 - User-visible reporting distinguishes requested result, exact files/links, verified effects, unresolved blockers and next legitimate action. No promise of background work without actual automation.

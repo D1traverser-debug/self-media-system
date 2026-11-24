@@ -1,18 +1,18 @@
 # 自媒体系统（Social Media Studio）
 
-The repository name is retained for compatibility. This is a CAOS-governed **general digital content system**, not a mandatory video-production pipeline. Its on-demand professional capabilities include original Chinese/English writing and X Articles, platform-native titles/descriptions/tags/cover copy, static/multi-aspect images and prompts, multimedia understanding and editing, exact audio preservation, audiovisual production, and nested Original Identity/IPOS. Each user goal activates only relevant capabilities. The Video runtime remains technically independent of the CAOS codebase; CAOS governs the user's selected work at every material decision/effect.
+The source package, command and product identity have been migrated; the GitHub remote address requires a separate administrative rename. This is a CAOS-governed **general digital content system**, not a mandatory video-production pipeline. Its on-demand professional capabilities include original Chinese/English writing and X Articles, platform-native titles/descriptions/tags/cover copy, static/multi-aspect images and prompts, multimedia understanding and editing, exact audio preservation, audiovisual production, and nested Original Identity/IPOS. Each user goal activates only relevant capabilities. The Social Media Studio runtime remains technically independent of the CAOS codebase; CAOS governs the user's selected work at every material decision/effect.
 
 **Current launch authority:** `STUDIO_ENTRY.md` + `social_media_studio/data/studio_manifest.json`. **Detailed candidate architecture:** `docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md` (not automatically promoted). **No existing video/business project or 50-task plan is active by default.** Read only specific historical sources if they are relevant; do not treat a task sample as a current owner goal.
 
 ## Current authority
 
-- `STUDIO_ENTRY.md` — only startup and operating entry for new Video work.
-- `docs/standalone_social_media_studio.md` — Video-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
+- `STUDIO_ENTRY.md` — only startup and operating entry for new self-media work.
+- `docs/standalone_social_media_studio.md` — self-media-owned goal, decision, dynamic DAG, execution, artifact, review, failure and learning method.
 - `social_media_studio/data/studio_manifest.json` — canonical runtime and parent-governance contract; no CAOS runtime/API dependency.
 - `social_media_studio/engine.py`, `cli.py`, `media.py` — canonical standalone project state, concurrent task claims, artifact lineage and deterministic FFmpeg/FFprobe QA.
 - `social_media_studio/adapters.py` — explicit, task-bound adapters for EditorialPlan, ShotContract, IPOS shot binding, IPOS continuity, MediaGraph bootstrap, Timeline, continuity, shot routing, business metrics, supplementary audio QA and deterministic local graphic rendering.
-- `skills/social-media-studio/SKILL.md` — self-contained Video-owned agent operating instructions.
-- `domain_manifest.json` and `capabilities.json` — Video-owned domain identity and capability contracts consumed by the canonical Studio.
+- `skills/social-media-studio/SKILL.md` — self-contained self-media-owned agent operating instructions.
+- `domain_manifest.json` and `capabilities.json` — self-media-owned domain identity and capability contracts consumed by the canonical Studio.
 - `docs/product_requirements.md` — historical 0.8 product-requirements baseline; new operating authority is the standalone contract.
 - `docs/media_business_os.md` — 0.8 media-business domain reference; new execution/governance authority is standalone Social Media Studio.
 - `docs/architecture.md` — historical 0.8 architecture reference.
@@ -21,10 +21,10 @@ The repository name is retained for compatibility. This is a CAOS-governed **gen
 - `projects/PROJECT_INDEX.json` — retired historical project/program index; not current task or owner-context authority.
 - `social_media_studio/data/business_feedback.json` — task-neutral growth/IP/commercial/production feedback relations.
 - `audits/EVOLUTION_INDEX.json` — canonical Video evolution-evidence entrypoint.
-- `social_media_studio/legacy/` — Video-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
+- `social_media_studio/legacy/` — self-media-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
 
-The `social_media_studio` package is the sole Video runtime: it owns Video project briefs, task DAGs, leases, artifact history, review receipts, failure recovery and domain execution. CAOS governs session-level requirement interpretation, material decisions, root-cause investigation, cross-domain authorization and independent acceptance when the owner selects Video from CAOS. The Video runtime has no CAOS API, runtime, task-ID or lease dependency. Video domain modules are imported only through the explicit `social_media_studio.adapters` boundary; the old fixed-stage controller is not an active execution path.
+The `social_media_studio` package is the sole Social Media Studio runtime: it owns self-media project briefs, task DAGs, leases, artifact history, review receipts, failure recovery and domain execution. CAOS governs session-level requirement interpretation, material decisions, root-cause investigation, cross-domain authorization and independent acceptance when the owner selects Social Media Studio from CAOS. The Social Media Studio runtime has no CAOS API, runtime, task-ID or lease dependency. specialist content-domain modules are imported only through the explicit `social_media_studio.adapters` boundary; the old fixed-stage controller is not an active execution path.
 
 ## Historical Video 0.8 domain models (not a universal execution chain)
 
@@ -60,7 +60,7 @@ Core 0.8 runtime surfaces:
 - `business_objects.py` — typed content-portfolio, distinctive-asset, commercial-fit, rights-package, offer and business-decision objects;
 - `business_metrics.py` — platform, production and commercial outcome receipts without one vanity score;
 - `operator_view.py` — non-authoritative CURRENT_AGENT projection;
-- `owner_behavior_admission.py` — Video-domain recovery, root-scope analysis, typed evolution and repair-closure rules.
+- `owner_behavior_admission.py` — self-media-domain recovery, root-scope analysis, typed evolution and repair-closure rules.
 
 ## Reusable business domains, no default task
 
@@ -103,7 +103,7 @@ Missing a high-assurance reviewer blocks only operations that require that tier.
 
 CAOS parent governance governs the session-level decision and execution discipline: recover the real outcome; compare competing hypotheses and methods; use discriminating tests and counterevidence; inspect exact artifact bytes; diagnose failures at the causal layer; independently replay repairs; and promote learning only with applicability, counterexamples and regression evidence. Social Media Studio owns the domain task graph and execution records; no CAOS runtime/API call is made.
 
-The standalone release contract now records immutable input lineage, invalidates consumers on source replacement, requires rights evidence across used media lineage, enforces exact-digest FFmpeg/FFprobe QA (full decode, stream timing, true peak and black frames), supports attested human cold reads and requires three evidence-backed Red Team findings when configured. See `docs/standalone_social_media_studio.md` and the three outcome/task examples.\n\nThe Video domain capability catalog describes verified domain operations; the Studio manifest is the sole runtime authority.
+The standalone release contract now records immutable input lineage, invalidates consumers on source replacement, requires rights evidence across used media lineage, enforces exact-digest FFmpeg/FFprobe QA (full decode, stream timing, true peak and black frames), supports attested human cold reads and requires three evidence-backed Red Team findings when configured. See `docs/standalone_social_media_studio.md` and the three outcome/task examples.\n\nThe self-media capability catalog describes verified domain operations; the Studio manifest is the sole runtime authority.
 
 
 ### Isolated regression examples

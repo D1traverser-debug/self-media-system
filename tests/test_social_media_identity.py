@@ -17,6 +17,7 @@ def test_single_social_media_studio_identity():
     assert manifest["product_name_zh"] == "自媒体系统"
     assert manifest["owner"] == "SOCIAL_MEDIA_STUDIO"
     assert manifest["governance"]["system"] == "CAOS"
+    assert manifest["domain_adapter_policy"]["specialist_domain_modules"].startswith("SOCIAL_MEDIA_")
     assert (ROOT / "social_media_studio/legacy/ip_identity.py").is_file()
     assert not (ROOT / ("video" + "_studio")).exists()
     assert not (ROOT / ("video" + "_growth_agent")).exists()
@@ -30,7 +31,7 @@ def test_no_retired_product_identifiers_in_active_files():
         "Universal" + " Content Studio",
     )
     included = [ROOT / x for x in (
-        "pyproject.toml", "README.md", "STUDIO_ENTRY.md", ".github/workflows/ci.yml",
+        "pyproject.toml", "README.md", "STUDIO_ENTRY.md", ".github/workflows/ci.yml",\n        "docs/standalone_social_media_studio.md", "docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md",
     )]
     for folder in ("social_media_studio", "skills/social-media-studio"):
         included += [p for p in (ROOT / folder).rglob("*") if p.is_file() and p.suffix in (".py", ".json", ".md", ".yml")]
@@ -38,3 +39,10 @@ def test_no_retired_product_identifiers_in_active_files():
                   for p in included for token in banned
                   if token in p.read_text(encoding="utf-8")]
     assert not violations, violations
+
+
+def test_startup_contract_uses_self_media_as_product_scope():
+    for rel in ("README.md", "STUDIO_ENTRY.md", "skills/social-media-studio/SKILL.md"):
+        content = (ROOT / rel).read_text(encoding="utf-8")
+        for stale in ("Video-owned", "Video-domain requirements", "Video runtime", "Video work", "Video conversations"):
+            assert stale not in content, (rel, stale)
