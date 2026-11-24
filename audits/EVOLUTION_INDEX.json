@@ -1,26 +1,34 @@
 {
   "schema_version": "1.2",
   "owner": "DOMAIN:video",
-  "revision": "3.0-candidate",
+  "revision": "4.0-universal-content-candidate",
   "updated_at": "2026-11-24",
   "current_open_items": [
-    "Exact candidate HEAD CI and independent review",
-    "Whole-system and all subsystem semantic audit, including real professional methods, roles, quality and cross-group contracts",
-    "Real native CAOS activation and recursive decision/effect/feedback behavior across fresh conversations",
-    "Non-task authorization and effect guards, decision dependency propagation, scheduler failure/wait/retry recovery",
-    "Knowledge lifecycle and independent method promotion, source invalidation and CRUD",
-    "Real independent outcomes for text, images, packaging, media transform and original video production"
+    "Independent semantic audit of all current source modules and original specialist references, including role/skill/knowledge applicability and upper/lower architectural consistency",
+    "Real native CAOS first selection, recursive parent cognition/effects and independent outcomes in ordinary fresh chats; code configuration is not a hard hook",
+    "Real multi-context writing and multi-platform professional craft outcomes, and visual generation/edit plus actual pixel/thumbnail review; current pure inspectors are not creators",
+    "Actual original-video creative production, enhancement/restoration, multi-track media QA and real user-quality review; current strict audio-copy operation is only scoped evidence",
+    "Owner-controlled IPOS long-term identity visual approval, exact current approved canon export and revocation tests for identity-dependent work; no private source mutation",
+    "Knowledge CRUD across project-independent methods, real independent scoped method promotion, source dependency invalidation and transfer/replay; self-attested candidate no longer auto-validates",
+    "Risk-specific reviewer independence, native effect authorization, external provider and platform-current support, cost/rights evidence, no automatic publication",
+    "Cross-surface direct-vs-durable real-world recovery, programmatic failure/retry exhaustion, external wait, cross-group parallel conflict, full project source/asset cleanup and release proof"
   ],
   "current_problem_refs": {
     "TASK_INSTANCE_SCOPE_LEAK": "audits/VIDEO_TASK_NEUTRAL_REFACTOR_2026-11-24.md"
   },
   "current_resume_ref": "STUDIO_ENTRY.md",
   "current_candidate": {
-    "id": "V-20261124-TASK-NEUTRAL",
-    "ref": "audits/VIDEO_TASK_NEUTRAL_REFACTOR_2026-11-24.md",
-    "status": "CANDIDATE_NOT_PROMOTED",
+    "id": "V-20261124-UNIVERSAL-CONTENT-ARCHITECTURE",
+    "ref": "docs/CONTENT_STUDIO_ARCHITECTURE_V2.md",
+    "decision_ref": "audits/CONTENT_STUDIO_CAOS_ARCH_DECISION_2026-11-24.md",
+    "acceptance_ref": "docs/CONTENT_STUDIO_ARCH_ACCEPTANCE_V2.json",
+    "status": "OPEN_DRAFT_PR40_NOT_PROMOTED",
     "base": "9998060b9946f47b4d50aa5c28db51e3428d4a21",
-    "next_action": "Read live PR #40 head/CI, verify decision admission and professional coverage, continue remaining architecture and real multi-demand acceptance without reviving task instances."
+    "candidate_pr": 40,
+    "candidate_branch": "refactor/caos-task-neutral-video-20261124",
+    "source_head_before_index_revision": "7ba35ac190f590acaaefe866a951ab251ebdabcb",
+    "latest_ci_assurance": "VERIFY_EXACT_CURRENT_BRANCH_HEAD_SEPARATELY",
+    "next_action": "Continue exact current user goal: causal/semantic audit all child subsystems and actual multi-type outcomes; protect native CAOS/owner identity; provider availability and independent artistic results remain NOT_TESTED. Never auto-promote or revive old task instances."
   },
   "recent_resolved_or_promoted": [
     {
@@ -195,16 +203,31 @@
     "video_studio/data/business_feedback.json",
     "video_studio/production/worker_pool.py",
     "tests/test_task_neutral_scope.py",
-    "tests/test_professional_capability_architecture.py"
+    "tests/test_professional_capability_architecture.py",
+    "docs/CONTENT_STUDIO_ARCHITECTURE_V2.md",
+    "docs/CONTENT_STUDIO_ARCH_ACCEPTANCE_V2.json",
+    "audits/CONTENT_STUDIO_CAOS_ARCH_DECISION_2026-11-24.md",
+    "video_studio/domain/contracts.py",
+    "video_studio/domain/identity.py",
+    "video_studio/domain/creative.py",
+    "video_studio/domain/editorial.py",
+    "video_studio/domain/assurance.py",
+    "video_studio/production/audio_preserve.py",
+    "tests/test_content_domain_contracts.py",
+    "tests/test_visual_direction_contracts.py",
+    "tests/test_editorial_contracts.py",
+    "tests/test_typed_quality_plans.py",
+    "tests/test_audio_preserving_edit.py"
   ],
   "historical_evidence_refs": [
     "audits/VIDEO_0_8_RESUME_CHECKPOINT_2026-10-15.md",
     "audits/SYSTEM_SELF_AUDIT_2026-10-10.md",
     "audits/SYSTEM_SELF_AUDIT_2026-10-11.md",
     "audits/VIDEO_DOMAIN_PRODUCT_ORCHESTRATION_AUDIT_2026-10-15.md",
-    "projects/pilot-002/PROGRAM_STATE.json"
+    "projects/pilot-002/PROGRAM_STATE.json",
+    "audits/VIDEO_TASK_NEUTRAL_REFACTOR_2026-11-24.md"
   ],
-  "assurance": "CANDIDATE_SOURCE_ONLY__NO_NATIVE_CAOS_ACTIVATION_OR_PRODUCTION_CLAIM",
+  "assurance": "DESIGN_AND_SCOPED_RUNTIME_STRUCTURAL_CI_ONLY__NO_NATIVE_CAOS__NO_INDEPENDENT_CREATIVE_OWNER_OUTCOME__NOT_READY",
   "governance_binding": {
     "system": "CAOS",
     "source_repository": "D1traverser-debug/cognition-agent-os",
