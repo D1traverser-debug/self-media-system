@@ -1285,6 +1285,8 @@ class StudioEngine:
             raise ContractError("lease_seconds must be 30..86400")
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            row = None
+            claimed = None
             try:
                 self._project_row(connection, project_id)
                 now = _now()
@@ -1303,7 +1305,6 @@ class StudioEngine:
                     query += " AND task_id=?"
                     query_params.append(task_id)
                 query += " ORDER BY priority DESC,created_at,task_id"
-                row = None
                 for candidate in connection.execute(query, query_params).fetchall():
                     try:
                         if candidate["attempts"] >= candidate["max_attempts"]:
@@ -1390,6 +1391,8 @@ class StudioEngine:
                 return packet
             except Exception:
                 connection.rollback()
+                if claimed is not None and claimed["kind"] == "review":
+                    self._cleanup_review_stage(project_id, claimed["task_id"], claimed["attempts"])
                 raise
 
     def _verify_claimed_inputs(
