@@ -1422,6 +1422,95 @@ def test_release_check_rejects_tampered_review_evidence_artifact_bytes(tmp_path)
     )
 
 
+def test_release_check_rejects_tampered_review_evidence_artifact_bytes(tmp_path):
+    engine = StudioEngine(tmp_path / "review-evidence-digest")
+    release_brief = {
+        "goal": "Produce a reviewed document.",
+        "audience": "The intended reader.",
+        "deliverables": ["final-document"],
+        "release_policy": {
+            "require_rights": True,
+            "required_review_rubrics": ["human-cold-read"],
+            "required_evidence_refs": [],
+            "require_technical_qa": False,
+            "review_contracts": {
+                "human-cold-read": {"require_resolvable_evidence_refs": True},
+            },
+        },
+    }
+    engine.create_project("demo", "Review evidence digest", release_brief)
+    evidence_path = tmp_path / "cold-read-evidence.txt"
+    evidence_path.write_text("The reviewer inspected the complete document.", encoding="utf-8")
+    evidence = engine.import_asset(
+        "demo", "cold-read-evidence", evidence_path,
+        kind="evidence", media_type="text/plain", rights_status="NOT_APPLICABLE",
+    )
+    engine.add_tasks("demo", [task("render")])
+    final_artifact = complete(engine, tmp_path, "render", "artist")
+    engine.record_review(
+        "demo", final_artifact["artifact_id"], reviewer_id="cold-reader",
+        rubric_id="human-cold-read", outcome="PASS", dimensions={},
+        evidence_refs=[evidence["artifact_id"]],
+    )
+    evidence_path.write_text("tampered after review", encoding="utf-8")
+    release = engine.release_check("demo", final_artifact["artifact_id"], required_rubrics=[])
+    assert release["pass"] is False, release
+    assert any(
+        item.startswith("review_evidence_bytes_missing_or_digest_changed:")
+        for item in release["failures"]
+    )
+
+
+def test_release_check_rejects_tampered_red_team_finding_evidence_bytes(tmp_path):
+    engine = StudioEngine(tmp_path / "finding-evidence-digest")
+    release_brief = {
+        "goal": "Produce a reviewed document.",
+        "audience": "The intended reader.",
+        "deliverables": ["final-document"],
+        "release_policy": {
+            "require_rights": True,
+            "required_review_rubrics": ["red-team"],
+            "required_evidence_refs": [],
+            "require_technical_qa": False,
+            "review_contracts": {
+                "red-team": {
+                    "min_findings": 1,
+                    "require_evidence_per_finding": True,
+                    "require_disposition_per_finding": True,
+                    "require_resolvable_evidence_refs": True,
+                },
+            },
+        },
+    }
+    engine.create_project("demo", "Finding evidence digest", release_brief)
+    evidence_path = tmp_path / "frame-001.txt"
+    evidence_path.write_text("Frame evidence inspected by the red team.", encoding="utf-8")
+    evidence = engine.import_asset(
+        "demo", "frame-001", evidence_path,
+        kind="evidence", media_type="text/plain", rights_status="NOT_APPLICABLE",
+    )
+    engine.add_tasks("demo", [task("render")])
+    final_artifact = complete(engine, tmp_path, "render", "artist")
+    engine.record_review(
+        "demo", final_artifact["artifact_id"], reviewer_id="red-team-reviewer",
+        rubric_id="red-team", outcome="PASS",
+        dimensions={"findings": [{
+            "finding": "The opening frame needs stronger contrast.",
+            "evidence_ref": evidence["artifact_id"],
+            "severity": "LOW",
+            "disposition": "MITIGATED",
+        }]},
+        evidence_refs=[evidence["artifact_id"]],
+    )
+    evidence_path.write_text("tampered after review", encoding="utf-8")
+    release = engine.release_check("demo", final_artifact["artifact_id"], required_rubrics=[])
+    assert release["pass"] is False, release
+    assert any(
+        item.startswith("review_finding_evidence_bytes_missing_or_digest_changed:")
+        for item in release["failures"]
+    )
+
+
 def test_release_check_rejects_red_team_without_three_evidence_backed_findings(tmp_path):
     engine = StudioEngine(tmp_path / "red-team-workspace")
     red_brief = brief()
