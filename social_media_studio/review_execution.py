@@ -225,10 +225,16 @@ class ReviewExecutionTrustRegistry:
         if required_media_mode:
             if not isinstance(media, dict) or media.get("mode") != required_media_mode:
                 raise ReviewExecutionError("review media inspection mode does not satisfy the contract")
+            if media != expected.get("media_inspection"):
+                raise ReviewExecutionError("signed media inspection does not match the registered review report")
             if media.get("artifact_sha256") != expected.get("reviewed_artifact_sha256"):
                 raise ReviewExecutionError("review media inspection is not bound to the reviewed artifact")
             if required_media_mode not in allowed_media_modes:
                 raise ReviewExecutionError("executor is not authorized for the required media inspection mode")
+            allowed_methods = executor.get("media_inspection_methods", [])
+            method = media.get("method")
+            if method not in allowed_methods:
+                raise ReviewExecutionError("executor is not authorized for the declared media inspection method")
             if required_media_mode == "FULL_VIDEO":
                 if media.get("coverage_fraction") != 1:
                     raise ReviewExecutionError("video review does not cover the full source")
@@ -244,6 +250,40 @@ class ReviewExecutionTrustRegistry:
                 tolerance = max(0.05, source_duration * 0.001)
                 if abs(inspected_duration - source_duration) > tolerance:
                     raise ReviewExecutionError("video review duration does not cover the complete source")
+                intervals = media.get("coverage_intervals")
+                if not isinstance(intervals, list) or not intervals:
+                    raise ReviewExecutionError("full-video review requires timestamped coverage intervals")
+                normalized: list[tuple[float, float]] = []
+                for interval in intervals:
+                    if not isinstance(interval, list) or len(interval) != 2:
+                        raise ReviewExecutionError("video review coverage interval is malformed")
+                    start, end = interval
+                    if (
+                        not isinstance(start, (int, float)) or isinstance(start, bool)
+                        or not math.isfinite(start)
+                        or not isinstance(end, (int, float)) or isinstance(end, bool)
+                        or not math.isfinite(end)
+                        or start < 0 or end <= start or end > source_duration + tolerance
+                    ):
+                        raise ReviewExecutionError("video review coverage interval is outside the source duration")
+                    normalized.append((float(start), float(end)))
+                normalized.sort()
+                cursor = 0.0
+                for start, end in normalized:
+                    if start > cursor + tolerance:
+                        raise ReviewExecutionError("video review coverage trace contains an uninspected gap")
+                    cursor = max(cursor, end)
+                if cursor < source_duration - tolerance:
+                    raise ReviewExecutionError("video review coverage trace does not reach the end of the source")
+                trace_payload = {
+                    "artifact_sha256": media.get("artifact_sha256"),
+                    "mode": media.get("mode"),
+                    "method": media.get("method"),
+                    "source_duration_seconds": source_duration,
+                    "coverage_intervals": media.get("coverage_intervals"),
+                }
+                if media.get("trace_sha256") != digest_json(trace_payload):
+                    raise ReviewExecutionError("video review coverage trace digest is missing or invalid")
 
         allowed_providers = executor.get("providers", [])
         if allowed_providers and predicate.get("provider") not in allowed_providers:
