@@ -14,6 +14,7 @@ from social_media_studio.review_execution import (
     ReviewExecutionTrustRegistry,
     build_review_packet,
     build_review_statement,
+    digest_json,
     review_contract_digest,
     sign_review_statement,
 )
@@ -45,7 +46,27 @@ def fixture_receipt(*, blind: bool = True, media_mode: str | None = None):
         "reviewed_artifact_sha256": sha("final-video"),
         "review_result_sha256": sha("review-report"),
         "executor_id": "isolated-review-runtime-01",
+        "media_inspection": None,
     }
+    media_inspection = {}
+    if media_mode:
+        media_inspection = {
+            "mode": media_mode,
+            "method": "CONTINUOUS_PLAYBACK",
+            "artifact_sha256": sha("final-video"),
+            "coverage_fraction": 1,
+            "inspected_duration_seconds": 30,
+            "source_duration_seconds": 30,
+            "coverage_intervals": [[0, 30]],
+        }
+        media_inspection["trace_sha256"] = digest_json({
+            "artifact_sha256": media_inspection["artifact_sha256"],
+            "mode": media_inspection["mode"],
+            "method": media_inspection["method"],
+            "source_duration_seconds": media_inspection["source_duration_seconds"],
+            "coverage_intervals": media_inspection["coverage_intervals"],
+        })
+        expected["media_inspection"] = media_inspection
     predicate = {
         "executor_id": "isolated-review-runtime-01",
         "issued_at": (now - timedelta(seconds=5)).isoformat(),
@@ -67,16 +88,8 @@ def fixture_receipt(*, blind: bool = True, media_mode: str | None = None):
         "sibling_verdicts_visible": False if blind else True,
         "provider": "test-provider",
         "model": "reviewer-v1",
-        "media_inspection": {},
+        "media_inspection": media_inspection,
     }
-    if media_mode:
-        predicate["media_inspection"] = {
-            "mode": media_mode,
-            "artifact_sha256": sha("final-video"),
-            "coverage_fraction": 1,
-            "inspected_duration_seconds": 30,
-            "source_duration_seconds": 30,
-        }
     statement = build_review_statement(
         reviewed_artifact_sha256=sha("final-video"),
         review_result_sha256=sha("review-report"),
@@ -101,6 +114,7 @@ def fixture_receipt(*, blind: bool = True, media_mode: str | None = None):
                 "providers": ["test-provider"],
                 "models": ["reviewer-v1"],
                 "media_inspection_modes": ["FULL_VIDEO"] if media_mode else [],
+                "media_inspection_methods": ["CONTINUOUS_PLAYBACK"] if media_mode else [],
             }
         },
     }
@@ -163,9 +177,20 @@ def test_review_receipt_rejects_expired_execution():
 
 def test_full_video_review_requires_complete_coverage_of_exact_source():
     envelope, expected, config, private_key, statement, _ = fixture_receipt(media_mode="FULL_VIDEO")
-    statement["predicate"]["media_inspection"]["coverage_fraction"] = 0.2
+    media = dict(statement["predicate"]["media_inspection"])
+    media["coverage_intervals"] = [[0, 6]]
+    media["coverage_fraction"] = 1
+    media["trace_sha256"] = digest_json({
+        "artifact_sha256": media["artifact_sha256"],
+        "mode": media["mode"],
+        "method": media["method"],
+        "source_duration_seconds": media["source_duration_seconds"],
+        "coverage_intervals": media["coverage_intervals"],
+    })
+    statement["predicate"]["media_inspection"] = media
+    expected["media_inspection"] = media
     envelope = sign_review_statement(statement, key_id="review-key-01", private_key=private_key)
-    with pytest.raises(ReviewExecutionError, match="does not cover the full source"):
+    with pytest.raises(ReviewExecutionError, match="does not reach the end"):
         ReviewExecutionTrustRegistry(config=config).verify(envelope, expected=expected)
 
 
@@ -187,7 +212,7 @@ def test_review_packet_is_digest_bound_and_excludes_sibling_review_outputs():
     )
     assert packet["sibling_verdicts_included"] is False
     assert len(packet["inputs"]) == 2
-    assert review_contract_digest(task_contract, rubric_contract) == review_contract_digest(task_contract, rubric_contract)
+    assert review_contract_digest(task_contract, rubric_contract) != review_contract_digest(task_contract, {**rubric_contract, "blind_review": False})
     with pytest.raises(ReviewExecutionError, match="sibling review outputs"):
         build_review_packet(
             project_id="project-01", task_id="review-01", task_contract=task_contract,
