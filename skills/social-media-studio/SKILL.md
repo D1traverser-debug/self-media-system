@@ -226,9 +226,13 @@ Challenge the previous method, not just the last output. State the repair, falsi
 
 ## 10. Learning and method evolution
 
-Store reusable methods with the problem solved, mechanism, applicability, evidence, counterexamples, failure conditions and replay references. New methods begin as candidates. A single successful output, provider marketing claim or model self-assessment does not establish a general rule.
+Capture reusable methods as project-local candidates with the problem solved, mechanism, applicability, evidence, counterexamples, failure conditions, replay references and rollback. Project learning remains `CANDIDATE`; a successful output or model self-rating never promotes a method.
 
-Promote a method only after independent replay and counterexample trials. Record where it does not apply. Keep volatile provider facts dated and revalidate them before use. Never let a learned preference override a new owner instruction.
+Shared knowledge promotion requires a real case, at least two independent replays on distinct tasks, at least one counterexample trial, cross-task transfer within the declared scope, a regression test, a rollback path, measured owner burden/cost (or a reasoned N/A), independent readback and CAOS owner-level acceptance. The exact evidence and method revision must enter the knowledge catalog through a versioned repository change. No runtime or model may promote a candidate automatically.
+
+Interpret catalog states precisely: `ACTIVE_REFERENCE` is a source locator, not proof of efficacy; `VERIFIED_OPERATION` is validated only within its recorded applicability; candidate, legacy and retired entries are not execution authority. Keep methods scoped, record counterexamples and revalidate volatile provider facts. Never let learned preferences override a new owner instruction.
+
+Learning is continuous and demand-driven, not a fixed LEARN stage or permanent team pipeline. Use sample-first only where it reduces a material risk: a representative text section for writing, a key composition for a static image, a short motion sample for video, or a source-claim sample for research. Do not impose video prototypes or motion QA on unrelated deliverables.
 
 ## 11. Continuation and completion
 
