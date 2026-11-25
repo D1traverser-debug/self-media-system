@@ -83,6 +83,7 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
     owners: dict[str, str] = {}
     adapter_map: dict[str, str] = {}
     operation_map: dict[str, str] = {}
+    topology_contract = cat.get("topology_contract", {})
     subs = cat.get("subsystems", [])
     ids: set[str] = set()
     for sub in subs:
@@ -124,6 +125,21 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             errors.append(f"unreadable or malformed tracked source: {tracked}: {exc}")
     python_files = [x for x in files if x.endswith(".py") and
                     x.startswith(("social_media_studio/", "social_media_studio/legacy/"))]
+    topology_minima = {
+        "minimum_subsystems": len(ids),
+        "minimum_code_modules": len(python_files),
+        "minimum_domain_adapters": len(adapter_map),
+        "minimum_production_operations": len(operation_map),
+    }
+    if not isinstance(topology_contract, dict):
+        errors.append("topology regression floors are missing or malformed")
+        topology_contract = {}
+    for field, actual in topology_minima.items():
+        minimum = topology_contract.get(field)
+        if isinstance(minimum, bool) or not isinstance(minimum, int) or minimum < 1:
+            errors.append(f"invalid topology regression floor: {field}")
+        elif actual < minimum:
+            errors.append(f"topology regression floor violated: {field}={actual} < {minimum}")
     for path in python_files:
         if path not in owners:
             errors.append(f"UNOWNED Python module: {path}")
@@ -232,6 +248,7 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         "tracked_files": len(files), "code_modules": len(python_files),
         "owned_modules": len(owners), "subsystems": len(ids),
         "domain_adapters": len(adapter_map), "production_operations": len(operation_map),
+        "topology_contract": topology_contract,
         "unclassified_paths": unclassified, "violations": sorted(set(errors)),
         "all_tracked_file_sha256": all_file_sha256,
         "all_tracked_bytes_inspected": len(all_file_sha256) == len(files),

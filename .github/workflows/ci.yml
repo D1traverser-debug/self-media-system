@@ -18,11 +18,13 @@ jobs:
         run: pip install -e . pytest==9.1.1
       - name: Run standalone Social Media Studio system audit
         run: |
-          sms-studio system-audit --repo-root . > /tmp/standalone-social-media-studio-system-audit.json || true
-          python - <<'PY'
+          audit_status=0
+          sms-studio system-audit --repo-root . > /tmp/standalone-social-media-studio-system-audit.json || audit_status=$?
+          SMS_AUDIT_EXIT="$audit_status" python - <<'PY'
           import json
+          import os
           report = json.load(open('/tmp/standalone-social-media-studio-system-audit.json', encoding='utf-8'))
-          if report['pass'] is not True:
+          if int(os.environ["SMS_AUDIT_EXIT"]) != 0 or report['pass'] is not True:
               print(json.dumps(report, indent=2, ensure_ascii=False))
               raise SystemExit('standalone Social Media Studio system audit failed')
           assert report['structural_status'] == 'PASS', report
@@ -40,11 +42,15 @@ jobs:
           python - <<'PY'
           import json
           report = json.load(open('/tmp/content-subsystems.json', encoding='utf-8'))
+          catalog = json.load(open("social_media_studio/data/subsystem_catalog.json", encoding="utf-8"))
+          floors = catalog["topology_contract"]
           assert report["pass"], report["violations"]
           assert report["all_tracked_bytes_inspected"] is True
           assert report["code_modules"] == report["owned_modules"]
-          assert report["subsystems"] == 16
-          assert report["domain_adapters"] == 17
+          assert report["code_modules"] >= floors["minimum_code_modules"]
+          assert report["subsystems"] >= floors["minimum_subsystems"]
+          assert report["domain_adapters"] >= floors["minimum_domain_adapters"]
+          assert report["production_operations"] >= floors["minimum_production_operations"]
           from social_media_studio.production.registry import PRODUCTION_EXECUTORS
           assert report["production_operations"] == len(PRODUCTION_EXECUTORS.operations())
           assert report["real_creative_quality_verified"] is False

@@ -8,6 +8,8 @@ The source package, command and product identity have been migrated; the GitHub 
 
 Use `sms-studio intake REQUEST.json` to identify only the owner's current demand. For a persistent project, bind the exact brief/deliverables, register task dependencies and current CAOS-governed decisions, then inspect `sms-studio work-cycle PROJECT --plan-only`. This projects currently admitted parallel lanes (tool/agent/human/external), exact-input handoff packets and decision/input blockers without claiming external authorization. `sms-studio work-cycle PROJECT --max-workers 2` executes **only locally registered, admitted tool operations** in finite concurrent rounds and then reads actual outcomes back. Revisions invalidate dependent work; failures require cause and method challenge; registered artifacts and independent review precede release. Learned methods remain candidates until independently tested and accepted.
 
+Create a durable owner project only with the explicit scope selector: `sms-studio --root WORKSPACE init PROJECT --brief BRIEF.json --owner-task`. Offline regression uses `--offline-fixture` and a separate empty root; its first `init` writes a root-bound `.sms-offline-fixture.json` marker. Do not point fixture commands at an existing owner or historical workspace.
+
 For a project carrying the previous scope epoch, use `sms-studio --root WORKSPACE migrate-scope PROJECT --reason "approved current goal"` once before RESUME. This preserves events and artifacts, supersedes earlier action decisions and revokes running claims; it never auto-resumes retired example projects.
 
 The research subsystem has a deterministic `source_evidence_audit` tool operation for an immutable claim manifest and declared UTF-8 source artifacts. It verifies exact source digests and quoted passages; it **does not** perform live research, semantic factual verification, automatic publication, or independent content acceptance.
@@ -129,7 +131,7 @@ sms-studio --offline-fixture --root ./studio-work import-asset adapter-demo righ
 sms-studio --offline-fixture --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED --metadata examples/adapter-demo-font.metadata.json
 ```
 
-Claim and complete the authoring task with the exact EditorialPlan JSON, then use `run-adapter` for validation/materialization/rendering and `qa-media` for canonical technical QA. The renderer's receipt explicitly states that the output is silent, candidate-only and not release-authorized.
+Claim and complete the authoring task with the exact EditorialPlan JSON, then use `run-adapter` for validation/materialization/rendering and `qa-media` for canonical technical QA. The renderer's receipt explicitly states that the output is silent, candidate-only and not release-authorized. The first fixture `init` creates the root-bound `.sms-offline-fixture.json` marker; use an empty dedicated directory, not an existing owner workspace.
 
 ## Validation
 
