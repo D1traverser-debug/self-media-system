@@ -2223,6 +2223,7 @@ class StudioEngine:
             failures.extend(lineage_failures)
             checked_lineage: list[dict[str, Any]] = []
             for source in lineage:
+                rights_evidence_bindings: list[dict[str, Any]] = []
                 source_path = self._project_dir(project_id) / source["relative_path"]
                 if not source_path.is_file() or _sha256(source_path) != source["sha256"]:
                     failures.append(f"lineage_bytes_missing_or_changed:{source['artifact_id']}")
@@ -2235,7 +2236,7 @@ class StudioEngine:
                         if not isinstance(refs, list) or not refs:
                             failures.append(f"lineage_rights_evidence_missing:{source['name']}:{source['artifact_id']}")
                         else:
-                            rights_evidence_bindings: list[dict[str, Any]] = []
+                            rights_evidence_bindings = []
                             for ref in refs:
                                 if not isinstance(ref, str) or not ref.strip():
                                     failures.append(f"lineage_rights_evidence_ref_invalid:{source['name']}:{source['artifact_id']}")
