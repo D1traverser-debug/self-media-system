@@ -291,7 +291,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         and knowledge_lifecycle.get("active_statuses") == ["ACTIVE_REFERENCE", "VERIFIED_OPERATION"]
         and knowledge_lifecycle.get("candidate_status") == "CANDIDATE_REQUIRES_REVALIDATION"
         and knowledge_lifecycle.get("retired_status") == "RETIRED_EVIDENCE_ONLY"
-        and knowledge_lifecycle.get("global_knowledge_promotion")
+        and learning_policy.get("global_knowledge_promotion")
         == "VERSIONED_REPOSITORY_CHANGE_AFTER_EVIDENCE_INDEPENDENT_REPLAY_AND_CAOS_ACCEPTANCE"
         and knowledge_lifecycle.get("mutation_authority")
         == "SOCIAL_MEDIA_STUDIO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
