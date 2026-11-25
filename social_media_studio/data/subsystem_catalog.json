@@ -29,7 +29,8 @@
         "social_media_studio/production/registry.py",
         "social_media_studio/production/worker_pool.py",
         "social_media_studio/subsystems.py",
-        "social_media_studio/operation_cycle.py"
+        "social_media_studio/operation_cycle.py",
+        "social_media_studio/scope_migration.py"
       ],
       "domain_adapters": [],
       "production_operations": [],

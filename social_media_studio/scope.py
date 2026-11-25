@@ -10,7 +10,7 @@ from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
-EPOCH = "VIDEO_TASK_NEUTRAL_20261124"
+EPOCH = "SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125"
 
 
 def contract() -> dict[str, Any]:
