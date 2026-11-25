@@ -507,6 +507,8 @@ class StudioEngine:
                     (_json(brief), now, project_id),
                 )
                 for task_id in invalidated:
+                    if tasks[task_id]["kind"] == "review":
+                        self._cleanup_review_stage(project_id, task_id, tasks[task_id]["attempts"])
                     connection.execute(
                         "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": reason, "brief_revision": int(project["revision"]) + 1}), now, project_id, task_id),
@@ -841,6 +843,8 @@ class StudioEngine:
                 self._validate_graph(graph)
                 descendants = self._descendant_closure(rows, [task_id]) - {task_id}
                 now = _iso()
+                if old["kind"] == "review":
+                    self._cleanup_review_stage(project_id, task_id, old["attempts"])
                 connection.execute(
                     """UPDATE tasks SET title=?,kind=?,executor=?,depends_on_json=?,inputs_json=?,outputs_json=?,
                        acceptance_json=?,requirements_json=?,priority=?,max_attempts=?,status='PENDING',
@@ -852,6 +856,8 @@ class StudioEngine:
                      _json({"reason": reason}), now, project_id, task_id),
                 )
                 for descendant in descendants:
+                    if rows[descendant]["kind"] == "review":
+                        self._cleanup_review_stage(project_id, descendant, rows[descendant]["attempts"])
                     connection.execute(
                         "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": f"upstream task {task_id} contract changed"}), now, project_id, descendant),
@@ -963,7 +969,7 @@ class StudioEngine:
                 (project_id, row["artifact_id"]),
             )
             task_rows = connection.execute(
-                "SELECT task_id,depends_on_json,inputs_json FROM tasks WHERE project_id=?",
+                "SELECT * FROM tasks WHERE project_id=?",
                 (project_id,),
             ).fetchall()
             task_map = {item["task_id"]: item for item in task_rows}
@@ -982,6 +988,8 @@ class StudioEngine:
                         changed = True
             now = _iso()
             for task_id in sorted(affected):
+                if task_map[task_id]["kind"] == "review":
+                    self._cleanup_review_stage(project_id, task_id, task_map[task_id]["attempts"])
                 connection.execute(
                     """UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,
                        claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=?
@@ -1726,6 +1734,8 @@ class StudioEngine:
                                 affected.add(candidate)
                                 changed = True
                     for affected_task in sorted(affected):
+                        if task_map[affected_task]["kind"] == "review":
+                            self._cleanup_review_stage(project_id, affected_task, task_map[affected_task]["attempts"])
                         connection.execute(
                             """UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,
                                lease_until=NULL,error_json=?,updated_at=?
@@ -3339,6 +3349,8 @@ class StudioEngine:
                             changed = True
             now = _iso()
             for affected in descendants:
+                if tasks[affected]["kind"] == "review":
+                    self._cleanup_review_stage(project_id, affected, tasks[affected]["attempts"])
                 connection.execute(
                     "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                     (_json({"reason": reason}), now, project_id, affected),
