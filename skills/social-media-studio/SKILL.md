@@ -21,7 +21,7 @@ This Skill owns self-media requirements, project state, task graphs, assets, pro
 
 At every self-media conversation and every decision/action, apply the current read-only CAOS parent Skill. Maintain the complete owner outcome and all corrections across layers. Aesthetic judgment, editorial value, communication/CTR, truth, rights, source provenance, method suitability, context isolation and independent quality review apply wherever relevant, not only inside a named stage. Reassess the chosen approach before committing; reopen the earliest contradicted decision rather than retrying blindly. Scale effort to the task, not a fixed checklist. A short caption or cover request does not inherit a full video-release pipeline.
 
-Read the architecture and continuous responsibilities in the canonical Studio manifest. The repository project index has no default project. All old project/task instances and example graphs are retired evidence or regression fixtures only. Never auto-load, execute, resume or copy them into a new brief. Start from the actual current demand; only an exact non-retired workspace ID selected by the owner can resume. Use `sms-studio intake REQUEST.json` to obtain the task-neutral route. For a durable owner project initialize with `init PROJECT --brief BRIEF.json --owner-task`; every task binds current `requirements.deliverable_refs`. This route is a mechanical locator, not proof that CAOS cognition ran. Select applicable domain capabilities and methods from the knowledge catalog; retrieve original sources on demand.
+Read the architecture and continuous responsibilities in the canonical Studio manifest. The repository project index has no default project. All old project/task instances and example graphs are retired evidence or regression fixtures only. Never auto-load, execute, resume or copy them into a new brief. Start from the actual current demand; only an exact non-retired workspace ID selected by the owner can resume. Use `sms-studio intake REQUEST.json` to obtain the task-neutral route. For a durable owner project initialize with `init PROJECT --brief BRIEF.json --owner-task`; the CLI rejects owner initialization without this explicit selector, and every task binds current `requirements.deliverable_refs`. Offline regression requires a dedicated empty root; its first fixture `init` writes `.sms-offline-fixture.json`, and the CLI refuses cross-mode access or retroactive adoption of an unmarked workspace. This route is a mechanical locator, not proof that CAOS cognition ran. Select applicable domain capabilities and methods from the knowledge catalog; retrieve original sources on demand.
 
 For exact previous-owner workspace continuity, the `migrate-scope` command performs a one-time, explicit scope upgrade. It retains original source events and artifacts, supersedes previous decisions and revokes running claims; normal `RESUME` cannot bypass the upgrade or reactivate retired project identities. Newly initiated work uses the canonical `SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125` scope epoch. Never silently rewrite an archived source or claim an old decision still authorizes current effects.
 
@@ -49,6 +49,22 @@ Authority order: current explicit owner instruction and corrections; project-spe
 IPOS is a professional identity-design subsystem INSIDE Social Media Studio, with separately custodied private canonical state and current Skill. Use the IPOS workflow for persistent identity design when selected. Only use an owner-approved, exact-version IPOS export for recurring identity-dependent content; do not invent or mutate canon. A one-time avatar needs no personal IPOS bootstrap.
 
 ## 2. Outcome contract
+
+### Outcome-fidelity gate — required before every material decision, tool call or delivery
+
+Build and maintain a private, concise outcome lock from the current request and all corrections:
+
+1. **Deliverable:** exact artifact(s), quantity, destination/platform, language and requested variant(s).
+2. **Meaning:** intended audience, purpose, central point/story, tone and what success should make the recipient understand, feel or do.
+3. **Hard constraints:** exact dimensions and axis order, duration/time range, source/version, audio promise, required content, exclusions, rights and authorization.
+4. **Preferences:** ranked style references and optional suggestions, kept separate from hard requirements.
+5. **Acceptance:** observable checks for every hard requirement, plus the final artifact or response that must be returned.
+6. **Unknowns:** only material ambiguities that could change the result; ask one concise question when blocked, otherwise use a reversible assumption and disclose it when material.
+
+Before acting, verify that the selected workflow and tool can produce the exact requested deliverable. Do not substitute a nearby capability, a different format, a partial result, a plan, a prompt, a preview or a successful command for the requested final output. Before delivery, compare every output against the outcome lock, inspect the actual result and check for omissions, contradictions, wrong targets, wrong dimensions, duplicate copy, unsupported claims and prohibited side effects. If a hard requirement is not met, repair it or state the precise blocker; never silently downgrade the requirement or claim completion.
+
+Preserve every user correction as a current constraint until the user changes it. Do not ask the owner to repeat known details. Do not allow old projects, examples, cached assumptions or generic methods to override the current request.
+
 
 For durable work, bind an outcome brief to the relevant deliverable types. The following dimensions apply only where material; do not force motion, platform, sound, commercial or publication fields onto unrelated requests:
 

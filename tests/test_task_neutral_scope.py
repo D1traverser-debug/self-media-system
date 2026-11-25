@@ -7,6 +7,26 @@ from social_media_studio.engine import StudioEngine
 from social_media_studio.scope import EPOCH, bind_owner_brief, resolve_intake
 
 
+def test_manifest_owner_scope_epoch_matches_runtime():
+    from social_media_studio.scope import contract
+    assert contract()["task_admission"]["scope_epoch"] == EPOCH
+
+
+def test_runtime_owner_scope_operations_fail_closed_on_manifest_epoch_drift(monkeypatch, tmp_path):
+    import social_media_studio.scope as scope
+    stale = {"task_admission": {"scope_epoch": "VIDEO_TASK_NEUTRAL_20261124", "retired_project_ids": []}}
+    monkeypatch.setattr(scope, "contract", lambda: stale)
+    with pytest.raises(ValueError, match="owner scope epoch mismatch"):
+        scope.bind_owner_brief("fresh", {"goal": "caption", "audience": "test", "deliverables": ["caption"]})
+    with pytest.raises(ValueError, match="owner scope epoch mismatch"):
+        scope.resolve_intake(tmp_path, {"mode": "NEW", "goal": "caption"})
+    with pytest.raises(ValueError, match="owner scope epoch mismatch"):
+        scope.validate_task_binding(
+            {"scope_epoch": EPOCH, "deliverables": ["caption"]},
+            {"requirements": {"deliverable_refs": ["caption"]}},
+        )
+
+
 def test_new_request_is_not_a_default_task_and_does_not_mutate(tmp_path):
     root = tmp_path / "not-created"
     for goal in ("Write a title only", "Edit source video without touching audio", "Design an original cover"):
@@ -69,20 +89,65 @@ def test_stale_or_unrelated_task_binding_fails_without_state_mutation(tmp_path):
     assert engine.list_tasks("fresh")[0]["requirements"]["deliverable_refs"] == ["caption"]
 
 
-def test_cli_rejects_legacy_workspace_on_all_owner_paths(tmp_path, capsys):
+def test_cli_rejects_legacy_workspace_on_all_owner_paths_and_requires_explicit_owner_scope(tmp_path, capsys):
     from social_media_studio.cli import main
     workspace = tmp_path / "workspace"
     engine = StudioEngine(workspace)
     engine.create_project("old-local", "old", {"goal": "old", "audience": "test", "deliverables": ["old"]})
     assert main(["--root", str(workspace), "status", "old-local"]) == 2
     assert main(["--root", str(workspace), "claim", "old-local", "--worker", "w"]) == 2
-    assert main(["--root", str(workspace), "--offline-fixture", "status", "old-local"]) == 0
+    # A fixture flag cannot adopt an existing unmarked owner/history workspace.
+    assert main(["--root", str(workspace), "--offline-fixture", "status", "old-local"]) == 2
+    assert main(["--root", str(workspace), "--offline-fixture", "init", "fixture", "--brief", str(tmp_path / "missing.json")]) == 2
+
     brief = tmp_path / "brief.json"
     brief.write_text(json.dumps({"goal": "new", "audience": "test", "deliverables": ["caption"]}))
-    assert main(["--root", str(workspace), "init", "fresh", "--brief", str(brief)]) == 0
+    # Owner scope is opt-in; the old no-op flag now gates creation.
+    assert main(["--root", str(workspace), "init", "fresh", "--brief", str(brief)]) == 2
+    assert main(["--root", str(workspace), "init", "fresh", "--brief", str(brief), "--owner-task"]) == 0
     assert resolve_intake(workspace, {"mode": "RESUME", "project_id": "fresh"})["scope_epoch"] == EPOCH
-    assert main(["--root", str(workspace), "--offline-fixture", "status", "fresh"]) == 2
     assert main(["--root", str(workspace), "status", "fresh"]) == 0
+
+    fixture_root = tmp_path / "fixture-workspace"
+    assert main(["--offline-fixture", "--root", str(fixture_root), "init", "fixture", "--brief", str(brief)]) == 0
+    assert (fixture_root / ".sms-offline-fixture.json").is_file()
+    assert main(["--offline-fixture", "--root", str(fixture_root), "status", "fixture"]) == 0
+    # Owner mode cannot open fixture data, and fixture mode cannot create owner scope.
+    assert main(["--root", str(fixture_root), "status", "fixture"]) == 2
+    assert main(["--offline-fixture", "--root", str(fixture_root), "init", "bad", "--brief", str(brief), "--owner-task"]) == 2
+    # A workspace with prior bytes cannot be retroactively labelled as a fixture.
+    assert main(["--offline-fixture", "--root", str(workspace), "init", "fixture2", "--brief", str(brief)]) == 2
+
+
+def test_workspace_mode_marker_is_root_bound_and_modes_are_mutually_exclusive(tmp_path):
+    from social_media_studio.scope import validate_workspace_mode
+    owner_root = tmp_path / "owner"
+    owner_root.mkdir()
+    fixture_root = tmp_path / "fixture"
+    resolved = validate_workspace_mode(
+        fixture_root, offline_fixture=True, initialize=True, owner_root=owner_root,
+    )
+    assert resolved == fixture_root.resolve()
+    with pytest.raises(ValueError):
+        validate_workspace_mode(fixture_root, offline_fixture=False, owner_root=owner_root)
+    with pytest.raises(ValueError):
+        validate_workspace_mode(owner_root, offline_fixture=True, initialize=True, owner_root=owner_root)
+
+    occupied_root = tmp_path / "occupied"
+    occupied_root.mkdir()
+    (occupied_root / "projects").mkdir()
+    with pytest.raises(ValueError):
+        validate_workspace_mode(
+            occupied_root, offline_fixture=True, initialize=True, owner_root=owner_root,
+        )
+
+    copied_root = tmp_path / "copied"
+    copied_root.mkdir()
+    (copied_root / ".sms-offline-fixture.json").write_bytes(
+        (fixture_root / ".sms-offline-fixture.json").read_bytes()
+    )
+    with pytest.raises(ValueError):
+        validate_workspace_mode(copied_root, offline_fixture=True, owner_root=owner_root)
 
 
 def test_knowledge_lookup_only_selects_active_reference_and_binds_source_bytes():

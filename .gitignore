@@ -7,3 +7,5 @@ exports/
 *.mp4
 *.mov
 *.wav
+.sms-offline-fixture.json
+/studio-work/

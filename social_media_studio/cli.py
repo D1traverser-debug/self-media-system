@@ -27,7 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="Standalone outcome-driven Social Media Studio. No CAOS runtime or provider lock-in.",
     )
     parser.add_argument("--root", type=Path, help="workspace root (default: SMS_STUDIO_HOME or ~/.sms-studio)")
-    parser.add_argument("--offline-fixture", action="store_true", help="isolated regression workspace only; never owner work")
+    parser.add_argument("--offline-fixture", action="store_true", help="dedicated empty regression workspace; never owner work")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("subsystems", help="source-based audit of all internal systems and import dependencies")
@@ -58,7 +58,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project_id")
     p.add_argument("--title", default="")
     p.add_argument("--brief", type=Path, required=True, help="JSON brief with goal, audience and deliverables")
-    p.add_argument("--owner-task", action="store_true", help="bind a fresh task-neutral owner brief; not proof of CAOS activation")
+    p.add_argument("--owner-task", action="store_true", help="explicitly select current-owner scope; not proof of CAOS activation")
 
     p = sub.add_parser("revise-brief", help="revise the owner outcome and invalidate only affected dependency descendants")
     p.add_argument("project_id")
@@ -111,7 +111,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("status", help="show project and task readiness")
     p.add_argument("project_id")
 
-    p = sub.add_parser("resume", help="reconstruct the project handoff from durable Video state without chat memory")
+    p = sub.add_parser("resume", help="reconstruct the project handoff from durable Social Media Studio state")
     p.add_argument("project_id")
     p.add_argument("--event-limit", type=int, default=40)
 
@@ -230,7 +230,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--token", required=True)
     p.add_argument("--input-name", help="declared input artifact name; defaults to the first available input")
 
-    p = sub.add_parser("run-adapter", help="run a declared deterministic Video domain adapter inside a claimed Studio task")
+    p = sub.add_parser("run-adapter", help="run a declared deterministic self-media domain adapter inside a claimed Studio task")
     p.add_argument("project_id")
     p.add_argument("task_id")
     p.add_argument("--worker", required=True)
@@ -251,6 +251,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         command = args.command
+        if args.offline_fixture and command in {"system-audit", "subsystems", "capabilities", "quality-plan", "inspect-visual", "inspect-editorial", "knowledge", "intake"}:
+            raise StudioError("--offline-fixture applies only to isolated workspace project operations")
+        if args.offline_fixture and command == "migrate-scope":
+            raise StudioError("scope upgrade is owner-workspace only, not an offline fixture operation")
         if command == "system-audit":
             from .system_audit import run_system_audit
             report = run_system_audit(args.repo_root)
@@ -299,11 +303,25 @@ def main(argv: list[str] | None = None) -> int:
             root = args.root or Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
             _emit(resolve_intake(root, _read_json(args.request)))
             return 0
-        from .scope import EPOCH, bind_owner_brief, resolve_intake
+        from .scope import EPOCH, bind_owner_brief, resolve_intake, validate_workspace_mode
         if args.offline_fixture and args.root is None:
             raise StudioError("offline regression requires an explicit separate workspace root")
+        if command == "init":
+            init_brief = _read_json(args.brief)
+            if args.offline_fixture:
+                if args.owner_task or "scope_epoch" in init_brief:
+                    raise StudioError("offline fixture cannot create an owner project")
+            elif not args.owner_task:
+                raise StudioError("owner project initialization requires explicit --owner-task")
+        else:
+            init_brief = None
         import os
-        root = args.root or Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
+        default_owner_root = Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
+        root = args.root or default_owner_root
+        root = validate_workspace_mode(
+            root, offline_fixture=args.offline_fixture, initialize=(command == "init"),
+            owner_root=default_owner_root,
+        )
         if command not in {"init", "migrate-scope"}:
             ids = ([args.source_project_id, args.target_project_id] if command == "transfer-asset"
                    else [args.project_id])
@@ -317,16 +335,15 @@ def main(argv: list[str] | None = None) -> int:
                         raise StudioError("offline fixture mode cannot access current owner projects")
         engine = StudioEngine(root)
         if command == "init":
-            brief = _read_json(args.brief)
-            if args.offline_fixture:
-                if args.owner_task or "scope_epoch" in brief:
-                    raise StudioError("offline fixture cannot create an owner project")
-            else:
+            brief = init_brief
+            if not args.offline_fixture:
                 brief = bind_owner_brief(args.project_id, brief)
             _emit(engine.create_project(args.project_id, args.title, brief))
         elif command == "revise-brief":
             affected = args.affect_task if args.affect_task else None
             revised_brief = _read_json(args.brief)
+            if args.offline_fixture and "scope_epoch" in revised_brief:
+                raise StudioError("offline fixture cannot write an owner scope epoch")
             if not args.offline_fixture:
                 revised_brief = bind_owner_brief(args.project_id, revised_brief)
             _emit(engine.revise_brief(args.project_id, revised_brief, reason=args.reason, affected_task_ids=affected))

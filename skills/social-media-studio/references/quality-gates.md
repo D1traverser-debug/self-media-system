@@ -1,70 +1,76 @@
 # Quality Gates
 
-> **Scope — 2026-11-24 task-neutral architecture:** Quality dimensions and thresholds are task-specific calibration references. Apply aesthetic, communication and craft judgment continuously where relevant. Numeric timing, three-frame and full-motion requirements below refer to their appropriate long-form production conditions, not every title, still image, or editing request. Current authority: repository-root `STUDIO_ENTRY.md` and `social_media_studio/data/studio_manifest.json`.
+> **Applicability contract:** This file is a reusable method library, not a universal stage checklist. Select criteria only when they apply to the owner's current deliverable and explicit brief. If a criterion does not apply, mark it N/A; do not invent work or fail a deliverable for not containing an unrelated medium, stage or asset. Current authority: `STUDIO_ENTRY.md`, the active owner brief and `social_media_studio/data/studio_manifest.json`.
 
-## Hook / retention
-- First 0.5s contains real visual change.
-- First 2s communicate a conflict, promise or curiosity without requiring prior context.
-- Every ~3–5s introduces new information, composition, scale, tension or payoff.
-- A viewer should be able to explain why they are still watching at each major beat.
+## Cross-deliverable fidelity
 
-## Visual / art
-- Reject PPT, SaaS dashboard and generic AI-template aesthetics unless intentionally demanded by the concept.
-- One dominant focal point per shot.
-- Use hierarchy, material, light, depth and negative space; complexity alone is not production value.
-- A static asset needs meaningful camera or layer motion.
-- At least one hero frame should be strong enough to function as a poster/thumbnail candidate.
+- Preserve the exact requested outcome, destination, language, format, source, variants and hard constraints.
+- Keep hard requirements separate from preferences and examples. A method may change; the requested outcome must not silently change.
+- Every hard requirement must map to an observable check. Every check must map to an applicable requirement or risk.
+- Inspect the exact final output, not only the prompt, plan, task graph, preview receipt or tool exit code.
+- Never call a result PASS because it is better than a rejected draft. Compare it with the owner's acceptance bar and relevant references.
 
-## Motion
-- Avoid all-linear motion and simple fade-only entrances.
-- Prefer coordinated position/scale/opacity/depth changes, stagger and faster exits.
-- Motion must explain or direct attention; decorative motion that reduces comprehension is a defect.
+## Short copy and captions
 
-## Edit
-- Delete shots that exist only because they were expensive to make.
-- Compression wins until removal damages comprehension, tension or emotional payoff.
-- Use pace contrast: fast sequences require rests; reveals need room to land.
+- Match the requested language, platform voice, audience, intent and length.
+- Lead with the actual hook, thought, joke, question or value the user asked for; do not turn a caption into news narration or an explanation unless requested.
+- Give title, body/description, cover copy and hashtags distinct roles when multiple fields are requested.
+- Check semantic redundancy, natural phrasing, factual boundaries and the exact requested call to action.
+- Do not add a cover, article, script, research report or extra variants when the user asked for one short text.
 
-## Sound
-- Voice quality below the brand bar is worse than a deliberate no-voice design.
-- Music, SFX and silence should map to narrative beats.
-- Final encode must be checked for clipping/true peak and unexpected silence.
+## Long-form writing and articles
 
-## Technical
-- Verify video stream duration, audio stream duration, frame count and resolution independently.
-- Final export must be rechecked after transcoding/upscaling/audio replacement.
-- Platform-safe subtitle/title areas are tested on final frames.
+- Preserve the requested thesis, point of view, emotional progression, structure and reader value.
+- Support material factual claims with current, traceable sources; separate fact, estimate, opinion, satire and fiction.
+- Check causal reasoning, counterarguments, originality, useful implications and non-redundancy.
+- Respect the requested heading/subtitle/body hierarchy, formatting, links, tags, image placement and publication conventions.
+- Do not import video-production stages into an article workflow.
 
-## Release question
-The team must be willing to answer YES to both:
-1. Would we publish this under our own account name?
-2. Would we send this to a desirable advertiser as evidence of our capability?
+## Static images and image sets
 
-## Absolute quality, not relative improvement
-A new version does not PASS because it is better than the rejected version. Quality-critical stages are judged against an approved external benchmark pack and the account's own release bar. “Better than V1”, “good enough for preview”, “formal build will improve it”, and “this can become good” are not passing arguments.
+- **Static images do not require camera motion, animation, a timeline, sound or video playback.** Add those only when the user requests a moving output.
+- Check the single intended scene, focal hierarchy, composition, subject readability, material/light, typography and mobile-size legibility where relevant.
+- Preserve reference roles: identify what may influence the result and what must not transfer.
+- Use canonical dimensions as explicit width × height plus orientation. Normalized ratios are always WIDTH:HEIGHT.
+- If the user explicitly supplies HEIGHT:WIDTH, reverse the axes when normalizing. For example, 4:3 HEIGHT:WIDTH becomes 3:4 WIDTH:HEIGHT and is portrait. If the axis order is genuinely ambiguous and changes the output, ask one concise clarification.
+- For a multi-aspect set, preserve the shared concept but design each aspect ratio independently. Do not merely crop one composition into every ratio unless explicitly requested.
+- Do not add collages, panels, UI, titles, slogans or extra images when prohibited or not requested.
 
-### 1–5 anchor
-- **5** — reference-level or better in this dimension; strong enough to teach from.
-- **4** — publishable and close to the chosen reference, with only minor non-blocking gaps.
-- **3** — competent but visibly below reference; reads as an internal draft. **FAIL for hard dimensions.**
-- **2** — template/demo quality, generic or weakly directed.
-- **1** — placeholder, broken or actively harmful.
+## Motion, original video and animation only
 
-No averaging can hide a hard dimension below 4. Creative Director quality-critical reviews require an average of at least 4.25 and no dimension below 4.
+Apply the following only when the deliverable actually contains motion:
+- The opening should communicate a conflict, promise or curiosity without requiring prior context.
+- Each major beat should introduce meaningful new information, composition, scale, tension or payoff; pace and rests should serve comprehension.
+- Use motion to explain or direct attention. Avoid arbitrary movement, all-linear motion or fade-only entrances when they weaken the concept.
+- Remove shots that add no comprehension, tension, emotion or payoff.
+- Sound, music, effects and silence should map to narrative beats when audio is part of the requested output.
+- Review full-speed playback and the actual final encode. Verify applicable stream duration, synchronization, frame count, resolution, frame rate, true peak, black frames and full decode.
 
-## Benchmark triangle
-Before LOOKDEV, create a project-specific benchmark pack with at least three references:
-1. **Format reference** — excellent work in the same delivery format/platform.
-2. **Craft reference** — aspirational world-class motion/brand/design execution.
-3. **Explanation reference** — excellent comprehension/visual teaching for the mechanism.
+## Media transformation and editing
 
-For every reference, extract observable traits (hierarchy, materials, typography, shot scale, motion, sound, information density) and an explicit `do_not_copy` note. The purpose is calibration, never cloning.
+- Identify the exact source asset and the precise time ranges, shots, tracks or properties the user permits changing.
+- Preserve everything outside the requested change, including original audio when promised.
+- Distinguish bitstream identity, PCM identity and perceptual similarity; never describe re-encoded audio as bit-identical.
+- Compare source and output, inspect the actual affected frames/audio, verify synchronization and report any unavoidable loss or truncation.
+- Do not upscale, crop, sharpen, denoise, recolor or alter unrelated material unless requested or explicitly approved.
 
-## LOOKDEV gate
-Do not animate the full piece before proving the art direction. Produce at least three near-final hero frames: **hook**, **mechanism/reveal**, and **payoff/ending**. They must establish the design system: palette, typography, material/texture, lighting, depth, icon/illustration language, camera/lens logic and information hierarchy. If these stills look like a dashboard, wireframe, code demo or generic AI interface, stop. Animation will not rescue them.
+## Quality scales and independent review
 
-## Visual preview gate
-The preview must be a real rendered motion study, not a storyboard with moving cards. Review full-speed playback plus a contact sheet. PASS requires current-file evidence for composition, materials, typography, visual consistency, camera depth, easing/stagger, narrative visual arc, first-2s stop power and benchmark parity. Any promise to improve these later is a FAIL.
+- Use a 1–5 scale only when a numeric rubric or quality-critical review is appropriate. The anchors are: 5 reference-level; 4 publishable and close to reference; 3 competent but below the bar; 2 template/demo quality; 1 broken or placeholder.
+- Do not average away a failed hard requirement. A score is evidence only when tied to the exact artifact version, reviewer, rubric, observed findings and supporting evidence.
+- The producer cannot independently approve their own output. Independent review must inspect the exact digest and disclose limitations.
+- Do not claim a human review, blind review, semantic fact-check or independent acceptance unless it actually occurred.
 
-## Side-by-side test
-Put the candidate and benchmark frames at comparable scale. If the reference wins immediately on hierarchy, detail, material, typography, motion intention or hero-frame strength, identify the gap and FAIL until the gap is intentionally solved. “Different style” is not a defense for lower craft.
+## Benchmark, LOOKDEV and visual-preview methods
+
+These methods are conditional tools for complex, long-form, high-cost or quality-critical motion/visual production when a benchmark or prototype is needed to test a material risk:
+- A project-specific benchmark pack may compare format, craft and explanatory clarity. Extract observable traits and explicit `do_not_copy` boundaries.
+- LOOKDEV hero frames and a representative motion preview may be useful before expensive production.
+- Side-by-side comparison may reveal craft gaps against an approved benchmark.
+- Do **not** impose three hero frames, a motion preview, a benchmark pack or a Creative Director scorecard on a short caption, article, prompt-only request, single static image, simple crop or routine edit.
+
+## Release and commercial presentation
+
+- Ask whether the team would publish under its own account or show the work to an advertiser only when public release or commercial presentation is actually in scope.
+- A draft, private prompt, single still or internal edit is not automatically a release candidate.
+- Public posting, paid promotion and third-party delivery require their own current authorization. A quality PASS is not permission to publish.

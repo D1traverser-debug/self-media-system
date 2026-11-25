@@ -11,10 +11,12 @@ def test_every_python_module_and_registered_executor_has_one_real_internal_owner
     report = audit_subsystems(ROOT)
     assert report["pass"], report["violations"]
     assert report["code_modules"] == report["owned_modules"]
-    assert report["code_modules"] >= 59
-    assert report["subsystems"] == 16
-    assert report["domain_adapters"] == 17
-    assert report["production_operations"] == 6
+    catalog = json.loads((ROOT/"social_media_studio/data/subsystem_catalog.json").read_text())
+    floors = catalog["topology_contract"]
+    assert report["code_modules"] >= floors["minimum_code_modules"]
+    assert report["subsystems"] >= floors["minimum_subsystems"]
+    assert report["domain_adapters"] >= floors["minimum_domain_adapters"]
+    assert report["production_operations"] >= floors["minimum_production_operations"]
     assert report["unclassified_paths"] == []
     assert report["all_tracked_bytes_inspected"] is True
     assert len(report["all_tracked_file_sha256"]) == report["tracked_files"]
@@ -116,6 +118,22 @@ def test_active_import_of_old_controller_is_rejected_not_whitelisted(tmp_path):
     assert audit["pass"] is False
     assert any("reaches old controller" in x and "social_media_studio.legacy.runtime" in x
                for x in audit["violations"])
+
+
+def test_topology_regression_floor_is_enforced_when_catalog_and_code_shrink_together(tmp_path):
+    cat = _isolated_source_checkout(tmp_path)
+    cat["topology_contract"]["minimum_subsystems"] = len(cat["subsystems"]) + 1
+    cat["topology_contract"]["minimum_code_modules"] = sum(
+        len(item["code_paths"]) for item in cat["subsystems"]
+    ) + 1
+    catalog_path = tmp_path/"social_media_studio/data/subsystem_catalog.json"
+    catalog_path.write_text(json.dumps(cat, ensure_ascii=False, indent=2))
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("topology regression floor violated: minimum_subsystems" in item
+               for item in report["violations"])
+    assert any("topology regression floor violated: minimum_code_modules" in item
+               for item in report["violations"])
 
 
 def test_false_external_ipos_and_duplicate_executor_ownership_are_rejected(tmp_path):

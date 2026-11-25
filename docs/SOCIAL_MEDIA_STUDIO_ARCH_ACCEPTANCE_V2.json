@@ -84,15 +84,28 @@
     },
     {
       "id": "S07",
-      "demand": "同创意3:4和4:3图",
+      "demand": "同创意分别交付3:4竖版与4:3横版（均按宽:高表示）",
       "deliverable_type": "MULTI_ASPECT_IMAGE_SET",
       "required_contexts": [
         "visual_design"
       ],
-      "owner_outcome_oracle": "不同构图、同创意、各比例清晰、宽高明确",
+      "requested_shapes": [
+        {
+          "width": 1080,
+          "height": 1440,
+          "orientation": "PORTRAIT"
+        },
+        {
+          "width": 1440,
+          "height": 1080,
+          "orientation": "LANDSCAPE"
+        }
+      ],
+      "ratio_convention": "WIDTH:HEIGHT",
+      "owner_outcome_oracle": "同一创意但分别为1080×1440竖版与1440×1080横版；两版独立构图、各自可读，不是同一张图的简单裁剪",
       "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
       "runtime_verified": false,
-      "forbidden_implicit_effect": "不可把4:3误当竖版或简单裁剪"
+      "forbidden_implicit_effect": "不得仅凭裸比例推断方向；不得把4:3横版误做竖版或简单裁剪"
     },
     {
       "id": "S08",
@@ -422,6 +435,27 @@
       "forbidden_implicit_effect": "不得使用旧快照作为当前决策依据",
       "design_coverage": "REQUIRES_INDEPENDENT_REVIEW",
       "runtime_verified": false
+    },
+    {
+      "id": "S35",
+      "demand": "TikTok竖版封面，用户明确写4:3（高:宽）",
+      "deliverable_type": "STATIC_IMAGE",
+      "required_contexts": [
+        "visual_design",
+        "platform_packaging"
+      ],
+      "requested_ratio": "4:3",
+      "ratio_convention": "HEIGHT:WIDTH",
+      "canonical_shape": {
+        "width": 1080,
+        "height": 1440,
+        "orientation": "PORTRAIT"
+      },
+      "owner_outcome_oracle": "按用户明确声明的高:宽4:3解释，规范化为宽:高3:4，即1080×1440竖版；保留单幅封面意图",
+      "design_coverage": "REQUIRES_EXACT_SHAPE_AND_ORIENTATION",
+      "runtime_verified": false,
+      "forbidden_implicit_effect": "不得把4:3按宽:高解释成横版；不得擅自裁切、旋转或改变用户指定方向",
+      "long_edge_pixels": 1440
     },
     {
       "id": "S34",

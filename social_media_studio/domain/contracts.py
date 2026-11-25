@@ -46,8 +46,10 @@ class MediaShape:
 
     @classmethod
     def from_mapping(cls, value: Mapping[str, Any]) -> "MediaShape":
-        if not isinstance(value, Mapping) or set(value) != {"width", "height", "orientation"}:
-            raise ContentContractError("shape must specify exactly width, height and orientation")
+        required = {"width", "height", "orientation"}
+        allowed = required | {"aspect_ratio", "ratio_order"}
+        if not isinstance(value, Mapping) or not required.issubset(value) or set(value) - allowed:
+            raise ContentContractError("shape must specify width, height and orientation; only normalized ratio metadata is optional")
         width, height, orientation = value["width"], value["height"], value["orientation"]
         if (isinstance(width, bool) or isinstance(height, bool)
                 or not isinstance(width, int) or not isinstance(height, int)
@@ -56,7 +58,46 @@ class MediaShape:
         expected = "LANDSCAPE" if width > height else "PORTRAIT" if height > width else "SQUARE"
         if orientation != expected:
             raise ContentContractError(f"{width}:{height} requires {expected} orientation")
-        return cls(width=width, height=height, orientation=orientation)
+        shape = cls(width=width, height=height, orientation=orientation)
+        if value.get("ratio_order", "WIDTH:HEIGHT") != "WIDTH:HEIGHT":
+            raise ContentContractError("normalized aspect_ratio must use WIDTH:HEIGHT order")
+        declared_ratio = value.get("aspect_ratio")
+        if declared_ratio is not None and declared_ratio != shape.ratio:
+            raise ContentContractError("declared aspect_ratio conflicts with width and height")
+        return shape
+
+    @classmethod
+    def from_ratio(
+        cls, value: str, *, ratio_order: str, long_edge_pixels: int,
+    ) -> "MediaShape":
+        """Normalize a ratio only when its axis order is explicit.
+
+        WIDTH:HEIGHT 4:3 -> landscape; HEIGHT:WIDTH 4:3 -> portrait.
+        The longer edge is set to the requested pixel count without changing the ratio.
+        """
+        match = re.fullmatch(r"\s*(\d+)\s*:\s*(\d+)\s*", value) if isinstance(value, str) else None
+        if not match:
+            raise ContentContractError("ratio must be an explicit positive N:D string")
+        first, second = int(match.group(1)), int(match.group(2))
+        if first < 1 or second < 1:
+            raise ContentContractError("ratio components must be positive integers")
+        if ratio_order == "WIDTH:HEIGHT":
+            width_ratio, height_ratio = first, second
+        elif ratio_order == "HEIGHT:WIDTH":
+            width_ratio, height_ratio = second, first
+        else:
+            raise ContentContractError("ratio_order must be WIDTH:HEIGHT or HEIGHT:WIDTH")
+        if isinstance(long_edge_pixels, bool) or not isinstance(long_edge_pixels, int) or not 1 <= long_edge_pixels <= 16384:
+            raise ContentContractError("long_edge_pixels must be an integer in 1..16384")
+        scale_edge = max(width_ratio, height_ratio)
+        if long_edge_pixels % scale_edge:
+            raise ContentContractError("long_edge_pixels cannot represent this ratio exactly in integer pixels")
+        scale = long_edge_pixels // scale_edge
+        return cls.from_mapping({
+            "width": width_ratio * scale,
+            "height": height_ratio * scale,
+            "orientation": "LANDSCAPE" if width_ratio > height_ratio else "PORTRAIT" if height_ratio > width_ratio else "SQUARE",
+        })
 
     @property
     def ratio(self) -> str:
@@ -65,7 +106,8 @@ class MediaShape:
 
     def as_dict(self) -> dict[str, Any]:
         return {"width": self.width, "height": self.height,
-                "orientation": self.orientation, "aspect_ratio": self.ratio}
+                "orientation": self.orientation, "aspect_ratio": self.ratio,
+                "ratio_order": "WIDTH:HEIGHT"}
 
 
 @dataclass(frozen=True)

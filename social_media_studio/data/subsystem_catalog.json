@@ -4,6 +4,12 @@
   "current_runtime": "social_media_studio.engine.StudioEngine",
   "installed_cli": "social_media_studio.cli:main",
   "product": "Social Media Studio",
+  "topology_contract": {
+    "minimum_subsystems": 16,
+    "minimum_code_modules": 62,
+    "minimum_domain_adapters": 17,
+    "minimum_production_operations": 6
+  },
   "separate_cognition_controller": false,
   "parent_governance": {
     "caos_read_only": true,

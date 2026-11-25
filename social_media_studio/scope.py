@@ -13,14 +13,93 @@ from typing import Any
 EPOCH = "SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125"
 
 
+OFFLINE_FIXTURE_MARKER = ".sms-offline-fixture.json"
+
+
+def validate_workspace_mode(
+    root: str | Path, *, offline_fixture: bool, initialize: bool = False,
+    owner_root: str | Path | None = None,
+) -> Path:
+    """Keep CLI owner ledgers and mechanical fixture workspaces mutually exclusive.
+
+    A fixture root is initialized only when it is empty, then bound to its resolved
+    path by a marker. This is an accidental-mixing guard, not an authentication system.
+    """
+    candidate = Path(root).expanduser()
+    if offline_fixture and candidate.is_symlink():
+        raise ValueError("offline fixture root cannot be a symlink")
+    workspace = candidate.resolve()
+    if workspace.exists() and not workspace.is_dir():
+        raise ValueError("workspace root must be a directory")
+    marker = workspace / OFFLINE_FIXTURE_MARKER
+
+    def verify_marker() -> None:
+        if marker.is_symlink() or not marker.is_file():
+            raise ValueError("offline fixture marker is missing or invalid")
+        try:
+            payload = json.loads(marker.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError("offline fixture marker cannot be read") from exc
+        expected = {
+            "schema_version": 1,
+            "mode": "OFFLINE_FIXTURE",
+            "authority": "MECHANICAL_REGRESSION_ONLY",
+            "workspace_root": str(workspace),
+        }
+        if payload != expected:
+            raise ValueError("offline fixture marker does not match this exact workspace")
+
+    if offline_fixture:
+        if owner_root is not None:
+            owner = Path(owner_root).expanduser().resolve()
+            if (workspace == owner or workspace.is_relative_to(owner)
+                    or owner.is_relative_to(workspace)):
+                raise ValueError("offline fixture root must be disjoint from the default owner workspace")
+        if marker.exists() or marker.is_symlink():
+            verify_marker()
+        else:
+            if not initialize:
+                raise ValueError("offline fixture root is unmarked; initialize a dedicated empty root first")
+            if workspace.exists() and any(workspace.iterdir()):
+                raise ValueError("offline fixture root must be empty before its first initialization")
+            workspace.mkdir(parents=True, exist_ok=True)
+            payload = {
+                "schema_version": 1,
+                "mode": "OFFLINE_FIXTURE",
+                "authority": "MECHANICAL_REGRESSION_ONLY",
+                "workspace_root": str(workspace),
+            }
+            try:
+                with marker.open("x", encoding="utf-8") as stream:
+                    json.dump(payload, stream, ensure_ascii=False, sort_keys=True)
+                    stream.write("\n")
+            except FileExistsError:
+                verify_marker()
+        return workspace
+
+    if marker.exists() or marker.is_symlink():
+        raise ValueError("owner mode cannot access an offline fixture workspace")
+    return workspace
+
+
 def contract() -> dict[str, Any]:
     return json.loads(files("social_media_studio").joinpath("data", "studio_manifest.json").read_text(encoding="utf-8"))
+
+
+def assert_scope_epoch(manifest: dict[str, Any] | None = None) -> None:
+    """Fail closed when runtime code and the canonical owner-scope contract drift."""
+    current = manifest if manifest is not None else contract()
+    declared = current.get("task_admission", {}).get("scope_epoch")
+    if declared != EPOCH:
+        raise ValueError(f"owner scope epoch mismatch: runtime={EPOCH!r}, manifest={declared!r}")
 
 
 def _id(value: Any) -> str:
     if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", value):
         raise ValueError("exact safe project_id required")
-    if value.casefold() in {item.casefold() for item in contract()["task_admission"]["retired_project_ids"]}:
+    manifest = contract()
+    assert_scope_epoch(manifest)
+    if value.casefold() in {item.casefold() for item in manifest["task_admission"]["retired_project_ids"]}:
         raise ValueError("retired project instance cannot be resumed or reused")
     return value
 
@@ -38,6 +117,7 @@ def bind_owner_brief(project_id: str, brief: dict[str, Any]) -> dict[str, Any]:
 
 
 def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> None:
+    assert_scope_epoch()
     if brief.get("scope_epoch") != EPOCH:
         return  # mechanical compatibility and isolated fixture path
     refs = task.get("requirements", {}).get("deliverable_refs")
@@ -70,6 +150,7 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(request, dict) or request.get("mode") not in {"NEW", "RESUME"}:
         raise ValueError("explicit NEW or RESUME mode required")
     manifest = contract()
+    assert_scope_epoch(manifest)
     mode = request["mode"]
     if mode == "NEW":
         goal = request.get("goal")
