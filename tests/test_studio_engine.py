@@ -1265,6 +1265,30 @@ def test_release_check_fails_closed_on_uncleared_source_asset_in_final_lineage(t
 
 def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_red_team(tmp_path):
     engine = StudioEngine(tmp_path / "strict-workspace")
+    private_key = Ed25519PrivateKey.generate()
+    public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )
+    engine.review_trust_registry = ReviewExecutionTrustRegistry(config={
+        "schema_version": 1,
+        "policy": {"max_receipt_age_seconds": 3600},
+        "trusted_executors": {
+            "human-review-executor": {
+                "status": "ACTIVE",
+                "key_id": "strict-review-key",
+                "public_key": base64.b64encode(public_key).decode("ascii"),
+                "issuer": "strict-review-test",
+                "isolation_mechanism": "ephemeral-review-container",
+                "reviewer_kinds": ["HUMAN"],
+                "execution_modes": ["INDEPENDENT_COLD_READ"],
+                "reviewer_ids": ["human-cold-reader"],
+                "providers": ["test-provider"],
+                "models": ["human-cold-read-v1"],
+                "media_inspection_modes": ["FULL_VIDEO"],
+            }
+        },
+    })
     strict_brief = brief()
     strict_brief["release_policy"] = {
         "require_rights": True,
@@ -1281,6 +1305,8 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
                 "blind_review": True,
                 "require_digest_attestation": True,
                 "require_context_id": True,
+                "require_execution_attestation": True,
+                "required_media_inspection": "FULL_VIDEO",
                 "require_resolvable_evidence_refs": True,
             },
             "red-team": {
@@ -1299,11 +1325,12 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         media_type="text/plain", rights_status="OWNED",
     )
     evidence_paths = {}
+    evidence_artifacts = {}
     for evidence_name in ("cold-read-evidence", "red-team-review-evidence", "frame-001", "frame-012", "frame-018"):
         evidence_path = tmp_path / f"{evidence_name}.txt"
         evidence_path.write_text(f"Evidence for {evidence_name}", encoding="utf-8")
         evidence_paths[evidence_name] = evidence_path
-        engine.import_asset(
+        evidence_artifacts[evidence_name] = engine.import_asset(
             "strict", evidence_name, evidence_path, kind="evidence",
             media_type="text/plain", rights_status="NOT_APPLICABLE",
         )
