@@ -176,7 +176,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project_id")
     p.add_argument("payload", type=Path)
 
-    p = sub.add_parser("resolve-failure", help="close a failure only with distinct current artifact IDs and exact-digest PASS review receipts")
+    p = sub.add_parser("resolve-failure", help="close a failure only with current artifact IDs, role-specific PASS reviews and digest-verified review evidence")
     p.add_argument("project_id")
     p.add_argument("failure_id")
     p.add_argument("resolution", type=Path)
