@@ -3027,6 +3027,8 @@ class StudioEngine:
                                 task is None or task["kind"] != "review" or task["status"] != "COMPLETED"
                                 or result_artifact is None or result_artifact["status"] not in {"CURRENT", "ACCEPTED"}
                                 or result_artifact["produced_by_task"] != review_task_id
+                                or result_artifact["kind"] != "review_report"
+                                or result_artifact["media_type"] != "application/json"
                                 or result_artifact["producer_id"] == artifact["producer_id"]
                             ):
                                 failures.append(f"review_execution_task_or_report_stale:{rubric}:{review['review_id']}")
@@ -3038,10 +3040,18 @@ class StudioEngine:
                                     task_result = _loads(task["result_json"], {})
                                     task_requirements = _loads(task["requirements_json"], {})
                                     task_contract = task_requirements.get("review_contract") if isinstance(task_requirements, dict) else None
-                                    current_rubric = release_policy.get("review_contracts", {}).get(rubric, {})
+                                    current_rubric_contracts = release_policy.get("review_contracts", {})
+                                    current_rubric = current_rubric_contracts.get(rubric, {}) if isinstance(current_rubric_contracts, dict) else {}
                                     output_ids = task_result.get("outputs", {}) if isinstance(task_result, dict) else {}
-                                    if result_artifact_id not in set(output_ids.values()):
+                                    if not isinstance(output_ids, dict) or result_artifact_id not in set(output_ids.values()):
                                         failures.append(f"review_execution_report_not_task_output:{rubric}:{review['review_id']}")
+                                    input_bindings = task_result.get("input_bindings", []) if isinstance(task_result, dict) else []
+                                    declared_inputs = _loads(task["inputs_json"], [])
+                                    if (
+                                        not isinstance(input_bindings, list)
+                                        or [item.get("name") for item in input_bindings if isinstance(item, dict)] != declared_inputs
+                                    ):
+                                        failures.append(f"review_execution_task_inputs_do_not_match_claim:{rubric}:{review['review_id']}")
                                     try:
                                         report_payload = json.loads(result_path.read_text(encoding="utf-8"))
                                     except (OSError, json.JSONDecodeError):
