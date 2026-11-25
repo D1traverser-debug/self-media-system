@@ -145,13 +145,193 @@ def read_project_brief(root: str | Path, project_id: str) -> dict[str, Any]:
     return json.loads(row[0])
 
 
+def validate_context_boundary(
+    boundary: dict[str, Any], *, task_inputs: list[str] | None = None,
+) -> dict[str, Any]:
+    """Validate a task's declared context boundary; this is a handoff contract, not a native chat sandbox."""
+    if not isinstance(boundary, dict):
+        raise ValueError("requirements.context_boundary must be an object")
+    mode = boundary.get("mode", "DECLARED_INPUTS_PLUS_PROJECT_BRIEF")
+    if mode not in {"DECLARED_INPUTS_ONLY", "DECLARED_INPUTS_PLUS_PROJECT_BRIEF"}:
+        raise ValueError("context_boundary.mode is unsupported")
+    allowed = boundary.get("allowed_input_names", task_inputs if task_inputs is not None else [])
+    excluded = boundary.get("excluded_context_refs", [])
+    for field, value in (("allowed_input_names", allowed), ("excluded_context_refs", excluded)):
+        if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+            raise ValueError(f"context_boundary.{field} must be an array of non-empty strings")
+        if len(value) != len(set(value)):
+            raise ValueError(f"context_boundary.{field} contains duplicates")
+    if task_inputs is not None and set(allowed) != set(task_inputs):
+        raise ValueError("context_boundary.allowed_input_names must exactly match the task's declared inputs")
+    if set(allowed) & set(excluded):
+        raise ValueError("context_boundary cannot both allow and exclude the same reference")
+    allow_prior = boundary.get("allow_prior_conversation", False)
+    allow_siblings = boundary.get("allow_sibling_task_context", False)
+    isolated_chat = boundary.get("isolated_chat_required", False)
+    if not all(isinstance(value, bool) for value in (allow_prior, allow_siblings, isolated_chat)):
+        raise ValueError("context_boundary flags must be booleans")
+    if mode == "DECLARED_INPUTS_ONLY" and (allow_prior or allow_siblings):
+        raise ValueError("DECLARED_INPUTS_ONLY cannot admit prior conversation or sibling-task context")
+    if isolated_chat and mode != "DECLARED_INPUTS_ONLY":
+        raise ValueError("isolated_chat_required requires DECLARED_INPUTS_ONLY")
+    if "native_session_isolation_verified" in boundary:
+        raise ValueError("native chat isolation cannot be asserted by a task contract")
+    return {
+        "mode": mode,
+        "allowed_input_names": list(allowed),
+        "excluded_context_refs": list(excluded),
+        "allow_prior_conversation": allow_prior,
+        "allow_sibling_task_context": allow_siblings,
+        "isolated_chat_required": isolated_chat,
+    }
+
+
+def validate_adoption_packet(packet: dict[str, Any], brief: dict[str, Any]) -> dict[str, Any]:
+    """Validate a portable conversation-to-project context package without promoting its claims to proof."""
+    if not isinstance(packet, dict) or packet.get("schema_version") != "1.0":
+        raise ValueError("adoption packet must be an object with schema_version 1.0")
+    if packet.get("kind") != "SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET":
+        raise ValueError("adoption packet kind must be SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET")
+    coverage = packet.get("source_coverage")
+    if coverage not in {"FULL_SOURCE_EXPORT", "PARTIAL_CONTEXT", "CURRENT_CHAT_ONLY", "UNKNOWN"}:
+        raise ValueError("adoption packet source_coverage is invalid")
+    coverage_notes = packet.get("coverage_notes")
+    if not isinstance(coverage_notes, str) or not coverage_notes.strip():
+        raise ValueError("adoption packet requires explicit coverage_notes")
+    sources = packet.get("source_refs")
+    if not isinstance(sources, list) or not sources:
+        raise ValueError("adoption packet requires at least one source_refs entry")
+    source_types = {"CHAT_EXPORT", "CHAT_CONTEXT", "LIBRARY_FILE", "LOCAL_FILE", "OTHER"}
+    source_roles = {"OWNER_GOAL", "USER_CORRECTION", "REQUIREMENT", "DECISION", "FAILURE", "REFERENCE", "ARTIFACT", "OUTPUT"}
+    source_verification = {"EXACT_BYTES_HASHED", "CONVERSATION_CONTEXT_ONLY", "UNVERIFIED"}
+    seen_sources: set[tuple[str, str]] = set()
+    for index, source in enumerate(sources):
+        if not isinstance(source, dict):
+            raise ValueError(f"adoption source_refs[{index}] must be an object")
+        source_ref = source.get("source_ref")
+        source_type = source.get("source_type")
+        role = source.get("role")
+        verification = source.get("verification")
+        if not isinstance(source_ref, str) or not source_ref.strip():
+            raise ValueError(f"adoption source_refs[{index}] requires source_ref")
+        if source_type not in source_types or role not in source_roles or verification not in source_verification:
+            raise ValueError(f"adoption source_refs[{index}] has an unsupported source_type, role or verification")
+        key = (source_ref, role)
+        if key in seen_sources:
+            raise ValueError(f"adoption packet contains duplicate source/role binding: {source_ref}/{role}")
+        seen_sources.add(key)
+        digest = source.get("sha256")
+        if verification == "EXACT_BYTES_HASHED":
+            if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
+                raise ValueError(f"adoption source_refs[{index}] requires a valid SHA-256 for EXACT_BYTES_HASHED")
+        elif digest is not None and (not isinstance(digest, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", digest)):
+            raise ValueError(f"adoption source_refs[{index}] has an invalid optional SHA-256")
+    if coverage == "FULL_SOURCE_EXPORT" and not any(
+        source["source_type"] == "CHAT_EXPORT" and source["verification"] == "EXACT_BYTES_HASHED"
+        for source in sources
+    ):
+        raise ValueError("FULL_SOURCE_EXPORT requires an exact-byte-hashed CHAT_EXPORT source")
+    if coverage == "CURRENT_CHAT_ONLY" and not any(
+        source["source_type"] == "CHAT_CONTEXT" and source["verification"] == "CONVERSATION_CONTEXT_ONLY"
+        for source in sources
+    ):
+        raise ValueError("CURRENT_CHAT_ONLY requires an explicit CHAT_CONTEXT source")
+
+    goal = packet.get("goal")
+    if not isinstance(goal, dict):
+        raise ValueError("adoption packet requires a goal object")
+    original_goal = goal.get("original_user_goal")
+    current_goal = goal.get("current_goal")
+    deliverables = goal.get("deliverables")
+    if not isinstance(original_goal, str) or not original_goal.strip():
+        raise ValueError("adoption goal requires original_user_goal")
+    if not isinstance(current_goal, str) or current_goal.strip() != brief.get("goal"):
+        raise ValueError("adoption current_goal must exactly match the project brief goal")
+    if not isinstance(deliverables, list) or deliverables != brief.get("deliverables"):
+        raise ValueError("adoption deliverables must exactly match the project brief deliverables")
+    for field in ("hard_constraints", "preferences", "prohibitions"):
+        values = goal.get(field, [])
+        if not isinstance(values, list) or any(not isinstance(value, str) or not value.strip() for value in values):
+            raise ValueError(f"adoption goal.{field} must be an array of non-empty strings")
+    corrections = goal.get("corrections", [])
+    if not isinstance(corrections, list):
+        raise ValueError("adoption goal.corrections must be an array")
+    correction_orders: set[int] = set()
+    for index, correction in enumerate(corrections):
+        if not isinstance(correction, dict) or not isinstance(correction.get("text"), str) or not correction["text"].strip():
+            raise ValueError(f"adoption goal.corrections[{index}] requires text")
+        order = correction.get("order")
+        if not isinstance(order, int) or isinstance(order, bool) or order < 1 or order in correction_orders:
+            raise ValueError(f"adoption goal.corrections[{index}] requires a unique positive order")
+        correction_orders.add(order)
+        if "source_ref" in correction and not isinstance(correction["source_ref"], str):
+            raise ValueError(f"adoption goal.corrections[{index}].source_ref must be a string")
+
+    completed = packet.get("completed_work", [])
+    if not isinstance(completed, list):
+        raise ValueError("adoption completed_work must be an array")
+    for index, item in enumerate(completed):
+        if not isinstance(item, dict) or not isinstance(item.get("description"), str) or not item["description"].strip():
+            raise ValueError(f"adoption completed_work[{index}] requires description")
+        if item.get("status") not in {"VERIFIED", "CLAIMED_UNVERIFIED"}:
+            raise ValueError(f"adoption completed_work[{index}] status must be VERIFIED or CLAIMED_UNVERIFIED")
+        evidence = item.get("evidence_refs", [])
+        if not isinstance(evidence, list) or any(not isinstance(ref, str) or not ref.strip() for ref in evidence):
+            raise ValueError(f"adoption completed_work[{index}].evidence_refs must be an array of non-empty strings")
+        if item["status"] == "VERIFIED" and not evidence:
+            raise ValueError(f"adoption completed_work[{index}] cannot be VERIFIED without evidence_refs")
+
+    decisions = packet.get("prior_decisions", [])
+    if not isinstance(decisions, list):
+        raise ValueError("adoption prior_decisions must be an array")
+    for index, decision in enumerate(decisions):
+        if not isinstance(decision, dict) or not isinstance(decision.get("question"), str) or not decision["question"].strip():
+            raise ValueError(f"adoption prior_decisions[{index}] requires question")
+        if not isinstance(decision.get("choice"), str) or not decision["choice"].strip():
+            raise ValueError(f"adoption prior_decisions[{index}] requires choice")
+        if decision.get("status") != "REQUIRES_REVALIDATION":
+            raise ValueError(f"adoption prior_decisions[{index}] must remain REQUIRES_REVALIDATION")
+
+    open_items = packet.get("open_items", [])
+    if not isinstance(open_items, list) or any(not isinstance(item, str) or not item.strip() for item in open_items):
+        raise ValueError("adoption open_items must be an array of non-empty strings")
+    failures = packet.get("failure_history", [])
+    if not isinstance(failures, list):
+        raise ValueError("adoption failure_history must be an array")
+    for index, failure in enumerate(failures):
+        if not isinstance(failure, dict) or not isinstance(failure.get("symptom"), str) or not failure["symptom"].strip():
+            raise ValueError(f"adoption failure_history[{index}] requires symptom")
+        if failure.get("status") not in {"OPEN", "RESOLVED_UNVERIFIED", "RESOLVED_WITH_EVIDENCE"}:
+            raise ValueError(f"adoption failure_history[{index}] has an unsupported status")
+        refs = failure.get("evidence_refs", [])
+        if not isinstance(refs, list) or any(not isinstance(ref, str) or not ref.strip() for ref in refs):
+            raise ValueError(f"adoption failure_history[{index}].evidence_refs must be an array of non-empty strings")
+        if failure["status"] == "RESOLVED_WITH_EVIDENCE" and not refs:
+            raise ValueError(f"adoption failure_history[{index}] cannot claim evidence-backed resolution without evidence_refs")
+
+    next_action = packet.get("next_action")
+    if not isinstance(next_action, str) or not next_action.strip():
+        raise ValueError("adoption packet requires a concrete next_action")
+    boundary = packet.get("context_boundary", {
+        "mode": "DECLARED_INPUTS_PLUS_PROJECT_BRIEF",
+        "allowed_input_names": [],
+        "excluded_context_refs": [],
+        "allow_prior_conversation": False,
+        "allow_sibling_task_context": False,
+        "isolated_chat_required": False,
+    })
+    validate_context_boundary(boundary)
+    return packet
+
+
 def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
     """Return a read-only route; never create a task, infer a project, or assert CAOS ran."""
-    if not isinstance(request, dict) or request.get("mode") not in {"NEW", "RESUME"}:
-        raise ValueError("explicit NEW or RESUME mode required")
+    if not isinstance(request, dict) or request.get("mode") not in {"NEW", "RESUME", "ADOPT"}:
+        raise ValueError("explicit NEW, RESUME or ADOPT mode required")
     manifest = contract()
     assert_scope_epoch(manifest)
     mode = request["mode"]
+    adoption_packet = None
     if mode == "NEW":
         goal = request.get("goal")
         if not isinstance(goal, str) or not goal.strip():
@@ -162,6 +342,14 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
             if (Path(root).expanduser().resolve() / "projects" / project_id).exists():
                 raise ValueError("NEW cannot reuse an existing project")
         brief = None
+    elif mode == "ADOPT":
+        project_id = _id(request.get("project_id"))
+        project_path = Path(root).expanduser().resolve() / "projects" / project_id
+        if project_path.exists():
+            raise ValueError("ADOPT requires a new project_id; use RESUME for an existing project")
+        brief = bind_owner_brief(project_id, request.get("brief"))
+        adoption_packet = validate_adoption_packet(request.get("adoption_packet"), brief)
+        goal = brief["goal"]
     else:
         project_id = _id(request.get("project_id"))
         brief = read_project_brief(root, project_id)
@@ -173,13 +361,15 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
     if declarations is not None:
         from .domain.contracts import inspect_declared_deliverables
         typed = inspect_declared_deliverables(
-            declarations, expected_ids=(brief.get("deliverables") if mode == "RESUME" else request.get("deliverables")))
+            declarations, expected_ids=(brief.get("deliverables") if mode in {"RESUME", "ADOPT"} else request.get("deliverables")))
     from .domain.identity import identity_route
     identity_routing = identity_route(typed["deliverables"]) if typed else None
     from .subsystems import route_declared_content
     internal_subsystem_routing = route_declared_content(typed["deliverables"]) if typed else None
     return {
         "mode": mode, "goal": goal, "project_id": project_id, "brief": brief,
+        "adoption_packet": adoption_packet if mode == "ADOPT" else None,
+        "task_graph_created": False,
         "typed_deliverables": typed,
         "identity_routing": identity_routing,
         "internal_subsystem_routing": internal_subsystem_routing,
@@ -194,6 +384,11 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
         "native_activation": "NOT_VERIFIED_BY_RUNTIME",
         "effect_authorized": False,
     }
+
+
+def knowledge_lookup(method_id: str | None = None, *, include_nonactive: bool = False,
+                     repo_root: str | Path | None = None) -> dict[str, Any]:
+
 
 
 def knowledge_lookup(method_id: str | None = None, *, include_nonactive: bool = False,
