@@ -3389,6 +3389,39 @@ class StudioEngine:
                         "checks": check_statuses,
                     }
 
+            rubric_contracts = release_policy.get("review_contracts", {})
+            if not isinstance(rubric_contracts, dict):
+                rubric_contracts = {}
+            high_assurance_rubrics = [
+                rubric for rubric in effective_rubrics
+                if self._review_contract_requires_execution(rubric_contracts.get(rubric, {}))
+            ]
+            high_assurance_reviews = [
+                attestation
+                for rubric in high_assurance_rubrics
+                for attestation in review_summary.get(rubric, {}).get("attestations", [])
+            ]
+            high_assurance_review_count = sum(
+                len(review_summary.get(rubric, {}).get("review_ids", []))
+                for rubric in high_assurance_rubrics
+            )
+            high_assurance_verified_count = sum(
+                1 for attestation in high_assurance_reviews
+                if isinstance(attestation, dict)
+                and isinstance(attestation.get("verified_execution"), dict)
+                and attestation["verified_execution"].get("verified") is True
+            )
+            if not high_assurance_rubrics:
+                high_assurance_status = "NOT_REQUIRED"
+            elif (
+                high_assurance_review_count > 0
+                and high_assurance_verified_count == high_assurance_review_count
+                and all(review_summary.get(rubric, {}).get("review_ids") for rubric in high_assurance_rubrics)
+            ):
+                high_assurance_status = "VERIFIED"
+            else:
+                high_assurance_status = "BLOCKED"
+
             receipt = {
                 "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
                 "required_rubrics": effective_rubrics, "review_summary": review_summary,
@@ -3403,9 +3436,11 @@ class StudioEngine:
                 "failures": failures, "pass": not failures,
                 "review_attestation_limit": "Low-assurance reviews retain metadata-only identity; high-assurance rubrics require a signed DSSE/in-toto Ed25519 execution receipt verified at recording and release.",
                 "review_execution_verification": {
-                    "high_assurance": "ED25519_DSSE_IN_TOTO_VERIFIED_AT_RECORD_AND_RELEASE",
+                    "high_assurance": high_assurance_status,
                     "ordinary_review": "LOW_ASSURANCE_METADATA_ONLY",
                     "trusted_executor_count": len(self.review_trust_registry.config.get("trusted_executors", {})),
+                    "high_assurance_review_count": high_assurance_review_count,
+                    "high_assurance_verified_count": high_assurance_verified_count,
                 },
             }
             if not failures:
