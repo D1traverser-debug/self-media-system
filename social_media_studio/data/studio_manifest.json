@@ -152,6 +152,7 @@
         "domain_adapter_registry_matches_manifest",
         "program_authority_refs_are_digest_bound_inputs",
         "isolated_regression_graphs_and_local_execution",
+        "high_assurance_review_execution_default_fail_closed",
         "isolated_historical_video_fixture_release_policy",
         "task_neutral_intake_and_retirement",
         "knowledge_locator_integrity",
