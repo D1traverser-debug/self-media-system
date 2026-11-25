@@ -131,6 +131,10 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         review_contract_detection = StudioEngine._review_contract_requires_execution({
             "reviewer_kind": "HUMAN", "execution_mode": "INDEPENDENT_COLD_READ", "blind_review": True,
         })
+        review_receipt_semantics_correct = (
+            "ED25519_DSSE_IN_TOTO_VERIFIED_AT_RECORD_AND_RELEASE" in engine_source
+            and "runtime cannot cryptographically prove a human" not in engine_source
+        )
         review_fail_closed = (
             not review_registry.config["trusted_executors"]
             and review_gate.get("default_trusted_executor_count") == 0
@@ -138,13 +142,14 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
             and review_gate.get("caller_supplied_attestation_is_proof") is False
             and quality_contract.get("high_assurance_review_proven") is False
             and quality_contract.get("production_executor_registered") is False
-            and review_execution_integrated and review_contract_detection
+            and review_execution_integrated and review_contract_detection and review_receipt_semantics_correct
         )
         _check(checks, "high_assurance_review_execution_default_fail_closed", review_fail_closed, {
             "trusted_executor_count": len(review_registry.config["trusted_executors"]),
             "empty_registry_behavior": review_gate.get("empty_registry_behavior"),
             "execution_verifier_integrated": review_execution_integrated,
             "high_assurance_contract_detected": review_contract_detection,
+            "release_receipt_semantics_correct": review_receipt_semantics_correct,
             "production_executor_registered": quality_contract.get("production_executor_registered"),
         })
         if not review_registry.config["trusted_executors"]:
