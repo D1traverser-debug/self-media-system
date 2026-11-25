@@ -92,3 +92,17 @@ def test_static_image_quality_does_not_inherit_motion_or_video_requirements():
     assert "motion_craft" not in criteria
     assert "audio_promise" not in criteria
     assert "mobile_thumbnail" in criteria
+
+
+def test_active_quality_references_are_conditional_not_universal():
+    root=Path(__file__).resolve().parents[1]
+    knowledge=json.loads((root/"social_media_studio/data/knowledge_catalog.json").read_text())
+    scopes={item["id"]:item["scope"] for item in knowledge["entries"]}
+    assert "never apply by default" in scopes["quality-gates"]
+    assert "never a default gate" in scopes["quality-rubric"]
+    rubric=json.loads((root/"social_media_studio/legacy/data/quality-rubric.json").read_text())
+    assert "MOTION_PRODUCTION_ONLY" in rubric["scope"]
+    assert all(stage["applies_to"]==["ORIGINAL_VIDEO"] for stage in rubric["stages"].values())
+    gates=(root/"skills/social-media-studio/references/quality-gates.md").read_text()
+    assert "Static images do not require camera motion" in gates
+    assert "Do **not** impose three hero frames" in gates
