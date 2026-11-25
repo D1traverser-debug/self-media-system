@@ -2363,8 +2363,9 @@ class StudioEngine:
                     or result_artifact["produced_by_task"] != review_task_id
                     or result_artifact["kind"] != "review_report"
                     or result_artifact["media_type"] != "application/json"
+                    or result_artifact["producer_id"] == artifact["producer_id"]
                 ):
-                    raise ContractError("review result must be a current JSON review_report artifact from the review task")
+                    raise ContractError("review result must be a current JSON review_report artifact from an executor independent of the original producer")
                 result_path = self._project_dir(project_id) / result_artifact["relative_path"]
                 if not result_path.is_file() or _sha256(result_path) != result_artifact["sha256"]:
                     raise ContractError("review report bytes are missing or have changed")
@@ -2875,6 +2876,7 @@ class StudioEngine:
                                 task is None or task["kind"] != "review" or task["status"] != "COMPLETED"
                                 or result_artifact is None or result_artifact["status"] not in {"CURRENT", "ACCEPTED"}
                                 or result_artifact["produced_by_task"] != review_task_id
+                                or result_artifact["producer_id"] == artifact["producer_id"]
                             ):
                                 failures.append(f"review_execution_task_or_report_stale:{rubric}:{review['review_id']}")
                             else:
