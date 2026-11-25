@@ -122,9 +122,9 @@ def records(engine: StudioEngine, project_id: str) -> list[dict[str, Any]]:
     result, seen = [], set()
     for row in rows:
         record = _loads(row["payload_json"], {})
-        digest = record.pop("record_sha256", None)
         if not isinstance(record, dict) or record.get("schema") != SCHEMA:
             raise GateError("continuity event has an invalid schema")
+        digest = record.pop("record_sha256", None)
         if digest != _digest(record) or record.get("project_id") != project_id:
             raise GateError("continuity record integrity or scope mismatch")
         if record.get("note_id") in seen:
@@ -137,13 +137,22 @@ def records(engine: StudioEngine, project_id: str) -> list[dict[str, Any]]:
 def handoff(engine: StudioEngine, project_id: str) -> dict[str, Any]:
     """Create a snapshot of the current durable ledger; never authorize execution."""
     audit = engine.audit(project_id)
+
+    def checkpoint() -> tuple[int, int]:
+        with closing(engine._connect(project_id)) as connection:
+            project = engine._project_row(connection, project_id)
+            latest = connection.execute(
+                "SELECT COALESCE(MAX(event_no),0) FROM events WHERE project_id=?", (project_id,)
+            ).fetchone()[0]
+            return int(project["revision"]), int(latest)
+
+    before = checkpoint()
     resume = engine.resume(project_id, event_limit=40)
     context = records(engine, project_id)
-    with closing(engine._connect(project_id)) as connection:
-        row = connection.execute(
-            "SELECT COALESCE(MAX(event_no),0) FROM events WHERE project_id=?", (project_id,)
-        ).fetchone()
-        checkpoint = row[0]
+    after = checkpoint()
+    if before != after or resume["project"]["revision"] != after[0]:
+        raise GateError("project changed during handoff construction; retry from current ledger")
+    checkpoint_event = after[1]
     # A correction is not silently incorporated into the executable brief.
     corrections = [r["note_id"] for r in context if r["kind"] == "OWNER_CORRECTION"]
     packet = {
@@ -152,7 +161,7 @@ def handoff(engine: StudioEngine, project_id: str) -> dict[str, Any]:
         "workspace": str(engine._project_dir(project_id).resolve()),
         "scope_epoch": resume["project"]["brief"].get("scope_epoch"),
         "project_revision": resume["project"]["revision"],
-        "event_checkpoint": checkpoint,
+        "event_checkpoint": checkpoint_event,
         "resume": resume,
         "continuity_records": context,
         "corrections_requiring_explicit_reconciliation": corrections,
