@@ -102,9 +102,21 @@
       "artifact_lineage": "IMMUTABLE_INPUT_ARTIFACT_ID_AND_SHA256",
       "source_replacement": "INVALIDATE_CONSUMERS_AND_DEPENDENT_DESCENDANTS",
       "rights": "FINAL_AND_USED_MEDIA_ASSETS_REQUIRE_ALLOWED_STATUS_AND_RESOLVABLE_EVIDENCE",
-      "human_review": "WHEN_REQUIRED_BY_BRIEF_EXACT_DIGEST_ATTESTED_HUMAN_COLD_READ",
+      "human_review": "WHEN_REQUIRED_BY_BRIEF_SIGNED_DSSE_EXECUTION_RECEIPT_BOUND_TO_EXACT_ARTIFACT_AND_REVIEW_REPORT",
       "red_team": "WHEN_REQUIRED_BY_BRIEF_MINIMUM_THREE_EVIDENCE_BACKED_FINDINGS",
-      "no_auto_publish": true
+      "no_auto_publish": true,
+      "high_assurance_review": {
+        "execution_receipt": "DSSE_IN_TOTO_ED25519",
+        "trusted_executor_registry": "social_media_studio/data/review_executors.json",
+        "default_trusted_executor_count": 0,
+        "empty_registry_behavior": "BLOCK_HIGH_ASSURANCE_RELEASE",
+        "review_task": "DEDICATED_KIND_REVIEW_TASK",
+        "review_report": "CURRENT_JSON_ARTIFACT_SHA256_BOUND_TO_TASK_AND_RECEIPT",
+        "blind_review": "DECLARED_INPUTS_ONLY_STAGED_WORKSPACE_HIDDEN_NO_SIBLING_REVIEW_OUTPUTS",
+        "full_video_review": "SIGNED_TIMESTAMPED_COVERAGE_TRACE_MUST_SPAN_COMPLETE_SOURCE_DURATION",
+        "release_reverification": true,
+        "caller_supplied_attestation_is_proof": false
+      }
     },
     "domain_adapters": {
       "editorial_plan_validate": "social_media_studio.legacy.editorial_planning.EditorialPlan",
@@ -359,7 +371,11 @@
       "cli": "sms-studio quality-plan DELIVERABLES.json",
       "policy": "DELIVERABLE_SPECIFIC_NO_FIXED_VIDEO_STAGES",
       "quality_observed": false,
-      "independent_review_proven": false
+      "independent_review_proven": false,
+      "execution_verification_source": "social_media_studio/review_execution.py",
+      "trusted_executor_registry": "social_media_studio/data/review_executors.json",
+      "high_assurance_review_proven": false,
+      "production_executor_registered": false
     },
     "internal_subsystem_catalog": {
       "source": "social_media_studio/data/subsystem_catalog.json",
