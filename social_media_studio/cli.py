@@ -111,7 +111,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("status", help="show project and task readiness")
     p.add_argument("project_id")
 
-    p = sub.add_parser("resume", help="reconstruct the project handoff from durable Video state without chat memory")
+    p = sub.add_parser("resume", help="reconstruct the project handoff from durable Social Media Studio state")
     p.add_argument("project_id")
     p.add_argument("--event-limit", type=int, default=40)
 
@@ -230,7 +230,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--token", required=True)
     p.add_argument("--input-name", help="declared input artifact name; defaults to the first available input")
 
-    p = sub.add_parser("run-adapter", help="run a declared deterministic Video domain adapter inside a claimed Studio task")
+    p = sub.add_parser("run-adapter", help="run a declared deterministic self-media domain adapter inside a claimed Studio task")
     p.add_argument("project_id")
     p.add_argument("task_id")
     p.add_argument("--worker", required=True)
