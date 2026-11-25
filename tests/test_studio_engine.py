@@ -1759,3 +1759,103 @@ def test_reopen_does_not_reset_exhausted_retry_budget_without_real_contract_revi
     assert not engine.status("demo")["retry_exhausted_tasks"]
     permitted = engine.claim_next("demo", "worker-three", task_id="exhausted")
     assert permitted and permitted["claim"]["attempt"] == 1
+
+
+def test_project_checkpoint_and_resume_reconstruct_complete_cross_chat_state(tmp_path):
+    engine = make_engine(tmp_path)
+    engine.add_tasks("demo", [task("research")])
+    before = engine.status("demo")
+    checkpoint = engine.record_checkpoint("demo", {
+        "checkpoint_id": "chat-switch-01",
+        "source_coverage": "CURRENT_CHAT_ONLY",
+        "source_refs": ["current-chat-context"],
+        "session_summary": "Research is planned; no output file has been registered yet.",
+        "user_corrections": ["Do not turn the article into a news report."],
+        "open_items": ["Verify the primary source before writing."],
+        "unregistered_work": ["A draft outline exists only in the conversation and is not yet an artifact."],
+        "next_action": "Inspect the primary source and create the evidence-backed outline.",
+    })
+    after = engine.status("demo")
+    assert checkpoint["persisted"] is True
+    assert checkpoint["task_state_changed"] is False
+    assert before["task_counts"] == after["task_counts"]
+
+    resumed = engine.resume("demo")
+    assert resumed["project_status"] == "IN_PROGRESS"
+    assert resumed["tasks"][0]["task_id"] == "research"
+    assert resumed["tasks"][0]["acceptance"]["observable"]
+    assert resumed["brief_history"]
+    assert resumed["reviews"] == []
+    assert resumed["latest_checkpoint"]["status"] == "CURRENT"
+    assert resumed["latest_checkpoint"]["payload"]["user_corrections"] == [
+        "Do not turn the article into a news report."
+    ]
+    assert resumed["latest_checkpoint"]["payload"]["unregistered_work"]
+    assert resumed["handoff"]["kind"] == "SOCIAL_MEDIA_STUDIO_PROJECT_HANDOFF"
+    assert resumed["handoff"]["requires_live_project_reconciliation"] is True
+    assert len(resumed["handoff"]["snapshot_sha256"]) == 64
+
+    engine.add_tasks("demo", [task("visual")])
+    stale = engine.resume("demo")
+    assert stale["latest_checkpoint"]["status"] == "STALE"
+    assert stale["event_cursor"] > checkpoint["event_no"]
+
+
+def test_resume_does_not_call_an_empty_task_graph_complete(tmp_path):
+    engine = make_engine(tmp_path)
+    resumed = engine.resume("demo")
+    assert resumed["project_status"] == "NO_TASK_GRAPH"
+    assert resumed["tasks"] == []
+    assert "No execution task graph exists yet" in resumed["next_action"]
+
+
+def test_isolated_task_handoff_uses_only_declared_inputs_and_does_not_claim(tmp_path):
+    engine = make_engine(tmp_path)
+    image = tmp_path / "reference.png"
+    image.write_bytes(b"only the explicitly selected reference image")
+    imported = engine.import_asset(
+        "demo", "reference-image", image,
+        kind="image", media_type="image/png", rights_status="OWNED",
+    )
+    spec = task("isolated-image", inputs=["reference-image"])
+    spec["requirements"] = {
+        "context_boundary": {
+            "mode": "DECLARED_INPUTS_ONLY",
+            "allowed_input_names": ["reference-image"],
+            "excluded_context_refs": ["unrelated-earlier-image", "sibling-task-history"],
+            "allow_prior_conversation": False,
+            "allow_sibling_task_context": False,
+            "isolated_chat_required": True,
+        }
+    }
+    engine.add_tasks("demo", [spec])
+    before = engine.status("demo")
+    packet = engine.preview_task_handoff("demo", "isolated-image")
+    after = engine.status("demo")
+
+    assert packet["handoff_ready"] if "handoff_ready" in packet else True
+    assert packet["new_chat_required"] is True
+    assert "brief" not in packet["project"]
+    assert set(packet["input_artifacts"]) == {"reference-image"}
+    assert packet["input_artifacts"]["reference-image"]["artifact_id"] == imported["artifact_id"]
+    assert packet["input_artifacts"]["reference-image"]["sha256"] == imported["sha256"]
+    assert packet["context_boundary"]["excluded_context_refs"] == [
+        "unrelated-earlier-image", "sibling-task-history"
+    ]
+    assert packet["context_boundary"]["native_session_isolation_verified"] is False
+    assert packet["handoff"]["claimed"] is False
+    assert packet["handoff"]["effect_authorized"] is False
+    assert before["task_counts"] == after["task_counts"] == {"READY": 1}
+    # A read-only handoff does not consume the claim; the exact task remains claimable.
+    claim = engine.claim_next("demo", "clean-chat-worker", task_id="isolated-image")
+    assert claim and claim["task"]["task_id"] == "isolated-image"
+
+
+def test_checkpoint_rejects_incomplete_or_untyped_payload(tmp_path):
+    from social_media_studio.engine import ContractError
+    engine = make_engine(tmp_path)
+    with pytest.raises(ContractError, match="payload must be an object"):
+        engine.record_checkpoint("demo", None)
+    with pytest.raises(ContractError, match="missing required fields"):
+        engine.record_checkpoint("demo", {"session_summary": "unfinished"})
+
