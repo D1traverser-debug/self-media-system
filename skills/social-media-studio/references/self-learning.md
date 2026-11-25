@@ -17,13 +17,13 @@ Do not convert every failure into a new role, gate, prompt or permanent rule. Pr
 
 ## 2. Learning-source admission: default deny
 
-Seeing material during a session does not make it a durable learning source. Conversation context, temporary research, user links, summaries, examples, transcripts and side tasks are outside the learning boundary unless explicitly admitted.
+Seeing content during a session does **not** make it a learning source. It does not become a durable learning source merely by appearing in the conversation. Conversation context, temporary research, user links, summaries, examples, transcripts and side tasks are outside the learning boundary unless explicitly admitted.
 
 A source may enter a candidate only when it is:
 1. internal project evidence produced by the declared workflow and present in the work packet; or
 2. explicitly imported as an external learning source with affirmative learning authorization and a durable source reference.
 
-If material is marked do not learn, do not persist, exclude from the system, or equivalent, exclude it before durable serialization. Do not create a title/URL/fingerprint denylist for excluded material; that would itself persist a trace. If provenance or authorization cannot be proved, reject the candidate rather than guessing.
+If material is marked do not learn, do not persist, exclude from the system, or equivalent, exclude it before durable serialization. Do not create a topic/title/URL/fingerprint denylist for excluded material; that would itself persist a trace. If provenance or authorization cannot be proved, reject the candidate rather than guessing.
 
 ## 3. Candidate record
 
