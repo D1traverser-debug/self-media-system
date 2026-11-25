@@ -126,3 +126,13 @@ def test_multi_aspect_quality_plan_preserves_each_variant_platform_and_locale():
     assert [(v["shape"]["width"],v["shape"]["height"]) for v in plan["per_variant_review"]]==[
         (1080,1440),(1440,1080)
     ]
+
+
+def test_social_media_skill_requires_user_outcome_fidelity_before_effect_and_delivery():
+    root=Path(__file__).resolve().parents[1]
+    skill=(root/"skills/social-media-studio/SKILL.md").read_text()
+    assert "Outcome-fidelity gate" in skill
+    assert "Preserve every user correction as a current constraint" in skill
+    assert "Do not substitute a nearby capability" in skill
+    assert "inspect the actual result" in skill
+    assert "never silently downgrade the requirement" in skill
