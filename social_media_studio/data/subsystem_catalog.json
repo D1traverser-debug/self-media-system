@@ -74,7 +74,12 @@
       "production_operations": [],
       "active_by_default": false,
       "activation": "CURRENT_USER_DEMAND_ONLY",
-      "creative_result_verified": false
+      "creative_result_verified": false,
+      "active_review_execution_authority": "social_media_studio/review_execution.py",
+      "legacy_reference_paths": [
+        "social_media_studio/legacy/execution_attestation.py",
+        "social_media_studio/legacy/reviewer_providers.py"
+      ]
     },
     {
       "id": "research_and_understanding",
