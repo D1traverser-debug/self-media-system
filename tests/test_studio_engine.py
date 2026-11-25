@@ -741,7 +741,7 @@ def test_failure_resolution_rejects_unresolved_review_evidence_refs(tmp_path):
         dimensions={"result": "PASS"}, evidence_refs=[verification["artifact_id"]],
     )
 
-    with pytest.raises(ContractError, match="exact registered evidence artifact IDs"):
+    with pytest.raises(ContractError, match="registered artifact_id"):
         engine.resolve_failure("demo", failure["failure_id"], {
             "verification_refs": [verification["artifact_id"]],
             "regression_refs": [regression["artifact_id"]],
