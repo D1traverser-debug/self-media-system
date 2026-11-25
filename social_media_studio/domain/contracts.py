@@ -61,7 +61,8 @@ class MediaShape:
         shape = cls(width=width, height=height, orientation=orientation)
         if value.get("ratio_order", "WIDTH:HEIGHT") != "WIDTH:HEIGHT":
             raise ContentContractError("normalized aspect_ratio must use WIDTH:HEIGHT order")
-        if value.get("aspect_ratio") not in {None, shape.ratio}:
+        declared_ratio = value.get("aspect_ratio")
+        if declared_ratio is not None and declared_ratio != shape.ratio:
             raise ContentContractError("declared aspect_ratio conflicts with width and height")
         return shape
 
