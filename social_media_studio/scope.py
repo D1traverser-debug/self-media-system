@@ -13,6 +13,75 @@ from typing import Any
 EPOCH = "SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125"
 
 
+OFFLINE_FIXTURE_MARKER = ".sms-offline-fixture.json"
+
+
+def validate_workspace_mode(
+    root: str | Path, *, offline_fixture: bool, initialize: bool = False,
+    owner_root: str | Path | None = None,
+) -> Path:
+    """Keep CLI owner ledgers and mechanical fixture workspaces mutually exclusive.
+
+    A fixture root is initialized only when it is empty, then bound to its resolved
+    path by a marker. This is an accidental-mixing guard, not an authentication system.
+    """
+    candidate = Path(root).expanduser()
+    if candidate.is_symlink():
+        raise ValueError("workspace root cannot be a symlink")
+    workspace = candidate.resolve()
+    if workspace.exists() and not workspace.is_dir():
+        raise ValueError("workspace root must be a directory")
+    marker = workspace / OFFLINE_FIXTURE_MARKER
+
+    def verify_marker() -> None:
+        if marker.is_symlink() or not marker.is_file():
+            raise ValueError("offline fixture marker is missing or invalid")
+        try:
+            payload = json.loads(marker.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError("offline fixture marker cannot be read") from exc
+        expected = {
+            "schema_version": 1,
+            "mode": "OFFLINE_FIXTURE",
+            "authority": "MECHANICAL_REGRESSION_ONLY",
+            "workspace_root": str(workspace),
+        }
+        if payload != expected:
+            raise ValueError("offline fixture marker does not match this exact workspace")
+
+    if offline_fixture:
+        if owner_root is not None:
+            owner = Path(owner_root).expanduser().resolve()
+            if (workspace == owner or workspace.is_relative_to(owner)
+                    or owner.is_relative_to(workspace)):
+                raise ValueError("offline fixture root must be disjoint from the default owner workspace")
+        if marker.exists() or marker.is_symlink():
+            verify_marker()
+        else:
+            if not initialize:
+                raise ValueError("offline fixture root is unmarked; initialize a dedicated empty root first")
+            if workspace.exists() and any(workspace.iterdir()):
+                raise ValueError("offline fixture root must be empty before its first initialization")
+            workspace.mkdir(parents=True, exist_ok=True)
+            payload = {
+                "schema_version": 1,
+                "mode": "OFFLINE_FIXTURE",
+                "authority": "MECHANICAL_REGRESSION_ONLY",
+                "workspace_root": str(workspace),
+            }
+            try:
+                with marker.open("x", encoding="utf-8") as stream:
+                    json.dump(payload, stream, ensure_ascii=False, sort_keys=True)
+                    stream.write("\n")
+            except FileExistsError:
+                verify_marker()
+        return workspace
+
+    if marker.exists() or marker.is_symlink():
+        raise ValueError("owner mode cannot access an offline fixture workspace")
+    return workspace
+
+
 def contract() -> dict[str, Any]:
     return json.loads(files("social_media_studio").joinpath("data", "studio_manifest.json").read_text(encoding="utf-8"))
 
