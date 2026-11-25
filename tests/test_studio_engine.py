@@ -1468,6 +1468,55 @@ def test_release_check_rejects_tampered_local_rights_evidence_artifact_bytes(tmp
     )
 
 
+def test_release_check_rejects_superseded_named_rights_evidence(tmp_path):
+    engine = StudioEngine(tmp_path / "rights-evidence-superseded")
+    release_brief = {
+        "goal": "Produce media with stable rights provenance.",
+        "audience": "The intended reader.",
+        "deliverables": ["final-video"],
+        "release_policy": {
+            "require_rights": True,
+            "require_rights_evidence": True,
+            "required_review_rubrics": ["rights"],
+            "required_evidence_refs": [],
+            "require_technical_qa": False,
+        },
+    }
+    engine.create_project("demo", "Superseded rights evidence", release_brief)
+    first_rights_path = tmp_path / "rights-v1.txt"
+    first_rights_path.write_text("Permission for the exact source and derivative use.", encoding="utf-8")
+    engine.import_asset(
+        "demo", "rights-clearance", first_rights_path,
+        kind="document", media_type="text/plain", rights_status="NOT_APPLICABLE",
+    )
+    source_path = tmp_path / "source-video.mp4"
+    source_path.write_bytes(b"source media bytes")
+    engine.import_asset(
+        "demo", "source-video", source_path,
+        kind="video", media_type="video/mp4", rights_status="OWNED",
+        metadata={"rights_evidence_refs": ["rights-clearance"]},
+    )
+    replacement_path = tmp_path / "rights-v2.txt"
+    replacement_path.write_text("Different permission with a different scope.", encoding="utf-8")
+    engine.import_asset(
+        "demo", "rights-clearance", replacement_path,
+        kind="document", media_type="text/plain", rights_status="NOT_APPLICABLE",
+    )
+    engine.add_tasks("demo", [task("render", inputs=["source-video"])])
+    final_artifact = complete(engine, tmp_path, "render", "artist")
+    engine.record_review(
+        "demo", final_artifact["artifact_id"], reviewer_id="rights-reviewer",
+        rubric_id="rights", outcome="PASS", dimensions={},
+        evidence_refs=["review://rights"],
+    )
+    release = engine.release_check("demo", final_artifact["artifact_id"], required_rubrics=[])
+    assert release["pass"] is False, release
+    assert any(
+        item.startswith("lineage_rights_evidence_ref_unresolved:source-video:rights-clearance")
+        for item in release["failures"]
+    )
+
+
 def test_release_check_rejects_tampered_red_team_finding_evidence_bytes(tmp_path):
     engine = StudioEngine(tmp_path / "finding-evidence-digest")
     release_brief = {

@@ -1292,12 +1292,106 @@ class StudioEngine:
             raise ClaimError(str(exc)) from exc
         return row
 
+    def _snapshot_rights_evidence_bindings_in_tx(
+        self, connection: sqlite3.Connection, project_id: str,
+        metadata: dict[str, Any],
+    ) -> dict[str, Any]:
+        if not isinstance(metadata, dict):
+            raise ContractError("artifact metadata must be an object")
+        payload = dict(metadata)
+        # Caller-supplied snapshots are never trusted. Bind the declared refs
+        # to the exact registered artifacts and bytes visible in this transaction.
+        payload.pop("rights_evidence_bindings", None)
+        if "rights_evidence_refs" not in payload:
+            return payload
+
+        raw_refs = payload.get("rights_evidence_refs")
+        bindings: list[dict[str, Any]] = []
+        if isinstance(raw_refs, list):
+            for reference in raw_refs:
+                if (
+                    not isinstance(reference, str) or not reference.strip()
+                    or reference != reference.strip()
+                ):
+                    bindings.append({
+                        "reference": reference,
+                        "reference_type": "INVALID",
+                        "resolved": False,
+                        "reason": "INVALID_REFERENCE",
+                    })
+                    continue
+                if reference.startswith(("https://", "http://")):
+                    bindings.append({
+                        "reference": reference,
+                        "reference_type": "EXTERNAL_URI",
+                        "resolved": True,
+                        "verification": "EXTERNAL_REFERENCE_NOT_FETCHED",
+                    })
+                    continue
+                evidence = connection.execute(
+                    "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, reference),
+                ).fetchone()
+                if evidence is None:
+                    evidence = self._artifact_by_name(connection, project_id, reference)
+                if evidence is None:
+                    bindings.append({
+                        "reference": reference,
+                        "reference_type": "ARTIFACT",
+                        "resolved": False,
+                        "reason": "ARTIFACT_NOT_FOUND",
+                    })
+                    continue
+                if evidence["status"] not in {"CURRENT", "ACCEPTED"}:
+                    bindings.append({
+                        "reference": reference,
+                        "reference_type": "ARTIFACT",
+                        "resolved": False,
+                        "reason": "ARTIFACT_NOT_CURRENT_OR_ACCEPTED",
+                        "artifact_id": evidence["artifact_id"],
+                    })
+                    continue
+                evidence_path = self._project_dir(project_id) / evidence["relative_path"]
+                if (
+                    not evidence_path.is_file()
+                    or _sha256(evidence_path) != evidence["sha256"]
+                ):
+                    bindings.append({
+                        "reference": reference,
+                        "reference_type": "ARTIFACT",
+                        "resolved": False,
+                        "reason": "BYTES_MISSING_OR_DIGEST_CHANGED",
+                        "artifact_id": evidence["artifact_id"],
+                    })
+                    continue
+                bindings.append({
+                    "reference": reference,
+                    "reference_type": "ARTIFACT",
+                    "resolved": True,
+                    "artifact_id": evidence["artifact_id"],
+                    "name": evidence["name"],
+                    "version": int(evidence["version"]),
+                    "sha256": evidence["sha256"],
+                    "kind": evidence["kind"],
+                    "media_type": evidence["media_type"],
+                    "producer_id": evidence["producer_id"],
+                })
+        payload["rights_evidence_bindings"] = {
+            "schema_version": 1,
+            "binding_mode": "ARTIFACT_CREATION_EVENT_ID_VERSION_SHA256_SNAPSHOT",
+            "items": bindings,
+        }
+        return payload
+
     def _register_artifact_in_tx(
         self, connection: sqlite3.Connection, project_id: str, name: str,
         path_value: str | Path, *, kind: str, media_type: str,
         rights_status: str, producer_id: str, produced_by_task: str | None,
         metadata: dict[str, Any], expected_sha256: str | None = None,
     ) -> dict[str, Any]:
+        metadata = self._snapshot_rights_evidence_bindings_in_tx(
+            connection, project_id, metadata,
+        )
         _safe_id(name, "artifact name")
         if rights_status not in RIGHTS_ALLOWED | {"UNKNOWN", "NOT_APPLICABLE"}:
             raise ContractError(f"unsupported rights_status: {rights_status}")
@@ -1347,12 +1441,15 @@ class StudioEngine:
         directory.mkdir(parents=True, exist_ok=True)
         safe_name = _safe_id(name, "artifact name")
         source_digest = _sha256(source)
-        metadata_payload = metadata or {}
-        metadata_json = _json(metadata_payload)
+        metadata_payload = dict(metadata or {})
         destination: Path | None = None
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
+                metadata_payload = self._snapshot_rights_evidence_bindings_in_tx(
+                    connection, project_id, metadata_payload,
+                )
+                metadata_json = _json(metadata_payload)
                 output_rows = connection.execute(
                     "SELECT task_id,outputs_json FROM tasks WHERE project_id=?", (project_id,)
                 ).fetchall()
@@ -2222,6 +2319,121 @@ class StudioEngine:
             lineage, lineage_failures = self._artifact_lineage_rows(connection, project_id, artifact_id)
             failures.extend(lineage_failures)
             checked_lineage: list[dict[str, Any]] = []
+            rights_evidence_verified_asset_ids: set[str] = set()
+
+            def verify_rights_evidence_bindings(
+                source: sqlite3.Row, *, failure_prefix: str,
+            ) -> list[dict[str, Any]]:
+                metadata = _loads(source["metadata_json"], {})
+                refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
+                if not isinstance(refs, list) or not refs:
+                    return []
+                source_label = f"{source['name']}:{source['artifact_id']}"
+                event_row = connection.execute(
+                    """SELECT payload_json FROM events
+                       WHERE project_id=? AND entity_type='ARTIFACT' AND entity_id=?
+                         AND event_type IN ('ASSET_IMPORTED','ARTIFACT_CREATED')
+                       ORDER BY event_no DESC LIMIT 1""",
+                    (project_id, source["artifact_id"]),
+                ).fetchone()
+                event_payload = _loads(event_row["payload_json"], {}) if event_row else {}
+                event_metadata = event_payload.get("metadata", {}) if isinstance(event_payload, dict) else {}
+                if (
+                    not isinstance(event_metadata, dict)
+                    or event_payload.get("artifact_id") != source["artifact_id"]
+                    or event_payload.get("version") != source["version"]
+                    or event_payload.get("sha256") != source["sha256"]
+                    or event_metadata.get("rights_evidence_refs") != refs
+                ):
+                    failures.append(f"{failure_prefix}_metadata_event_mismatch:{source_label}")
+                    return []
+                stored_bindings = metadata.get("rights_evidence_bindings")
+                event_bindings = event_metadata.get("rights_evidence_bindings")
+                if stored_bindings != event_bindings:
+                    failures.append(f"{failure_prefix}_digest_binding_metadata_mismatch:{source_label}")
+                    return []
+                # Legacy compatibility is limited to event-recorded external URLs.
+                # They are references, not authenticated copies of remote content.
+                if event_bindings is None:
+                    if all(
+                        isinstance(ref, str) and ref.startswith(("https://", "http://"))
+                        for ref in refs
+                    ):
+                        return [{
+                            "reference": ref,
+                            "verification": "EXTERNAL_REFERENCE_NOT_FETCHED",
+                        } for ref in refs]
+                    failures.append(f"{failure_prefix}_digest_bindings_missing:{source_label}")
+                    return []
+                if (
+                    not isinstance(event_bindings, dict)
+                    or event_bindings.get("schema_version") != 1
+                    or event_bindings.get("binding_mode") != "ARTIFACT_CREATION_EVENT_ID_VERSION_SHA256_SNAPSHOT"
+                ):
+                    failures.append(f"{failure_prefix}_digest_bindings_invalid:{source_label}")
+                    return []
+                items = event_bindings.get("items")
+                if not isinstance(items, list) or len(items) != len(refs):
+                    failures.append(f"{failure_prefix}_digest_bindings_incomplete:{source_label}")
+                    return []
+
+                receipts: list[dict[str, Any]] = []
+                for index, reference in enumerate(refs):
+                    binding = items[index]
+                    if not isinstance(binding, dict) or binding.get("reference") != reference:
+                        failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
+                        continue
+                    if isinstance(reference, str) and reference.startswith(("https://", "http://")):
+                        if binding.get("reference_type") != "EXTERNAL_URI" or binding.get("resolved") is not True:
+                            failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
+                            continue
+                        receipts.append({
+                            "reference": reference,
+                            "verification": "EXTERNAL_REFERENCE_NOT_FETCHED",
+                        })
+                        continue
+                    if binding.get("reference_type") != "ARTIFACT" or binding.get("resolved") is not True:
+                        reason = binding.get("reason")
+                        if reason == "BYTES_MISSING_OR_DIGEST_CHANGED":
+                            failures.append(f"{failure_prefix}_bytes_missing_or_digest_changed:{source['name']}:{reference}")
+                        else:
+                            failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
+                        continue
+                    evidence_id = binding.get("artifact_id")
+                    if not isinstance(evidence_id, str) or not evidence_id or evidence_id == source["artifact_id"]:
+                        failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
+                        continue
+                    evidence_row = connection.execute(
+                        "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                        (project_id, evidence_id),
+                    ).fetchone()
+                    if evidence_row is None or evidence_row["status"] not in {"CURRENT", "ACCEPTED"}:
+                        failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
+                        continue
+                    if (
+                        int(evidence_row["version"]) != binding.get("version")
+                        or evidence_row["sha256"] != binding.get("sha256")
+                        or evidence_row["producer_id"] != binding.get("producer_id")
+                    ):
+                        failures.append(f"{failure_prefix}_bytes_missing_or_digest_changed:{source['name']}:{reference}")
+                        continue
+                    evidence_path = self._project_dir(project_id) / evidence_row["relative_path"]
+                    if not evidence_path.is_file() or _sha256(evidence_path) != evidence_row["sha256"]:
+                        failures.append(f"{failure_prefix}_bytes_missing_or_digest_changed:{source['name']}:{reference}")
+                        continue
+                    receipts.append({
+                        "reference": reference,
+                        "artifact_id": evidence_id,
+                        "name": evidence_row["name"],
+                        "version": int(evidence_row["version"]),
+                        "sha256": evidence_row["sha256"],
+                        "kind": evidence_row["kind"],
+                        "media_type": evidence_row["media_type"],
+                        "producer_id": evidence_row["producer_id"],
+                        "verification": "LOCAL_ARTIFACT_ID_VERSION_SHA256_RECHECKED",
+                    })
+                return receipts
+
             for source in lineage:
                 rights_evidence_bindings: list[dict[str, Any]] = []
                 source_path = self._project_dir(project_id) / source["relative_path"]
@@ -2236,40 +2448,10 @@ class StudioEngine:
                         if not isinstance(refs, list) or not refs:
                             failures.append(f"lineage_rights_evidence_missing:{source['name']}:{source['artifact_id']}")
                         else:
-                            rights_evidence_bindings = []
-                            for ref in refs:
-                                if not isinstance(ref, str) or not ref.strip():
-                                    failures.append(f"lineage_rights_evidence_ref_invalid:{source['name']}:{source['artifact_id']}")
-                                    continue
-                                if ref.startswith(("https://", "http://")):
-                                    rights_evidence_bindings.append({
-                                        "reference": ref,
-                                        "verification": "EXTERNAL_REFERENCE_NOT_FETCHED",
-                                    })
-                                    continue
-                                evidence_row = connection.execute(
-                                    "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
-                                    (project_id, ref),
-                                ).fetchone()
-                                if evidence_row is None:
-                                    evidence_row = self._artifact_by_name(connection, project_id, ref)
-                                if evidence_row is None or evidence_row["status"] not in {"CURRENT", "ACCEPTED"}:
-                                    failures.append(f"lineage_rights_evidence_ref_unresolved:{source['name']}:{ref}")
-                                    continue
-                                evidence_path = self._project_dir(project_id) / evidence_row["relative_path"]
-                                if not evidence_path.is_file() or _sha256(evidence_path) != evidence_row["sha256"]:
-                                    failures.append(f"lineage_rights_evidence_bytes_missing_or_digest_changed:{source['name']}:{ref}")
-                                    continue
-                                rights_evidence_bindings.append({
-                                    "reference": ref,
-                                    "artifact_id": evidence_row["artifact_id"],
-                                    "name": evidence_row["name"],
-                                    "version": int(evidence_row["version"]),
-                                    "sha256": evidence_row["sha256"],
-                                    "kind": evidence_row["kind"],
-                                    "media_type": evidence_row["media_type"],
-                                    "verification": "LOCAL_ARTIFACT_SHA256_RECHECKED",
-                                })
+                            rights_evidence_bindings = verify_rights_evidence_bindings(
+                                source, failure_prefix="lineage_rights_evidence",
+                            )
+                            rights_evidence_verified_asset_ids.add(source["artifact_id"])
                     else:
                         rights_evidence_bindings = []
                 else:
@@ -2554,6 +2736,11 @@ class StudioEngine:
                         refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
                         if not isinstance(refs, list) or not refs:
                             failures.append(f"required_source_asset_rights_evidence_missing:{asset_name}")
+                        elif source_asset["artifact_id"] not in rights_evidence_verified_asset_ids:
+                            verify_rights_evidence_bindings(
+                                source_asset, failure_prefix="required_source_asset_rights_evidence",
+                            )
+                            rights_evidence_verified_asset_ids.add(source_asset["artifact_id"])
 
             qa_receipt: dict[str, Any] | None = None
             requires_technical_qa = bool(release_policy.get("require_technical_qa", artifact["kind"] == "video" or str(artifact["media_type"]).startswith("video/")))
