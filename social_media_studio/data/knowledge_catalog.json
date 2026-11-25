@@ -43,7 +43,7 @@
       "id": "quality-gates",
       "ref": "skills/social-media-studio/references/quality-gates.md",
       "status": "ACTIVE_REFERENCE",
-      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+      "scope": "Conditional method library: select only criteria applicable to the current owner deliverable; motion/LOOKDEV/preview gates never apply by default to short copy, articles, prompt-only, static images or simple edits. Current owner brief overrides this reference."
     },
     {
       "id": "reviewer-execution-attestation",
@@ -139,7 +139,7 @@
       "id": "quality-rubric",
       "ref": "social_media_studio/legacy/data/quality-rubric.json",
       "status": "ACTIVE_REFERENCE",
-      "scope": "Quality dimensions as task-specific calibration"
+      "scope": "Numeric LOOKDEV, VISUAL_PREVIEW and ROUGH_CUT rubric applies only to complex or quality-critical ORIGINAL_VIDEO/motion-production work when selected; never a default gate for text, prompt-only, static image or routine media transform."
     },
     {
       "id": "coordination-policy",
