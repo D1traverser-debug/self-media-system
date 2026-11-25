@@ -3049,7 +3049,9 @@ class StudioEngine:
                                     declared_inputs = _loads(task["inputs_json"], [])
                                     if (
                                         not isinstance(input_bindings, list)
-                                        or [item.get("name") for item in input_bindings if isinstance(item, dict)] != declared_inputs
+                                        or len(input_bindings) != len(declared_inputs)
+                                        or not all(isinstance(item, dict) for item in input_bindings)
+                                        or [item.get("name") for item in input_bindings] != declared_inputs
                                     ):
                                         failures.append(f"review_execution_task_inputs_do_not_match_claim:{rubric}:{review['review_id']}")
                                     try:
