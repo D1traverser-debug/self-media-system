@@ -207,7 +207,49 @@
       "pilot-002"
     ],
     "owner_brief_marker": "scope_epoch",
-    "task_binding": "requirements.deliverable_refs contains exact current brief deliverables; no inferred CAOS proof"
+    "task_binding": "requirements.deliverable_refs contains exact current brief deliverables; no inferred CAOS proof",
+    "entry_modes": {
+      "NEW": "A new independent owner goal; never inherits a previous project by recency.",
+      "RESUME": "Continue one exact non-retired project_id from its current durable ledger.",
+      "ADOPT": "Create a new project from an explicit validated SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET for work previously held in conversation context."
+    },
+    "task_identity": {
+      "subsystem_id": "A reusable long-lived capability boundary; never a project or execution task.",
+      "project_id": "The durable identity of one coherent owner outcome; may span multiple conversations.",
+      "task_id": "A project-local DAG execution node with exact dependencies, inputs, outputs and acceptance.",
+      "conversation": "An ephemeral interaction surface; it may access a project but is not task authority or project identity."
+    },
+    "continuity": {
+      "checkpoint_event": "PROJECT_CHECKPOINT_RECORDED",
+      "resume_source": "PROJECT_BRIEF_TASKS_ARTIFACTS_DECISIONS_REVIEWS_FAILURES_LEARNING_AND_APPEND_ONLY_EVENTS",
+      "exported_handoff": "DERIVED_READ_ONLY_PROJECT_PROJECTION_REQUIRES_LIVE_PROJECT_RECONCILIATION",
+      "conversation_history": "PROVENANCE_ONLY_UNLESS_EXACT_SOURCE_BYTES_ARE_IMPORTED_AND_HASHED",
+      "automatic_resume": false,
+      "recent_project_selection": false,
+      "missing_native_ledger_access": "MARK_UNVERIFIED_AND_DO_NOT_INFER_LIVE_TASK_STATE"
+    },
+    "adoption": {
+      "packet_kind": "SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET",
+      "source_coverage": [
+        "FULL_SOURCE_EXPORT",
+        "PARTIAL_CONTEXT",
+        "CURRENT_CHAT_ONLY",
+        "UNKNOWN"
+      ],
+      "prior_decisions": "REQUIRES_REVALIDATION",
+      "claimed_completed_work": "NOT_VERIFIED_UNTIL_CURRENT_ARTIFACT_READBACK",
+      "task_graph_created": false,
+      "source_files": "IMPORTED_SEPARATELY_THROUGH_DIGEST_BOUND_ASSET_MANIFEST"
+    },
+    "context_isolation": {
+      "task_field": "requirements.context_boundary",
+      "allowed_context": "EXACT_DECLARED_TASK_INPUTS_AND_OPTIONAL_CURRENT_PROJECT_BRIEF",
+      "implicit_prior_conversation": false,
+      "implicit_sibling_task_context": false,
+      "isolated_mode": "DECLARED_INPUTS_ONLY",
+      "native_chat_isolation": "NOT_VERIFIED_BY_RUNTIME",
+      "isolated_chat_handoff": "READ_ONLY_PACKET_NO_CLAIM_NO_EFFECT_AUTHORIZATION"
+    }
   },
   "architecture": {
     "authority": "social_media_studio/data/studio_manifest.json",
