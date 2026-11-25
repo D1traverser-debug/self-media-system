@@ -699,6 +699,34 @@ class StudioEngine:
                         raise ContractError(f"{task_id}: acceptance must be a non-empty object")
                     if not isinstance(requirements, dict):
                         raise ContractError(f"{task_id}: requirements must be an object")
+                    if kind == "review":
+                        review_contract = requirements.get("review_contract")
+                        if not isinstance(review_contract, dict):
+                            raise ContractError(f"{task_id}: review task requires requirements.review_contract")
+                        rubric_id = review_contract.get("rubric_id")
+                        subject_name = review_contract.get("subject_artifact")
+                        reviewer_id = review_contract.get("reviewer_id")
+                        if not all(isinstance(value, str) and value.strip() for value in (rubric_id, subject_name, reviewer_id)):
+                            raise ContractError(f"{task_id}: review contract requires rubric_id, subject_artifact and reviewer_id")
+                        if subject_name not in inputs:
+                            raise ContractError(f"{task_id}: review subject_artifact must be an exact declared task input")
+                        rubric_contracts = brief.get("release_policy", {}).get("review_contracts", {})
+                        rubric_contract = rubric_contracts.get(rubric_id) if isinstance(rubric_contracts, dict) else None
+                        if not isinstance(rubric_contract, dict):
+                            raise ContractError(f"{task_id}: review rubric must exist in the owner release contract")
+                        for field in ("reviewer_kind", "execution_mode", "blind_review", "required_media_inspection"):
+                            if field in rubric_contract and review_contract.get(field) != rubric_contract.get(field):
+                                raise ContractError(f"{task_id}: review task {field} differs from the owner rubric contract")
+                        reviewer_kind = rubric_contract.get("reviewer_kind")
+                        expected_executors = {
+                            "HUMAN": {"human"},
+                            "AI": {"agent", "external"},
+                            "TOOL": {"tool"},
+                        }.get(reviewer_kind)
+                        if expected_executors and executor not in expected_executors:
+                            raise ContractError(f"{task_id}: executor {executor} cannot satisfy reviewer_kind {reviewer_kind}")
+                    elif "review_contract" in requirements:
+                        raise ContractError(f"{task_id}: review_contract is valid only for kind='review'")
                     max_attempts = int(raw.get("max_attempts", 3))
                     if max_attempts < 1 or max_attempts > 20:
                         raise ContractError(f"{task_id}: max_attempts must be 1..20")
