@@ -106,3 +106,23 @@ def test_active_quality_references_are_conditional_not_universal():
     gates=(root/"skills/social-media-studio/references/quality-gates.md").read_text()
     assert "Static images do not require camera motion" in gates
     assert "Do **not** impose three hero frames" in gates
+
+
+def test_multi_aspect_quality_plan_preserves_each_variant_platform_and_locale():
+    plan=build_quality_plan([{
+        "id":"platform-covers","type":"MULTI_ASPECT_IMAGE_SET",
+        "variants":[
+            {"id":"tiktok-portrait","locale":"zh-CN","platform":"TIKTOK",
+             "shape":{"width":1080,"height":1440,"orientation":"PORTRAIT"}},
+            {"id":"x-landscape","locale":"en-US","platform":"X",
+             "shape":{"width":1440,"height":1080,"orientation":"LANDSCAPE"}},
+        ],
+        "acceptance":{"target":"same concept, platform-specific composition"},
+    }])["plans"][0]
+    assert [(v["id"],v["locale"],v["platform"]) for v in plan["per_variant_review"]]==[
+        ("tiktok-portrait","zh-CN","TIKTOK"),
+        ("x-landscape","en-US","X"),
+    ]
+    assert [(v["shape"]["width"],v["shape"]["height"]) for v in plan["per_variant_review"]]==[
+        (1080,1440),(1440,1080)
+    ]
