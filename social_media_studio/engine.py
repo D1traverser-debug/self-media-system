@@ -419,6 +419,72 @@ class StudioEngine:
             connection.close()
         return self.project(project_id)
 
+    def adopt_project(
+        self, project_id: str, title: str, brief: dict[str, Any],
+        adoption_packet_path: str | Path,
+    ) -> dict[str, Any]:
+        """Create a new project from an explicit, validated conversation-adoption packet."""
+        from .scope import bind_owner_brief, validate_adoption_packet
+
+        project_id = _safe_id(project_id, "project_id")
+        brief = bind_owner_brief(project_id, brief)
+        self._validate_brief(brief)
+        packet_path = Path(adoption_packet_path).expanduser().resolve(strict=True)
+        if not packet_path.is_file():
+            raise ContractError("adoption packet must be a regular file")
+        packet_bytes = packet_path.read_bytes()
+        try:
+            packet = json.loads(packet_bytes.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ContractError(f"adoption packet is not valid UTF-8 JSON: {exc}") from exc
+        try:
+            validate_adoption_packet(packet, brief)
+        except ValueError as exc:
+            raise ContractError(str(exc)) from exc
+        packet_digest = hashlib.sha256(packet_bytes).hexdigest()
+
+        self.create_project(project_id, title, brief)
+        try:
+            artifact = self.import_asset(
+                project_id, "adoption-context", packet_path,
+                kind="context", media_type="application/json",
+                rights_status="NOT_APPLICABLE",
+                metadata={
+                    "context_packet_kind": packet["kind"],
+                    "context_packet_schema_version": packet["schema_version"],
+                    "source_coverage": packet["source_coverage"],
+                    "source_refs": packet["source_refs"],
+                    "authority": "CONTEXT_PROVENANCE_ONLY_NOT_EXECUTION_OR_COMPLETION_PROOF",
+                },
+            )
+            if artifact["sha256"] != packet_digest:
+                raise GateError("adoption packet bytes changed between validation and immutable import")
+            with closing(self._connect(project_id)) as connection:
+                connection.execute("BEGIN IMMEDIATE")
+                self._event(connection, project_id, "PROJECT", project_id, "PROJECT_ADOPTED_FROM_CHAT", {
+                    "adoption_artifact_id": artifact["artifact_id"],
+                    "adoption_artifact_sha256": artifact["sha256"],
+                    "source_coverage": packet["source_coverage"],
+                    "source_refs": packet["source_refs"],
+                    "task_graph_created": False,
+                    "prior_decisions_authority": "REQUIRES_REVALIDATION",
+                    "claimed_completed_work_authority": "NOT_PROMOTED_WITHOUT_CURRENT_ARTIFACT_READBACK",
+                })
+                connection.commit()
+        except Exception:
+            # The project is newly created and has no admitted tasks or external effects yet.
+            shutil.rmtree(self._project_dir(project_id), ignore_errors=True)
+            raise
+        return {
+            "project": self.project(project_id),
+            "adoption_context_artifact": artifact,
+            "source_coverage": packet["source_coverage"],
+            "source_refs": packet["source_refs"],
+            "task_graph_created": False,
+            "execution_authorized": False,
+            "next_action": "Review the adopted goal, source coverage, prior decisions and open items; then create only the remaining task graph.",
+        }
+
     def project(self, project_id: str) -> dict[str, Any]:
         with closing(self._connect(project_id)) as connection:
             row = self._project_row(connection, project_id)
@@ -988,7 +1054,25 @@ class StudioEngine:
         ).fetchone()
 
     def _work_packet(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> dict[str, Any]:
+        from .scope import validate_context_boundary
+
         input_names = _loads(task["inputs_json"], [])
+        requirements = _loads(task["requirements_json"], {})
+        boundary = requirements.get("context_boundary")
+        if boundary is None:
+            boundary = {
+                "mode": "DECLARED_INPUTS_PLUS_PROJECT_BRIEF",
+                "allowed_input_names": input_names,
+                "excluded_context_refs": [],
+                "allow_prior_conversation": False,
+                "allow_sibling_task_context": False,
+                "isolated_chat_required": False,
+            }
+        try:
+            boundary = validate_context_boundary(boundary, task_inputs=input_names)
+        except ValueError as exc:
+            raise GateError(f"invalid task context boundary: {exc}") from exc
+
         inputs: dict[str, Any] = {}
         missing: list[str] = []
         for name in input_names:
@@ -1005,18 +1089,95 @@ class StudioEngine:
                     "media_type": artifact["media_type"], "rights_status": artifact["rights_status"],
                     "metadata": _loads(artifact["metadata_json"], {}),
                 }
+        project = self.project(project_id)
+        if boundary["mode"] == "DECLARED_INPUTS_ONLY":
+            project = {
+                "project_id": project["project_id"],
+                "title": project["title"],
+                "revision": project["revision"],
+                "context_policy": "PROJECT_BRIEF_AND_UNRELATED_PROJECT_CONTEXT_OMITTED",
+            }
         return {
-            "project": self.project(project_id),
+            "project": project,
             "task": {
                 "task_id": task["task_id"], "title": task["title"], "kind": task["kind"],
                 "executor": task["executor"], "depends_on": _loads(task["depends_on_json"], []),
                 "inputs": input_names, "outputs": _loads(task["outputs_json"], []),
                 "acceptance": _loads(task["acceptance_json"], {}),
-                "requirements": _loads(task["requirements_json"], {}), "attempt": task["attempts"],
+                "requirements": requirements, "attempt": task["attempts"],
             },
             "input_artifacts": inputs,
             "missing_inputs": missing,
-            "instructions": "Produce only the declared outputs. Preserve source truth, provenance and rights. If the task cannot meet its acceptance contract, return a structured failure instead of claiming completion.",
+            "context_boundary": {
+                **boundary,
+                "native_session_isolation_verified": False,
+                "enforcement": "DECLARED_HANDOFF_PACKET_ONLY",
+            },
+            "new_chat_required": boundary["isolated_chat_required"],
+            "instructions": "Produce only the declared outputs. Use only the explicitly bound inputs and context boundary. Preserve source truth, provenance and rights. If the task cannot meet its acceptance contract, return a structured failure instead of claiming completion.",
+        }
+
+    def preview_task_handoff(self, project_id: str, task_id: str) -> dict[str, Any]:
+        """Build a read-only cross-chat packet for one exact task; never claim or authorize it."""
+        task_id = _safe_id(task_id, "task_id")
+        status = self.status(project_id)
+        tasks = {task["task_id"]: task for task in self.list_tasks(project_id)}
+        task = tasks.get(task_id)
+        if task is None:
+            raise ProjectNotFound(task_id)
+        if task["status"] != "READY":
+            return {
+                "project_id": project_id, "task_id": task_id, "handoff_ready": False,
+                "reason": f"TASK_NOT_READY:{task['status']}",
+                "claimed": False, "effect_authorized": False,
+            }
+        if task_id not in set(status["admitted_ready_tasks"]):
+            return {
+                "project_id": project_id, "task_id": task_id, "handoff_ready": False,
+                "reason": status["decision_blocked_tasks"].get(task_id, "TASK_NOT_ADMITTED"),
+                "claimed": False, "effect_authorized": False,
+            }
+        with closing(self._connect(project_id)) as connection:
+            row = connection.execute(
+                "SELECT * FROM tasks WHERE project_id=? AND task_id=? AND status='READY'",
+                (project_id, task_id),
+            ).fetchone()
+            if row is None:
+                return {
+                    "project_id": project_id, "task_id": task_id, "handoff_ready": False,
+                    "reason": "TASK_STATE_CHANGED_DURING_HANDOFF",
+                    "claimed": False, "effect_authorized": False,
+                }
+            try:
+                self._require_task_decision(connection, project_id, row)
+                packet = self._work_packet(connection, project_id, row)
+            except GateError as exc:
+                return {
+                    "project_id": project_id, "task_id": task_id, "handoff_ready": False,
+                    "reason": str(exc), "claimed": False, "effect_authorized": False,
+                }
+        if packet["missing_inputs"]:
+            return {
+                "project_id": project_id, "task_id": task_id, "handoff_ready": False,
+                "reason": "MISSING_INPUTS", "missing_inputs": packet["missing_inputs"],
+                "claimed": False, "effect_authorized": False,
+            }
+        return {
+            **packet,
+            "handoff": {
+                "kind": "SOCIAL_MEDIA_STUDIO_TASK_HANDOFF",
+                "schema_version": "1.0",
+                "project_id": project_id,
+                "task_id": task_id,
+                "output_names": packet["task"]["outputs"],
+                "return_to_project_id": project_id,
+                "return_to_task_id": task_id,
+                "claimed": False,
+                "effect_authorized": False,
+                "new_chat_required": packet["new_chat_required"],
+                "native_session_isolation_verified": False,
+                "requires_fresh_claim_and_decision_recheck": True,
+            },
         }
 
     def _reclaim_expired_claims_in_tx(
@@ -2942,6 +3103,88 @@ class StudioEngine:
         return {"learning_id": learning_id, "status": "RETIRED", "reason": reason,
                 "source_history_retained": True, "other_methods_changed": False}
 
+    def record_checkpoint(self, project_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        """Append a chat-session delta without replacing project/task authority."""
+        required = ["session_summary", "next_action", "source_coverage", "source_refs"]
+        missing = [key for key in required if not payload.get(key)]
+        if missing:
+            raise ContractError(f"checkpoint missing required fields: {missing}")
+        if not isinstance(payload.get("session_summary"), str) or not payload["session_summary"].strip():
+            raise ContractError("checkpoint session_summary must be non-empty text")
+        if not isinstance(payload.get("next_action"), str) or not payload["next_action"].strip():
+            raise ContractError("checkpoint next_action must be non-empty text")
+        if payload["source_coverage"] not in {"FULL_SOURCE_EXPORT", "PARTIAL_CONTEXT", "CURRENT_CHAT_ONLY", "UNKNOWN"}:
+            raise ContractError("checkpoint source_coverage is invalid")
+        source_refs = payload.get("source_refs")
+        if not isinstance(source_refs, list) or any(not isinstance(ref, str) or not ref.strip() for ref in source_refs):
+            raise ContractError("checkpoint source_refs must be an array of non-empty strings")
+        def string_list(field: str) -> list[str]:
+            value = payload.get(field, [])
+            if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+                raise ContractError(f"checkpoint {field} must be an array of non-empty strings")
+            return value
+        corrections = string_list("user_corrections")
+        open_items = string_list("open_items")
+        unregistered_work = string_list("unregistered_work")
+        from .scope import validate_context_boundary
+        boundary = payload.get("context_boundary", {
+            "mode": "DECLARED_INPUTS_PLUS_PROJECT_BRIEF",
+            "allowed_input_names": [],
+            "excluded_context_refs": [],
+            "allow_prior_conversation": False,
+            "allow_sibling_task_context": False,
+            "isolated_chat_required": False,
+        })
+        try:
+            boundary = validate_context_boundary(boundary)
+        except ValueError as exc:
+            raise ContractError(f"checkpoint context_boundary invalid: {exc}") from exc
+        checkpoint_id = _safe_id(payload.get("checkpoint_id") or "cp_" + uuid.uuid4().hex[:16], "checkpoint_id")
+        with closing(self._connect(project_id)) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            try:
+                project = self._project_row(connection, project_id)
+                cursor_row = connection.execute(
+                    "SELECT COALESCE(MAX(event_no),0) AS event_no FROM events WHERE project_id=?",
+                    (project_id,),
+                ).fetchone()
+                checkpoint = {
+                    "schema_version": "1.0",
+                    "kind": "SOCIAL_MEDIA_SESSION_CHECKPOINT",
+                    "checkpoint_id": checkpoint_id,
+                    "project_id": project_id,
+                    "project_revision": int(project["revision"]),
+                    "source_event_cursor": int(cursor_row["event_no"]),
+                    "source_coverage": payload["source_coverage"],
+                    "source_refs": source_refs,
+                    "session_summary": payload["session_summary"].strip(),
+                    "user_corrections": corrections,
+                    "open_items": open_items,
+                    "unregistered_work": unregistered_work,
+                    "next_action": payload["next_action"].strip(),
+                    "context_boundary": boundary,
+                }
+                self._event(connection, project_id, "PROJECT", project_id, "PROJECT_CHECKPOINT_RECORDED", checkpoint)
+                event_no = connection.execute(
+                    "SELECT MAX(event_no) AS event_no FROM events WHERE project_id=?",
+                    (project_id,),
+                ).fetchone()["event_no"]
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
+        return {
+            "checkpoint_id": checkpoint_id,
+            "project_id": project_id,
+            "event_no": int(event_no),
+            "project_revision": int(project["revision"]),
+            "source_event_cursor": checkpoint["source_event_cursor"],
+            "source_coverage": checkpoint["source_coverage"],
+            "persisted": True,
+            "task_state_changed": False,
+            "effect_authorized": False,
+        }
+
     def status(self, project_id: str) -> dict[str, Any]:
         project = self.project(project_id)
         tasks = self.list_tasks(project_id)
@@ -2980,7 +3223,7 @@ class StudioEngine:
                 "open_failures": open_failures, "event_count": events}
 
     def resume(self, project_id: str, *, event_limit: int = 40) -> dict[str, Any]:
-        """Reconstruct an actionable project handoff from durable Video state only."""
+        """Reconstruct the full actionable project state; exported handoffs remain read-only projections."""
         self.refresh(project_id)
         status = self.status(project_id)
         tasks = self.list_tasks(project_id)
@@ -3001,13 +3244,35 @@ class StudioEngine:
                 "SELECT * FROM learning WHERE project_id=? ORDER BY updated_at DESC",
                 (project_id,),
             ).fetchall()
+            review_rows = connection.execute(
+                "SELECT * FROM reviews WHERE project_id=? ORDER BY created_at,review_id",
+                (project_id,),
+            ).fetchall()
+            event_cursor = int(connection.execute(
+                "SELECT COALESCE(MAX(event_no),0) AS event_no FROM events WHERE project_id=?",
+                (project_id,),
+            ).fetchone()["event_no"])
+            checkpoint_row = connection.execute(
+                """SELECT * FROM events WHERE project_id=? AND entity_type='PROJECT'
+                   AND event_type='PROJECT_CHECKPOINT_RECORDED'
+                   ORDER BY event_no DESC LIMIT 1""",
+                (project_id,),
+            ).fetchone()
+            adoption_row = connection.execute(
+                """SELECT * FROM events WHERE project_id=? AND entity_type='PROJECT'
+                   AND event_type='PROJECT_ADOPTED_FROM_CHAT'
+                   ORDER BY event_no DESC LIMIT 1""",
+                (project_id,),
+            ).fetchone()
         ready_by_executor: dict[str, list[str]] = {}
         admitted = set(status["admitted_ready_tasks"])
         for task in tasks:
             if task["task_id"] in admitted:
                 ready_by_executor.setdefault(task["executor"], []).append(task["task_id"])
         unfinished = [task for task in tasks if task["status"] not in {"COMPLETED", "CANCELLED"}]
-        if failure_rows:
+        if not tasks:
+            next_action = "No execution task graph exists yet. Review the admitted goal and context, then create only the remaining tasks required by the outcome."
+        elif failure_rows:
             next_action = "Resolve the open root-cause records with artifact-backed verification and regression evidence."
         elif ready_by_executor.get("tool"):
             next_action = "Run the registered local tool workers; independent READY tool tasks can execute concurrently."
@@ -3018,7 +3283,7 @@ class StudioEngine:
         elif ready_by_executor.get("external"):
             next_action = "Verify the external capability, rights, availability and cost; obtain owner authorization before any paid operation."
         elif status["decision_blocked_tasks"]:
-            next_action = "Re-investigate missing or stale scoped decisions and bind current evidence before claiming affected tasks."
+            next_action = "Re-investigate missing or stale scoped decisions and bind current evidence before claiming tasks."
         elif status["retry_exhausted_tasks"]:
             next_action = "Repair and revise exhausted task contracts; reopen alone does not grant more attempts."
         elif status["explicit_external_wait_tasks"]:
@@ -3028,11 +3293,34 @@ class StudioEngine:
         elif unfinished:
             next_action = "Inspect dependency blockers and task failures; revise only the affected descendants."
         else:
-            next_action = "All declared tasks are complete; run the exact-digest release check and verify the delivery package."
-        return {
+            next_action = "All declared execution tasks are complete; inspect exact deliverables and remaining project-level obligations."
+        task_snapshot = []
+        for task in tasks:
+            task_snapshot.append({
+                key: task.get(key) for key in (
+                    "task_id", "title", "kind", "executor", "depends_on", "inputs", "outputs",
+                    "acceptance", "requirements", "priority", "max_attempts", "attempts", "status",
+                    "worker_id", "lease_until", "result", "error", "created_at", "updated_at",
+                )
+            })
+        checkpoint = None
+        if checkpoint_row is not None:
+            checkpoint = {
+                "event_no": int(checkpoint_row["event_no"]),
+                "status": "CURRENT" if int(checkpoint_row["event_no"]) == event_cursor else "STALE",
+                "payload": _loads(checkpoint_row["payload_json"], {}),
+            }
+        adoption = None
+        if adoption_row is not None:
+            adoption = {
+                "event_no": int(adoption_row["event_no"]),
+                "payload": _loads(adoption_row["payload_json"], {}),
+            }
+        result = {
             "project": status["project"],
-            "project_status": "TASK_GRAPH_COMPLETE" if not unfinished else "IN_PROGRESS",
+            "project_status": "NO_TASK_GRAPH" if not tasks else ("TASK_GRAPH_COMPLETE" if not unfinished else "IN_PROGRESS"),
             "task_counts": status["task_counts"],
+            "tasks": task_snapshot,
             "ready_by_executor": ready_by_executor,
             "decision_blocked_tasks": status["decision_blocked_tasks"],
             "retry_exhausted_tasks": status["retry_exhausted_tasks"],
@@ -3042,16 +3330,28 @@ class StudioEngine:
                  "depends_on": task["depends_on"], "inputs": task["inputs"], "outputs": task["outputs"]}
                 for task in unfinished
             ],
+            "brief_history": self.brief_history(project_id),
             "current_artifacts": [
                 {"artifact_id": row["artifact_id"], "name": row["name"], "version": row["version"],
                  "sha256": row["sha256"], "kind": row["kind"], "media_type": row["media_type"],
-                 "rights_status": row["rights_status"], "status": row["status"]}
+                 "rights_status": row["rights_status"], "status": row["status"],
+                 "producer_id": row["producer_id"], "produced_by_task": row["produced_by_task"],
+                 "relative_path": row["relative_path"], "metadata": _loads(row["metadata_json"], {})}
                 for row in artifact_rows
             ],
             "decisions": [
                 {"decision_id": row["decision_id"], "question": row["question"], "status": row["status"],
                  "payload": _loads(row["payload_json"], {})}
                 for row in decision_rows
+            ],
+            "reviews": [
+                {"review_id": row["review_id"], "artifact_id": row["artifact_id"],
+                 "artifact_digest": row["artifact_digest"], "rubric_id": row["rubric_id"],
+                 "reviewer_id": row["reviewer_id"], "producer_id": row["producer_id"],
+                 "outcome": row["outcome"], "dimensions": _loads(row["dimensions_json"], {}),
+                 "evidence_refs": _loads(row["evidence_refs_json"], []), "notes": row["notes"],
+                 "created_at": row["created_at"]}
+                for row in review_rows
             ],
             "open_failures": [
                 {"failure_id": row["failure_id"], "task_id": row["task_id"], "payload": _loads(row["payload_json"], {})}
@@ -3061,11 +3361,26 @@ class StudioEngine:
                 {"learning_id": row["learning_id"], "status": row["status"], "payload": _loads(row["payload_json"], {})}
                 for row in learning_rows
             ],
+            "adoption": adoption,
+            "latest_checkpoint": checkpoint,
+            "event_cursor": event_cursor,
             "recent_events": self.events(project_id, event_limit),
             "open_failure_count": status["open_failures"],
             "next_action": next_action,
             "release_authorized": False,
         }
+        result["handoff"] = {
+            "kind": "SOCIAL_MEDIA_STUDIO_PROJECT_HANDOFF",
+            "schema_version": "1.0",
+            "authority": "DERIVED_READ_ONLY_PROJECT_PROJECTION",
+            "requires_live_project_reconciliation": True,
+            "project_id": status["project"]["project_id"],
+            "project_revision": status["project"]["revision"],
+            "event_cursor": event_cursor,
+            "snapshot_sha256": None,
+        }
+        result["handoff"]["snapshot_sha256"] = hashlib.sha256(_json(result).encode("utf-8")).hexdigest()
+        return result
 
     def events(self, project_id: str, limit: int = 100) -> list[dict[str, Any]]:
         with closing(self._connect(project_id)) as connection:
