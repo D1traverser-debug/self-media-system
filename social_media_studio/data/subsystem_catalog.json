@@ -6,7 +6,7 @@
   "product": "Social Media Studio",
   "topology_contract": {
     "minimum_subsystems": 16,
-    "minimum_code_modules": 59,
+    "minimum_code_modules": 62,
     "minimum_domain_adapters": 17,
     "minimum_production_operations": 6
   },
