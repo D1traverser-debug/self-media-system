@@ -2758,7 +2758,7 @@ class StudioEngine:
                         "verified_at_release": True,
                     }
 
-                def review_event_evidence_bindings(review_id: str) -> dict[str, Any]:
+                def review_event_payload(review_id: str) -> dict[str, Any]:
                     event_row = connection.execute(
                         """SELECT payload_json FROM events
                            WHERE project_id=? AND entity_type='REVIEW' AND entity_id=?
@@ -2767,15 +2767,17 @@ class StudioEngine:
                         (project_id, review_id),
                     ).fetchone()
                     event_payload = _loads(event_row["payload_json"], {}) if event_row else {}
-                    bindings = event_payload.get("evidence_bindings", {})
-                    return bindings if isinstance(bindings, dict) else {}
+                    return event_payload if isinstance(event_payload, dict) else {}
 
                 for review in rows:
                     reviewer_ids.add(review["reviewer_id"])
                     dimensions = _loads(review["dimensions_json"], {})
                     review_evidence_receipts: list[dict[str, Any]] = []
                     finding_evidence_receipts: list[dict[str, Any]] = []
-                    event_bindings = review_event_evidence_bindings(review["review_id"])
+                    event_payload = review_event_payload(review["review_id"])
+                    event_bindings = event_payload.get("evidence_bindings", {})
+                    if not isinstance(event_bindings, dict):
+                        event_bindings = {}
                     if contract.get("require_resolvable_evidence_refs"):
                         review_evidence = _loads(review["evidence_refs_json"], [])
                         review_snapshots = event_bindings.get("review_evidence", [])
@@ -2793,9 +2795,61 @@ class StudioEngine:
                                 )
                                 if verified_binding is not None:
                                     review_evidence_receipts.append(verified_binding)
-                    attestation = dimensions.get("_attestation", {}) if isinstance(dimensions, dict) else {}
-                    if not isinstance(attestation, dict):
-                        attestation = {}
+                    attestation: dict[str, Any] = {}
+                    if self._review_contract_requires_execution(contract):
+                        receipt = event_payload.get("execution_receipt")
+                        expected = event_payload.get("execution_expected")
+                        review_task_id = event_payload.get("review_task_id")
+                        result_artifact_id = event_payload.get("review_result_artifact_id")
+                        if not isinstance(receipt, dict) or not isinstance(expected, dict) or not review_task_id or not result_artifact_id:
+                            failures.append(f"review_execution_attestation_missing:{rubric}:{review['review_id']}")
+                        else:
+                            task = connection.execute(
+                                "SELECT * FROM tasks WHERE project_id=? AND task_id=?",
+                                (project_id, review_task_id),
+                            ).fetchone()
+                            result_artifact = connection.execute(
+                                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                                (project_id, result_artifact_id),
+                            ).fetchone()
+                            if (
+                                task is None or task["kind"] != "review" or task["status"] != "COMPLETED"
+                                or result_artifact is None or result_artifact["status"] not in {"CURRENT", "ACCEPTED"}
+                                or result_artifact["produced_by_task"] != review_task_id
+                            ):
+                                failures.append(f"review_execution_task_or_report_stale:{rubric}:{review['review_id']}")
+                            else:
+                                result_path = self._project_dir(project_id) / result_artifact["relative_path"]
+                                if not result_path.is_file() or _sha256(result_path) != result_artifact["sha256"]:
+                                    failures.append(f"review_execution_report_bytes_changed:{rubric}:{review['review_id']}")
+                                else:
+                                    expected_current = dict(expected)
+                                    expected_current["reviewed_artifact_sha256"] = artifact["sha256"]
+                                    expected_current["review_result_sha256"] = result_artifact["sha256"]
+                                    expected_current["result_digest"] = result_artifact["sha256"]
+                                    expected_current["executor_id"] = result_artifact["producer_id"]
+                                    try:
+                                        verified_execution = self.review_trust_registry.verify(
+                                            receipt, expected=expected_current,
+                                        )
+                                        nonce_row = connection.execute(
+                                            "SELECT review_id FROM review_execution_nonces WHERE project_id=? AND nonce=?",
+                                            (project_id, verified_execution["nonce"]),
+                                        ).fetchone()
+                                        if nonce_row is None or nonce_row["review_id"] != review["review_id"]:
+                                            failures.append(f"review_execution_nonce_binding_invalid:{rubric}:{review['review_id']}")
+                                        else:
+                                            attestation = {
+                                                "reviewer_kind": verified_execution["reviewer_kind"],
+                                                "execution_mode": verified_execution["execution_mode"],
+                                                "blind_review": bool(contract.get("blind_review", False)),
+                                                "inspected_artifact_digest": artifact["sha256"],
+                                                "context_id": verified_execution["context_id"],
+                                                "verified_execution": verified_execution,
+                                            }
+                                            context_ids.add(verified_execution["context_id"])
+                                    except ReviewExecutionError as exc:
+                                        failures.append(f"review_execution_attestation_invalid:{rubric}:{review['review_id']}:{exc}")
                     attestations.append(attestation)
                     required_kind = contract.get("reviewer_kind")
                     if required_kind and attestation.get("reviewer_kind") != required_kind:
@@ -2807,12 +2861,8 @@ class StudioEngine:
                         failures.append(f"blind_review_attestation_missing:{rubric}:{review['review_id']}")
                     if contract.get("require_digest_attestation") and attestation.get("inspected_artifact_digest") != artifact["sha256"]:
                         failures.append(f"review_inspected_digest_mismatch:{rubric}:{review['review_id']}")
-                    if contract.get("require_context_id"):
-                        context_id = attestation.get("context_id")
-                        if not isinstance(context_id, str) or not context_id.strip():
-                            failures.append(f"review_context_id_missing:{rubric}:{review['review_id']}")
-                        else:
-                            context_ids.add(context_id)
+                    if contract.get("require_context_id") and not attestation.get("context_id"):
+                        failures.append(f"review_context_id_missing:{rubric}:{review['review_id']}")
                     scorecard = dimensions.get("scorecard", dimensions.get("scores", {})) if isinstance(dimensions, dict) else {}
                     if not isinstance(scorecard, dict):
                         scorecard = {}
