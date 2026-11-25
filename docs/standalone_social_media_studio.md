@@ -49,7 +49,7 @@ Continuous responsibilities are evaluated at each applicable decision/effect: co
 - **Artifact records** own exact file identity, digest, version, rights and producer lineage.
 - **Review records** own artifact-bound evaluation evidence.
 - **Event log** is append-only operational history.
-- **IPOS** is an internal professional identity-design bounded context of Social Media Studio. Its existing private canon and owner approval are separately custodied; approved bundles may be imported into downstream Video only with exact provenance.
+- **IPOS** is an internal professional identity-design bounded context of Social Media Studio. Its existing private canon and owner approval are separately custodied; approved bundles may be imported into downstream media-production tasks only with exact provenance.
 
 CAOS governs every owner-facing self-media conversation, decision and action, including revisions, retrieval, method selection, execution and final acceptance. Social Media Studio owns domain execution, project/task state and artifact records. The runtime has no CAOS imports, API, parent task identity or parent lease; this runtime boundary does not waive the active session's CAOS governance. The fixed-stage controller is not loaded by `sms-studio`. specialist content-domain modules are imported only through `social_media_studio.adapters` when a task declares a supported adapter.
 
@@ -193,9 +193,23 @@ Record the verification report review with rubric `failure-verification`; its `-
 
 ## 11. Learning and method promotion
 
-Learning sources must be explicitly admitted and source-bound. A method candidate records the problem it solves, mechanism, evidence, applicability, counterexamples, failure conditions and replay references.
+Learning is continuous and evidence-triggered, not a mandatory production stage. The project learning table stores scoped candidates; `record_learning` always creates `CANDIDATE`. A successful output, model self-rating, provider claim or non-empty URI is not validation and cannot grant reusable-method authority.
 
-A candidate remains `CANDIDATE` until there is independent validation evidence and at least one counterexample trial. A successful single project or a model's self-rating does not establish a universal rule. Provider-specific knowledge expires faster than durable storytelling or production principles. Rejected approaches remain recorded with the reason they failed.
+A candidate records the problem solved, mechanism, applicability, source/evidence references, counterexamples, failure conditions and replay references. Before a method enters the shared knowledge catalog as a `VERIFIED_OPERATION`, the evidence package must contain:
+
+1. A real case with the original acceptance failure or measurable baseline.
+2. At least two independent replays on distinct task instances within the declared applicability.
+3. At least one deliberate counterexample trial, with the boundary and failure conditions recorded.
+4. A cross-task transfer trial; cross-domain transfer is required whenever the method claims cross-domain applicability.
+5. A regression test that would detect recurrence of the original failure.
+6. A rollback/fallback path that preserves the previous accepted method.
+7. Measured owner burden and cost before/after, or an explicit reasoned N/A.
+8. Independent readback by a reviewer who did not produce the method, tested outputs or cited evidence.
+9. CAOS owner-level acceptance of the exact evidence and proposed scope.
+
+The shared knowledge catalog is changed only through a versioned repository change with the evidence, independent replay and regression results. Project candidates are not automatically promoted. `ACTIVE_REFERENCE` means a source can be consulted; it does not certify operational efficacy. `VERIFIED_OPERATION` means a method has passed validation only within its recorded applicability. `CANDIDATE_REQUIRES_REVALIDATION`, `LEGACY_REFERENCE_ONLY` and `RETIRED_EVIDENCE_ONLY` are not execution authority.
+
+Every promoted method must state where it applies, where it does not, what evidence would falsify it, its expiry/revalidation trigger and how to roll back. Provider-specific facts require more frequent revalidation than durable principles. A method that is deliberately task-specific remains a project candidate rather than being generalized. Rejected approaches remain recorded with the reason they failed.
 
 ## 12. Hard release gates and provenance
 

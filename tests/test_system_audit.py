@@ -28,11 +28,31 @@ def test_audit_distinguishes_caos_session_governance_from_runtime_independence()
     assert boundary["automatic_publication"] is False
 
 
-def test_audit_checks_only_one_installed_video_cli():
+def test_audit_checks_only_one_installed_social_media_cli():
     import tomllib
 
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert project["project"]["scripts"] == {"sms-studio": "social_media_studio.cli:main"}
+
+
+def test_learning_promotion_contract_is_explicit_and_fail_closed():
+    report = run_system_audit(ROOT)
+    checks = {item["id"]: item for item in report["checks"]}
+    contract = checks["knowledge_promotion_is_scoped_and_fail_closed"]
+    assert contract["pass"], contract
+    assert contract["detail"]["default_project_status"] == "CANDIDATE"
+    assert contract["detail"]["minimum_independent_replays"] == 2
+    assert contract["detail"]["minimum_counterexample_trials"] >= 1
+    assert contract["detail"]["mutation_authority"] == "SOCIAL_MEDIA_STUDIO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
+    assert contract["detail"]["automatic_project_promotion"] is False
+
+
+def test_brand_audit_rejects_retired_video_repository_authority_label(tmp_path):
+    from social_media_studio.system_audit import _brand_violations
+
+    (tmp_path / "README.md").write_text("VIDEO_REPOSITORY", encoding="utf-8")
+    violations = _brand_violations(tmp_path)
+    assert any("retired identifier VIDEO_REPOSITORY" in item for item in violations)
 
 
 def test_content_architecture_cases_are_audited_as_structure_not_craft():
@@ -45,7 +65,7 @@ def test_content_architecture_cases_are_audited_as_structure_not_craft():
     assert report["boundary"]["caos_source_mutation_allowed"] is False
 
 
-def test_old_video_red_team_gate_is_not_universal_content_policy():
+def test_historical_video_red_team_gate_is_not_universal_content_policy():
     report = run_system_audit(ROOT)
     checks = {c["id"]: c for c in report["checks"]}
     assert "hard_release_gates" not in checks

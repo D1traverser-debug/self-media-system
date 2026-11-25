@@ -1,96 +1,90 @@
 # Self-Learning Protocol
 
-> **Scope — 2026-11-24 task-neutral architecture:** Continuous learning is triggered by evidence gaps and failures at any relevant decision boundary. The historical LEARN-stage example is not a mandatory task or a separate scheduler. Apply read-only CAOS guidance and scoped independent replay; do not promote a method merely because a receipt exists. Current authority: repository-root `STUDIO_ENTRY.md` and `social_media_studio/data/studio_manifest.json`.
+> **Scope — task-neutral Social Media Studio:** Learning is continuous and evidence-triggered, not a fixed production stage or separate scheduler. CAOS remains the parent authority for decision quality and owner-level acceptance. The Studio records project-local candidates and locates shared knowledge; it never promotes candidates automatically. Current authority: repository-root `STUDIO_ENTRY.md` and `social_media_studio/data/studio_manifest.json`.
 
-Use when a quality gap, tool limitation, superior external example, ecosystem change, or repeated production failure appears.
+## 1. Trigger and classify before changing the system
 
-## Prevention-first rule
-Do not turn every failure into another role, gate, prompt or permanent rule. Before changing the global system, classify the failure:
+Use this protocol when a quality gap, repeated failure, tool limitation, benchmark gap, source conflict or material ecosystem change appears.
 
-- **local execution** — the project failed to apply an already-correct rule; fix the project, not the architecture.
-- **capability/tool gap** — the method or tool cannot reach the required ceiling; search and replace/augment the method.
-- **quality-standard gap** — the team lacked a benchmark, measurable threshold or evidence contract; improve the standard.
-- **systemic architecture gap** — the workflow can repeatedly permit the same class of bad outcome; only this category normally justifies a global runtime change.
+Classify the cause before changing a global rule:
 
-Prefer simplifying, replacing or deleting weak mechanisms over stacking new patches on top of them. Any proposed global rule must state what class of failures it prevents and whether it can replace or merge an existing rule.
+- **Local execution defect:** the project failed to apply an already-correct method. Repair the project; do not change global architecture.
+- **Capability/tool gap:** the current method or tool cannot meet the required quality ceiling. Research alternatives and test the smallest material risk.
+- **Quality-standard gap:** the team lacks an observable criterion, benchmark or evidence contract. Improve the standard.
+- **Systemic architecture defect:** the workflow can repeatedly admit the same class of bad outcome. Only this category normally justifies a global runtime change.
 
-A repeated material failure after an accepted fix is a reliability incident. Persist the failure evidence and repair the enforcement/eval path before adding unrelated studio capability. A chat reminder, role-played apology, or one-off prompt tweak does not count as durable learning.
+Do not convert every failure into a new role, gate, prompt or permanent rule. Prefer replacing, simplifying or deleting weak mechanisms over stacking patches. A repeated material failure after an accepted fix is a reliability incident: preserve evidence and repair the enforcement/evaluation path before unrelated capability work.
 
-## Learning-source admission: default deny
-Seeing content during a session does **not** make it a learning source. Ad-hoc conversation context, temporary research, user-provided links, summaries, examples, transcripts and side tasks are outside the durable learning boundary by default.
+## 2. Learning-source admission: default deny
 
-A source may enter `LEARN` only when one of these is true:
+Seeing content during a session does **not** make it a learning source. It does not become a durable learning source merely by appearing in the conversation. Ambient conversation, open tabs, unrelated chats, temporary research, user links, summaries, examples, transcripts and side tasks are outside the durable learning boundary by default. The declared work packet is the learning context boundary. Ambient conversation is context for the current response, not a durable source, unless explicitly admitted.
 
-1. it is internal project evidence produced by the declared workflow and present in the work packet; or
-2. it was explicitly imported as an external learning source with affirmative learning authorization and a durable source reference.
+A source may enter a candidate only when it is:
+1. internal project evidence produced by the declared workflow and present in the work packet; or
+2. explicitly imported as an external learning source with affirmative learning authorization and a durable source reference.
 
-The declared work packet is the learning context boundary. Ambient conversation, unlisted browsing context and undeclared side-task material must not be treated as learning evidence.
+If material is marked do not learn, do not persist, exclude from the system, or equivalent, exclude it before durable serialization. Do not create a topic/title/URL/fingerprint denylist for excluded material; that would itself persist a trace. If provenance or authorization cannot be proved, reject the candidate rather than guessing.
 
-If the user marks any material as **do not learn**, **do not persist**, **exclude from the system**, or equivalent, exclude it before durable serialization. Do not create a topic/title/URL/fingerprint denylist for that material merely to remember the exclusion; that would itself persist a trace. Enforce the exclusion through this generic admission rule instead.
+## 3. Candidate record
 
-A `learning_candidate` that depends on external material must identify the authorized source reference. If provenance or authorization cannot be proved, reject the candidate rather than guessing. This admission rule applies equally to benchmark libraries, technique libraries, failure-learning corpora, role prompts, continuity notes and global methodology changes.
+A candidate must preserve:
 
-## Autonomous scout rule
-The user is not responsible for discovering tools, workflows, Skills, creator breakdowns or benchmark works for the studio. During active durable video work, the studio must scout proactively whenever:
+- the concrete problem and the original acceptance failure or measurable baseline;
+- the proposed mechanism, not merely a tool/model name;
+- the declared applicability and non-applicability boundaries;
+- source references and exact supporting evidence;
+- counterexamples and explicit failure conditions;
+- replay references and the task contexts in which they were tested;
+- a rollback/fallback path;
+- owner burden and cost before/after, or a reasoned N/A.
 
-- a user or reviewer rejects quality;
-- a benchmark shows a material craft gap;
-- a planned stage depends on a capability whose ceiling is uncertain;
-- a fast-moving model/tool ecosystem may materially change the best production route;
-- the current technique library has no validated method for the hardest shot.
+The project learning table is a candidate ledger. `record_learning` always creates `CANDIDATE`. It is not a global method registry and it does not grant execution authority.
 
-Scout from multiple evidence classes rather than one promotional source:
+## 4. Evidence ladder for shared method promotion
 
-1. official model/tool docs and first-party production breakdowns;
-2. GitHub source, Skills, workflows, issues and release notes;
-3. credible creator/studio breakdowns with visible outputs;
-4. community failure reports and comparisons (Reddit/X/YouTube/forums) when useful.
+A candidate becomes a shared `VERIFIED_OPERATION` only after the complete evidence chain is accepted:
 
-Do not wait for the user to provide names. User-provided names are seeds, not the boundary of research.
+1. **Real case:** demonstrate the method on an actual owner task with a measurable baseline or prior failure.
+2. **Independent replay:** at least two replays on distinct task instances within the claimed applicability. A repeated run of the same unchanged fixture is not cross-task evidence.
+3. **Counterexample:** at least one deliberate negative trial that exposes a boundary or failure condition. A valid counterexample does not mean the method should succeed outside its scope.
+4. **Cross-task transfer:** demonstrate that the mechanism survives a different task context. Require cross-domain transfer whenever the method claims cross-domain applicability.
+5. **Regression:** add a test that would detect recurrence of the original failure.
+6. **Rollback:** preserve the previous accepted method and a clear fallback path.
+7. **Owner burden/cost:** compare time, cost, credits, rework or coordination before and after; if not measurable, record why it is N/A.
+8. **Independent readback:** the reviewer must not have produced the method, the tested outputs, the review report or the cited evidence.
+9. **CAOS acceptance:** CAOS independently challenges the evidence, applicability, counterexamples, risk and owner outcome before shared promotion.
+10. **Versioned change:** update the shared knowledge catalog and source method through a repository-versioned change containing the evidence, regression result and exact method revision.
 
-For every promising external method, distill five fields before adoption:
+No single success, Boolean self-assertion, opaque URI, provider marketing claim or model self-rating satisfies this ladder.
 
-- **problem solved** — what production bottleneck it addresses;
-- **mechanism** — why it works, not just which brand/model it uses;
-- **evidence** — source/output/failure evidence;
-- **transfer rule** — where it applies to our content and where it does not;
-- **prototype test** — the cheapest real sample that could falsify the idea.
+## 5. Knowledge states and authority
 
-A tool name never becomes architecture by itself. Prefer portable production principles over vendor lock-in.
+- `ACTIVE_REFERENCE`: a source locator that may be consulted; it is not proof that the described method works.
+- `VERIFIED_OPERATION`: a method independently validated within its exact recorded applicability and version.
+- `CANDIDATE_REQUIRES_REVALIDATION`: an unvalidated proposal; not execution authority.
+- `LEGACY_REFERENCE_ONLY`: historical material retained for context; not current authority.
+- `RETIRED_EVIDENCE_ONLY`: preserved history without active authority.
 
-## Sample-first rule
-Before a full quality-critical build, create the smallest sample that represents the intended final quality. Normally this is a **3–12 second prototype reel** or a small set of near-final hero shots plus motion. It must test the highest-risk assumption first.
+Project candidates remain `CANDIDATE`. Shared knowledge promotion requires a versioned repository change with evidence, independent replay, regression and CAOS owner-level acceptance. There is no automatic promotion command. A method that is deliberately task-specific remains project-local rather than being generalized. Cross-project reuse must respect the declared applicability and be revalidated when the target context materially differs.
 
-A valid sample should include, when relevant:
+## 6. Sample-first is conditional on the deliverable
 
-- final or near-final art/material/asset quality;
-- representative camera and motion language;
-- representative typography/subtitle treatment;
-- representative sound design, voice or intentional silence;
-- at least one transition/reveal that would be expensive to discover after full build;
-- the same benchmark pack and acceptance bar intended for the final piece.
+Before expensive or quality-critical production, test the smallest sample that can falsify the highest-risk assumption:
 
-Do not approve a rough technical demo merely because it proves the engine can run. If the sample is not good enough to show publicly as a fragment of the final work, it cannot authorize the full build.
+- writing: one representative hook, section or argument;
+- static image: one key composition or hero frame;
+- video/motion: a short representative motion sample, often 3–12 seconds when appropriate;
+- research: one source-backed claim and its counterargument;
+- platform packaging: one representative platform variant.
 
-## Learning loop
-1. DIAGNOSE the exact bottleneck: idea, research, script, art, motion, asset quality, sound, editing, render engineering, QA or commercial fit.
-2. Decide whether the defect is local, capability, standard, or systemic before mutating the global Skill/runtime.
-3. SCOUT proactively for at least two plausible approaches; do not depend on user-supplied tool names.
-4. COMPARE quality ceiling, cash cost, token/credit cost, licensing, repeatability, observability, coordination cost and lock-in.
-5. INSPECT SOURCE rather than trusting promotional claims.
-6. PRE-MORTEM the next expensive stage and PROTOTYPE only its highest-risk assumptions first.
-7. QA the real sample against external benchmarks, not merely the previous internal version.
-8. ACCEPT or REJECT with an explicit reason.
-9. ROUTE each shot to the cheapest engine that can plausibly meet its hardest requirement; one model/tool does not need to own the whole film.
-10. PERSIST verified lessons in code/config/reference docs only when they generalize; keep project-specific fixes inside the project. Rejected approaches remain recorded so they are not rediscovered as if new.
+A sample must be judged against the intended final acceptance bar, not merely technical execution. Do not impose motion, audio or video prototypes on text-only or static-image work.
 
-## Operational execution boundary
-The normal `LEARN` stage is now an explicit evidence pipeline:
+## 7. Research and method selection
 
-`Production Methodologist -> Evolution Engineer candidate package -> Red Team -> Showrunner`.
+When scouting is relevant, compare at least two plausible approaches using primary documentation, inspectable outputs, source code or credible failure reports. Evaluate quality ceiling, repeatability, cost, licensing, observability, coordination burden and lock-in. Distill each promising method into problem, mechanism, evidence, transfer boundary and a falsifiable prototype. Tool names alone never become architecture.
 
-The Production Methodologist produces a `learning_candidate`. The Evolution Engineer converts it into a **proposed** `learning_receipt` / change package. Those artifacts are not proof that the repository or production rules have changed. Red Team and Showrunner must approve the learning stage, and actual durable promotion still requires the owner maintenance path to apply the smallest accepted code/config/reference/test change, run the relevant regression/eval, remove or demote superseded mechanisms, and verify the authoritative result.
+## 8. Governance and execution boundary
 
-This distinction is deliberate: scheduled learning evidence is operational; unrestricted autonomous repository mutation is not. Mid-stage/on-demand capability-gap learning still requires an explicit trigger/executor path before it may be described as fully autonomous.
+Learning is a continuous responsibility, not a mandatory LEARN stage or fixed role pipeline. Roles such as method author, reviewer and owner are temporary responsibilities assigned only when the demand requires them; they are not permanent workers. The task graph is derived from the current goal, and only declared dependencies block parallel work.
 
-Refresh knowledge during active work without waiting for user prompts. Scheduled/background monitoring is optional infrastructure and must not become a dependency for normal production. Tool choice and organizational structure are replaceable; the quality contract and evidence standard are not.
+A local correction stays local unless evidence proves a systemic defect. Shared rules change only through the versioned knowledge path above. Rejected approaches remain recorded with why they failed so the system does not rediscover them as if new. Revalidate volatile provider facts before reuse, and never let a learned preference override a new owner instruction.

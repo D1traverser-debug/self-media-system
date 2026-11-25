@@ -36,9 +36,9 @@ The research subsystem has a deterministic `source_evidence_audit` tool operatio
 
 The `social_media_studio` package is the sole Social Media Studio runtime: it owns self-media project briefs, task DAGs, leases, artifact history, review receipts, failure recovery and domain execution. CAOS governs session-level requirement interpretation, material decisions, root-cause investigation, cross-domain authorization and independent acceptance when the owner selects Social Media Studio from CAOS. The Social Media Studio runtime has no CAOS API, runtime, task-ID or lease dependency. specialist content-domain modules are imported only through the explicit `social_media_studio.adapters` boundary; the old fixed-stage controller is not an active execution path.
 
-## Historical Video 0.8 domain models (not a universal execution chain)
+## Historical video-specific 0.8 domain models (not a universal execution chain)
 
-The following historical video-specific structures remain callable only where an explicit Video adapter declares the corresponding work. They do not describe the current general-content workflow. New user content demands route through typed contracts; `social_media_studio.engine.StudioEngine` is the only durable scheduler, and direct conversational tasks need no project.
+The following historical video-specific structures remain callable only where an explicit video-domain adapter declares the corresponding work. They do not describe the current general-content workflow. New user content demands route through typed contracts; `social_media_studio.engine.StudioEngine` is the only durable scheduler, and direct conversational tasks need no project.
 
 Historical example chain (not a current default or mandatory production order):
 
