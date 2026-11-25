@@ -1081,10 +1081,17 @@ class StudioEngine:
     ) -> None:
         """Give a review executor only staged, digest-verified declared inputs."""
         stage_root = self._review_stage_dir(project_id, task["task_id"], task["attempts"])
+        review_root = self.root / "review_sessions"
+        project_stage_root = review_root / _safe_id(project_id, "project_id")
+        task_stage_root = project_stage_root / _safe_id(task["task_id"], "task_id")
+        if any(path.is_symlink() for path in (review_root, project_stage_root, task_stage_root, stage_root)):
+            raise GateError("review staging path cannot contain symlinks")
         if stage_root.exists() and not reuse_existing:
             shutil.rmtree(stage_root)
         try:
             inputs_root = stage_root / "inputs"
+            if inputs_root.is_symlink():
+                raise GateError("review input staging path cannot be a symlink")
             inputs_root.mkdir(parents=True, exist_ok=True)
             staged_inputs: dict[str, dict[str, Any]] = {}
             expected_names: set[str] = set()
@@ -1095,6 +1102,8 @@ class StudioEngine:
                     raise GateError(f"review input changed before isolation staging: {name}")
                 destination = inputs_root / f"{_safe_id(name, 'review_input')}{source.suffix.lower()}"
                 expected_names.add(destination.name)
+                if destination.is_symlink():
+                    destination.unlink()
                 if not destination.is_file() or _sha256(destination) != expected_digest:
                     shutil.copyfile(source, destination)
                 if _sha256(destination) != expected_digest:
