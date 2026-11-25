@@ -161,6 +161,22 @@ class ReviewExecutionTrustRegistry:
         executor = self.config.get("trusted_executors", {}).get(executor_id)
         if not isinstance(executor, dict) or executor.get("status") != "ACTIVE":
             raise ReviewExecutionError(f"review executor is not trusted: {executor_id}")
+        required_registry_fields = (
+            "key_id", "public_key", "issuer", "isolation_mechanism",
+            "reviewer_kinds", "execution_modes", "reviewer_ids", "providers", "models",
+        )
+        missing_registry_fields = [
+            field for field in required_registry_fields
+            if executor.get(field) in (None, "", [])
+        ]
+        if missing_registry_fields:
+            raise ReviewExecutionError(
+                f"trusted executor registration is incomplete: {missing_registry_fields}"
+            )
+        for field in ("reviewer_kinds", "execution_modes", "reviewer_ids", "providers", "models"):
+            values = executor.get(field)
+            if not isinstance(values, list) or not all(isinstance(value, str) and value for value in values):
+                raise ReviewExecutionError(f"trusted executor registration field is malformed: {field}")
 
         key_id = executor.get("key_id")
         signature_entry = next(
@@ -193,9 +209,10 @@ class ReviewExecutionTrustRegistry:
             raise ReviewExecutionError("review execution receipt exceeds the maximum age")
 
         required_fields = (
-            "nonce", "execution_id", "review_task_id", "review_contract_digest", "reviewer_id",
-            "reviewer_kind", "execution_mode", "packet_digest", "result_digest",
-            "input_digests", "context_id", "isolation_mode",
+            "nonce", "execution_id", "provider_run_id", "trace_id", "provider", "model",
+            "review_task_id", "review_contract_digest", "reviewer_id", "reviewer_kind",
+            "execution_mode", "packet_digest", "result_digest", "input_digests",
+            "context_id", "isolation_mode",
         )
         missing = [field for field in required_fields if predicate.get(field) in (None, "", {})]
         if missing:
@@ -300,13 +317,13 @@ class ReviewExecutionTrustRegistry:
                     raise ReviewExecutionError("video review coverage trace digest is missing or invalid")
 
         allowed_providers = executor.get("providers", [])
-        if allowed_providers and predicate.get("provider") not in allowed_providers:
+        if predicate.get("provider") not in allowed_providers:
             raise ReviewExecutionError("review provider is not authorized for this executor")
         allowed_models = executor.get("models", [])
-        if allowed_models and predicate.get("model") not in allowed_models:
+        if predicate.get("model") not in allowed_models:
             raise ReviewExecutionError("review model is not authorized for this executor")
         allowed_reviewers = executor.get("reviewer_ids", [])
-        if allowed_reviewers and predicate.get("reviewer_id") not in allowed_reviewers:
+        if predicate.get("reviewer_id") not in allowed_reviewers:
             raise ReviewExecutionError("reviewer identity is not authorized for this executor")
 
         return {
