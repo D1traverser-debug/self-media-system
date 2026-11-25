@@ -222,7 +222,7 @@ Classify the cause at the correct layer:
 - review rubric or independence;
 - integration, packaging or release.
 
-Challenge the previous method, not just the last output. State the repair, falsifier and rollback. Repair the smallest causal layer that evidence supports, then independently verify and replay the relevant regression. Close a failure only with verification and regression evidence references. Preserve failed attempts and rejected methods.
+Challenge the previous method, not just the last output. State the repair, falsifier and rollback. Repair the smallest causal layer that evidence supports, then independently verify and replay the relevant regression. Close a failure only when `verification_refs` and `regression_refs` contain distinct exact artifact IDs in the current project. Each referenced artifact must be current, its bytes must match its recorded SHA-256, and it must have only exact-digest PASS review receipts from reviewer IDs distinct from its producer. Import external reports as artifacts before resolving. The engine verifies bytes and structural reviewer/producer separation; this is not cryptographic proof of reviewer identity or semantic correctness. Preserve failed attempts and rejected methods.
 
 ## 10. Learning and method evolution
 

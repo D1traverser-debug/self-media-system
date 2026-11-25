@@ -618,27 +618,75 @@ def test_decision_receipt_requires_competing_causes_alternatives_and_falsifier(t
 def test_failure_cannot_close_without_independent_verification_and_regression(tmp_path):
     engine = make_engine(tmp_path)
     engine.add_tasks("demo", [task("render")])
+    rendered = complete(engine, tmp_path, "render", "artist")
     failure = engine.record_failure("demo", {
         "task_id": "render",
-        "symptom": "generated clips repeatedly break object continuity",
+        "symptom": "the final deliverable repeatedly fails its declared acceptance check",
         "hypotheses": [
-            {"id": "H1", "claim": "reference binding is insufficient", "discriminator": "compare same prompt with and without locked reference"},
-            {"id": "H2", "claim": "motion request exceeds model capability", "discriminator": "test a lower-motion control with the same reference"},
+            {"id": "H1", "claim": "the source input is incomplete", "discriminator": "repeat with a verified complete source"},
+            {"id": "H2", "claim": "the selected method is unsuitable", "discriminator": "compare a materially different method on the same source"},
         ],
         "selected_root_cause": "H2",
-        "method_challenge": "the current benchmark did not isolate motion complexity",
-        "repair_plan": "split the move into two controlled shots",
-        "falsifier": "a matched test with the original motion succeeds consistently",
-        "rollback": "restore the original shot plan and retain rejected takes",
-        "evidence_refs": ["take://failed-1", "benchmark://motion-control"],
+        "method_challenge": "the previous test did not compare a viable alternative method",
+        "repair_plan": "apply the alternative method and rerun the affected acceptance checks",
+        "falsifier": "the original method passes the same independent acceptance checks on the same source",
+        "rollback": "restore the previous method and retain both output versions",
+        "evidence_refs": [rendered["artifact_id"]],
     })
-    with pytest.raises(ContractError):
-        engine.resolve_failure("demo", failure["failure_id"], {"verification_refs": ["qa://1"]})
-    engine.resolve_failure("demo", failure["failure_id"], {
-        "verification_refs": ["review://new-cut"],
-        "regression_refs": ["replay://continuity-fixture"],
+
+    # Opaque URI strings are declarations, not verifiable evidence.
+    with pytest.raises(ContractError, match="registered artifact_id"):
+        engine.resolve_failure("demo", failure["failure_id"], {
+            "verification_refs": ["review://new-output"],
+            "regression_refs": ["replay://regression-run"],
+            "result": "PASS",
+        })
+
+    engine.add_tasks("demo", [task("verification")])
+    verification = complete(engine, tmp_path, "verification", "verification-producer")
+    engine.add_tasks("demo", [task("regression")])
+    regression = complete(engine, tmp_path, "regression", "regression-producer")
+    resolution = {
+        "verification_refs": [verification["artifact_id"]],
+        "regression_refs": [regression["artifact_id"]],
         "result": "PASS",
-    })
+    }
+
+    # Existing artifacts are insufficient until each exact digest has a PASS review.
+    with pytest.raises(ContractError, match="exact-digest PASS review"):
+        engine.resolve_failure("demo", failure["failure_id"], resolution)
+
+    engine.record_review(
+        "demo", verification["artifact_id"], reviewer_id="verification-reviewer",
+        rubric_id="failure-verification", outcome="PASS",
+        dimensions={"result": "PASS"}, evidence_refs=[verification["artifact_id"]],
+    )
+    with pytest.raises(ContractError, match="exact-digest PASS review"):
+        engine.resolve_failure("demo", failure["failure_id"], resolution)
+
+    engine.record_review(
+        "demo", regression["artifact_id"], reviewer_id="regression-reviewer",
+        rubric_id="failure-regression", outcome="PASS",
+        dimensions={"result": "PASS"}, evidence_refs=[regression["artifact_id"]],
+    )
+    with pytest.raises(ContractError, match="distinct artifact IDs"):
+        engine.resolve_failure("demo", failure["failure_id"], {
+            "verification_refs": [verification["artifact_id"]],
+            "regression_refs": [verification["artifact_id"]],
+            "result": "PASS",
+        })
+
+    verification_path = Path(verification["path"])
+    verification_path.write_text("tampered verification bytes", encoding="utf-8")
+    with pytest.raises(ContractError, match="bytes are missing or changed"):
+        engine.resolve_failure("demo", failure["failure_id"], resolution)
+    verification_path.write_text("artifact for verification", encoding="utf-8")
+
+    receipt = engine.resolve_failure("demo", failure["failure_id"], resolution)
+    assert receipt["status"] == "RESOLVED"
+    assert receipt["resolution"]["verified_evidence"]["verification"][0]["sha256"] == verification["sha256"]
+    assert receipt["resolution"]["verified_evidence"]["regression"][0]["sha256"] == regression["sha256"]
+    assert receipt["resolution"]["reviewer_independence"] == "STRUCTURAL_REVIEWER_ID_SEPARATION_ONLY_NOT_CRYPTOGRAPHIC"
     assert engine.status("demo")["open_failures"] == 0
 
 
