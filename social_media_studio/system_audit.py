@@ -29,7 +29,7 @@ def _authority_paths(root: Path, manifest_path: Path, manifest: dict[str, Any]) 
 
 
 def _brand_violations(root: Path) -> list[str]:
-    """Inspect active source identities, not archived video evidence."""
+    """Inspect active product identities; historical medium-specific evidence is not a product alias."""
     paths = [
         root / "pyproject.toml",
         root / "README.md",
@@ -45,7 +45,7 @@ def _brand_violations(root: Path) -> list[str]:
                          if p.is_file() and p.suffix in {".py", ".json", ".md", ".yml", ".toml"})
     retired = (
         "video" + "_studio", "video" + "_growth_agent", "vga" + "-",
-        "VGA" + "_", "VIDEO" + "_GROWTH_AGENT",
+        "VGA" + "_", "VIDEO" + "_GROWTH_AGENT", "VIDEO" + "_REPOSITORY",
         "Video" + " Growth Agent", "Universal" + " Content Studio",
     )
     violations = []
@@ -67,7 +67,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
 
     This is a repository-level structural/readiness audit. It exercises the project
     engine in temporary directories and never mutates the repository or user workspace.
-    A structural PASS does not mean a video has been generated, reviewed or released.
+    A structural PASS does not mean any deliverable has been generated, reviewed or released.
     """
     root = Path(repo_root).expanduser().resolve() if repo_root else Path(__file__).resolve().parents[1]
     checks: list[dict[str, Any]] = []
@@ -162,6 +162,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         studio_manifest.get("product_name") == "Social Media Studio"
         and studio_manifest.get("product_name_zh") == "自媒体系统"
         and studio_manifest.get("owner") == "SOCIAL_MEDIA_STUDIO"
+        and studio_manifest.get("repository_slug") == "social-media-studio"
         and pyproject["project"]["name"] == "social-media-studio"
         and pyproject["project"]["scripts"] == {"sms-studio": "social_media_studio.cli:main"}
         and not brand_violations
@@ -264,6 +265,37 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         _check(checks, "knowledge_locator_integrity", True, {"source_count": len(methods["entries"])})
     except (ValueError, OSError, KeyError, TypeError) as exc:
         _check(checks, "knowledge_locator_integrity", False, str(exc))
+    learning_policy = studio_manifest.get("learning_policy", {})
+    knowledge_lifecycle = studio_manifest.get("knowledge_lifecycle", {})
+    adapter_execution = studio_manifest.get("capabilities", {}).get("domain_adapter_execution", {})
+    promotion_contract_ok = (
+        learning_policy.get("default_status") == "CANDIDATE"
+        and learning_policy.get("requires_evidence") is True
+        and learning_policy.get("requires_counterexamples") is True
+        and learning_policy.get("requires_failure_conditions") is True
+        and learning_policy.get("requires_independent_replay_for_validation") is True
+        and learning_policy.get("minimum_independent_replays") == 2
+        and learning_policy.get("minimum_counterexample_trials", 0) >= 1
+        and learning_policy.get("requires_real_case") is True
+        and learning_policy.get("requires_cross_task_transfer") is True
+        and learning_policy.get("requires_regression_test") is True
+        and learning_policy.get("requires_rollback") is True
+        and learning_policy.get("requires_owner_burden_cost_or_na") is True
+        and learning_policy.get("requires_independent_readback") is True
+        and learning_policy.get("requires_caos_owner_acceptance") is True
+        and learning_policy.get("project_candidate_promotion_authorized") is False
+        and adapter_execution.get("candidate_promotion_authorized") is False
+        and knowledge_lifecycle.get("mutation_authority")
+        == "SOCIAL_MEDIA_STUDIO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
+    )
+    _check(checks, "knowledge_promotion_is_scoped_and_fail_closed", promotion_contract_ok, {
+        "default_project_status": learning_policy.get("default_status"),
+        "minimum_independent_replays": learning_policy.get("minimum_independent_replays"),
+        "minimum_counterexample_trials": learning_policy.get("minimum_counterexample_trials"),
+        "cross_task_transfer_required": learning_policy.get("requires_cross_task_transfer"),
+        "automatic_project_promotion": learning_policy.get("project_candidate_promotion_authorized"),
+        "mutation_authority": knowledge_lifecycle.get("mutation_authority"),
+    })
     from .scope import capability_lookup
     try:
         coverage = capability_lookup(profile=_read_json(root / "social_media_studio" / "legacy" / "data" / "capabilities.json"))
