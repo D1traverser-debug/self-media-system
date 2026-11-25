@@ -2374,8 +2374,9 @@ class StudioEngine:
         }
         return bool(
             contract.get("require_execution_attestation")
+            or contract.get("reviewer_kind")
+            or contract.get("execution_mode")
             or contract.get("blind_review")
-            or contract.get("execution_mode") in independent_modes
             or contract.get("require_digest_attestation")
             or contract.get("require_context_id")
             or contract.get("required_media_inspection")
