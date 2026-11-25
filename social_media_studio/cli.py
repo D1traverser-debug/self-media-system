@@ -115,6 +115,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project_id")
     p.add_argument("--event-limit", type=int, default=40)
 
+    p = sub.add_parser("capture-context", help="append exact source-labelled conversation context to one project")
+    p.add_argument("project_id")
+    p.add_argument("payload", type=Path, help="JSON: kind, text, source_kind, source_locator, optional task_ids/artifact_ids")
+
+    p = sub.add_parser("continuity", help="read all recorded project conversation notes (no cross-project inference)")
+    p.add_argument("project_id")
+
+    p = sub.add_parser("handoff", help="export a digest-bound current project handoff for another chat")
+    p.add_argument("project_id")
+
+    p = sub.add_parser("verify-handoff", help="verify a saved handoff against the exact current project ledger")
+    p.add_argument("project_id")
+    p.add_argument("packet", type=Path)
+
     p = sub.add_parser("tasks", help="list the dynamic task graph")
     p.add_argument("project_id")
 
@@ -441,6 +455,14 @@ def main(argv: list[str] | None = None) -> int:
             _emit(engine.status(args.project_id))
         elif command == "resume":
             _emit(engine.resume(args.project_id, event_limit=args.event_limit))
+        elif command == "capture-context":
+            _emit(engine.capture_continuity(args.project_id, _read_json(args.payload)))
+        elif command == "continuity":
+            _emit(engine.continuity_records(args.project_id))
+        elif command == "handoff":
+            _emit(engine.handoff(args.project_id))
+        elif command == "verify-handoff":
+            _emit(engine.verify_handoff(args.project_id, _read_json(args.packet)))
         elif command == "tasks":
             _emit(engine.list_tasks(args.project_id))
         elif command == "claim":
