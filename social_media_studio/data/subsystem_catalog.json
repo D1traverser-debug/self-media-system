@@ -6,7 +6,7 @@
   "product": "Social Media Studio",
   "topology_contract": {
     "minimum_subsystems": 16,
-    "minimum_code_modules": 62,
+    "minimum_code_modules": 63,
     "minimum_domain_adapters": 17,
     "minimum_production_operations": 6
   },
@@ -67,7 +67,8 @@
         "social_media_studio/domain/contracts.py",
         "social_media_studio/domain/assurance.py",
         "social_media_studio/legacy/execution_attestation.py",
-        "social_media_studio/legacy/reviewer_providers.py"
+        "social_media_studio/legacy/reviewer_providers.py",
+        "social_media_studio/review_execution.py"
       ],
       "domain_adapters": [],
       "production_operations": [],
