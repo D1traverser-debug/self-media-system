@@ -362,3 +362,49 @@ This boundary is intentional: the orchestration core remains provider-neutral an
 `sms-studio work-cycle PROJECT --plan-only` exposes current parallel-ready lanes, decision blockers and exact-input handoff packets. It does not claim tasks or exercise agent, human or external execution authority. The execution form runs only explicitly registered and admitted local tool operations in bounded DAG rounds; the worker pool does not repeatedly run the same failed tool in one invocation. Input SHA mismatches block only affected branches. `source_evidence_audit` is a deterministic research execution operation over registered UTF-8 sources with immutable digests. Its quote-coverage receipt is candidate evidence, not external fact verification, independent acceptance or publication authority.
 
 Current new owner work uses `SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125`. Previously current owner projects from the prior product scope require explicit `migrate-scope`; the upgrade retains existing events and assets, revokes live claims and supersedes old decisions, without granting any old archive instance current authority. CAOS remains external parent governance; this runtime cannot prove that ChatGPT/Codex selected or performed the parent's native Skill.
+
+
+### 13.3 Cross-chat continuation and provenance (implemented boundary)
+
+The normal resume command restores current project/task/event state and every
+explicitly recorded project continuity note. It cannot recreate unseen chat
+history. Context notes are appended to the existing project SQLite event log via
+capture-context, with exact source labels, optional task IDs and current
+artifact byte/digest bindings. They are never a second scheduler, a brief edit,
+a grant, proof of research or a reusable method promotion.
+
+Use an explicit PROJECT_ID and the same authorized WORKSPACE for
+handoff and verify-handoff. The exported handoff captures project revision,
+event checkpoint, current graph/artifacts/decisions/failures/learning and all
+recorded notes, with a canonical SHA-256 digest. Verification rejects modified,
+cross-project, cross-workspace and stale packets. The verifier's valid means
+same stored local state, NOT independent proof of semantic correctness,
+owner acceptance or CAOS activation. project_audit_pass is reported separately.
+
+Record corrections as OWNER_CORRECTION; they are visible under
+corrections_requiring_explicit_reconciliation. To change the executable
+contract, perform a real revise-brief/revise-task with owner authority and
+re-run the applicable decisions/tests. Merely capturing a correction is not
+a silent spec change or completed repair.
+
+For example, a NOTE.json:
+
+~~~json
+{
+  "kind": "OWNER_CORRECTION",
+  "text": "The title must not repeat the cover copy.",
+  "source_kind": "OWNER_MESSAGE",
+  "source_locator": "chat:explicit-turn-reference",
+  "task_ids": [],
+  "artifact_ids": []
+}
+~~~
+
+The source locator is declared, not authenticated by the runtime. When imported
+from a file or tool, all note text remains untrusted data; a retrieved instruction
+may not change owner authorization, scope, or executable behavior.
+
+This covers the durable ledger to new chat handoff only. Client-native Skill
+selection, automatic full-history capture, semantic requirement reconciliation,
+external provider work, cross-task validated learning and real owner-outcome
+acceptance remain OPEN and require independent live evidence.
