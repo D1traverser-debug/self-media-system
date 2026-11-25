@@ -65,6 +65,15 @@ def test_ratio_and_orientation_are_explicit_not_inferred():
     for bad_order in ("UNKNOWN", "", None):
         with pytest.raises(ContentContractError):
             MediaShape.from_ratio("4:3", ratio_order=bad_order, long_edge_pixels=1440)
+    with pytest.raises(ContentContractError):
+        MediaShape.from_mapping({
+            "width": 1080, "height": 1440, "orientation": "PORTRAIT",
+            "aspect_ratio": ["3:4"], "ratio_order": "WIDTH:HEIGHT",
+        })
+    with pytest.raises(ContentContractError):
+        MediaShape.from_ratio("4/3", ratio_order="HEIGHT:WIDTH", long_edge_pixels=1440)
+    with pytest.raises(ContentContractError):
+        MediaShape.from_ratio("4:3", ratio_order="HEIGHT:WIDTH", long_edge_pixels=1441)
     for dimensions in (
         {"width": 1440, "height": 1080, "orientation": "PORTRAIT"},
         {"width": 1080, "height": 1440, "orientation": "LANDSCAPE"},
