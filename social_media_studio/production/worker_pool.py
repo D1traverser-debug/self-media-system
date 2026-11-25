@@ -56,7 +56,8 @@ def run_ready_tool_tasks(
         raise ValueError("max_rounds must be between 1 and 500")
     if lease_seconds < 30 or lease_seconds > 86400:
         raise ValueError("lease_seconds must be between 30 and 86400")
-    heartbeat_interval = heartbeat_interval_seconds or max(5.0, min(60.0, lease_seconds / 3.0))
+    heartbeat_interval = (max(5.0, min(60.0, lease_seconds / 3.0))
+                          if heartbeat_interval_seconds is None else heartbeat_interval_seconds)
     if heartbeat_interval <= 0 or heartbeat_interval >= lease_seconds:
         raise ValueError("heartbeat_interval_seconds must be positive and shorter than the lease")
 
@@ -65,6 +66,7 @@ def run_ready_tool_tasks(
     claimed_total: list[dict[str, Any]] = []
     unregistered_by_id: dict[str, dict[str, Any]] = {}
     reclaimed_expired_claims: list[dict[str, Any]] = []
+    failed_this_invocation: set[str] = set()
     rounds = 0
 
     for round_number in range(1, max_rounds + 1):
@@ -73,7 +75,9 @@ def run_ready_tool_tasks(
         tasks = engine.list_tasks(project_id)
         ready_tools = [item for item in tasks if item.get("status") == "READY" and item.get("executor") == "tool"]
         admitted = set(engine.status(project_id)["admitted_ready_tasks"])
-        candidates = [item for item in ready_tools if item["task_id"] in admitted and tool_executor_for_task(item)]
+        candidates = [item for item in ready_tools if item["task_id"] in admitted
+                      and item["task_id"] not in failed_this_invocation
+                      and tool_executor_for_task(item)]
         for item in ready_tools:
             if not tool_executor_for_task(item):
                 unregistered_by_id[item["task_id"]] = {
@@ -111,6 +115,7 @@ def run_ready_tool_tasks(
                 try:
                     completed.append({"task_id": packet["task"]["task_id"], "result": future.result()})
                 except Exception as exc:
+                    failed_this_invocation.add(packet["task"]["task_id"])
                     failed.append({
                         "task_id": packet["task"]["task_id"],
                         "error_type": type(exc).__name__, "error": str(exc),
@@ -132,6 +137,17 @@ def run_ready_tool_tasks(
         if item["task_id"] in admitted and item.get("executor") == "tool"
         and tool_executor_for_task(item)
     ]
+    # The pool reports CURRENT admitted gaps only. Unadmitted or completed
+    # tasks cannot leave a stale "missing executor" blocker behind.
+    unregistered_by_id = {
+        item["task_id"]: {
+            "task_id": item["task_id"], "title": item.get("title"),
+            "kind": item.get("kind"), "requirements": item.get("requirements", {}),
+        }
+        for item in remaining_tasks
+        if item.get("status") == "READY" and item.get("executor") == "tool"
+        and item["task_id"] in admitted and not tool_executor_for_task(item)
+    }
     all_tasks_complete = bool(remaining_tasks) and all(item["status"] == "COMPLETED" for item in remaining_tasks)
     project_status = "TASK_GRAPH_COMPLETE" if all_tasks_complete else "IN_PROGRESS"
 

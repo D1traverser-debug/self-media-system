@@ -121,6 +121,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--executor", choices=["agent", "human", "tool", "external"])
     p.add_argument("--task-id", help="claim this exact ready task instead of the next matching task")
 
+    p = sub.add_parser("work-cycle", help="run admitted local tools in parallel; report execution, blockers and learning handoffs")
+    p.add_argument("project_id")
+    p.add_argument("--plan-only", action="store_true", help="read-only; do not claim or execute tools")
+    p.add_argument("--max-workers", type=int, default=2)
+    p.add_argument("--max-rounds", type=int, default=50)
+
     p = sub.add_parser("run-ready-tools", help="execute registered local tool tasks concurrently in dependency-ready rounds")
     p.add_argument("project_id")
     p.add_argument("--worker-prefix", default="local-tool")
@@ -417,6 +423,15 @@ def main(argv: list[str] | None = None) -> int:
                 executor=args.executor, task_id=args.task_id,
             )
             _emit(packet or {"claimed": False, "reason": "NO_MATCHING_READY_TASK"})
+        elif command == "work-cycle":
+            from .operation_cycle import run_work_cycle
+            result = run_work_cycle(
+                engine, args.project_id, execute_tools=not args.plan_only,
+                max_workers=args.max_workers, max_rounds=args.max_rounds,
+            )
+            _emit(result)
+            if result["execution"] and result["execution"]["failed"]:
+                return 2
         elif command == "run-ready-tools":
             from .production.worker_pool import run_ready_tool_tasks
             result = run_ready_tool_tasks(
