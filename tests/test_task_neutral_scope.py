@@ -7,6 +7,11 @@ from social_media_studio.engine import StudioEngine
 from social_media_studio.scope import EPOCH, bind_owner_brief, resolve_intake
 
 
+def test_manifest_owner_scope_epoch_matches_runtime():
+    from social_media_studio.scope import contract
+    assert contract()["task_admission"]["scope_epoch"] == EPOCH
+
+
 def test_new_request_is_not_a_default_task_and_does_not_mutate(tmp_path):
     root = tmp_path / "not-created"
     for goal in ("Write a title only", "Edit source video without touching audio", "Design an original cover"):
