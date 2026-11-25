@@ -94,6 +94,8 @@ For factual or current-affairs work:
 
 For entertainment and creative work, research may target audience language, genre grammar, platform conventions, visual references, pacing and production methods. Do not copy a reference's protected expression or treat popularity as proof that a format fits this project.
 
+For exact sourced text evidence, a declared local tool task can use `source_evidence_audit`: provide an imported JSON claim manifest and each quoted UTF-8 source as distinct immutable task inputs, and declare one evidence report output. This executor verifies current source digests and literal quotations, including recorded contradictory source labels, but **cannot** independently decide whether a claim is true, search the live web, interpret video, or approve publication. A grounded quote is not factual or authorial validation. Keep human/agent semantic review and independent acceptance separate.
+
 ## 4. Decision loop
 
 Use a recursive decision process whenever an uncertainty can materially change the outcome, cost, quality, schedule, rights or architecture.

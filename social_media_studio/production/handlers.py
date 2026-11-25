@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ..media import run_claimed_media_qa
+from ..domain.research import inspect_research_evidence
 from .context import ProductionTaskContext
 from .contracts import FrameRenderSpec, ProductionContractError, RenderSpec
 from .delivery import create_delivery_package
@@ -302,3 +303,32 @@ def execute_ffmpeg_video_audio_copy(context: ProductionTaskContext) -> dict[str,
         {"production_executor":"ffmpeg_video_audio_copy","candidate_only":True,
          "identity_receipt":outcome["receipt"]})
     return {"operation":"ffmpeg_video_audio_copy","completion":completion}
+
+
+def execute_source_evidence_audit(context: ProductionTaskContext) -> dict[str, Any]:
+    manifest_name = str(context.config.get("manifest_input") or "")
+    output_name = str(context.config.get("report_output") or "")
+    if not manifest_name or manifest_name not in context.inputs:
+        raise ProductionContractError("source evidence manifest must be a declared input")
+    if not output_name or context.outputs != {output_name}:
+        raise ProductionContractError("research evidence task must declare exactly the report output")
+    try:
+        manifest = json.loads(Path(str(context.inputs[manifest_name]["path"])).read_text(encoding="utf-8"))
+        report = inspect_research_evidence(manifest, context.inputs, manifest_input=manifest_name)
+    except (OSError, UnicodeError, ValueError, TypeError, KeyError) as exc:
+        raise ProductionContractError(f"cannot inspect research evidence: {exc}") from exc
+    path = context.output_dir / f"{output_name}.json"
+    path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    output = _output_payload(
+        path, kind="evidence", media_type="application/json",
+        metadata={"production_executor": "source_evidence_audit",
+                  "assurance": report["assurance"], "candidate_only": True},
+    )
+    completion = context.engine.complete_task(
+        context.project_id, context.task_id, context.worker_id,
+        context.claim_token, {output_name: output},
+        {"production_executor": "source_evidence_audit",
+         "evidence_coverage_pass": report["evidence_coverage_pass"],
+         "semantic_fact_check_performed": False, "candidate_only": True},
+    )
+    return {"operation": "source_evidence_audit", "completion": completion}

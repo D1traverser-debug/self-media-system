@@ -14,7 +14,7 @@ def test_every_python_module_and_registered_executor_has_one_real_internal_owner
     assert report["code_modules"] >= 59
     assert report["subsystems"] == 16
     assert report["domain_adapters"] == 17
-    assert report["production_operations"] == 5
+    assert report["production_operations"] == 6
     assert report["unclassified_paths"] == []
     assert report["all_tracked_bytes_inspected"] is True
     assert len(report["all_tracked_file_sha256"]) == report["tracked_files"]
