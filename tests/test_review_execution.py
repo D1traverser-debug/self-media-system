@@ -73,6 +73,8 @@ def fixture_receipt(*, blind: bool = True, media_mode: str | None = None):
         "expires_at": (now + timedelta(minutes=10)).isoformat(),
         "nonce": uuid.uuid4().hex,
         "execution_id": "execution-01",
+        "provider_run_id": "provider-run-01",
+        "trace_id": "review-trace-01",
         "review_task_id": expected["review_task_id"],
         "review_contract_digest": expected["review_contract_digest"],
         "reviewer_id": expected["reviewer_id"],
