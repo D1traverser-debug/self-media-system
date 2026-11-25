@@ -214,6 +214,7 @@ def validate_adoption_packet(packet: dict[str, Any], brief: dict[str, Any]) -> d
     source_roles = {"OWNER_GOAL", "USER_CORRECTION", "REQUIREMENT", "DECISION", "FAILURE", "REFERENCE", "ARTIFACT", "OUTPUT"}
     source_verification = {"EXACT_BYTES_HASHED", "CONVERSATION_CONTEXT_ONLY", "UNVERIFIED"}
     seen_sources: set[tuple[str, str]] = set()
+    seen_artifact_names: set[str] = {"adoption-context"}
     for index, source in enumerate(sources):
         if not isinstance(source, dict):
             raise ValueError(f"adoption source_refs[{index}] must be an object")
@@ -240,6 +241,9 @@ def validate_adoption_packet(packet: dict[str, Any], brief: dict[str, Any]) -> d
             artifact_name = source.get("artifact_name")
             if not isinstance(artifact_name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", artifact_name):
                 raise ValueError(f"adoption source_refs[{index}] requires a safe artifact_name for exact-byte import")
+            if artifact_name in seen_artifact_names:
+                raise ValueError(f"adoption packet contains duplicate/reserved source artifact_name: {artifact_name}")
+            seen_artifact_names.add(artifact_name)
             if source_type == "CHAT_CONTEXT":
                 raise ValueError(f"adoption source_refs[{index}] CHAT_CONTEXT cannot claim exact file bytes")
             media_type = source.get("media_type", "text/plain")
