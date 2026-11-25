@@ -65,7 +65,8 @@ class MediaShape:
 
     def as_dict(self) -> dict[str, Any]:
         return {"width": self.width, "height": self.height,
-                "orientation": self.orientation, "aspect_ratio": self.ratio}
+                "orientation": self.orientation, "aspect_ratio": self.ratio,
+                "ratio_order": "WIDTH:HEIGHT"}
 
 
 @dataclass(frozen=True)
