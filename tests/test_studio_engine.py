@@ -1535,6 +1535,15 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         review_result_artifact_id=review_result_artifact["artifact_id"],
         execution_receipt=execution_receipt,
     )
+    with pytest.raises(ContractError, match="nonce has already been used"):
+        engine.record_review(
+            "strict", final_artifact["artifact_id"], reviewer_id="human-cold-reader",
+            rubric_id="human-cold-read", outcome="PASS", dimensions={},
+            evidence_refs=[review_evidence_id],
+            review_task_id="human-cold-read-task",
+            review_result_artifact_id=review_result_artifact["artifact_id"],
+            execution_receipt=execution_receipt,
+        )
     engine.record_review(
         "strict", final_artifact["artifact_id"], reviewer_id="red-team-reviewer",
         rubric_id="red-team", outcome="PASS",
@@ -1550,6 +1559,17 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
     assert release["technical_qa"]["media_sha256"] == final_artifact["sha256"]
     assert len(release["review_summary"]["red-team"]["review_ids"]) == 1
     assert engine.audit("strict")["pass"] is True
+    evidence_path = Path(evidence_artifacts["cold-read-evidence"]["path"])
+    original_evidence_bytes = evidence_path.read_bytes()
+    evidence_path.write_bytes(b"cold-read-evidence-was-replaced-after-review")
+    stale_release = engine.release_check("strict", final_artifact["artifact_id"], required_rubrics=[])
+    assert stale_release["pass"] is False
+    assert any(
+        item.startswith("review_execution_inputs_stale_or_incomplete:human-cold-read")
+        for item in stale_release["failures"]
+    )
+    evidence_path.write_bytes(original_evidence_bytes)
+    assert engine.release_check("strict", final_artifact["artifact_id"], required_rubrics=[])["pass"] is True
 
 
 def test_release_check_rejects_tampered_review_evidence_artifact_bytes(tmp_path):
