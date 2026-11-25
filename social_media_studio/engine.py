@@ -723,9 +723,16 @@ class StudioEngine:
                         if not isinstance(rubric_contract, dict):
                             raise ContractError(f"{task_id}: review rubric must exist in the owner release contract")
                         for field in ("reviewer_kind", "execution_mode", "blind_review", "required_media_inspection"):
-                            if field in rubric_contract and review_contract.get(field) != rubric_contract.get(field):
-                                raise ContractError(f"{task_id}: review task {field} differs from the owner rubric contract")
+                            if field in rubric_contract or field in review_contract:
+                                if review_contract.get(field) != rubric_contract.get(field):
+                                    raise ContractError(f"{task_id}: review task {field} differs from the owner rubric contract")
                         reviewer_kind = rubric_contract.get("reviewer_kind")
+                        execution_mode = rubric_contract.get("execution_mode")
+                        if self._review_contract_requires_execution(rubric_contract):
+                            if reviewer_kind not in {"HUMAN", "AI", "TOOL"}:
+                                raise ContractError(f"{task_id}: high-assurance review requires reviewer_kind HUMAN, AI or TOOL")
+                            if not isinstance(execution_mode, str) or not execution_mode.strip():
+                                raise ContractError(f"{task_id}: high-assurance review requires an explicit execution_mode")
                         expected_executors = {
                             "HUMAN": {"human"},
                             "AI": {"agent", "external"},
