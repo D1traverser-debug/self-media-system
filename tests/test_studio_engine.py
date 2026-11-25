@@ -1558,6 +1558,8 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
     assert release["pass"] is True, release["failures"]
     assert release["review_execution_verification"]["high_assurance"] == "VERIFIED"
     assert release["review_execution_verification"]["trusted_executor_count"] == 1
+    assert release["review_execution_verification"]["high_assurance_review_count"] == 1
+    assert release["review_execution_verification"]["high_assurance_verified_count"] == 1
     assert release["technical_qa"]["media_sha256"] == final_artifact["sha256"]
     assert len(release["review_summary"]["red-team"]["review_ids"]) == 1
     assert engine.audit("strict")["pass"] is True
