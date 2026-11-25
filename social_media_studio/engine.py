@@ -153,6 +153,12 @@ class StudioEngine:
                 FOREIGN KEY(project_id, review_id)
                     REFERENCES reviews(project_id, review_id)
             );
+            CREATE TRIGGER IF NOT EXISTS review_execution_nonces_no_update
+                BEFORE UPDATE ON review_execution_nonces
+                BEGIN SELECT RAISE(ABORT, 'review execution nonce records are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS review_execution_nonces_no_delete
+                BEFORE DELETE ON review_execution_nonces
+                BEGIN SELECT RAISE(ABORT, 'review execution nonce records are immutable'); END;
             CREATE TABLE IF NOT EXISTS artifact_inputs (
                 project_id TEXT NOT NULL,
                 output_artifact_id TEXT NOT NULL,
