@@ -78,6 +78,8 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         root / "STUDIO_ENTRY.md",
         root / "pyproject.toml",
         root / "social_media_studio" / "data" / "studio_manifest.json",
+        root / "social_media_studio" / "data" / "subsystem_catalog.json",
+        root / "social_media_studio" / "scope.py",
         root / "social_media_studio" / "system_audit.py",
         root / "examples" / "technology-explainer.brief.json",
         root / "examples" / "technology-explainer.tasks.json",
@@ -167,10 +169,15 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     _check(checks, "social_media_product_identity_no_active_legacy_aliases",
            product_identity_ok, {"violations": brand_violations})
 
-    from .scope import resolve_intake
+    from .scope import EPOCH, resolve_intake, validate_workspace_mode
     index = _read_json(root / "projects" / "PROJECT_INDEX.json")
     admission = studio_manifest.get("task_admission", {})
     retired_ids = {item["project_id"] for item in index["projects"]}
+    scope_epoch_ok = admission.get("scope_epoch") == EPOCH
+    _check(checks, "owner_scope_epoch_matches_runtime", scope_epoch_ok, {
+        "manifest_scope_epoch": admission.get("scope_epoch"),
+        "runtime_scope_epoch": EPOCH,
+    })
     task_neutral = (
         index.get("default_project_id") is None
         and admission.get("default_project_id") is None
@@ -189,6 +196,59 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
                 continue
             task_neutral = False
     _check(checks, "task_neutral_intake_and_retirement", task_neutral, sorted(retired_ids))
+
+    workspace_mode_failures: list[str] = []
+    try:
+        import shutil
+        with tempfile.TemporaryDirectory(prefix="sms-workspace-mode-") as mode_root:
+            base = Path(mode_root)
+            owner_root = base / "owner"
+            owner_root.mkdir()
+            fixture_root = base / "fixture"
+            validate_workspace_mode(
+                fixture_root, offline_fixture=True, initialize=True, owner_root=owner_root,
+            )
+            try:
+                validate_workspace_mode(fixture_root, offline_fixture=False, owner_root=owner_root)
+            except ValueError:
+                pass
+            else:
+                workspace_mode_failures.append("owner mode accepted a fixture-marked root")
+            try:
+                validate_workspace_mode(
+                    owner_root, offline_fixture=True, initialize=True, owner_root=owner_root,
+                )
+            except ValueError:
+                pass
+            else:
+                workspace_mode_failures.append("fixture mode accepted the default owner root")
+            occupied_root = base / "occupied"
+            occupied_root.mkdir()
+            (occupied_root / "projects").mkdir()
+            try:
+                validate_workspace_mode(
+                    occupied_root, offline_fixture=True, initialize=True, owner_root=owner_root,
+                )
+            except ValueError:
+                pass
+            else:
+                workspace_mode_failures.append("fixture mode adopted a pre-existing unmarked workspace")
+            copied_root = base / "copied"
+            copied_root.mkdir()
+            shutil.copy2(
+                fixture_root / ".sms-offline-fixture.json",
+                copied_root / ".sms-offline-fixture.json",
+            )
+            try:
+                validate_workspace_mode(copied_root, offline_fixture=True, owner_root=owner_root)
+            except ValueError:
+                pass
+            else:
+                workspace_mode_failures.append("fixture marker was accepted at a different root")
+    except (OSError, ValueError, TypeError) as exc:
+        workspace_mode_failures.append(f"{type(exc).__name__}: {exc}")
+    _check(checks, "owner_and_fixture_workspace_modes_are_isolated",
+           not workspace_mode_failures, workspace_mode_failures)
     from .scope import knowledge_lookup
     try:
         methods = knowledge_lookup(include_nonactive=True, repo_root=root)
@@ -253,8 +313,8 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         _check(checks, "all_internal_subsystems_owned_and_no_legacy_control_reentry",
                topology["pass"],
                {key: topology[key] for key in ("tracked_files","code_modules","owned_modules",
-                  "subsystems","domain_adapters","production_operations","unclassified_paths",
-                  "violations","assurance")})
+                  "subsystems","domain_adapters","production_operations","topology_contract",
+                  "unclassified_paths","violations","assurance")})
     except (ValueError, OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
         _check(checks, "all_internal_subsystems_owned_and_no_legacy_control_reentry", False,
                f"{type(exc).__name__}: {exc}")
