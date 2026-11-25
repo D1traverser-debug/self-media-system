@@ -9,6 +9,7 @@ import threading
 import pytest
 
 from social_media_studio.engine import ClaimError, ContractError, StudioEngine
+from social_media_studio.scope import validate_workspace_mode
 
 
 def brief():
@@ -143,6 +144,9 @@ def test_cross_project_transfer_is_exact_idempotent_and_unblocks_target(tmp_path
     from social_media_studio.cli import main
 
     workspace = tmp_path / "workspace"
+    validate_workspace_mode(
+        workspace, offline_fixture=True, initialize=True, owner_root=tmp_path / "owner-workspace",
+    )
     engine = StudioEngine(workspace)
     engine.create_project("program", "Program", brief())
     engine.create_project("episode", "Episode", brief())
@@ -460,6 +464,9 @@ def test_import_manifest_preflights_all_files_and_imports_digest_bound_context(t
     from social_media_studio.cli import main
 
     workspace = tmp_path / "workspace"
+    validate_workspace_mode(
+        workspace, offline_fixture=True, initialize=True, owner_root=tmp_path / "owner-workspace",
+    )
     engine = StudioEngine(workspace)
     engine.create_project("demo", "Manifest import", brief())
     repo = tmp_path / "repo"
