@@ -126,6 +126,8 @@ class ReviewExecutionTrustRegistry:
         self, envelope: dict[str, Any], *, expected: dict[str, Any],
         now: datetime | None = None,
     ) -> dict[str, Any]:
+        if not isinstance(expected, dict):
+            raise ReviewExecutionError("expected review execution contract must be an object")
         if not isinstance(envelope, dict) or envelope.get("payloadType") != PAYLOAD_TYPE:
             raise ReviewExecutionError("review execution receipt must be an in-toto DSSE envelope")
         try:
@@ -144,6 +146,8 @@ class ReviewExecutionTrustRegistry:
             item.get("name"): item.get("digest", {}).get("sha256")
             for item in subjects if isinstance(item, dict) and isinstance(item.get("digest"), dict)
         }
+        if len(subjects) != 2 or set(subject_map) != {"reviewed-artifact", "review-result"}:
+            raise ReviewExecutionError("review execution statement must bind exactly the reviewed artifact and review result")
         if subject_map.get("reviewed-artifact") != expected.get("reviewed_artifact_sha256"):
             raise ReviewExecutionError("reviewed artifact digest does not match the review contract")
         if subject_map.get("review-result") != expected.get("review_result_sha256"):
@@ -205,8 +209,12 @@ class ReviewExecutionTrustRegistry:
         if expires_at <= current or expires_at <= issued_at:
             raise ReviewExecutionError("review execution receipt is expired or has an invalid validity window")
         max_age = int(self.config.get("policy", {}).get("max_receipt_age_seconds", 86400))
+        if max_age < 1 or max_age > 604800:
+            raise ReviewExecutionError("review executor maximum receipt age policy is invalid")
         if (current - issued_at).total_seconds() > max_age:
             raise ReviewExecutionError("review execution receipt exceeds the maximum age")
+        if (expires_at - issued_at).total_seconds() > max_age:
+            raise ReviewExecutionError("review execution receipt validity window exceeds the maximum age")
 
         required_fields = (
             "nonce", "execution_id", "provider_run_id", "trace_id", "provider", "model",
@@ -217,6 +225,9 @@ class ReviewExecutionTrustRegistry:
         missing = [field for field in required_fields if predicate.get(field) in (None, "", {})]
         if missing:
             raise ReviewExecutionError(f"review execution predicate is missing fields: {missing}")
+        nonce = predicate.get("nonce")
+        if not isinstance(nonce, str) or len(nonce) < 16 or len(nonce) > 128:
+            raise ReviewExecutionError("review execution nonce must contain 16..128 characters")
         for field in (
             "review_task_id", "review_contract_digest", "reviewer_id", "reviewer_kind",
             "execution_mode", "packet_digest", "result_digest", "input_digests",
