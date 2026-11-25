@@ -37,6 +37,66 @@ def digest_json(value: Any) -> str:
     return hashlib.sha256(canonical_json(value)).hexdigest()
 
 
+def review_contract_digest(
+    task_contract: dict[str, Any], rubric_contract: dict[str, Any],
+) -> str:
+    if not isinstance(task_contract, dict) or not isinstance(rubric_contract, dict):
+        raise ReviewExecutionError("review task and rubric contracts must be objects")
+    return digest_json({
+        "schema_version": 1,
+        "task_contract": task_contract,
+        "rubric_contract": rubric_contract,
+    })
+
+
+def build_review_packet(
+    *, project_id: str, task_id: str, task_contract: dict[str, Any],
+    rubric_contract: dict[str, Any], input_bindings: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if not isinstance(task_contract, dict) or not isinstance(rubric_contract, dict):
+        raise ReviewExecutionError("review task and rubric contracts must be objects")
+    subject_name = task_contract.get("subject_artifact")
+    if not isinstance(subject_name, str) or not subject_name:
+        raise ReviewExecutionError("review task contract requires subject_artifact")
+    if not isinstance(input_bindings, list) or not input_bindings:
+        raise ReviewExecutionError("review packet requires a non-empty declared input list")
+    normalized: list[dict[str, Any]] = []
+    names: set[str] = set()
+    for item in input_bindings:
+        if not isinstance(item, dict):
+            raise ReviewExecutionError("review packet input binding must be an object")
+        name = item.get("name")
+        artifact_id = item.get("artifact_id")
+        digest = item.get("sha256")
+        version = item.get("version")
+        if not isinstance(name, str) or not name or name in names:
+            raise ReviewExecutionError("review packet input names must be unique non-empty strings")
+        if not isinstance(artifact_id, str) or not artifact_id:
+            raise ReviewExecutionError(f"review packet input artifact ID is missing: {name}")
+        if not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+            raise ReviewExecutionError(f"review packet input SHA-256 is invalid: {name}")
+        if not isinstance(version, int) or isinstance(version, bool) or version < 1:
+            raise ReviewExecutionError(f"review packet input version is invalid: {name}")
+        kind = str(item.get("kind") or "").lower()
+        if kind in {"review", "review_report", "review_result", "review_verdict"}:
+            raise ReviewExecutionError("blind review packets cannot include sibling review outputs")
+        names.add(name)
+        normalized.append(dict(item))
+    subject = next((item for item in normalized if item.get("name") == subject_name), None)
+    if subject is None:
+        raise ReviewExecutionError("review subject must be a bound task input")
+    return {
+        "schema_version": 1,
+        "project_id": project_id,
+        "review_task_id": task_id,
+        "review_contract": task_contract,
+        "rubric": rubric_contract,
+        "subject": subject,
+        "inputs": sorted(normalized, key=lambda item: str(item.get("name", ""))),
+        "sibling_verdicts_included": False,
+    }
+
+
 def dsse_pae(payload_type: str, payload: bytes) -> bytes:
     """DSSE pre-authentication encoding (PAE), version 1."""
     return (
