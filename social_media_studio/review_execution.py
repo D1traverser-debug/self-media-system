@@ -206,7 +206,7 @@ class ReviewExecutionTrustRegistry:
         allowed_kinds = executor.get("reviewer_kinds", [])
         allowed_modes = executor.get("execution_modes", [])
         allowed_media_modes = executor.get("media_inspection_modes", [])
-        if predicate.get("reviewer_kind") not in allowed_kinds:
+        if expected.get("executor_id") and executor_id != expected.get("executor_id"):\n            raise ReviewExecutionError("review executor does not match the registered task-output producer")\n        if predicate.get("reviewer_kind") not in allowed_kinds:
             raise ReviewExecutionError("reviewer kind is not authorized for this executor")
         if predicate.get("execution_mode") not in allowed_modes:
             raise ReviewExecutionError("review execution mode is not authorized for this executor")
