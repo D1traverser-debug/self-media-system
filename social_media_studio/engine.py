@@ -1076,35 +1076,39 @@ class StudioEngine:
         stage_root = self._review_stage_dir(project_id, task["task_id"], task["attempts"])
         if stage_root.exists():
             shutil.rmtree(stage_root)
-        inputs_root = stage_root / "inputs"
-        inputs_root.mkdir(parents=True, exist_ok=True)
-        staged_inputs: dict[str, dict[str, Any]] = {}
-        for name, item in packet.get("input_artifacts", {}).items():
-            source = Path(item["path"])
-            expected_digest = item["sha256"]
-            if not source.is_file() or _sha256(source) != expected_digest:
-                raise GateError(f"review input changed before isolation staging: {name}")
-            destination = inputs_root / f"{_safe_id(name, 'review_input')}{source.suffix.lower()}"
-            shutil.copyfile(source, destination)
-            if _sha256(destination) != expected_digest:
-                raise GateError(f"review input staging digest mismatch: {name}")
-            staged_item = dict(item)
-            staged_item["path"] = str(destination)
-            staged_item["staged_sha256"] = expected_digest
-            staged_inputs[name] = staged_item
-        packet["input_artifacts"] = staged_inputs
-        project = packet.get("project")
-        if isinstance(project, dict):
-            packet["project"] = {
-                key: value for key, value in project.items() if key != "workspace"
+        try:
+            inputs_root = stage_root / "inputs"
+            inputs_root.mkdir(parents=True, exist_ok=True)
+            staged_inputs: dict[str, dict[str, Any]] = {}
+            for name, item in packet.get("input_artifacts", {}).items():
+                source = Path(item["path"])
+                expected_digest = item["sha256"]
+                if not source.is_file() or _sha256(source) != expected_digest:
+                    raise GateError(f"review input changed before isolation staging: {name}")
+                destination = inputs_root / f"{_safe_id(name, 'review_input')}{source.suffix.lower()}"
+                shutil.copyfile(source, destination)
+                if _sha256(destination) != expected_digest:
+                    raise GateError(f"review input staging digest mismatch: {name}")
+                staged_item = dict(item)
+                staged_item["path"] = str(destination)
+                staged_item["staged_sha256"] = expected_digest
+                staged_inputs[name] = staged_item
+            packet["input_artifacts"] = staged_inputs
+            project = packet.get("project")
+            if isinstance(project, dict):
+                packet["project"] = {
+                    key: value for key, value in project.items() if key != "workspace"
+                }
+            packet["review_isolation"] = {
+                "mode": "DECLARED_INPUTS_ONLY",
+                "staged_input_root": str(inputs_root),
+                "shared_workspace_path_exposed": False,
+                "sibling_verdicts_included": False,
+                "input_digests_verified": True,
             }
-        packet["review_isolation"] = {
-            "mode": "DECLARED_INPUTS_ONLY",
-            "staged_input_root": str(inputs_root),
-            "shared_workspace_path_exposed": False,
-            "sibling_verdicts_included": False,
-            "input_digests_verified": True,
-        }
+        except Exception:
+            shutil.rmtree(stage_root, ignore_errors=True)
+            raise
 
     def _cleanup_review_stage(self, project_id: str, task_id: str, attempt: int) -> None:
         stage_root = self._review_stage_dir(project_id, task_id, attempt)
@@ -1293,6 +1297,18 @@ class StudioEngine:
                     rubric_contract = rubric_contracts.get(rubric_id) if isinstance(rubric_contracts, dict) else None
                     if not isinstance(rubric_contract, dict):
                         raise ContractError("review task rubric is not declared in the current owner release contract")
+                    for binding in input_bindings:
+                        source_artifact = connection.execute(
+                            "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                            (project_id, binding["artifact_id"]),
+                        ).fetchone()
+                        if source_artifact is not None and source_artifact["produced_by_task"]:
+                            source_task = connection.execute(
+                                "SELECT kind FROM tasks WHERE project_id=? AND task_id=?",
+                                (project_id, source_artifact["produced_by_task"]),
+                            ).fetchone()
+                            if source_task is not None and source_task["kind"] == "review":
+                                raise ContractError("blind review tasks cannot consume outputs from sibling review tasks")
                     review_packet = build_review_packet(
                         project_id=project_id, task_id=row["task_id"],
                         task_contract=task_contract, rubric_contract=rubric_contract,
