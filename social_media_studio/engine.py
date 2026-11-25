@@ -1063,6 +1063,54 @@ class StudioEngine:
             "instructions": "Produce only the declared outputs. Preserve source truth, provenance and rights. If the task cannot meet its acceptance contract, return a structured failure instead of claiming completion.",
         }
 
+    def _review_stage_dir(self, project_id: str, task_id: str, attempt: int) -> Path:
+        return (
+            self.root / "review_sessions" / _safe_id(project_id, "project_id")
+            / _safe_id(task_id, "task_id") / str(int(attempt))
+        )
+
+    def _stage_review_inputs(
+        self, project_id: str, task: sqlite3.Row, packet: dict[str, Any],
+    ) -> None:
+        """Give a review executor only staged, digest-verified declared inputs."""
+        stage_root = self._review_stage_dir(project_id, task["task_id"], task["attempts"])
+        if stage_root.exists():
+            shutil.rmtree(stage_root)
+        inputs_root = stage_root / "inputs"
+        inputs_root.mkdir(parents=True, exist_ok=True)
+        staged_inputs: dict[str, dict[str, Any]] = {}
+        for name, item in packet.get("input_artifacts", {}).items():
+            source = Path(item["path"])
+            expected_digest = item["sha256"]
+            if not source.is_file() or _sha256(source) != expected_digest:
+                raise GateError(f"review input changed before isolation staging: {name}")
+            destination = inputs_root / f"{_safe_id(name, 'review_input')}{source.suffix.lower()}"
+            shutil.copyfile(source, destination)
+            if _sha256(destination) != expected_digest:
+                raise GateError(f"review input staging digest mismatch: {name}")
+            staged_item = dict(item)
+            staged_item["path"] = str(destination)
+            staged_item["staged_sha256"] = expected_digest
+            staged_inputs[name] = staged_item
+        packet["input_artifacts"] = staged_inputs
+        project = packet.get("project")
+        if isinstance(project, dict):
+            packet["project"] = {
+                key: value for key, value in project.items() if key != "workspace"
+            }
+        packet["review_isolation"] = {
+            "mode": "DECLARED_INPUTS_ONLY",
+            "staged_input_root": str(inputs_root),
+            "shared_workspace_path_exposed": False,
+            "sibling_verdicts_included": False,
+            "input_digests_verified": True,
+        }
+
+    def _cleanup_review_stage(self, project_id: str, task_id: str, attempt: int) -> None:
+        stage_root = self._review_stage_dir(project_id, task_id, attempt)
+        if stage_root.exists():
+            shutil.rmtree(stage_root)
+
     def _reclaim_expired_claims_in_tx(
         self, connection: sqlite3.Connection, project_id: str, now: datetime,
     ) -> list[dict[str, Any]]:
@@ -1252,6 +1300,7 @@ class StudioEngine:
                     contract_digest = review_contract_digest(task_contract, rubric_contract)
                     packet["review_packet"] = review_packet
                     packet["review_packet_digest"] = packet_digest
+                    self._stage_review_inputs(project_id, claimed, packet)
                     self._event(connection, project_id, "TASK", row["task_id"], "REVIEW_PACKET_BOUND", {
                         "review_packet": review_packet,
                         "review_packet_digest": packet_digest,
