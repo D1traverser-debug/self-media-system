@@ -805,7 +805,39 @@ class StudioEngine:
                 }
                 revised = {**current, **patch}
                 from .scope import validate_task_binding
-                validate_task_binding(_loads(self._project_row(connection, project_id)["brief_json"], {}), revised)
+                brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+                validate_task_binding(brief, revised)
+                if revised["kind"] == "review":
+                    review_contract = revised["requirements"].get("review_contract")
+                    if not isinstance(review_contract, dict):
+                        raise ContractError("review task revision requires requirements.review_contract")
+                    rubric_id = review_contract.get("rubric_id")
+                    subject_name = review_contract.get("subject_artifact")
+                    reviewer_id = review_contract.get("reviewer_id")
+                    if not all(isinstance(value, str) and value.strip() for value in (rubric_id, subject_name, reviewer_id)):
+                        raise ContractError("review task revision requires rubric_id, subject_artifact and reviewer_id")
+                    if subject_name not in revised["inputs"]:
+                        raise ContractError("review task revision subject_artifact must be an exact declared input")
+                    rubric_contracts = brief.get("release_policy", {}).get("review_contracts", {})
+                    rubric_contract = rubric_contracts.get(rubric_id) if isinstance(rubric_contracts, dict) else None
+                    if not isinstance(rubric_contract, dict):
+                        raise ContractError("review task revision rubric is not declared in the owner release contract")
+                    for field in ("reviewer_kind", "execution_mode", "blind_review", "required_media_inspection"):
+                        if field in rubric_contract or field in review_contract:
+                            if review_contract.get(field) != rubric_contract.get(field):
+                                raise ContractError(f"review task revision {field} differs from the owner rubric contract")
+                    reviewer_kind = rubric_contract.get("reviewer_kind")
+                    execution_mode = rubric_contract.get("execution_mode")
+                    if self._review_contract_requires_execution(rubric_contract):
+                        if reviewer_kind not in {"HUMAN", "AI", "TOOL"} or not isinstance(execution_mode, str) or not execution_mode.strip():
+                            raise ContractError("high-assurance review task revision requires a typed reviewer and execution_mode")
+                    expected_executors = {
+                        "HUMAN": {"human"}, "AI": {"agent", "external"}, "TOOL": {"tool"},
+                    }.get(reviewer_kind)
+                    if expected_executors and revised["executor"] not in expected_executors:
+                        raise ContractError("review task revision executor does not match reviewer_kind")
+                elif "review_contract" in revised["requirements"]:
+                    raise ContractError("review_contract is valid only for kind='review'")
                 if revised["executor"] not in {"agent", "tool", "human", "external"}:
                     raise ContractError(f"unsupported executor: {revised['executor']}")
                 for field in ("depends_on", "inputs", "outputs"):
