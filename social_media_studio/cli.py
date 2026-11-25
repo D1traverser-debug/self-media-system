@@ -51,14 +51,21 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--include-nonactive", action="store_true", help="include candidate and historical evidence")
     p.add_argument("--repo-root", type=Path, help="hash exact source bytes under this checkout")
 
-    p = sub.add_parser("intake", help="resolve only the current owner demand or exact current workspace identity")
+    p = sub.add_parser("intake", help="resolve NEW, RESUME or ADOPT without mutating project state")
     p.add_argument("request", type=Path)
 
-    p = sub.add_parser("init", help="create a project from an outcome brief")
+    p = sub.add_parser("init", help="create a new project from an outcome brief")
     p.add_argument("project_id")
     p.add_argument("--title", default="")
     p.add_argument("--brief", type=Path, required=True, help="JSON brief with goal, audience and deliverables")
     p.add_argument("--owner-task", action="store_true", help="explicitly select current-owner scope; not proof of CAOS activation")
+
+    p = sub.add_parser("adopt", help="adopt an in-progress conversation task into a new durable project")
+    p.add_argument("project_id")
+    p.add_argument("--title", default="")
+    p.add_argument("--brief", type=Path, required=True)
+    p.add_argument("--packet", type=Path, required=True, help="validated SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET JSON")
+    p.add_argument("--owner-task", action="store_true", help="explicitly admit this current owner task")
 
     p = sub.add_parser("revise-brief", help="revise the owner outcome and invalidate only affected dependency descendants")
     p.add_argument("project_id")
@@ -111,9 +118,18 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("status", help="show project and task readiness")
     p.add_argument("project_id")
 
-    p = sub.add_parser("resume", help="reconstruct the project handoff from durable Social Media Studio state")
+    p = sub.add_parser("resume", help="reconstruct the complete project state and read-only cross-chat handoff")
     p.add_argument("project_id")
     p.add_argument("--event-limit", type=int, default=40)
+    p.add_argument("--output", type=Path, help="write a new read-only handoff JSON file; existing files are never overwritten")
+
+    p = sub.add_parser("checkpoint", help="append a session summary and unresolved work to the exact project event history")
+    p.add_argument("project_id")
+    p.add_argument("payload", type=Path, help="JSON checkpoint delta; does not change task state")
+
+    p = sub.add_parser("handoff", help="create a read-only packet for one exact ready task, optionally for a clean chat")
+    p.add_argument("project_id")
+    p.add_argument("task_id")
 
     p = sub.add_parser("tasks", help="list the dynamic task graph")
     p.add_argument("project_id")
@@ -306,15 +322,17 @@ def main(argv: list[str] | None = None) -> int:
         from .scope import EPOCH, bind_owner_brief, resolve_intake, validate_workspace_mode
         if args.offline_fixture and args.root is None:
             raise StudioError("offline regression requires an explicit separate workspace root")
-        if command == "init":
+        if command in {"init", "adopt"}:
             init_brief = _read_json(args.brief)
             if args.offline_fixture:
-                if args.owner_task or "scope_epoch" in init_brief:
-                    raise StudioError("offline fixture cannot create an owner project")
+                if command == "adopt" or args.owner_task or "scope_epoch" in init_brief:
+                    raise StudioError("offline fixture cannot create or adopt an owner project")
             elif not args.owner_task:
-                raise StudioError("owner project initialization requires explicit --owner-task")
+                raise StudioError("owner project initialization/adoption requires explicit --owner-task")
+            adoption_packet = _read_json(args.packet) if command == "adopt" else None
         else:
             init_brief = None
+            adoption_packet = None
         import os
         default_owner_root = Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
         root = args.root or default_owner_root
@@ -322,7 +340,7 @@ def main(argv: list[str] | None = None) -> int:
             root, offline_fixture=args.offline_fixture, initialize=(command == "init"),
             owner_root=default_owner_root,
         )
-        if command not in {"init", "migrate-scope"}:
+        if command not in {"init", "adopt", "migrate-scope"}:
             ids = ([args.source_project_id, args.target_project_id] if command == "transfer-asset"
                    else [args.project_id])
             for project_id in ids:
@@ -339,6 +357,13 @@ def main(argv: list[str] | None = None) -> int:
             if not args.offline_fixture:
                 brief = bind_owner_brief(args.project_id, brief)
             _emit(engine.create_project(args.project_id, args.title, brief))
+        elif command == "adopt":
+            from .scope import resolve_intake
+            resolve_intake(root, {
+                "mode": "ADOPT", "project_id": args.project_id,
+                "brief": init_brief, "adoption_packet": adoption_packet,
+            })
+            _emit(engine.adopt_project(args.project_id, args.title, init_brief, args.packet))
         elif command == "revise-brief":
             affected = args.affect_task if args.affect_task else None
             revised_brief = _read_json(args.brief)
@@ -440,7 +465,28 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "status":
             _emit(engine.status(args.project_id))
         elif command == "resume":
-            _emit(engine.resume(args.project_id, event_limit=args.event_limit))
+            payload = engine.resume(args.project_id, event_limit=args.event_limit)
+            if args.output:
+                output_path = args.output.expanduser().resolve()
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    with output_path.open("x", encoding="utf-8") as stream:
+                        json.dump(payload, stream, ensure_ascii=False, indent=2)
+                        stream.write("\n")
+                except FileExistsError as exc:
+                    raise StudioError(f"handoff output already exists; choose a new path: {output_path}") from exc
+                _emit({
+                    "project_id": args.project_id,
+                    "handoff_file": str(output_path),
+                    "handoff": payload["handoff"],
+                    "authority": "DERIVED_READ_ONLY_PROJECT_PROJECTION",
+                })
+            else:
+                _emit(payload)
+        elif command == "checkpoint":
+            _emit(engine.record_checkpoint(args.project_id, _read_json(args.payload)))
+        elif command == "handoff":
+            _emit(engine.preview_task_handoff(args.project_id, args.task_id))
         elif command == "tasks":
             _emit(engine.list_tasks(args.project_id))
         elif command == "claim":
