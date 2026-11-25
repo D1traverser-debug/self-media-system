@@ -161,7 +161,7 @@ def validate_context_boundary(
     if not isinstance(boundary, dict):
         raise ValueError("requirements.context_boundary must be an object")
     mode = boundary.get("mode", "DECLARED_INPUTS_PLUS_PROJECT_BRIEF")
-    if mode not in {"DECLARED_INPUTS_ONLY", "DECLARED_INPUTS_PLUS_PROJECT_BRIEF"}:
+    if not isinstance(mode, str) or mode not in {"DECLARED_INPUTS_ONLY", "DECLARED_INPUTS_PLUS_PROJECT_BRIEF"}:
         raise ValueError("context_boundary.mode is unsupported")
     allowed = boundary.get("allowed_input_names", task_inputs if task_inputs is not None else [])
     excluded = boundary.get("excluded_context_refs", [])
@@ -202,7 +202,7 @@ def validate_adoption_packet(packet: dict[str, Any], brief: dict[str, Any]) -> d
     if packet.get("kind") != "SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET":
         raise ValueError("adoption packet kind must be SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET")
     coverage = packet.get("source_coverage")
-    if coverage not in {"FULL_SOURCE_EXPORT", "PARTIAL_CONTEXT", "CURRENT_CHAT_ONLY", "UNKNOWN"}:
+    if not isinstance(coverage, str) or coverage not in {"FULL_SOURCE_EXPORT", "PARTIAL_CONTEXT", "CURRENT_CHAT_ONLY", "UNKNOWN"}:
         raise ValueError("adoption packet source_coverage is invalid")
     coverage_notes = packet.get("coverage_notes")
     if not isinstance(coverage_notes, str) or not coverage_notes.strip():
@@ -223,7 +223,11 @@ def validate_adoption_packet(packet: dict[str, Any], brief: dict[str, Any]) -> d
         verification = source.get("verification")
         if not isinstance(source_ref, str) or not source_ref.strip():
             raise ValueError(f"adoption source_refs[{index}] requires source_ref")
-        if source_type not in source_types or role not in source_roles or verification not in source_verification:
+        if (
+            not isinstance(source_type, str) or source_type not in source_types
+            or not isinstance(role, str) or role not in source_roles
+            or not isinstance(verification, str) or verification not in source_verification
+        ):
             raise ValueError(f"adoption source_refs[{index}] has an unsupported source_type, role or verification")
         key = (source_ref, role)
         if key in seen_sources:
@@ -282,7 +286,8 @@ def validate_adoption_packet(packet: dict[str, Any], brief: dict[str, Any]) -> d
     for index, item in enumerate(completed):
         if not isinstance(item, dict) or not isinstance(item.get("description"), str) or not item["description"].strip():
             raise ValueError(f"adoption completed_work[{index}] requires description")
-        if item.get("status") not in {"VERIFIED", "CLAIMED_UNVERIFIED"}:
+        item_status = item.get("status")
+        if not isinstance(item_status, str) or item_status not in {"VERIFIED", "CLAIMED_UNVERIFIED"}:
             raise ValueError(f"adoption completed_work[{index}] status must be VERIFIED or CLAIMED_UNVERIFIED")
         evidence = item.get("evidence_refs", [])
         if not isinstance(evidence, list) or any(not isinstance(ref, str) or not ref.strip() for ref in evidence):
@@ -310,7 +315,8 @@ def validate_adoption_packet(packet: dict[str, Any], brief: dict[str, Any]) -> d
     for index, failure in enumerate(failures):
         if not isinstance(failure, dict) or not isinstance(failure.get("symptom"), str) or not failure["symptom"].strip():
             raise ValueError(f"adoption failure_history[{index}] requires symptom")
-        if failure.get("status") not in {"OPEN", "RESOLVED_UNVERIFIED", "RESOLVED_WITH_EVIDENCE"}:
+        failure_status = failure.get("status")
+        if not isinstance(failure_status, str) or failure_status not in {"OPEN", "RESOLVED_UNVERIFIED", "RESOLVED_WITH_EVIDENCE"}:
             raise ValueError(f"adoption failure_history[{index}] has an unsupported status")
         refs = failure.get("evidence_refs", [])
         if not isinstance(refs, list) or any(not isinstance(ref, str) or not ref.strip() for ref in refs):

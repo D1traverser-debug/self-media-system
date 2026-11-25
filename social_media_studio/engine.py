@@ -1124,7 +1124,7 @@ class StudioEngine:
         tasks = {task["task_id"]: task for task in self.list_tasks(project_id)}
         task = tasks.get(task_id)
         if task is None:
-            raise ProjectNotFound(task_id)
+            raise ContractError(f"task not found in project {project_id}: {task_id}")
         if task["status"] != "READY":
             return {
                 "project_id": project_id, "task_id": task_id, "handoff_ready": False,
@@ -3105,6 +3105,8 @@ class StudioEngine:
 
     def record_checkpoint(self, project_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Append a chat-session delta without replacing project/task authority."""
+        if not isinstance(payload, dict):
+            raise ContractError("checkpoint payload must be an object")
         required = ["session_summary", "next_action", "source_coverage", "source_refs"]
         missing = [key for key in required if not payload.get(key)]
         if missing:
@@ -3378,6 +3380,7 @@ class StudioEngine:
             "project_revision": status["project"]["revision"],
             "event_cursor": event_cursor,
             "snapshot_sha256": None,
+            "integrity_only_not_signature": True,
         }
         result["handoff"]["snapshot_sha256"] = hashlib.sha256(_json(result).encode("utf-8")).hexdigest()
         return result
