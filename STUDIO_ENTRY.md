@@ -39,6 +39,30 @@ For an actual video release, exact final bytes must pass applicable digest-bound
 
 Professional capability classification is distinct from business workstreams, media object containment, roles, reusable knowledge, cognition dependencies and task execution. Discover exact groups with `sms-studio capabilities [--group GROUP]`; the output binds the catalog to registered adapters and local operations, discloses missing effects and does not select a task, authorize execution or certify quality. For current owner work, CAOS recursively governs every material choice at every organizational level, including the choice of professional method, reviewer, tool and verification. No group is a compulsory stage or permanent worker. Apply independent domain and overall owner acceptance separately. New evidence may reopen the earliest contradicted premise without invalidating unrelated branches. The existing engine is the only scheduler; use direct session capability for nonpersistent simple work where appropriate.
 
+## Task identity, cross-chat continuity and isolation
+
+Keep four identities separate:
+
+- **Subsystem ID:** a reusable long-lived capability boundary. It is not a work order.
+- **Project ID:** one coherent owner outcome and its durable task context. It may span many conversations.
+- **Task ID:** one project-local execution node in the dynamic DAG.
+- **Conversation:** an ephemeral interaction surface. It is neither project identity nor task authority.
+
+A short, self-contained request may stay in direct conversational execution; do not create a project merely to simulate governance. When durable persistence is warranted, use exactly one project for one coherent owner outcome. Split independent outcomes into separate projects. Reuse of a subsystem does not transfer another project's task state, brief, images or decisions. Cross-project reuse requires an explicit exact-artifact transfer by ID, version and SHA-256.
+
+Use three explicit entry modes:
+- `NEW`: a genuinely new owner outcome; no prior project is inherited by recency.
+- `RESUME`: continue one exact current `project_id`.
+- `ADOPT`: move an already-started conversation task into a new project using a validated `SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET`. If the project already exists, use `RESUME` or append a checkpoint; do not duplicate it.
+
+An adoption packet preserves the original and current goal, chronological user corrections, constraints, source references and their coverage level, claimed versus verified completed work, prior decisions, failures, open items, next action and context boundary. Prior decisions remain `REQUIRES_REVALIDATION`. A chat statement that something was completed is not proof; verified completion requires current artifact readback. Import source files separately through the digest-bound asset manifest. Unknown or partial chat history must be labelled as such, never upgraded to a complete transcript by inference.
+
+At every deliberate pause or chat switch, append a project checkpoint with the session summary, user corrections, open items, work not yet registered as artifacts, source coverage and next action. Use `sms-studio checkpoint PROJECT CHECKPOINT.json`. Re-enter with `sms-studio resume PROJECT --output HANDOFF.json`. The exported handoff is a read-only projection, not a second authority; reconcile its project revision and event cursor against the live project ledger before making state-changing claims. If the live ledger is unavailable, continue only provisionally from the snapshot and label that limitation.
+
+A long-running task can be continued in a new chat without becoming a new project. For a subtask that needs a clean context, declare `requirements.context_boundary` and use `sms-studio handoff PROJECT TASK_ID`. `DECLARED_INPUTS_ONLY` exposes only that task's exact declared inputs and contract; it omits the project brief and sibling-task context. Explicit excluded references remain excluded. The packet is read-only, does not claim the task, does not authorize effects, and cannot prove that the chat platform itself isolated its context. Return the produced artifact to the original project and verify its exact bytes before completing the task.
+
+Project-local corrections and failures remain local. A reusable method is a candidate until independently replayed on distinct tasks, challenged with counterexamples and regressed. A system defect requires a versioned code/Skill/contract change and regression evidence. No single task can silently promote its preferences or a one-off workaround into global system rules.
+
 ## Task-neutral intake and hierarchy
 
 Use `sms-studio knowledge --id METHOD --repo-root REPOSITORY` to locate and hash the exact current reusable method source; historical/candidate sources require `--include-nonactive` and are never execution authority.
@@ -48,14 +72,20 @@ The canonical manifest defines authority layers, continuous responsibilities and
 ```bash
 python -m pip install -e .
 sms-studio --root WORKSPACE intake REQUEST.json
-# REQUEST.json contains mode NEW and the exact goal, or mode RESUME and exact project_id.
+# REQUEST.json contains mode NEW with the exact goal, mode RESUME with the exact project_id, or mode ADOPT with a new project_id, brief and adoption packet.
 # After CAOS-governed interpretation and decision, use the actual current brief and DAG:
 # Each task requirements.deliverable_refs names its current brief deliverable(s).
 sms-studio --root WORKSPACE init PROJECT --brief BRIEF.json --owner-task
+# To adopt ongoing work from chat, use an explicit packet; ADOPT never creates a task graph:
+# sms-studio --root WORKSPACE adopt PROJECT --brief BRIEF.json --packet ADOPTION.json --owner-task
 # If the actual demand has context inputs, import its explicit digest-bound manifest:
 # sms-studio --root WORKSPACE import-manifest PROJECT CONTEXT.json
 sms-studio --root WORKSPACE plan PROJECT TASKS.json
-sms-studio --root WORKSPACE resume PROJECT
+sms-studio --root WORKSPACE resume PROJECT --output HANDOFF.json
+# Record a chat-switch checkpoint without changing task state:
+# sms-studio --root WORKSPACE checkpoint PROJECT CHECKPOINT.json
+# Build one exact task handoff for an isolated clean chat:
+# sms-studio --root WORKSPACE handoff PROJECT TASK_ID
 ```
 
 The intake response must not be treated as native CAOS activation proof. Every decision/action uses CAOS; professional aesthetic judgment and goal fidelity are cross-cutting responsibilities, not finished stages. Each demand chooses only relevant capabilities and tasks. Research, critique, execution, re-entry and learning follow evidence, not a compulsory sequence. Project learning remains CANDIDATE. Shared method promotion requires real-case evidence, at least two independent replays on distinct tasks, counterexamples, cross-task transfer, regression, rollback, owner-burden/cost evidence or a reasoned N/A, independent readback and CAOS owner-level acceptance, followed by a versioned repository change; no runtime or model promotes candidates automatically.
