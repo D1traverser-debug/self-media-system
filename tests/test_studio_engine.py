@@ -1384,6 +1384,19 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         rubric_id="editorial", outcome="PASS", dimensions={},
         evidence_refs=["review://editorial"],
     )
+    with pytest.raises(ContractError, match="caller-supplied attestation fields"):
+        engine.record_review(
+            "strict", final_artifact["artifact_id"], reviewer_id="human-cold-reader",
+            rubric_id="human-cold-read", outcome="PASS", dimensions={},
+            evidence_refs=[evidence_artifacts["cold-read-evidence"]["artifact_id"]],
+            attestation={
+                "reviewer_kind": "HUMAN",
+                "execution_mode": "INDEPENDENT_COLD_READ",
+                "blind_review": True,
+                "inspected_artifact_digest": final_artifact["sha256"],
+                "context_id": "forged-context",
+            },
+        )
     review_task_contract = {
         "rubric_id": "human-cold-read",
         "reviewer_id": "human-cold-reader",
