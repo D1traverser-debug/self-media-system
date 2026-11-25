@@ -1829,29 +1829,69 @@ class StudioEngine:
                 if row["status"] != "OPEN":
                     raise ContractError("only OPEN failures can be resolved")
 
+                def verify_artifact(artifact_id: str, role: str) -> sqlite3.Row:
+                    artifact = connection.execute(
+                        "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                        (project_id, artifact_id),
+                    ).fetchone()
+                    if artifact is None:
+                        raise ContractError(
+                            f"{role} must reference a registered artifact_id in this project: {artifact_id}"
+                        )
+                    if artifact["status"] not in {"CURRENT", "ACCEPTED"}:
+                        raise ContractError(
+                            f"{role} artifact is not current: {artifact_id}:{artifact['status']}"
+                        )
+                    artifact_path = self._project_dir(project_id) / artifact["relative_path"]
+                    if not artifact_path.is_file() or _sha256(artifact_path) != artifact["sha256"]:
+                        raise ContractError(
+                            f"{role} artifact bytes are missing or changed: {artifact_id}"
+                        )
+                    return artifact
+
+                def verify_review_evidence(
+                    review: sqlite3.Row, reviewed_artifact_id: str, role: str,
+                ) -> list[dict[str, Any]]:
+                    evidence_refs = _loads(review["evidence_refs_json"], [])
+                    if (
+                        not isinstance(evidence_refs, list) or not evidence_refs
+                        or any(
+                            not isinstance(ref, str) or not ref.strip()
+                            or ref != ref.strip() for ref in evidence_refs
+                        )
+                    ):
+                        raise ContractError(
+                            f"{role} review requires exact registered evidence artifact IDs: {review['review_id']}"
+                        )
+                    if len(set(evidence_refs)) != len(evidence_refs):
+                        raise ContractError(
+                            f"{role} review contains duplicate evidence artifact IDs: {review['review_id']}"
+                        )
+                    bindings: list[dict[str, Any]] = []
+                    for evidence_id in evidence_refs:
+                        if evidence_id == reviewed_artifact_id:
+                            raise ContractError(
+                                f"{role} review cannot cite the reviewed report as its own evidence: {review['review_id']}"
+                            )
+                        evidence_artifact = verify_artifact(evidence_id, f"{role} review evidence")
+                        bindings.append({
+                            "artifact_id": evidence_id,
+                            "version": int(evidence_artifact["version"]),
+                            "sha256": evidence_artifact["sha256"],
+                            "kind": evidence_artifact["kind"],
+                            "media_type": evidence_artifact["media_type"],
+                        })
+                    return bindings
+
                 def verify_evidence_refs(role: str) -> list[dict[str, Any]]:
                     verified: list[dict[str, Any]] = []
+                    rubric_id = (
+                        "failure-verification"
+                        if role == "verification_refs"
+                        else "failure-regression"
+                    )
                     for artifact_id in refs_by_role[role]:
-                        artifact = connection.execute(
-                            "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
-                            (project_id, artifact_id),
-                        ).fetchone()
-                        if artifact is None:
-                            raise ContractError(
-                                f"{role} must reference a registered artifact_id in this project: {artifact_id}"
-                            )
-                        if artifact["status"] not in {"CURRENT", "ACCEPTED"}:
-                            raise ContractError(
-                                f"{role} artifact is not current: {artifact_id}:{artifact['status']}"
-                            )
-                        artifact_path = self._project_dir(project_id) / artifact["relative_path"]
-                        if (
-                            not artifact_path.is_file()
-                            or _sha256(artifact_path) != artifact["sha256"]
-                        ):
-                            raise ContractError(
-                                f"{role} artifact bytes are missing or changed: {artifact_id}"
-                            )
+                        artifact = verify_artifact(artifact_id, role)
                         producer_id = artifact["producer_id"]
                         if not isinstance(producer_id, str) or not producer_id.strip():
                             raise ContractError(
@@ -1859,17 +1899,17 @@ class StudioEngine:
                             )
                         reviews = connection.execute(
                             """SELECT * FROM reviews
-                               WHERE project_id=? AND artifact_id=? AND artifact_digest=?
+                               WHERE project_id=? AND artifact_id=? AND artifact_digest=? AND rubric_id=?
                                ORDER BY created_at,review_id""",
-                            (project_id, artifact_id, artifact["sha256"]),
+                            (project_id, artifact_id, artifact["sha256"], rubric_id),
                         ).fetchall()
                         if not reviews:
                             raise ContractError(
-                                f"{role} artifact requires an exact-digest PASS review: {artifact_id}"
+                                f"{role} artifact requires an exact-digest PASS {rubric_id} review: {artifact_id}"
                             )
                         if any(review["outcome"] != "PASS" for review in reviews):
                             raise ContractError(
-                                f"{role} artifact has a non-PASS or conflicting review: {artifact_id}"
+                                f"{role} artifact has a non-PASS or conflicting {rubric_id} review: {artifact_id}"
                             )
                         if any(
                             review["producer_id"] != producer_id
@@ -1880,6 +1920,16 @@ class StudioEngine:
                             raise ContractError(
                                 f"{role} artifact review lacks structural reviewer/producer separation: {artifact_id}"
                             )
+                        review_receipts = []
+                        for review in reviews:
+                            review_receipts.append({
+                                "review_id": review["review_id"],
+                                "rubric_id": rubric_id,
+                                "reviewer_id": review["reviewer_id"],
+                                "evidence_artifacts": verify_review_evidence(
+                                    review, artifact_id, role,
+                                ),
+                            })
                         verified.append({
                             "artifact_id": artifact_id,
                             "version": int(artifact["version"]),
@@ -1889,6 +1939,7 @@ class StudioEngine:
                             "producer_id": producer_id,
                             "review_ids": sorted(review["review_id"] for review in reviews),
                             "reviewer_ids": sorted({review["reviewer_id"] for review in reviews}),
+                            "review_receipts": review_receipts,
                         })
                     return verified
 
@@ -1902,7 +1953,7 @@ class StudioEngine:
                         "verification": verification,
                         "regression": regression,
                     },
-                    "evidence_verification": "CURRENT_ARTIFACT_BYTES_AND_EXACT_DIGEST_PASS_REVIEWS",
+                    "evidence_verification": "CURRENT_ARTIFACT_BYTES_AND_EXACT_DIGEST_ROLE_SPECIFIC_PASS_REVIEWS",
                     "reviewer_independence": "STRUCTURAL_REVIEWER_ID_SEPARATION_ONLY_NOT_CRYPTOGRAPHIC",
                 }
                 connection.execute(

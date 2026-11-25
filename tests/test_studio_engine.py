@@ -642,6 +642,8 @@ def test_failure_cannot_close_without_independent_verification_and_regression(tm
             "result": "PASS",
         })
 
+    engine.add_tasks("demo", [task("repaired-output")])
+    repaired_output = complete(engine, tmp_path, "repaired-output", "repair-worker")
     engine.add_tasks("demo", [task("verification")])
     verification = complete(engine, tmp_path, "verification", "verification-producer")
     engine.add_tasks("demo", [task("regression")])
@@ -652,22 +654,22 @@ def test_failure_cannot_close_without_independent_verification_and_regression(tm
         "result": "PASS",
     }
 
-    # Existing artifacts are insufficient until each exact digest has a PASS review.
-    with pytest.raises(ContractError, match="exact-digest PASS review"):
+    # Each role requires its own exact-digest PASS review and the review must cite real evidence.
+    with pytest.raises(ContractError, match="failure-verification review"):
         engine.resolve_failure("demo", failure["failure_id"], resolution)
 
     engine.record_review(
         "demo", verification["artifact_id"], reviewer_id="verification-reviewer",
         rubric_id="failure-verification", outcome="PASS",
-        dimensions={"result": "PASS"}, evidence_refs=[verification["artifact_id"]],
+        dimensions={"result": "PASS"}, evidence_refs=[repaired_output["artifact_id"]],
     )
-    with pytest.raises(ContractError, match="exact-digest PASS review"):
+    with pytest.raises(ContractError, match="failure-regression review"):
         engine.resolve_failure("demo", failure["failure_id"], resolution)
 
     engine.record_review(
         "demo", regression["artifact_id"], reviewer_id="regression-reviewer",
         rubric_id="failure-regression", outcome="PASS",
-        dimensions={"result": "PASS"}, evidence_refs=[regression["artifact_id"]],
+        dimensions={"result": "PASS"}, evidence_refs=[verification["artifact_id"]],
     )
     with pytest.raises(ContractError, match="distinct artifact IDs"):
         engine.resolve_failure("demo", failure["failure_id"], {
@@ -682,10 +684,20 @@ def test_failure_cannot_close_without_independent_verification_and_regression(tm
         engine.resolve_failure("demo", failure["failure_id"], resolution)
     verification_path.write_text("artifact for verification", encoding="utf-8")
 
+    repaired_path = Path(repaired_output["path"])
+    repaired_path.write_text("tampered reviewed evidence", encoding="utf-8")
+    with pytest.raises(ContractError, match="review evidence artifact bytes are missing or changed"):
+        engine.resolve_failure("demo", failure["failure_id"], resolution)
+    repaired_path.write_text("artifact for repaired-output", encoding="utf-8")
+
     receipt = engine.resolve_failure("demo", failure["failure_id"], resolution)
+    verified = receipt["resolution"]["verified_evidence"]
     assert receipt["status"] == "RESOLVED"
-    assert receipt["resolution"]["verified_evidence"]["verification"][0]["sha256"] == verification["sha256"]
-    assert receipt["resolution"]["verified_evidence"]["regression"][0]["sha256"] == regression["sha256"]
+    assert verified["verification"][0]["sha256"] == verification["sha256"]
+    assert verified["regression"][0]["sha256"] == regression["sha256"]
+    assert verified["verification"][0]["review_receipts"][0]["rubric_id"] == "failure-verification"
+    assert verified["verification"][0]["review_receipts"][0]["evidence_artifacts"][0]["sha256"] == repaired_output["sha256"]
+    assert verified["regression"][0]["review_receipts"][0]["evidence_artifacts"][0]["sha256"] == verification["sha256"]
     assert receipt["resolution"]["reviewer_independence"] == "STRUCTURAL_REVIEWER_ID_SEPARATION_ONLY_NOT_CRYPTOGRAPHIC"
     assert engine.status("demo")["open_failures"] == 0
 
