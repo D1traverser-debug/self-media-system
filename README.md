@@ -129,8 +129,7 @@ sms-studio --offline-fixture --root ./studio-work import-asset adapter-demo righ
 sms-studio --offline-fixture --root ./studio-work import-asset adapter-demo font-asset ./DejaVuSans.ttf --kind font --media-type font/ttf --rights-status LICENSED --metadata examples/adapter-demo-font.metadata.json
 ```
 
-Claim and complete the authoring task with the exact EditorialPlan JSON, then use `run-adapter` for validation/materialization/rendering and `qa-media` for canonical technical QA. The renderer's receipt explicitly states that the output is silent, candidate-only and not release-authorized.
-
+Claim and complete the authoring task with the exact EditorialPlan JSON, then use `run-adapter` for validation/materialization/rendering and `qa-media` for canonical technical QA. The renderer's receipt explicitly states that the output is silent, candidate-only and not release-authorized. The first fixture `init` creates the root-bound `.sms-offline-fixture.json` marker; use an empty dedicated directory, not an existing owner workspace.\n
 ## Validation
 
 After `pip install -e .`:
