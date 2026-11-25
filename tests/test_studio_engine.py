@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from social_media_studio.engine import ClaimError, ContractError, StudioEngine
 from social_media_studio.review_execution import (
-    ReviewExecutionTrustRegistry, build_review_statement, review_contract_digest,
+    ReviewExecutionTrustRegistry, build_review_statement, digest_json, review_contract_digest,
     sign_review_statement,
 )
 from social_media_studio.scope import validate_workspace_mode
@@ -1286,6 +1286,7 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
                 "providers": ["test-provider"],
                 "models": ["human-cold-read-v1"],
                 "media_inspection_modes": ["FULL_VIDEO"],
+                "media_inspection_methods": ["CONTINUOUS_PLAYBACK"],
             }
         },
     })
@@ -1439,12 +1440,29 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         name: item["path"] for name, item in review_packet["input_artifacts"].items()
     }
     review_evidence_id = evidence_artifacts["cold-read-evidence"]["artifact_id"]
+    media_inspection = {
+        "mode": "FULL_VIDEO",
+        "method": "CONTINUOUS_PLAYBACK",
+        "artifact_sha256": final_artifact["sha256"],
+        "coverage_fraction": 1,
+        "inspected_duration_seconds": 60,
+        "source_duration_seconds": 60,
+        "coverage_intervals": [[0, 60]],
+    }
+    media_inspection["trace_sha256"] = digest_json({
+        "artifact_sha256": media_inspection["artifact_sha256"],
+        "mode": media_inspection["mode"],
+        "method": media_inspection["method"],
+        "source_duration_seconds": media_inspection["source_duration_seconds"],
+        "coverage_intervals": media_inspection["coverage_intervals"],
+    })
     review_report = {
         "schema_version": 1,
         "outcome": "PASS",
         "dimensions": {},
         "evidence_refs": [review_evidence_id],
         "notes": "",
+        "media_inspection": media_inspection,
     }
     review_report_path = engine._project_dir("strict") / "artifacts" / "cold-read-report.json"
     review_report_path.write_text(json.dumps(review_report, sort_keys=True), encoding="utf-8")
@@ -1484,13 +1502,7 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         "sibling_verdicts_visible": False,
         "provider": "test-provider",
         "model": "human-cold-read-v1",
-        "media_inspection": {
-            "mode": "FULL_VIDEO",
-            "artifact_sha256": final_artifact["sha256"],
-            "coverage_fraction": 1,
-            "inspected_duration_seconds": 60,
-            "source_duration_seconds": 60,
-        },
+        "media_inspection": media_inspection,
     }
     review_statement = build_review_statement(
         reviewed_artifact_sha256=final_artifact["sha256"],
