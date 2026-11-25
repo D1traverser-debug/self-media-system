@@ -2280,8 +2280,9 @@ class StudioEngine:
                 def verify_review_evidence_binding(
                     binding: Any, reference: Any, *, rubric: str, review_id: str,
                     unresolved_code: str, digest_code: str,
+                    failure_detail: str | None = None,
                 ) -> dict[str, Any] | None:
-                    detail = f"{rubric}:{review_id}:{reference}"
+                    detail = failure_detail or f"{rubric}:{review_id}:{reference}"
                     if (
                         not isinstance(binding, dict)
                         or binding.get("reference") != reference
@@ -2444,6 +2445,7 @@ class StudioEngine:
                                     review_id=review["review_id"],
                                     unresolved_code="review_finding_evidence_unresolved",
                                     digest_code="review_finding_evidence_bytes_missing_or_digest_changed",
+                                    failure_detail=f"{rubric}:{index}:{finding['evidence_ref']}",
                                 )
                                 if verified_binding is not None:
                                     finding_evidence_receipts.append({
