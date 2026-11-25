@@ -198,6 +198,10 @@ class ReviewExecutionTrustRegistry:
         ):
             if predicate.get(field) != expected.get(field):
                 raise ReviewExecutionError(f"review execution {field} does not match the current contract")
+        observed = predicate.get("observed_input_digests")
+        required = set(expected.get("input_digests", {}).values())
+        if not isinstance(observed, list) or not required.issubset(set(observed)):
+            raise ReviewExecutionError("review executor did not attest observing every exact input digest")
         if predicate.get("blind_review") is not expected.get("blind_review"):
             raise ReviewExecutionError("review execution blind-review mode does not match the contract")
         if expected.get("blind_review") and predicate.get("sibling_verdicts_visible") is not False:
