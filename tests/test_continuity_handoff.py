@@ -153,3 +153,19 @@ def test_cli_capture_and_handoff_work_in_isolated_mechanical_workspace(tmp_path,
     assert main(["--offline-fixture", "--root", str(root),
                  "verify-handoff", "article", str(packet_path)]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
+
+
+
+def test_concurrent_continuity_write_cannot_yield_internally_mixed_handoff(tmp_path, monkeypatch):
+    engine = StudioEngine(tmp_path / "studio")
+    engine.create_project("article", "Article", brief())
+    original_resume = engine.resume
+
+    def interleaved_resume(project_id, *, event_limit=40):
+        snapshot = original_resume(project_id, event_limit=event_limit)
+        engine.capture_continuity("article", note(kind="NEXT_ACTION", text="Concurrent update"))
+        return snapshot
+
+    monkeypatch.setattr(engine, "resume", interleaved_resume)
+    with pytest.raises(GateError, match="changed during handoff"):
+        engine.handoff("article")
