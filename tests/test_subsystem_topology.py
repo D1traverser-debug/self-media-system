@@ -120,6 +120,17 @@ def test_active_import_of_old_controller_is_rejected_not_whitelisted(tmp_path):
                for x in audit["violations"])
 
 
+def test_topology_regression_floor_is_enforced_when_catalog_and_code_shrink_together(tmp_path):
+    cat = _isolated_source_checkout(tmp_path)
+    cat["topology_contract"]["minimum_subsystems"] = len(cat["subsystems"]) + 1
+    catalog_path = tmp_path/"social_media_studio/data/subsystem_catalog.json"
+    catalog_path.write_text(json.dumps(cat, ensure_ascii=False, indent=2))
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("topology regression floor violated: minimum_subsystems" in item
+               for item in report["violations"])
+
+
 def test_false_external_ipos_and_duplicate_executor_ownership_are_rejected(tmp_path):
     cat=_isolated_source_checkout(tmp_path)
     catalog_path=tmp_path/"social_media_studio/data/subsystem_catalog.json"
