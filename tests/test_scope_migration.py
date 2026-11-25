@@ -28,9 +28,13 @@ def test_canonical_scope_and_controlled_upgrade_preserves_history(tmp_path):
         conn.execute("UPDATE projects SET brief_json=? WHERE project_id=?",
                      (json.dumps(old), "owner"))
         conn.commit()
-    engine.add_tasks("owner", [_task("running"), _task("ready")])
+    old_bound_task = {**_task("ready"), "requirements": {
+        "deliverable_refs": ["one"], "decision_id": "old-decision",
+    }}
+    engine.add_tasks("owner", [_task("running"), old_bound_task])
     engine.record_decision("owner", {
-        "decision_id": "old-decision", "question": "Original choice", "scope": "owner",
+        "decision_id": "old-decision", "task_id": "ready",
+        "question": "Original choice", "scope": "owner",
         "source_refs": ["current goal"], "hypotheses": [
             {"id": "h1", "discriminator": "test 1"},
             {"id": "h2", "discriminator": "test 2"}],
@@ -52,7 +56,7 @@ def test_canonical_scope_and_controlled_upgrade_preserves_history(tmp_path):
     task_state = {item["task_id"]: item["status"] for item in engine.list_tasks("owner")}
     assert task_state["running"] == "STALE"
     assert task_state["ready"] == "READY"
-    assert "ready" in engine.status("owner")["decision_blocked_tasks"]
+    assert "superseded" in engine.status("owner")["decision_blocked_tasks"]["ready"]
     assert any(e["event_type"] == "PROJECT_BRIEF_REVISED" for e in engine.events("owner"))
     before = engine.status("owner")["event_count"]
     assert migrate_owner_scope(engine, "owner", reason="Recheck")["already_current"]
