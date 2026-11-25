@@ -1,6 +1,6 @@
 # 自媒体系统 — Social Media Studio · Canonical Entry
 
-Status: `ACTIVE_CANDIDATE`
+Status: `ACTIVE_CANONICAL_ENTRY__PRODUCTION_READINESS_PARTIAL`
 This file, `STUDIO_ENTRY.md`, is the single startup authority for all self-media work.
 Runtime: `social_media_studio.engine.StudioEngine`
 CLI: `sms-studio`
@@ -24,6 +24,8 @@ Social Media Studio owns self-media requirements, project/task state, assets, ev
 Recover the owner outcome, inspect relevant authoritative sources, research and challenge alternatives, select an admissible method, execute with current tools, independently inspect actual results and preserve validated learning. These are recursive responsibilities, not a prescribed order or a requirement to create a work packet for each conversation. Durable work uses the project brief, versioned assets, exact decision receipts and a demand-specific DAG; independent branches may proceed together, and a correction can reopen an earlier decision. A delivery or release requires only the applicable domain-specific gates, not unrelated video-production stages.
 
 For a durable owner task, give `requirements.decision_id` an exact unique ID when planning; after current inputs and decision evidence are available, use `sms-studio decision PROJECT RECEIPT.json` with that `decision_id` and `task_id` plus the existing competing-cause/alternative fields. The engine derives the binding from actual current brief, task contract and input artifact bytes. Unbound/stale branches cannot be claimed or completed; unrelated admitted branches may proceed. Revise a stale task to a new decision ID and reopen it after re-investigation. This local check is not CAOS activation, verified external research, a permission grant, or semantic acceptance. Direct non-task session actions still require CAOS governance and appropriate independent evidence.
+
+For a previously admitted owner workspace with the former scope epoch, a one-time **explicit** `sms-studio --root WORKSPACE migrate-scope PROJECT --reason REASON` converts its source scope without deleting project history. Old decisions are superseded, live leases revoked, and newly admitted actions require fresh current-scope decisions. This is a migration of the user's exact existing project, never automatic resurrection of retired repository examples. A bare source quote cannot replace semantic research or independent owner acceptance.
 
 ## Bounded operational loop and real parallel execution
 
