@@ -1128,6 +1128,8 @@ class StudioEngine:
             self._event(connection, project_id, "TASK", row["task_id"], "TASK_LEASE_EXPIRED", {
                 "worker_id": row["worker_id"], "attempt": row["attempts"], "next_status": next_status,
             })
+            if row["kind"] == "review":
+                self._cleanup_review_stage(project_id, row["task_id"], row["attempts"])
             reclaimed.append({
                 "task_id": row["task_id"], "worker_id": row["worker_id"],
                 "attempt": row["attempts"], "next_status": next_status,
@@ -1899,6 +1901,8 @@ class StudioEngine:
                 })
                 self._refresh_in_tx(connection, project_id)
                 connection.commit()
+                if task["kind"] == "review":
+                    self._cleanup_review_stage(project_id, task_id, task["attempts"])
                 return {"task_id": task_id, "status": "COMPLETED", "artifacts": registered, "result": result_payload}
             except ClaimError:
                 # Persist any upstream-transfer invalidation before reporting the revoked claim.
@@ -1927,12 +1931,14 @@ class StudioEngine:
                 "SELECT status FROM tasks WHERE project_id=? AND task_id=?", (project_id, task_id)
             ).fetchone()["status"]
             connection.commit()
+            if task["kind"] == "review":
+                self._cleanup_review_stage(project_id, task_id, task["attempts"])
             return {"task_id": task_id, "status": actual, "retry_scheduled": retry}
 
     def wait_for_input(self, project_id: str, task_id: str, worker_id: str, claim_token: str, reason: str) -> None:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
-            self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
+            task = self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
             connection.execute(
                 "UPDATE tasks SET status='WAITING_INPUT',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                 (_json({"reason": reason, "explicit_external_wait": True}), _iso(), project_id, task_id),
@@ -1940,6 +1946,8 @@ class StudioEngine:
             self._event(connection, project_id, "TASK", task_id, "TASK_WAITING_INPUT",
                         {"reason": reason, "explicit_external_wait": True})
             connection.commit()
+            if task["kind"] == "review":
+                self._cleanup_review_stage(project_id, task_id, task["attempts"])
 
     def record_decision(self, project_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         required = ["question", "scope", "source_refs", "hypotheses", "alternatives", "selected_option", "falsifier", "rollback"]
