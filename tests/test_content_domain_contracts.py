@@ -18,10 +18,21 @@ def test_every_architecture_scenario_has_a_typed_route_without_effect(tmp_path):
         assert scenario["forbidden_implicit_effect"] and scenario["owner_outcome_oracle"]
         item = {"id": "result", "type": scenario["deliverable_type"]}
         if item["type"] == "MULTI_ASPECT_IMAGE_SET":
-            item["variants"] = [
-                {"id": "portrait", "shape": {"width": 1080, "height": 1440, "orientation": "PORTRAIT"}},
-                {"id": "landscape", "shape": {"width": 1440, "height": 1080, "orientation": "LANDSCAPE"}},
+            shapes = scenario.get("requested_shapes") or [
+                {"width": 1080, "height": 1440, "orientation": "PORTRAIT"},
+                {"width": 1440, "height": 1080, "orientation": "LANDSCAPE"},
             ]
+            item["variants"] = [
+                {"id": f"variant-{index}", "shape": shape}
+                for index, shape in enumerate(shapes)
+            ]
+        elif scenario.get("requested_ratio"):
+            item["shape"] = MediaShape.from_ratio(
+                scenario["requested_ratio"], ratio_order=scenario["ratio_convention"],
+                long_edge_pixels=scenario["long_edge_pixels"],
+            ).as_dict()
+        elif scenario.get("canonical_shape"):
+            item["shape"] = scenario["canonical_shape"]
         preview = resolve_intake(tmp_path, {
             "mode": "NEW", "goal": scenario["demand"], "deliverable_specs": [item]})
         assert preview["project_id"] is None
@@ -30,11 +41,30 @@ def test_every_architecture_scenario_has_a_typed_route_without_effect(tmp_path):
         assert preview["typed_deliverables"]["deliverables"][0]["type"] in DELIVERABLE_TYPES
         assert preview["typed_deliverables"]["quality_verified"] is False
         assert preview["typed_deliverables"]["native_caos_activation"] == "NOT_VERIFIED"
+        declared = preview["typed_deliverables"]["deliverables"][0]
+        if scenario.get("canonical_shape"):
+            assert declared["shape"]["width"] == scenario["canonical_shape"]["width"]
+            assert declared["shape"]["height"] == scenario["canonical_shape"]["height"]
+            assert declared["shape"]["orientation"] == scenario["canonical_shape"]["orientation"]
+        if scenario.get("requested_shapes"):
+            assert [v["shape"]["orientation"] for v in declared["variants"]] == [
+                shape["orientation"] for shape in scenario["requested_shapes"]
+            ]
 
 
 def test_ratio_and_orientation_are_explicit_not_inferred():
-    assert MediaShape.from_mapping({"width": 1440, "height": 1080, "orientation": "LANDSCAPE"}).ratio == "4:3"
-    assert MediaShape.from_mapping({"width": 1080, "height": 1440, "orientation": "PORTRAIT"}).ratio == "3:4"
+    landscape = MediaShape.from_mapping({"width": 1440, "height": 1080, "orientation": "LANDSCAPE"})
+    portrait = MediaShape.from_mapping({"width": 1080, "height": 1440, "orientation": "PORTRAIT"})
+    assert landscape.ratio == "4:3"
+    assert portrait.ratio == "3:4"
+    assert landscape.as_dict()["ratio_order"] == "WIDTH:HEIGHT"
+    assert MediaShape.from_mapping(landscape.as_dict()) == landscape
+    # The user's explicit 4:3 height:width request normalizes to 3:4 width:height.
+    assert MediaShape.from_ratio("4:3", ratio_order="HEIGHT:WIDTH", long_edge_pixels=1440) == portrait
+    assert MediaShape.from_ratio("4:3", ratio_order="WIDTH:HEIGHT", long_edge_pixels=1440) == landscape
+    for bad_order in ("UNKNOWN", "", None):
+        with pytest.raises(ContentContractError):
+            MediaShape.from_ratio("4:3", ratio_order=bad_order, long_edge_pixels=1440)
     for dimensions in (
         {"width": 1440, "height": 1080, "orientation": "PORTRAIT"},
         {"width": 1080, "height": 1440, "orientation": "LANDSCAPE"},
