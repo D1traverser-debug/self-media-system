@@ -2437,8 +2437,13 @@ class StudioEngine:
             raise ContractError("caller-supplied attestation fields are not execution proof; use a signed DSSE execution receipt")
         if outcome not in {"PASS", "REVISE", "FAIL", "BLOCKED", "NOT_TESTED"}:
             raise ContractError("invalid review outcome")
-        if not reviewer_id or not rubric_id or not evidence_refs:
-            raise ContractError("review requires reviewer, rubric and evidence_refs")
+        if not reviewer_id or not rubric_id:
+            raise ContractError("review requires reviewer and rubric")
+        if (
+            not isinstance(evidence_refs, list) or not evidence_refs
+            or not all(isinstance(reference, str) and reference.strip() for reference in evidence_refs)
+        ):
+            raise ContractError("review evidence_refs must be a non-empty array of artifact IDs or names")
         _safe_id(reviewer_id, "reviewer_id")
         _safe_id(rubric_id, "rubric_id")
         self.refresh(project_id)
