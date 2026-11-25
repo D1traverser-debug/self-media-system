@@ -33,9 +33,16 @@ def build_quality_plan(specs: Any) -> dict[str, Any]:
     for item in declared["deliverables"]:
         kind = item["type"]
         variants = item["variants"]
+        acceptance = dict(item["acceptance"])
+        acceptance_present = bool(acceptance)
         plan = {
             "deliverable_id": item["id"], "type": kind, "criteria": list(CRITERIA[kind]),
-            "owner_acceptance": dict(item["acceptance"]),
+            "locale": item["locale"], "platform": item["platform"],
+            "shape": item["shape"], "source_refs": list(item["source_refs"]),
+            "prohibitions": list(item["prohibitions"]),
+            "owner_acceptance": acceptance,
+            "owner_acceptance_status": "DECLARED" if acceptance_present else "MISSING",
+            "blocking_gaps": [] if acceptance_present else ["OWNER_ACCEPTANCE_NOT_DECLARED"],
             "declared_constraints": dict(item["constraints"]),
             "output_variant_ids": [v["id"] for v in variants] if variants else [item["id"]],
             "proof_required": ["actual output examined", "exact version and source",
