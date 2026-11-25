@@ -133,7 +133,7 @@ def test_valid_signed_review_execution_receipt_verifies():
 
 def test_empty_registry_fails_closed():
     envelope, expected, *_ = fixture_receipt()
-    registry = ReviewExecutionTrustRegistry(config={"trusted_executors": {}})
+    registry = ReviewExecutionTrustRegistry(config={"schema_version": 1, "trusted_executors": {}})
     with pytest.raises(ReviewExecutionError, match="not trusted"):
         registry.verify(envelope, expected=expected)
 
@@ -156,7 +156,7 @@ def test_review_receipt_requires_every_input_digest_to_be_observed():
     envelope, expected, config, private_key, statement, _ = fixture_receipt()
     statement["predicate"]["observed_input_digests"] = [sha("final-video")]
     envelope = sign_review_statement(statement, key_id="review-key-01", private_key=private_key)
-    with pytest.raises(ReviewExecutionError, match="observing every exact input digest"):
+    with pytest.raises(ReviewExecutionError, match="observing exactly every declared input digest"):
         ReviewExecutionTrustRegistry(config=config).verify(envelope, expected=expected)
 
 
