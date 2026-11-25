@@ -17,7 +17,7 @@ Do not convert every failure into a new role, gate, prompt or permanent rule. Pr
 
 ## 2. Learning-source admission: default deny
 
-Seeing content during a session does **not** make it a learning source. It does not become a durable learning source merely by appearing in the conversation. Conversation context, temporary research, user links, summaries, examples, transcripts and side tasks are outside the learning boundary unless explicitly admitted.
+Seeing content during a session does **not** make it a learning source. It does not become a durable learning source merely by appearing in the conversation. Ambient conversation, open tabs, unrelated chats, temporary research, user links, summaries, examples, transcripts and side tasks are outside the durable learning boundary by default. The declared work packet is the learning context boundary. Ambient conversation is context for the current response, not a durable source, unless explicitly admitted.
 
 A source may enter a candidate only when it is:
 1. internal project evidence produced by the declared workflow and present in the work packet; or
