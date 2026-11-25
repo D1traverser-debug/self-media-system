@@ -89,3 +89,27 @@ def test_cycle_parameter_preflight_does_not_claim(tmp_path):
     with pytest.raises(ValueError, match="max_workers"):
         run_work_cycle(engine, "params", execute_tools=False, max_workers=0)
     assert engine.status("params")["event_count"] == 1
+
+
+def test_agent_handoff_packet_binds_real_input_bytes_without_claim(tmp_path):
+    import hashlib
+    engine = StudioEngine(tmp_path / "workspace")
+    engine.create_project("handoff", "Agent packet", _brief())
+    source = tmp_path / "source.md"
+    source.write_text("verified content", encoding="utf-8")
+    registered = engine.import_asset("handoff", "source", source,
+                                     kind="document", media_type="text/markdown",
+                                     rights_status="OWNED")
+    engine.add_tasks("handoff", [{
+        **_task("draft", "agent"),
+        "inputs": ["source"],
+        "acceptance": {"output": "Use exact registered source bytes"},
+    }])
+    report = run_work_cycle(engine, "handoff", execute_tools=False)
+    packet = report["after"]["handoff_packets"]["agent"][0]
+    assert packet["task"]["task_id"] == "draft"
+    assert packet["input_artifacts"]["source"]["artifact_id"] == registered["artifact_id"]
+    assert packet["input_artifacts"]["source"]["sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+    assert packet["claimed"] is False
+    assert packet["effect_authorized"] is False
+    assert engine.list_tasks("handoff")[0]["status"] == "READY"

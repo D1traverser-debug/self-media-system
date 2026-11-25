@@ -8,6 +8,7 @@ from the single StudioEngine ledger.
 from __future__ import annotations
 
 from typing import Any
+from contextlib import closing
 
 from .engine import StudioEngine
 from .production.executors import tool_executor_for_task
@@ -22,6 +23,7 @@ def _snapshot(engine: StudioEngine, project_id: str) -> dict[str, Any]:
     retry_exhausted = admission["retry_exhausted_tasks"]
     parallel: dict[str, list[str]] = {"tool": [], "agent": [], "human": [], "external": []}
     blocked: list[dict[str, Any]] = []
+    handoff_packets: dict[str, list[dict[str, Any]]] = {"agent": [], "human": [], "external": []}
     for task in tasks:
         task_id = task["task_id"]
         status = task["status"]
@@ -50,7 +52,29 @@ def _snapshot(engine: StudioEngine, project_id: str) -> dict[str, Any]:
             "task_id": task_id, "status": status, "reason": reason,
             "depends_on": task.get("depends_on", []),
         })
+    # A real, read-only task packet has exact current input artifact hashes.
+    # It does NOT claim a task or authorize an Agent, human or external effect.
+    with closing(engine._connect(project_id)) as connection:
+        for executor in ("agent", "human", "external"):
+            for task_id in parallel[executor]:
+                row = connection.execute(
+                    "SELECT * FROM tasks WHERE project_id=? AND task_id=? AND status='READY'",
+                    (project_id, task_id),
+                ).fetchone()
+                if row is None:
+                    continue  # readiness changed while projecting; a claim must recheck
+                packet = engine._work_packet(connection, project_id, row)
+                handoff_packets[executor].append({
+                    "task": packet["task"],
+                    "input_artifacts": packet["input_artifacts"],
+                    "missing_inputs": packet["missing_inputs"],
+                    "instructions": packet["instructions"],
+                    "claimed": False,
+                    "effect_authorized": False,
+                    "requires_fresh_claim_and_decision_recheck": True,
+                })
     return {
+        "handoff_packets": handoff_packets,
         "task_counts": admission["task_counts"],
         "open_failures": admission["open_failures"],
         "parallel_ready_lanes": {key: sorted(values) for key, values in parallel.items()},
