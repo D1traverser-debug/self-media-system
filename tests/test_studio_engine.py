@@ -747,6 +747,52 @@ def test_failure_resolution_rejects_unresolved_review_evidence_refs(tmp_path):
     assert engine.status("demo")["open_failures"] == 1
 
 
+def test_failure_resolution_rejects_reviewer_who_produced_cited_evidence(tmp_path):
+    engine = make_engine(tmp_path)
+    engine.add_tasks("demo", [task("render")])
+    rendered = complete(engine, tmp_path, "render", "artist")
+    failure = engine.record_failure("demo", {
+        "task_id": "render",
+        "symptom": "the final deliverable fails its declared acceptance check",
+        "hypotheses": [
+            {"id": "H1", "claim": "the source is incomplete", "discriminator": "repeat with a complete verified source"},
+            {"id": "H2", "claim": "the method is unsuitable", "discriminator": "compare a different method on the same source"},
+        ],
+        "selected_root_cause": "H2",
+        "method_challenge": "the previous method was not compared against a viable alternative",
+        "repair_plan": "use the alternative method and rerun verification and regression",
+        "falsifier": "the original method passes the same checks on the same source",
+        "rollback": "restore the original method and preserve both attempts",
+        "evidence_refs": [rendered["artifact_id"]],
+    })
+    engine.add_tasks("demo", [task("repaired-output")])
+    repaired = complete(engine, tmp_path, "repaired-output", "repair-worker")
+    engine.add_tasks("demo", [task("verification")])
+    verification = complete(engine, tmp_path, "verification", "verification-producer")
+    engine.add_tasks("demo", [task("regression")])
+    regression = complete(engine, tmp_path, "regression", "regression-producer")
+
+    # The report producer differs, but the reviewer is also the producer of the output being reviewed.
+    engine.record_review(
+        "demo", verification["artifact_id"], reviewer_id="repair-worker",
+        rubric_id="failure-verification", outcome="PASS",
+        dimensions={"result": "PASS"}, evidence_refs=[repaired["artifact_id"]],
+    )
+    engine.record_review(
+        "demo", regression["artifact_id"], reviewer_id="regression-reviewer",
+        rubric_id="failure-regression", outcome="PASS",
+        dimensions={"result": "PASS"}, evidence_refs=[verification["artifact_id"]],
+    )
+
+    with pytest.raises(ContractError, match="reviewer also produced cited evidence artifact"):
+        engine.resolve_failure("demo", failure["failure_id"], {
+            "verification_refs": [verification["artifact_id"]],
+            "regression_refs": [regression["artifact_id"]],
+            "result": "PASS",
+        })
+    assert engine.status("demo")["open_failures"] == 1
+
+
 def test_reviews_are_bound_to_exact_digest_and_independent_reviewer(tmp_path):
     engine = make_engine(tmp_path)
     engine.add_tasks("demo", [task("render")])

@@ -189,7 +189,7 @@ At minimum, the resolution JSON contains the exact registered artifact IDs and t
 }
 ```
 
-Record the verification report review with rubric `failure-verification`; its `--evidence` values must be the exact artifact IDs of the repaired output or other evidence inspected. Record the regression report review with rubric `failure-regression`; its `--evidence` values must identify the exact replay/test evidence inspected. A review cannot cite its own report as evidence. The engine records the artifact digests, review IDs and evidence-artifact digests it checked. Reviewer/producer separation is structural evidence only, not cryptographic identity proof or semantic acceptance; CAOS still performs the independent owner-level acceptance.
+Record the verification report review with rubric `failure-verification`; its `--evidence` values must be the exact artifact IDs of the repaired output or other evidence inspected. Record the regression report review with rubric `failure-regression`; its `--evidence` values must identify the exact replay/test evidence inspected. A review cannot cite its own report as evidence. The engine records the artifact digests, review IDs and evidence-artifact digests it checked. Reviewer IDs must differ from the failed task's output producer, the report producer and every producer of cited evidence. This is structural evidence only, not cryptographic identity proof or semantic acceptance; CAOS still performs the independent owner-level acceptance.
 
 ## 11. Learning and method promotion
 

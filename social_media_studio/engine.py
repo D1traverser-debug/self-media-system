@@ -1833,6 +1833,17 @@ class StudioEngine:
                     raise ProjectNotFound(failure_id)
                 if row["status"] != "OPEN":
                     raise ContractError("only OPEN failures can be resolved")
+                original_task_producer_ids: set[str] = set()
+                if row["task_id"]:
+                    original_producers = connection.execute(
+                        """SELECT DISTINCT producer_id FROM artifacts
+                           WHERE project_id=? AND produced_by_task=?""",
+                        (project_id, row["task_id"]),
+                    ).fetchall()
+                    original_task_producer_ids = {
+                        producer["producer_id"] for producer in original_producers
+                        if isinstance(producer["producer_id"], str) and producer["producer_id"].strip()
+                    }
 
                 def verify_artifact(artifact_id: str, role: str) -> sqlite3.Row:
                     artifact = connection.execute(
@@ -1879,12 +1890,22 @@ class StudioEngine:
                                 f"{role} review cannot cite the reviewed report as its own evidence: {review['review_id']}"
                             )
                         evidence_artifact = verify_artifact(evidence_id, f"{role} review evidence")
+                        evidence_producer_id = evidence_artifact["producer_id"]
+                        if not isinstance(evidence_producer_id, str) or not evidence_producer_id.strip():
+                            raise ContractError(
+                                f"{role} review evidence has no recorded producer identity: {evidence_id}"
+                            )
+                        if review["reviewer_id"] == evidence_producer_id:
+                            raise ContractError(
+                                f"{role} reviewer also produced cited evidence artifact: {review['review_id']}:{evidence_id}"
+                            )
                         bindings.append({
                             "artifact_id": evidence_id,
                             "version": int(evidence_artifact["version"]),
                             "sha256": evidence_artifact["sha256"],
                             "kind": evidence_artifact["kind"],
                             "media_type": evidence_artifact["media_type"],
+                            "producer_id": evidence_producer_id,
                         })
                     return bindings
 
@@ -1927,13 +1948,31 @@ class StudioEngine:
                             )
                         review_receipts = []
                         for review in reviews:
+                            reviewer_id = review["reviewer_id"]
+                            if reviewer_id in original_task_producer_ids:
+                                raise ContractError(
+                                    f"{role} reviewer also produced the failed task output: {review['review_id']}"
+                                )
+                            evidence_bindings = verify_review_evidence(
+                                review, artifact_id, role,
+                            )
+                            evidence_producer_ids = {
+                                item["producer_id"] for item in evidence_bindings
+                            }
+                            if reviewer_id in evidence_producer_ids:
+                                raise ContractError(
+                                    f"{role} reviewer also produced cited evidence artifact: {review['review_id']}"
+                                )
                             review_receipts.append({
                                 "review_id": review["review_id"],
                                 "rubric_id": rubric_id,
-                                "reviewer_id": review["reviewer_id"],
-                                "evidence_artifacts": verify_review_evidence(
-                                    review, artifact_id, role,
-                                ),
+                                "reviewer_id": reviewer_id,
+                                "separated_from_producer_ids": sorted({
+                                    producer_id,
+                                    *original_task_producer_ids,
+                                    *evidence_producer_ids,
+                                }),
+                                "evidence_artifacts": evidence_bindings,
                             })
                         verified.append({
                             "artifact_id": artifact_id,
@@ -1959,7 +1998,7 @@ class StudioEngine:
                         "regression": regression,
                     },
                     "evidence_verification": "CURRENT_ARTIFACT_BYTES_AND_EXACT_DIGEST_ROLE_SPECIFIC_PASS_REVIEWS",
-                    "reviewer_independence": "STRUCTURAL_REVIEWER_ID_SEPARATION_ONLY_NOT_CRYPTOGRAPHIC",
+                    "reviewer_independence": "STRUCTURAL_SEPARATION_FROM_REPORT_FAILED_TASK_AND_CITED_EVIDENCE_PRODUCERS_ONLY_NOT_CRYPTOGRAPHIC",
                 }
                 connection.execute(
                     "UPDATE failures SET status='RESOLVED',resolution_json=?,updated_at=? WHERE project_id=? AND failure_id=?",
