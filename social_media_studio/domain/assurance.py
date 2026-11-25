@@ -54,9 +54,10 @@ def build_quality_plan(specs: Any) -> dict[str, Any]:
         }
         if kind == "MULTI_ASPECT_IMAGE_SET":
             plan["per_variant_review"] = [
-                {"id": v["id"], "shape": v["shape"],
-                 "pixels_reviewed": False, "composition_verified": False,
-                 "text_at_mobile_size_verified": False} for v in variants]
+                {"id": v["id"], "locale": v["locale"], "platform": v["platform"],
+                 "shape": v["shape"], "pixels_reviewed": False,
+                 "composition_verified": False, "text_at_mobile_size_verified": False}
+                for v in variants]
         if kind == "MEDIA_TRANSFORM":
             plan["audio_promise"] = item["constraints"].get("original_audio_promise")
             plan["audio_identity_verified"] = False
