@@ -12,7 +12,7 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from social_media_studio.engine import ClaimError, ContractError, StudioEngine
+from social_media_studio.engine import ClaimError, ContractError, GateError, StudioEngine
 from social_media_studio.review_execution import (
     ReviewExecutionTrustRegistry, build_review_statement, digest_json, review_contract_digest,
     sign_review_statement,
@@ -1466,6 +1466,19 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
     }
     review_report_path = engine._project_dir("strict") / "artifacts" / "cold-read-report.json"
     review_report_path.write_text(json.dumps(review_report, sort_keys=True), encoding="utf-8")
+    staged_video = Path(review_packet["input_artifacts"]["final-video"]["path"])
+    original_staged_video = staged_video.read_bytes()
+    staged_video.write_bytes(b"reviewer-mutated-source-copy")
+    with pytest.raises(GateError, match="review staged input bytes changed"):
+        engine.complete_task(
+            "strict", "human-cold-read-task", "human-review-executor",
+            review_packet["claim"]["claim_token"],
+            {"cold-read-report": {
+                "path": str(review_report_path), "kind": "review_report",
+                "media_type": "application/json", "rights_status": "NOT_APPLICABLE",
+            }},
+        )
+    staged_video.write_bytes(original_staged_video)
     review_result = engine.complete_task(
         "strict", "human-cold-read-task", "human-review-executor",
         review_packet["claim"]["claim_token"],
