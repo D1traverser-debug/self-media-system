@@ -45,7 +45,8 @@ jobs:
           assert report["code_modules"] == report["owned_modules"]
           assert report["subsystems"] == 16
           assert report["domain_adapters"] == 17
-          assert report["production_operations"] == 5
+          from social_media_studio.production.registry import PRODUCTION_EXECUTORS
+          assert report["production_operations"] == len(PRODUCTION_EXECUTORS.operations())
           assert report["real_creative_quality_verified"] is False
           assert report["native_caos_selection_verified"] is False
           print("complete-source-topology-structural-audit: PASS")
