@@ -697,8 +697,11 @@ def test_failure_resolution_requires_current_role_specific_reviewed_evidence(tmp
     assert verified["regression"][0]["sha256"] == regression["sha256"]
     assert verified["verification"][0]["review_receipts"][0]["rubric_id"] == "failure-verification"
     assert verified["verification"][0]["review_receipts"][0]["evidence_artifacts"][0]["sha256"] == repaired_output["sha256"]
+    assert set(verified["verification"][0]["review_receipts"][0]["separated_from_producer_ids"]) == {
+        "artist", "repair-worker", "verification-producer",
+    }
     assert verified["regression"][0]["review_receipts"][0]["evidence_artifacts"][0]["sha256"] == verification["sha256"]
-    assert receipt["resolution"]["reviewer_independence"] == "STRUCTURAL_REVIEWER_ID_SEPARATION_ONLY_NOT_CRYPTOGRAPHIC"
+    assert receipt["resolution"]["reviewer_independence"] == "STRUCTURAL_SEPARATION_FROM_REPORT_FAILED_TASK_AND_CITED_EVIDENCE_PRODUCERS_ONLY_NOT_CRYPTOGRAPHIC"
     assert engine.status("demo")["open_failures"] == 0
 
 
@@ -785,6 +788,52 @@ def test_failure_resolution_rejects_reviewer_who_produced_cited_evidence(tmp_pat
     )
 
     with pytest.raises(ContractError, match="reviewer also produced cited evidence artifact"):
+        engine.resolve_failure("demo", failure["failure_id"], {
+            "verification_refs": [verification["artifact_id"]],
+            "regression_refs": [regression["artifact_id"]],
+            "result": "PASS",
+        })
+    assert engine.status("demo")["open_failures"] == 1
+
+
+def test_failure_resolution_rejects_reviewer_from_failed_task_producer(tmp_path):
+    engine = make_engine(tmp_path)
+    engine.add_tasks("demo", [task("render")])
+    rendered = complete(engine, tmp_path, "render", "artist")
+    failure = engine.record_failure("demo", {
+        "task_id": "render",
+        "symptom": "the final deliverable fails its declared acceptance check",
+        "hypotheses": [
+            {"id": "H1", "claim": "the source is incomplete", "discriminator": "repeat with a complete verified source"},
+            {"id": "H2", "claim": "the method is unsuitable", "discriminator": "compare a different method on the same source"},
+        ],
+        "selected_root_cause": "H2",
+        "method_challenge": "the previous method was not compared against a viable alternative",
+        "repair_plan": "use the alternative method and rerun verification and regression",
+        "falsifier": "the original method passes the same checks on the same source",
+        "rollback": "restore the original method and preserve both attempts",
+        "evidence_refs": [rendered["artifact_id"]],
+    })
+    engine.add_tasks("demo", [task("repaired-output")])
+    repaired = complete(engine, tmp_path, "repaired-output", "repair-worker")
+    engine.add_tasks("demo", [task("verification")])
+    verification = complete(engine, tmp_path, "verification", "verification-producer")
+    engine.add_tasks("demo", [task("regression")])
+    regression = complete(engine, tmp_path, "regression", "regression-producer")
+
+    # The reviewer did not produce the report or repaired output, but did produce the failed original output.
+    engine.record_review(
+        "demo", verification["artifact_id"], reviewer_id="artist",
+        rubric_id="failure-verification", outcome="PASS",
+        dimensions={"result": "PASS"}, evidence_refs=[repaired["artifact_id"]],
+    )
+    engine.record_review(
+        "demo", regression["artifact_id"], reviewer_id="regression-reviewer",
+        rubric_id="failure-regression", outcome="PASS",
+        dimensions={"result": "PASS"}, evidence_refs=[verification["artifact_id"]],
+    )
+
+    with pytest.raises(ContractError, match="reviewer also produced the failed task output"):
         engine.resolve_failure("demo", failure["failure_id"], {
             "verification_refs": [verification["artifact_id"]],
             "regression_refs": [regression["artifact_id"]],
