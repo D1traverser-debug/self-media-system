@@ -113,7 +113,11 @@ def test_end_to_end_production_render_qa_and_delivery_package(tmp_path):
     engine.create_project("delivery-demo", "Production delivery demo", delivery_brief)
     assets = _source_assets(tmp_path)
     imported_assets = {}
-    for name, (path, kind, media_type, rights) in assets.items():
+    # Local rights evidence must exist before a source asset can bind to its
+    # exact artifact ID, version and digest at import time.
+    import_order = ["rights-manifest", *[name for name in assets if name != "rights-manifest"]]
+    for name in import_order:
+        path, kind, media_type, rights = assets[name]
         metadata = {"rights_evidence_refs": ["rights-manifest"]} if name in {"shot-01", "shot-02", "audio-mix"} else {}
         imported_assets[name] = engine.import_asset(
             "delivery-demo", name, path, kind=kind, media_type=media_type,
