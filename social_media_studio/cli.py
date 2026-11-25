@@ -498,7 +498,10 @@ def main(argv: list[str] | None = None) -> int:
                                       reviewer_id=args.reviewer, rubric_id=args.rubric,
                                       outcome=args.outcome, dimensions=_read_json(args.dimensions),
                                       evidence_refs=args.evidence, notes=args.notes,
-                                      attestation=_read_json(args.attestation) if args.attestation else None))
+                                       attestation=_read_json(args.attestation) if args.attestation else None,
+                                       review_task_id=args.review_task,
+                                       review_result_artifact_id=args.review_result,
+                                       execution_receipt=_read_json(args.execution_receipt) if args.execution_receipt else None))
         elif command == "release-check":
             _emit(engine.release_check(args.project_id, args.artifact_id,
                                        required_rubrics=args.rubric, evidence_refs=args.evidence,
