@@ -1203,6 +1203,32 @@ class StudioEngine:
                 self._event(connection, project_id, "TASK", row["task_id"], "TASK_INPUTS_BOUND", {
                     "worker_id": worker_id, "input_bindings": input_bindings,
                 })
+                if claimed["kind"] == "review":
+                    requirements = _loads(claimed["requirements_json"], {})
+                    task_contract = requirements.get("review_contract") if isinstance(requirements, dict) else None
+                    if not isinstance(task_contract, dict):
+                        raise ContractError("review tasks require an immutable requirements.review_contract")
+                    brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+                    release_policy = brief.get("release_policy", {})
+                    rubric_contracts = release_policy.get("review_contracts", {})
+                    rubric_id = task_contract.get("rubric_id")
+                    rubric_contract = rubric_contracts.get(rubric_id) if isinstance(rubric_contracts, dict) else None
+                    if not isinstance(rubric_contract, dict):
+                        raise ContractError("review task rubric is not declared in the current owner release contract")
+                    review_packet = build_review_packet(
+                        project_id=project_id, task_id=row["task_id"],
+                        task_contract=task_contract, rubric_contract=rubric_contract,
+                        input_bindings=input_bindings,
+                    )
+                    packet_digest = digest_json(review_packet)
+                    contract_digest = review_contract_digest(task_contract, rubric_contract)
+                    packet["review_packet"] = review_packet
+                    packet["review_packet_digest"] = packet_digest
+                    self._event(connection, project_id, "TASK", row["task_id"], "REVIEW_PACKET_BOUND", {
+                        "review_packet": review_packet,
+                        "review_packet_digest": packet_digest,
+                        "review_contract_digest": contract_digest,
+                    })
                 connection.commit()
                 packet["claim"] = asdict(TaskClaim(project_id, row["task_id"], worker_id, token, lease_until, claimed["attempts"]))
                 return packet
