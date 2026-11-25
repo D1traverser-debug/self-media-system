@@ -132,7 +132,8 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
             "reviewer_kind": "HUMAN", "execution_mode": "INDEPENDENT_COLD_READ", "blind_review": True,
         })
         review_receipt_semantics_correct = (
-            "ED25519_DSSE_IN_TOTO_VERIFIED_AT_RECORD_AND_RELEASE" in engine_source
+            'high_assurance_status = "VERIFIED"' in engine_source
+            and 'high_assurance_status = "BLOCKED"' in engine_source
             and "runtime cannot cryptographically prove a human" not in engine_source
         )
         review_fail_closed = (
