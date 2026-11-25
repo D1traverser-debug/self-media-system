@@ -615,7 +615,7 @@ def test_decision_receipt_requires_competing_causes_alternatives_and_falsifier(t
     assert receipt["status"] == "ACTIVE"
 
 
-def test_failure_cannot_close_without_independent_verification_and_regression(tmp_path):
+def test_failure_resolution_requires_current_role_specific_reviewed_evidence(tmp_path):
     engine = make_engine(tmp_path)
     engine.add_tasks("demo", [task("render")])
     rendered = complete(engine, tmp_path, "render", "artist")
@@ -700,6 +700,51 @@ def test_failure_cannot_close_without_independent_verification_and_regression(tm
     assert verified["regression"][0]["review_receipts"][0]["evidence_artifacts"][0]["sha256"] == verification["sha256"]
     assert receipt["resolution"]["reviewer_independence"] == "STRUCTURAL_REVIEWER_ID_SEPARATION_ONLY_NOT_CRYPTOGRAPHIC"
     assert engine.status("demo")["open_failures"] == 0
+
+
+def test_failure_resolution_rejects_unresolved_review_evidence_refs(tmp_path):
+    engine = make_engine(tmp_path)
+    engine.add_tasks("demo", [task("render")])
+    rendered = complete(engine, tmp_path, "render", "artist")
+    failure = engine.record_failure("demo", {
+        "task_id": "render",
+        "symptom": "the final deliverable fails its declared acceptance check",
+        "hypotheses": [
+            {"id": "H1", "claim": "the source is incomplete", "discriminator": "repeat with a complete verified source"},
+            {"id": "H2", "claim": "the method is unsuitable", "discriminator": "compare a different method on the same source"},
+        ],
+        "selected_root_cause": "H2",
+        "method_challenge": "the previous method was not compared against a viable alternative",
+        "repair_plan": "use the alternative method and rerun verification and regression",
+        "falsifier": "the original method passes the same checks on the same source",
+        "rollback": "restore the original method and preserve both attempts",
+        "evidence_refs": [rendered["artifact_id"]],
+    })
+    engine.add_tasks("demo", [task("repaired-output")])
+    repaired = complete(engine, tmp_path, "repaired-output", "repair-worker")
+    engine.add_tasks("demo", [task("verification")])
+    verification = complete(engine, tmp_path, "verification", "verification-producer")
+    engine.add_tasks("demo", [task("regression")])
+    regression = complete(engine, tmp_path, "regression", "regression-producer")
+
+    engine.record_review(
+        "demo", verification["artifact_id"], reviewer_id="verification-reviewer",
+        rubric_id="failure-verification", outcome="PASS",
+        dimensions={"result": "PASS"}, evidence_refs=["https://unresolved.example/review"],
+    )
+    engine.record_review(
+        "demo", regression["artifact_id"], reviewer_id="regression-reviewer",
+        rubric_id="failure-regression", outcome="PASS",
+        dimensions={"result": "PASS"}, evidence_refs=[verification["artifact_id"]],
+    )
+
+    with pytest.raises(ContractError, match="exact registered evidence artifact IDs"):
+        engine.resolve_failure("demo", failure["failure_id"], {
+            "verification_refs": [verification["artifact_id"]],
+            "regression_refs": [regression["artifact_id"]],
+            "result": "PASS",
+        })
+    assert engine.status("demo")["open_failures"] == 1
 
 
 def test_reviews_are_bound_to_exact_digest_and_independent_reviewer(tmp_path):

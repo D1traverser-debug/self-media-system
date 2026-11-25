@@ -1789,6 +1789,11 @@ class StudioEngine:
     def resolve_failure(
         self, project_id: str, failure_id: str, resolution: dict[str, Any],
     ) -> dict[str, Any]:
+        """Close only after current, digest-bound, role-specific reviewed evidence is verified.
+
+        This verifies artifact bytes and structural reviewer/producer separation. It does
+        not authenticate reviewer identity or determine semantic correctness.
+        """
         if not isinstance(resolution, dict):
             raise ContractError("failure resolution must be a JSON object")
         refs_by_role: dict[str, list[str]] = {}

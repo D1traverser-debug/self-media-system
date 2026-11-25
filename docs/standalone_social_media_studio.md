@@ -179,7 +179,7 @@ Do not assume every failure needs another prompt, reviewer, role, gate or stage.
 
 Repair at the causal layer supported by evidence. A failure cannot be marked resolved by opaque URI strings or caller-declared PASS alone. `verification_refs` and `regression_refs` must each contain distinct exact artifact IDs registered in the current project. Every referenced artifact must be current, its bytes must match its recorded SHA-256, and it must have an exact-digest PASS review under `failure-verification` or `failure-regression`, respectively. Each review must cite separate current artifact IDs whose bytes also match their recorded digests. Import external verification reports, regression reports and the evidence they inspect as artifacts before resolving.
 
-The resolution JSON contains only the exact registered artifact IDs and the PASS result:
+At minimum, the resolution JSON contains the exact registered artifact IDs and the PASS result:
 
 ```json
 {
