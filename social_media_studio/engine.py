@@ -1070,29 +1070,38 @@ class StudioEngine:
         )
 
     def _stage_review_inputs(
-        self, project_id: str, task: sqlite3.Row, packet: dict[str, Any],
+        self, project_id: str, task: sqlite3.Row, packet: dict[str, Any], *,
+        reuse_existing: bool = False,
     ) -> None:
         """Give a review executor only staged, digest-verified declared inputs."""
         stage_root = self._review_stage_dir(project_id, task["task_id"], task["attempts"])
-        if stage_root.exists():
+        if stage_root.exists() and not reuse_existing:
             shutil.rmtree(stage_root)
         try:
             inputs_root = stage_root / "inputs"
             inputs_root.mkdir(parents=True, exist_ok=True)
             staged_inputs: dict[str, dict[str, Any]] = {}
+            expected_names: set[str] = set()
             for name, item in packet.get("input_artifacts", {}).items():
                 source = Path(item["path"])
                 expected_digest = item["sha256"]
                 if not source.is_file() or _sha256(source) != expected_digest:
                     raise GateError(f"review input changed before isolation staging: {name}")
                 destination = inputs_root / f"{_safe_id(name, 'review_input')}{source.suffix.lower()}"
-                shutil.copyfile(source, destination)
+                expected_names.add(destination.name)
+                if not destination.is_file() or _sha256(destination) != expected_digest:
+                    shutil.copyfile(source, destination)
                 if _sha256(destination) != expected_digest:
                     raise GateError(f"review input staging digest mismatch: {name}")
                 staged_item = dict(item)
                 staged_item["path"] = str(destination)
                 staged_item["staged_sha256"] = expected_digest
                 staged_inputs[name] = staged_item
+            for child in inputs_root.iterdir():
+                if child.is_file() and child.name not in expected_names:
+                    child.unlink()
+                elif child.is_dir():
+                    shutil.rmtree(child)
             packet["input_artifacts"] = staged_inputs
             project = packet.get("project")
             if isinstance(project, dict):
@@ -1386,7 +1395,23 @@ class StudioEngine:
                 }
                 for row in rows
             }
-            packet["missing_inputs"] = []
+            if task["kind"] == "review":
+                event_row = connection.execute(
+                    """SELECT payload_json FROM events
+                       WHERE project_id=? AND entity_type='TASK' AND entity_id=?
+                         AND event_type='REVIEW_PACKET_BOUND'
+                       ORDER BY event_no DESC LIMIT 1""",
+                    (project_id, task_id),
+                ).fetchone()
+                event_payload = _loads(event_row["payload_json"], {}) if event_row else {}
+                review_packet = event_payload.get("review_packet") if isinstance(event_payload, dict) else None
+                if not isinstance(review_packet, dict) or event_payload.get("review_packet_digest") != digest_json(review_packet):
+                    raise GateError("claimed review task has no intact immutable review packet")
+                packet["review_packet"] = review_packet
+                packet["review_packet_digest"] = event_payload["review_packet_digest"]
+                self._stage_review_inputs(project_id, task, packet, reuse_existing=True)
+            else:
+                packet["missing_inputs"] = []
             return packet
 
     def heartbeat(self, project_id: str, task_id: str, worker_id: str, claim_token: str, lease_seconds: int = 900) -> str:
