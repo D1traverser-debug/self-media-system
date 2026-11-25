@@ -1125,6 +1125,32 @@ class StudioEngine:
             shutil.rmtree(stage_root, ignore_errors=True)
             raise
 
+    def _verify_review_stage_inputs(
+        self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row,
+        input_bindings: list[dict[str, Any]],
+    ) -> None:
+        stage_root = self._review_stage_dir(project_id, task["task_id"], task["attempts"])
+        inputs_root = stage_root / "inputs"
+        if stage_root.is_symlink() or inputs_root.is_symlink() or not inputs_root.is_dir():
+            raise GateError("review isolated input staging directory is missing or unsafe")
+        expected_files: set[str] = set()
+        for binding in input_bindings:
+            source = connection.execute(
+                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                (project_id, binding["artifact_id"]),
+            ).fetchone()
+            if source is None or source["name"] != binding["name"]:
+                raise GateError("review staged input no longer maps to its registered artifact")
+            suffix = Path(source["relative_path"]).suffix.lower()
+            filename = f"{_safe_id(source['name'], 'review_input')}{suffix}"
+            expected_files.add(filename)
+            staged = inputs_root / filename
+            if staged.is_symlink() or not staged.is_file() or _sha256(staged) != binding["sha256"]:
+                raise GateError(f"review staged input bytes changed before completion: {source['name']}")
+        actual_files = {item.name for item in inputs_root.iterdir() if item.is_file()}
+        if actual_files != expected_files or any(item.is_dir() for item in inputs_root.iterdir()):
+            raise GateError("review staging contains undeclared or missing input files")
+
     def _cleanup_review_stage(self, project_id: str, task_id: str, attempt: int) -> None:
         stage_root = self._review_stage_dir(project_id, task_id, attempt)
         if stage_root.exists():
@@ -1911,6 +1937,8 @@ class StudioEngine:
                 if set(outputs) != expected:
                     raise ContractError(f"expected outputs {sorted(expected)}, got {sorted(outputs)}")
                 input_bindings, input_rows = self._verify_claimed_inputs(connection, project_id, task)
+                if task["kind"] == "review":
+                    self._verify_review_stage_inputs(connection, project_id, task, input_bindings)
                 registered: dict[str, Any] = {}
                 for name, payload in outputs.items():
                     if not isinstance(payload, dict) or not payload.get("path"):
