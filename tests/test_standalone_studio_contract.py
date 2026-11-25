@@ -25,6 +25,21 @@ def test_social_media_studio_is_the_single_runtime_under_caos_parent_governance(
     assert manifest["governance"]["standalone_mode"] == "OFFLINE_MECHANICAL_TESTS_ONLY"
     assert manifest["governance"]["source_mutation"] == "FORBIDDEN"
     assert manifest["execution"]["fixed_stage_machine"] is False
+    task_admission = manifest["task_admission"]
+    assert set(task_admission["entry_modes"]) == {"NEW", "RESUME", "ADOPT"}
+    assert "durable identity" in task_admission["task_identity"]["project_id"]
+    assert "DAG execution node" in task_admission["task_identity"]["task_id"]
+    assert task_admission["continuity"]["automatic_resume"] is False
+    assert task_admission["continuity"]["recent_project_selection"] is False
+    assert task_admission["adoption"]["task_graph_created"] is False
+    assert task_admission["context_isolation"]["implicit_prior_conversation"] is False
+    assert task_admission["context_isolation"]["native_chat_isolation"] == "NOT_VERIFIED_BY_RUNTIME"
+    assert "Task identity and cross-chat continuity" in skill
+    assert "SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET" in skill
+    assert "DECLARED_INPUTS_ONLY" in skill
+    assert "def adopt_project(" in source
+    assert "def record_checkpoint(" in source
+    assert "def preview_task_handoff(" in source
     assert set(manifest["business_workstreams"]) == {"MEDIA_GROWTH", "ORIGINAL_DIGITAL_IP", "COMMERCIALIZATION", "PRODUCTION_SYSTEM"}
     assert manifest["domain_adapter_policy"]["fixed_stage_orchestrator"] == "NOT_LOADED_BY_STUDIO_RUNTIME"
     assert pyproject["project"]["scripts"]["sms-studio"] == "social_media_studio.cli:main"
