@@ -1411,7 +1411,7 @@ def test_release_check_rejects_tampered_review_evidence_artifact_bytes(tmp_path)
         evidence_refs=[evidence["artifact_id"]],
     )
 
-    evidence_path.write_text("tampered after review", encoding="utf-8")
+    Path(evidence["path"]).write_text("tampered after review", encoding="utf-8")
     release = engine.release_check(
         "demo", final_artifact["artifact_id"], required_rubrics=[],
     )
@@ -1502,7 +1502,7 @@ def test_release_check_rejects_tampered_red_team_finding_evidence_bytes(tmp_path
         }]},
         evidence_refs=[evidence["artifact_id"]],
     )
-    evidence_path.write_text("tampered after review", encoding="utf-8")
+    Path(evidence["path"]).write_text("tampered after review", encoding="utf-8")
     release = engine.release_check("demo", final_artifact["artifact_id"], required_rubrics=[])
     assert release["pass"] is False, release
     assert any(
