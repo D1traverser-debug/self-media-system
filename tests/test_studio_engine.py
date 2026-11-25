@@ -1384,17 +1384,98 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         rubric_id="editorial", outcome="PASS", dimensions={},
         evidence_refs=["review://editorial"],
     )
+    review_task_contract = {
+        "rubric_id": "human-cold-read",
+        "reviewer_id": "human-cold-reader",
+        "subject_artifact": "final-video",
+        "reviewer_kind": "HUMAN",
+        "execution_mode": "INDEPENDENT_COLD_READ",
+        "blind_review": True,
+        "required_media_inspection": "FULL_VIDEO",
+    }
+    engine.add_tasks("strict", [{
+        "task_id": "human-cold-read-task",
+        "title": "Independent full-video cold read",
+        "kind": "review",
+        "executor": "human",
+        "depends_on": ["qa"],
+        "inputs": ["final-video", "cold-read-evidence"],
+        "outputs": ["cold-read-report"],
+        "acceptance": {"observable": "A signed review report is produced against the exact full video digest."},
+        "requirements": {"review_contract": review_task_contract},
+    }])
+    review_packet = engine.claim_next("strict", "human-review-executor")
+    assert review_packet is not None
+    assert review_packet["task"]["task_id"] == "human-cold-read-task"
+    assert review_packet["review_packet"]["sibling_verdicts_included"] is False
+    review_evidence_id = evidence_artifacts["cold-read-evidence"]["artifact_id"]
+    review_report = {
+        "schema_version": 1,
+        "outcome": "PASS",
+        "dimensions": {},
+        "evidence_refs": [review_evidence_id],
+        "notes": "",
+    }
+    review_report_path = engine._project_dir("strict") / "artifacts" / "cold-read-report.json"
+    review_report_path.write_text(json.dumps(review_report, sort_keys=True), encoding="utf-8")
+    review_result = engine.complete_task(
+        "strict", "human-cold-read-task", "human-review-executor",
+        review_packet["claim"]["claim_token"],
+        {"cold-read-report": {
+            "path": str(review_report_path), "kind": "review_report",
+            "media_type": "application/json", "rights_status": "NOT_APPLICABLE",
+        }},
+    )
+    review_result_artifact = review_result["artifacts"]["cold-read-report"]
+    input_bindings = review_result["result"]["input_bindings"]
+    input_digests = {item["name"]: item["sha256"] for item in input_bindings}
+    now = datetime.now(timezone.utc)
+    predicate = {
+        "executor_id": "human-review-executor",
+        "issued_at": (now - timedelta(seconds=1)).isoformat(),
+        "expires_at": (now + timedelta(minutes=10)).isoformat(),
+        "nonce": "strict-human-cold-read-nonce-001",
+        "execution_id": "strict-human-cold-read-execution-001",
+        "review_task_id": "human-cold-read-task",
+        "review_contract_digest": review_contract_digest(
+            review_task_contract, strict_brief["release_policy"]["review_contracts"]["human-cold-read"],
+        ),
+        "reviewer_id": "human-cold-reader",
+        "reviewer_kind": "HUMAN",
+        "execution_mode": "INDEPENDENT_COLD_READ",
+        "packet_digest": review_packet["review_packet_digest"],
+        "result_digest": review_result_artifact["sha256"],
+        "input_digests": input_digests,
+        "observed_input_digests": list(input_digests.values()),
+        "context_id": "cold-read-session-001",
+        "isolation_mode": "ephemeral-review-container",
+        "blind_review": True,
+        "sibling_verdicts_visible": False,
+        "provider": "test-provider",
+        "model": "human-cold-read-v1",
+        "media_inspection": {
+            "mode": "FULL_VIDEO",
+            "artifact_sha256": final_artifact["sha256"],
+            "coverage_fraction": 1,
+            "inspected_duration_seconds": 60,
+            "source_duration_seconds": 60,
+        },
+    }
+    review_statement = build_review_statement(
+        reviewed_artifact_sha256=final_artifact["sha256"],
+        review_result_sha256=review_result_artifact["sha256"],
+        predicate=predicate,
+    )
+    execution_receipt = sign_review_statement(
+        review_statement, key_id="strict-review-key", private_key=private_key,
+    )
     engine.record_review(
         "strict", final_artifact["artifact_id"], reviewer_id="human-cold-reader",
         rubric_id="human-cold-read", outcome="PASS", dimensions={},
-        evidence_refs=["cold-read-evidence"],
-        attestation={
-            "reviewer_kind": "HUMAN",
-            "execution_mode": "INDEPENDENT_COLD_READ",
-            "blind_review": True,
-            "inspected_artifact_digest": final_artifact["sha256"],
-            "context_id": "cold-read-session-001",
-        },
+        evidence_refs=[review_evidence_id],
+        review_task_id="human-cold-read-task",
+        review_result_artifact_id=review_result_artifact["artifact_id"],
+        execution_receipt=execution_receipt,
     )
     engine.record_review(
         "strict", final_artifact["artifact_id"], reviewer_id="red-team-reviewer",
