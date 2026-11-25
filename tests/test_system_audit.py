@@ -5,13 +5,16 @@ from social_media_studio.system_audit import run_system_audit
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_canonical_video_system_audit_passes_structural_contract():
+def test_canonical_social_media_studio_system_audit_passes_structural_contract():
     report = run_system_audit(ROOT)
     assert report["pass"] is True, report
     assert report["structural_status"] == "PASS"
     assert report["production_readiness"] == "PARTIAL"
     assert report["capability_gaps"]
     assert report["owner_inputs_required"] == []
+    checks = {item["id"]: item for item in report["checks"]}
+    assert checks["owner_scope_epoch_matches_runtime"]["pass"]
+    assert checks["owner_and_fixture_workspace_modes_are_isolated"]["pass"]
 
 
 def test_audit_distinguishes_caos_session_governance_from_runtime_independence():
