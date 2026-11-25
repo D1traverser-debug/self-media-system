@@ -432,3 +432,72 @@ def test_adopt_cli_requires_explicit_owner_scope_and_imports_packet(tmp_path, ca
     assert result["task_graph_created"] is False
     assert result["project"]["project_id"] == "video-adopted"
 
+
+
+def test_checkpoint_resume_export_and_clean_task_handoff_cli(tmp_path, capsys):
+    from social_media_studio.cli import main
+    workspace = tmp_path / "fixture-workspace"
+    brief = {"goal": "Create one isolated cover concept", "audience": "viewers", "deliverables": ["cover"]}
+    brief_path = tmp_path / "brief.json"
+    brief_path.write_text(json.dumps(brief), encoding="utf-8")
+    assert main(["--offline-fixture", "--root", str(workspace),
+                 "init", "cover-project", "--brief", str(brief_path)]) == 0
+    capsys.readouterr()
+
+    tasks_path = tmp_path / "tasks.json"
+    tasks_path.write_text(json.dumps([{
+        "task_id": "isolated-cover",
+        "title": "Generate one cover concept in a clean chat",
+        "kind": "visual",
+        "executor": "agent",
+        "depends_on": [],
+        "inputs": [],
+        "outputs": ["cover-candidate"],
+        "acceptance": {"visual": "The exact cover brief is satisfied."},
+        "requirements": {"context_boundary": {
+            "mode": "DECLARED_INPUTS_ONLY",
+            "allowed_input_names": [],
+            "excluded_context_refs": ["unrelated-earlier-image"],
+            "allow_prior_conversation": False,
+            "allow_sibling_task_context": False,
+            "isolated_chat_required": True,
+        }},
+    }]), encoding="utf-8")
+    assert main(["--offline-fixture", "--root", str(workspace),
+                 "plan", "cover-project", str(tasks_path)]) == 0
+    capsys.readouterr()
+
+    checkpoint_path = tmp_path / "checkpoint.json"
+    checkpoint_path.write_text(json.dumps({
+        "source_coverage": "CURRENT_CHAT_ONLY",
+        "source_refs": ["current-chat-context"],
+        "session_summary": "The cover task is planned but no candidate has been registered.",
+        "user_corrections": ["Do not reuse the unrelated previous image."],
+        "open_items": ["Generate the candidate and inspect the actual pixels."],
+        "unregistered_work": ["The art direction exists only in chat."],
+        "next_action": "Open a clean chat with the exact task handoff.",
+    }), encoding="utf-8")
+    assert main(["--offline-fixture", "--root", str(workspace),
+                 "checkpoint", "cover-project", str(checkpoint_path)]) == 0
+    capsys.readouterr()
+
+    handoff = tmp_path / "handoff.json"
+    assert main(["--offline-fixture", "--root", str(workspace),
+                 "resume", "cover-project", "--output", str(handoff)]) == 0
+    output = json.loads(capsys.readouterr().out)
+    exported = json.loads(handoff.read_text(encoding="utf-8"))
+    assert output["authority"] == "DERIVED_READ_ONLY_PROJECT_PROJECTION"
+    assert exported["latest_checkpoint"]["payload"]["user_corrections"]
+    assert exported["handoff"]["requires_live_project_reconciliation"] is True
+
+    assert main(["--offline-fixture", "--root", str(workspace),
+                 "handoff", "cover-project", "isolated-cover"]) == 0
+    task_packet = json.loads(capsys.readouterr().out)
+    assert task_packet["handoff"]["new_chat_required"] is True
+    assert task_packet["handoff"]["claimed"] is False
+    assert task_packet["context_boundary"]["excluded_context_refs"] == ["unrelated-earlier-image"]
+
+    assert main(["--offline-fixture", "--root", str(workspace),
+                 "resume", "cover-project", "--output", str(handoff)]) == 2
+    assert "already exists" in capsys.readouterr().err
+
