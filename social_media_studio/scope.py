@@ -118,9 +118,18 @@ def bind_owner_brief(project_id: str, brief: dict[str, Any]) -> dict[str, Any]:
 
 def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> None:
     assert_scope_epoch()
+    requirements = task.get("requirements", {})
+    if not isinstance(requirements, dict):
+        raise ValueError("task requirements must be an object")
+    boundary = requirements.get("context_boundary")
+    if boundary is not None:
+        inputs = task.get("inputs", [])
+        if not isinstance(inputs, list) or any(not isinstance(item, str) or not item.strip() for item in inputs):
+            raise ValueError("task inputs must be declared before validating context_boundary")
+        validate_context_boundary(boundary, task_inputs=inputs)
     if brief.get("scope_epoch") != EPOCH:
         return  # mechanical compatibility and isolated fixture path
-    refs = task.get("requirements", {}).get("deliverable_refs")
+    refs = requirements.get("deliverable_refs")
     deliverables = brief.get("deliverables", [])
     if not isinstance(refs, list) or not refs or any(
         not isinstance(ref, str) or ref not in deliverables for ref in refs
