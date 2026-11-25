@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from social_media_studio.domain.assurance import CRITERIA, build_quality_plan
+from social_media_studio.domain.contracts import MediaShape
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -12,8 +13,16 @@ def test_34_scenarios_have_type_specific_no_pass_plans():
              "acceptance":{"target":case["owner_outcome_oracle"]},
              "prohibitions":[case["forbidden_implicit_effect"]]}
         if obj["type"]=="MULTI_ASPECT_IMAGE_SET":
-            obj["variants"]=[{"id":"tall","shape":{"width":1080,"height":1440,"orientation":"PORTRAIT"}},
-                             {"id":"wide","shape":{"width":1440,"height":1080,"orientation":"LANDSCAPE"}}]
+            shapes=case.get("requested_shapes") or [
+                {"width":1080,"height":1440,"orientation":"PORTRAIT"},
+                {"width":1440,"height":1080,"orientation":"LANDSCAPE"}]
+            obj["variants"]=[{"id":f"variant-{i}","shape":shape} for i,shape in enumerate(shapes)]
+        elif case.get("requested_ratio"):
+            obj["shape"]=MediaShape.from_ratio(
+                case["requested_ratio"],ratio_order=case["ratio_convention"],
+                long_edge_pixels=case["long_edge_pixels"]).as_dict()
+        elif case.get("canonical_shape"):
+            obj["shape"]=case["canonical_shape"]
         result=build_quality_plan([obj])
         plan=result["plans"][0]
         assert plan["type"]==obj["type"]
@@ -21,6 +30,15 @@ def test_34_scenarios_have_type_specific_no_pass_plans():
         assert plan["criteria"] and plan["quality_verified"] is False
         assert plan["owner_outcome_verified"] is False
         assert result["release_authorized"] is False
+        if case.get("canonical_shape"):
+            assert plan["shape"]["width"] == case["canonical_shape"]["width"]
+            assert plan["shape"]["height"] == case["canonical_shape"]["height"]
+            assert plan["shape"]["orientation"] == case["canonical_shape"]["orientation"]
+        if case.get("requested_shapes"):
+            assert [v["shape"]["orientation"] for v in plan["per_variant_review"]] == [
+                shape["orientation"] for shape in case["requested_shapes"]
+            ]
+            assert all(v["shape"]["ratio_order"] == "WIDTH:HEIGHT" for v in plan["per_variant_review"])
 
 def test_caption_and_article_have_no_fixed_video_stage():
     for kind in ["SHORT_COPY","LONG_ARTICLE","PROMPT_SPEC"]:
@@ -42,3 +60,35 @@ def test_multi_aspect_reviews_each_ratio_and_ipos_requires_actual_approval():
           "constraints":{"original_audio_promise":"BITSTREAM_IDENTITY"}}])["plans"][0]
     assert transform["audio_promise"]=="BITSTREAM_IDENTITY"
     assert transform["audio_identity_verified"] is False
+
+
+def test_quality_plan_preserves_user_facing_shape_platform_locale_sources_and_prohibitions():
+    plan=build_quality_plan([{
+        "id":"portrait-cover","type":"STATIC_IMAGE","locale":"zh-CN","platform":"TIKTOK",
+        "shape":{"width":1080,"height":1440,"orientation":"PORTRAIT"},
+        "source_refs":["source-cover"],"prohibitions":["no collage","no title panel"],
+        "acceptance":{"target":"one portrait cover, readable on mobile"},
+    }])["plans"][0]
+    assert plan["shape"]["width"]==1080 and plan["shape"]["height"]==1440
+    assert plan["shape"]["orientation"]=="PORTRAIT"
+    assert plan["shape"]["ratio_order"]=="WIDTH:HEIGHT"
+    assert plan["locale"]=="zh-CN" and plan["platform"]=="TIKTOK"
+    assert plan["source_refs"]==["source-cover"]
+    assert plan["prohibitions"]==["no collage","no title panel"]
+    assert plan["owner_acceptance_status"]=="DECLARED"
+    assert plan["blocking_gaps"]==[]
+
+
+def test_missing_owner_acceptance_is_explicitly_blocking_not_silently_complete():
+    plan=build_quality_plan([{"id":"caption","type":"SHORT_COPY"}])["plans"][0]
+    assert plan["owner_acceptance_status"]=="MISSING"
+    assert "OWNER_ACCEPTANCE_NOT_DECLARED" in plan["blocking_gaps"]
+    assert plan["quality_verified"] is False
+
+
+def test_static_image_quality_does_not_inherit_motion_or_video_requirements():
+    criteria=set(CRITERIA["STATIC_IMAGE"])
+    assert "full_playback" not in criteria
+    assert "motion_craft" not in criteria
+    assert "audio_promise" not in criteria
+    assert "mobile_thumbnail" in criteria
