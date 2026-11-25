@@ -1139,8 +1139,11 @@ class StudioEngine:
         input_bindings: list[dict[str, Any]],
     ) -> None:
         stage_root = self._review_stage_dir(project_id, task["task_id"], task["attempts"])
+        review_root = self.root / "review_sessions"
+        project_stage_root = review_root / _safe_id(project_id, "project_id")
+        task_stage_root = project_stage_root / _safe_id(task["task_id"], "task_id")
         inputs_root = stage_root / "inputs"
-        if stage_root.is_symlink() or inputs_root.is_symlink() or not inputs_root.is_dir():
+        if any(path.is_symlink() for path in (review_root, project_stage_root, task_stage_root, stage_root, inputs_root)) or not inputs_root.is_dir():
             raise GateError("review isolated input staging directory is missing or unsafe")
         expected_files: set[str] = set()
         for binding in input_bindings:
