@@ -221,7 +221,7 @@ When a task completes, the runtime records each declared input artifact ID and S
 
 ### Rights and provenance
 
-For public release, the final deliverable and every used media asset in its lineage must have one of `OWNED`, `AUTHORIZED`, `LICENSED` or `PUBLIC_DOMAIN`. `UNKNOWN` is fail-closed. By default, media artifacts also require non-empty `metadata.rights_evidence_refs`; each reference must resolve to a registered current artifact name/ID or an explicit HTTP(S) source URL. Briefs may name mandatory source assets and evidence artifacts. Required source assets must actually occur in the final artifact's recorded lineage, not merely exist elsewhere in the project.
+For public release, the final deliverable and every used media asset in its lineage must have one of `OWNED`, `AUTHORIZED`, `LICENSED` or `PUBLIC_DOMAIN`. `UNKNOWN` is fail-closed. By default, media artifacts also require non-empty `metadata.rights_evidence_refs`. Local references must resolve to a registered current artifact name/ID whose bytes match its recorded SHA-256 at release. HTTP(S) references are retained as external references but are not fetched or content-verified; import the actual rights document when reproducible verification is required. Briefs may name mandatory source assets and evidence artifacts. Required source assets must actually occur in the final artifact's recorded lineage, not merely exist elsewhere in the project.
 
 The rights status field is a declaration backed by evidence, not an automatic legal opinion. Likeness, voice, music, font, stock footage, product truth, territory, duration, paid-media and derivative-use scope still require a competent human review.
 

@@ -1443,7 +1443,9 @@ def test_release_check_rejects_tampered_local_rights_evidence_artifact_bytes(tmp
     engine.import_asset(
         "demo", "source-video", source_path,
         kind="video", media_type="video/mp4", rights_status="OWNED",
-        metadata={"rights_evidence_refs": [rights_evidence["artifact_id"]]},
+        metadata={"rights_evidence_refs": [
+            rights_evidence["artifact_id"], "https://licenses.example/source-permission",
+        ]},
     )
     engine.add_tasks("demo", [task("render", inputs=["source-video"])])
     final_artifact = complete(engine, tmp_path, "render", "artist")
@@ -1458,6 +1460,11 @@ def test_release_check_rejects_tampered_local_rights_evidence_artifact_bytes(tmp
     assert any(
         item.startswith("lineage_rights_evidence_bytes_missing_or_digest_changed:source-video:")
         for item in release["failures"]
+    )
+    assert any(
+        evidence_ref.get("verification") == "EXTERNAL_REFERENCE_NOT_FETCHED"
+        for lineage_item in release["artifact_lineage"]
+        for evidence_ref in lineage_item.get("rights_evidence", [])
     )
 
 
