@@ -138,7 +138,7 @@ def test_high_assurance_is_an_explicit_contract_choice_not_a_global_default():
     }) is True
 
 
-def test_short_article_high_assurance_contract_blocks_without_a_registered_executor(tmp_path):
+def test_short_article_high_assurance_contract_blocks_without_a_verified_review(tmp_path):
     engine = StudioEngine(tmp_path / "high-assurance-article")
     brief = {
         "goal": "Produce a short X Article.",
@@ -177,3 +177,10 @@ def test_short_article_high_assurance_contract_blocks_without_a_registered_execu
             reviewer_id="human-reviewer", rubric_id="human-cold-read",
             outcome="PASS", dimensions={}, evidence_refs=[evidence["artifact_id"]],
         )
+    release = engine.release_check(
+        "high-assurance-article", artifact["artifact_id"],
+        required_rubrics=[], require_rights=False,
+    )
+    assert release["pass"] is False
+    assert release["review_execution_verification"]["high_assurance"] == "BLOCKED"
+    assert release["review_execution_verification"]["high_assurance_review_count"] == 0
