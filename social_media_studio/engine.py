@@ -423,7 +423,7 @@ class StudioEngine:
         self, project_id: str, title: str, brief: dict[str, Any],
         adoption_packet_path: str | Path,
     ) -> dict[str, Any]:
-        """Create a new project from an explicit, validated conversation-adoption packet."""
+        """Create a new project from a validated packet and import its exact local source files."""
         from .scope import bind_owner_brief, validate_adoption_packet
 
         project_id = _safe_id(project_id, "project_id")
@@ -442,9 +442,55 @@ class StudioEngine:
         except ValueError as exc:
             raise ContractError(str(exc)) from exc
         packet_digest = hashlib.sha256(packet_bytes).hexdigest()
+        packet_root = packet_path.parent.resolve()
+        prepared_sources: list[dict[str, Any]] = []
+        for source in packet["source_refs"]:
+            if source["verification"] != "EXACT_BYTES_HASHED":
+                continue
+            relative = Path(source["source_ref"]).expanduser()
+            if relative.is_absolute() or ".." in relative.parts:
+                raise ContractError("exact adoption source_ref must be a relative path inside the adoption packet directory")
+            try:
+                source_path = (packet_root / relative).resolve(strict=True)
+            except OSError as exc:
+                raise ContractError(f"adoption source file is unavailable: {source['source_ref']}") from exc
+            if not source_path.is_relative_to(packet_root) or not source_path.is_file():
+                raise ContractError(f"adoption source file escapes its packet directory or is not a regular file: {source['source_ref']}")
+            actual_digest = _sha256(source_path)
+            if actual_digest != source["sha256"]:
+                raise GateError(f"adoption source digest mismatch: {source['source_ref']}")
+            prepared_sources.append({
+                "source_ref": source["source_ref"],
+                "source_type": source["source_type"],
+                "role": source["role"],
+                "artifact_name": source["artifact_name"],
+                "media_type": source.get("media_type", "text/plain"),
+                "path": source_path,
+                "sha256": actual_digest,
+            })
+        if packet_path in {item["path"] for item in prepared_sources}:
+            raise ContractError("the adoption packet cannot also be imported as one of its source files")
 
         self.create_project(project_id, title, brief)
+        source_artifacts: list[dict[str, Any]] = []
         try:
+            for item in prepared_sources:
+                imported = self.import_asset(
+                    project_id, item["artifact_name"], item["path"],
+                    kind="context", media_type=item["media_type"],
+                    rights_status="NOT_APPLICABLE",
+                    metadata={
+                        "source_ref": item["source_ref"],
+                        "source_type": item["source_type"],
+                        "role": item["role"],
+                        "source_sha256": item["sha256"],
+                        "verification": "EXACT_BYTES_HASHED_AND_RECHECKED_DURING_IMPORT",
+                        "authority": "CONTEXT_PROVENANCE_ONLY_NOT_EXECUTION_OR_COMPLETION_PROOF",
+                    },
+                )
+                if imported["sha256"] != item["sha256"]:
+                    raise GateError(f"adoption source bytes changed during import: {item['source_ref']}")
+                source_artifacts.append(imported)
             artifact = self.import_asset(
                 project_id, "adoption-context", packet_path,
                 kind="context", media_type="application/json",
@@ -466,6 +512,10 @@ class StudioEngine:
                     "adoption_artifact_sha256": artifact["sha256"],
                     "source_coverage": packet["source_coverage"],
                     "source_refs": packet["source_refs"],
+                    "source_artifacts": [
+                        {"artifact_id": item["artifact_id"], "name": item["name"], "version": item["version"], "sha256": item["sha256"]}
+                        for item in source_artifacts
+                    ],
                     "task_graph_created": False,
                     "prior_decisions_authority": "REQUIRES_REVALIDATION",
                     "claimed_completed_work_authority": "NOT_PROMOTED_WITHOUT_CURRENT_ARTIFACT_READBACK",
@@ -478,6 +528,7 @@ class StudioEngine:
         return {
             "project": self.project(project_id),
             "adoption_context_artifact": artifact,
+            "source_artifacts": source_artifacts,
             "source_coverage": packet["source_coverage"],
             "source_refs": packet["source_refs"],
             "task_graph_created": False,
