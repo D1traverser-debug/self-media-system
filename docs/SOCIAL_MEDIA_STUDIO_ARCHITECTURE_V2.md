@@ -134,7 +134,7 @@ Every provider adapter declares:
 - quality assurance = UNTESTED / FIXTURE_TESTED / REAL_ARTIFACT_VERIFIED / USER_OUTCOME_VERIFIED by operation and task type;
 - explicit failure/degradation policy and independent readback. No provider claims implied by Skill text.
 
-**Operations are typed.** A format transformation is not AI upscaling; FFprobe success is not semantic video understanding; a story prompt is not a good scene; an image rendering interface is not aesthetic direction. Current five production operations and seventeen domain adapters keep their exact scope. Legacy 0.8 orchestrator is evidence only.
+**Operations are typed.** A format transformation is not AI upscaling; FFprobe success is not semantic video understanding; a story prompt is not a good scene; an image rendering interface is not aesthetic direction. Current six registered production operations and seventeen domain adapters keep their exact scope. Legacy 0.8 orchestrator is evidence only.
 
 ### F1. Audio preservation: three independent promises
 - BITSTREAM_IDENTITY: exact audio payload bytes/codec stream unchanged; only offer when container, cut boundaries and mux support it; prove stream hashes/packet identity as applicable. A remux can preserve encoded audio without making output-file bytes identical.

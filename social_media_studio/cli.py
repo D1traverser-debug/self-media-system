@@ -66,6 +66,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--reason", required=True)
     p.add_argument("--affect-task", action="append", default=[], help="root task affected by the change; omit to invalidate all project tasks")
 
+    p = sub.add_parser("migrate-scope", help="explicitly upgrade a previous owner-scope project without resurrecting old decisions")
+    p.add_argument("project_id")
+    p.add_argument("--reason", required=True, help="owner-approved migration reason")
+
     p = sub.add_parser("brief-history", help="show immutable project brief revision events")
     p.add_argument("project_id")
 
@@ -120,6 +124,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--lease-seconds", type=int, default=900)
     p.add_argument("--executor", choices=["agent", "human", "tool", "external"])
     p.add_argument("--task-id", help="claim this exact ready task instead of the next matching task")
+
+    p = sub.add_parser("work-cycle", help="run admitted local tools in parallel; report execution, blockers and learning handoffs")
+    p.add_argument("project_id")
+    p.add_argument("--plan-only", action="store_true", help="read-only; do not claim or execute tools")
+    p.add_argument("--max-workers", type=int, default=2)
+    p.add_argument("--max-rounds", type=int, default=50)
 
     p = sub.add_parser("run-ready-tools", help="execute registered local tool tasks concurrently in dependency-ready rounds")
     p.add_argument("project_id")
@@ -294,7 +304,7 @@ def main(argv: list[str] | None = None) -> int:
             raise StudioError("offline regression requires an explicit separate workspace root")
         import os
         root = args.root or Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
-        if command != "init":
+        if command not in {"init", "migrate-scope"}:
             ids = ([args.source_project_id, args.target_project_id] if command == "transfer-asset"
                    else [args.project_id])
             for project_id in ids:
@@ -320,6 +330,11 @@ def main(argv: list[str] | None = None) -> int:
             if not args.offline_fixture:
                 revised_brief = bind_owner_brief(args.project_id, revised_brief)
             _emit(engine.revise_brief(args.project_id, revised_brief, reason=args.reason, affected_task_ids=affected))
+        elif command == "migrate-scope":
+            if args.offline_fixture:
+                raise StudioError("scope upgrade is owner-workspace only, not an offline fixture operation")
+            from .scope_migration import migrate_owner_scope
+            _emit(migrate_owner_scope(engine, args.project_id, reason=args.reason))
         elif command == "brief-history":
             _emit(engine.brief_history(args.project_id))
         elif command == "revise-task":
@@ -417,6 +432,15 @@ def main(argv: list[str] | None = None) -> int:
                 executor=args.executor, task_id=args.task_id,
             )
             _emit(packet or {"claimed": False, "reason": "NO_MATCHING_READY_TASK"})
+        elif command == "work-cycle":
+            from .operation_cycle import run_work_cycle
+            result = run_work_cycle(
+                engine, args.project_id, execute_tools=not args.plan_only,
+                max_workers=args.max_workers, max_rounds=args.max_rounds,
+            )
+            _emit(result)
+            if result["execution"] and result["execution"]["failed"]:
+                return 2
         elif command == "run-ready-tools":
             from .production.worker_pool import run_ready_tool_tasks
             result = run_ready_tool_tasks(

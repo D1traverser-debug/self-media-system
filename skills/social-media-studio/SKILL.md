@@ -15,13 +15,15 @@ description: CAOS-governed universal digital content studio for X longform/short
 
 **Operating contract:** `docs/standalone_social_media_studio.md`.
 
-This Skill owns self-media requirements, project state, task graphs, assets, production execution, review, failure recovery and domain learning. When Social Media Studio is selected in a CAOS-governed ChatGPT session, the CAOS parent Skill governs complete-goal recovery, material decisions, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Do not bypass that parent governance or modify the CAOS repository, Skills or configuration. Social Media Studio has no CAOS runtime/API/task-ID/lease dependency. Direct offline mechanical testing is not an owner-facing Video task; all owner-facing self-media work is governed by CAOS. The fixed-stage controller is not an active execution path.
+This Skill owns self-media requirements, project state, task graphs, assets, production execution, review, failure recovery and domain learning. When Social Media Studio is selected in a CAOS-governed ChatGPT session, the CAOS parent Skill governs complete-goal recovery, material decisions, root-cause investigation, cross-domain authorization, execution discipline and independent acceptance. Do not bypass that parent governance or modify the CAOS repository, Skills or configuration. Social Media Studio has no CAOS runtime/API/task-ID/lease dependency. Direct offline mechanical testing is not an owner-facing self-media task; all owner-facing self-media work is governed by CAOS. The fixed-stage controller is not an active execution path.
 
 ## Continuous responsibilities (not workflow nodes)
 
 At every self-media conversation and every decision/action, apply the current read-only CAOS parent Skill. Maintain the complete owner outcome and all corrections across layers. Aesthetic judgment, editorial value, communication/CTR, truth, rights, source provenance, method suitability, context isolation and independent quality review apply wherever relevant, not only inside a named stage. Reassess the chosen approach before committing; reopen the earliest contradicted decision rather than retrying blindly. Scale effort to the task, not a fixed checklist. A short caption or cover request does not inherit a full video-release pipeline.
 
 Read the architecture and continuous responsibilities in the canonical Studio manifest. The repository project index has no default project. All old project/task instances and example graphs are retired evidence or regression fixtures only. Never auto-load, execute, resume or copy them into a new brief. Start from the actual current demand; only an exact non-retired workspace ID selected by the owner can resume. Use `sms-studio intake REQUEST.json` to obtain the task-neutral route. For a durable owner project initialize with `init PROJECT --brief BRIEF.json --owner-task`; every task binds current `requirements.deliverable_refs`. This route is a mechanical locator, not proof that CAOS cognition ran. Select applicable domain capabilities and methods from the knowledge catalog; retrieve original sources on demand.
+
+For exact previous-owner workspace continuity, the `migrate-scope` command performs a one-time, explicit scope upgrade. It retains original source events and artifacts, supersedes previous decisions and revokes running claims; normal `RESUME` cannot bypass the upgrade or reactivate retired project identities. Newly initiated work uses the canonical `SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125` scope epoch. Never silently rewrite an archived source or claim an old decision still authorizes current effects.
 
 ## Professional capability discovery
 
@@ -94,6 +96,8 @@ For factual or current-affairs work:
 
 For entertainment and creative work, research may target audience language, genre grammar, platform conventions, visual references, pacing and production methods. Do not copy a reference's protected expression or treat popularity as proof that a format fits this project.
 
+For exact sourced text evidence, a declared local tool task can use `source_evidence_audit`: provide an imported JSON claim manifest and each quoted UTF-8 source as distinct immutable task inputs, and declare one evidence report output. This executor verifies current source digests and literal quotations, including recorded contradictory source labels, but **cannot** independently decide whether a claim is true, search the live web, interpret video, or approve publication. A grounded quote is not factual or authorial validation. Keep human/agent semantic review and independent acceptance separate.
+
 ## 4. Decision loop
 
 Use a recursive decision process whenever an uncertainty can materially change the outcome, cost, quality, schedule, rights or architecture.
@@ -141,6 +145,8 @@ If a required tool is unavailable, record the blocked capability and compare an 
 
 
 For complex, high-risk visual sequences, consult the **optional** `references/visual-development.md` method candidate: establish reference contracts, separate exploratory candidates from approved assets, and test representative high-risk shots before committing to costly full production. This does not impose a shot probe on standalone images, short copy, basic edits, or other unrelated deliverables; verify current provider operations and real sample results before accepting the method.
+
+For durable Studio projects, use `sms-studio work-cycle PROJECT_ID --plan-only` for a non-mutating decision/readiness/parallel-lane view. Use `sms-studio work-cycle PROJECT_ID --max-workers N` for **only registered and currently decision-admitted local tool work**; this bounded operational loop executes independent local branches concurrently and reports CAOS decision gaps, external/human/agent handoffs, failures, learning candidates and independent acceptance obligations. Never interpret its output as actual CAOS native activation, external capability availability, a human decision, accepted output or learning validation. A failed tool must not be blindly retried inside the same cycle. The owner goal and exact deliverable contracts still determine the DAG.
 
 ## 7. Worker execution and artifact custody
 

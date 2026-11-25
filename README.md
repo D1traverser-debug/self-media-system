@@ -4,6 +4,14 @@ The source package, command and product identity have been migrated; the GitHub 
 
 **Current launch authority:** `STUDIO_ENTRY.md` + `social_media_studio/data/studio_manifest.json`. **Detailed candidate architecture:** `docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md` (not automatically promoted). **No existing video/business project or 50-task plan is active by default.** Read only specific historical sources if they are relevant; do not treat a task sample as a current owner goal.
 
+## Durable work: one goal, one ledger, bounded cycles
+
+Use `sms-studio intake REQUEST.json` to identify only the owner's current demand. For a persistent project, bind the exact brief/deliverables, register task dependencies and current CAOS-governed decisions, then inspect `sms-studio work-cycle PROJECT --plan-only`. This projects currently admitted parallel lanes (tool/agent/human/external), exact-input handoff packets and decision/input blockers without claiming external authorization. `sms-studio work-cycle PROJECT --max-workers 2` executes **only locally registered, admitted tool operations** in finite concurrent rounds and then reads actual outcomes back. Revisions invalidate dependent work; failures require cause and method challenge; registered artifacts and independent review precede release. Learned methods remain candidates until independently tested and accepted.
+
+For a project carrying the previous scope epoch, use `sms-studio --root WORKSPACE migrate-scope PROJECT --reason "approved current goal"` once before RESUME. This preserves events and artifacts, supersedes earlier action decisions and revokes running claims; it never auto-resumes retired example projects.
+
+The research subsystem has a deterministic `source_evidence_audit` tool operation for an immutable claim manifest and declared UTF-8 source artifacts. It verifies exact source digests and quoted passages; it **does not** perform live research, semantic factual verification, automatic publication, or independent content acceptance.
+
 ## Current authority
 
 - `STUDIO_ENTRY.md` — only startup and operating entry for new self-media work.
@@ -20,7 +28,7 @@ The source package, command and product identity have been migrated; the GitHub 
 - `docs/provider_benchmark_protocol.md` — owner benchmark method for volatile provider quality/cost evidence.
 - `projects/PROJECT_INDEX.json` — retired historical project/program index; not current task or owner-context authority.
 - `social_media_studio/data/business_feedback.json` — task-neutral growth/IP/commercial/production feedback relations.
-- `audits/EVOLUTION_INDEX.json` — canonical Video evolution-evidence entrypoint.
+- `audits/EVOLUTION_INDEX.json` — canonical historical domain evolution-evidence entrypoint.
 - `social_media_studio/legacy/` — self-media-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
 

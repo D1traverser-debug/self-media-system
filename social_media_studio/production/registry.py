@@ -9,6 +9,7 @@ from .handlers import (
     execute_ffmpeg_video_audio_copy,
     execute_ffprobe_media_qa,
     execute_python_frame_render,
+    execute_source_evidence_audit,
 )
 
 
@@ -58,3 +59,5 @@ PRODUCTION_EXECUTORS.register("delivery_package", execute_delivery_package)
 PRODUCTION_EXECUTORS.register("ffprobe_media_qa", execute_ffprobe_media_qa)
 
 PRODUCTION_EXECUTORS.register("ffmpeg_video_audio_copy", execute_ffmpeg_video_audio_copy)
+
+PRODUCTION_EXECUTORS.register("source_evidence_audit", execute_source_evidence_audit)

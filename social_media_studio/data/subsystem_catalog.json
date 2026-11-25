@@ -28,7 +28,9 @@
         "social_media_studio/production/handlers.py",
         "social_media_studio/production/registry.py",
         "social_media_studio/production/worker_pool.py",
-        "social_media_studio/subsystems.py"
+        "social_media_studio/subsystems.py",
+        "social_media_studio/operation_cycle.py",
+        "social_media_studio/scope_migration.py"
       ],
       "domain_adapters": [],
       "production_operations": [],
@@ -70,14 +72,18 @@
     {
       "id": "research_and_understanding",
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
-      "role": "PROFESSIONAL_CAPABILITY_WITHOUT_REGISTERED_EXECUTOR",
-      "code_paths": [],
+      "role": "PROFESSIONAL_CAPABILITY_WITH_DETERMINISTIC_EVIDENCE_EXECUTOR",
+      "code_paths": [
+        "social_media_studio/domain/research.py"
+      ],
       "domain_adapters": [],
-      "production_operations": [],
+      "production_operations": [
+        "source_evidence_audit"
+      ],
       "active_by_default": false,
-      "activation": "CURRENT_USER_DEMAND_ONLY_WITH_REAL_SESSION_TOOL_CHECK",
+      "activation": "CURRENT_USER_DEMAND_ONLY",
       "creative_result_verified": false,
-      "status": "IMPLEMENTATION_GAP_NOT_A_REMOTE_SERVICE"
+      "status": "SOURCE_BYTES_AUDIT_REGISTERED__SEMANTIC_RESEARCH_NOT_CONNECTED"
     },
     {
       "id": "editorial_and_language",

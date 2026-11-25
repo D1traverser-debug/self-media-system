@@ -739,9 +739,11 @@
         "research_and_fact_check"
       ],
       "adapters": [],
-      "operations": [],
+      "operations": [
+        "source_evidence_audit"
+      ],
       "gaps": [
-        "No full semantic video/audio/image understanding or fact-research executor is registered; native session capabilities require discovery and evidence."
+        "Deterministic source-byte and quote-grounding checks are registered; no live search, external fact oracle or semantic video/audio/image understanding provider is registered."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
       "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
