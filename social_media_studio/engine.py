@@ -2420,6 +2420,8 @@ class StudioEngine:
                     report_payload = json.loads(result_path.read_text(encoding="utf-8"))
                 except (OSError, json.JSONDecodeError) as exc:
                     raise ContractError("review report artifact is not valid JSON") from exc
+                if not isinstance(report_payload, dict):
+                    raise ContractError("review report artifact must contain a JSON object")
                 expected_report = {
                     "schema_version": 1, "outcome": outcome, "dimensions": dimensions,
                     "evidence_refs": evidence_refs, "notes": notes,
