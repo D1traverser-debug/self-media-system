@@ -179,8 +179,8 @@ def validate_context_boundary(
     isolated_chat = boundary.get("isolated_chat_required", False)
     if not all(isinstance(value, bool) for value in (allow_prior, allow_siblings, isolated_chat)):
         raise ValueError("context_boundary flags must be booleans")
-    if mode == "DECLARED_INPUTS_ONLY" and (allow_prior or allow_siblings):
-        raise ValueError("DECLARED_INPUTS_ONLY cannot admit prior conversation or sibling-task context")
+    if allow_prior or allow_siblings:
+        raise ValueError("prior conversation and sibling-task context must be imported as explicitly declared artifacts")
     if isolated_chat and mode != "DECLARED_INPUTS_ONLY":
         raise ValueError("isolated_chat_required requires DECLARED_INPUTS_ONLY")
     if "native_session_isolation_verified" in boundary:
@@ -348,13 +348,14 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
         project_id = request.get("project_id")
         if project_id is not None:
             project_id = _id(project_id)
-            if (Path(root).expanduser().resolve() / "projects" / project_id).exists():
+            project_path = Path(root).expanduser().resolve() / "projects" / project_id
+            if project_path.exists() or project_path.is_symlink():
                 raise ValueError("NEW cannot reuse an existing project")
         brief = None
     elif mode == "ADOPT":
         project_id = _id(request.get("project_id"))
         project_path = Path(root).expanduser().resolve() / "projects" / project_id
-        if project_path.exists():
+        if project_path.exists() or project_path.is_symlink():
             raise ValueError("ADOPT requires a new project_id; use RESUME for an existing project")
         brief = bind_owner_brief(project_id, request.get("brief"))
         adoption_packet = validate_adoption_packet(request.get("adoption_packet"), brief)
