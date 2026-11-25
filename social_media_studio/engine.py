@@ -3110,6 +3110,25 @@ class StudioEngine:
                                     try:
                                         if not isinstance(task_contract, dict) or not isinstance(current_rubric, dict):
                                             raise ReviewExecutionError("current owner review contract is missing")
+                                        if (
+                                            task_contract.get("rubric_id") != rubric
+                                            or task_contract.get("reviewer_id") != review["reviewer_id"]
+                                            or task_contract.get("subject_artifact") != artifact["name"]
+                                        ):
+                                            raise ReviewExecutionError("review task identity no longer matches the reviewed artifact and reviewer")
+                                        for field in ("reviewer_kind", "execution_mode", "blind_review", "required_media_inspection"):
+                                            if task_contract.get(field) != current_rubric.get(field):
+                                                raise ReviewExecutionError(f"review task {field} no longer matches the owner rubric")
+                                        expected_executors = {
+                                            "HUMAN": {"human"}, "AI": {"agent", "external"}, "TOOL": {"tool"},
+                                        }.get(current_rubric.get("reviewer_kind"))
+                                        if (
+                                            current_rubric.get("reviewer_kind") not in {"HUMAN", "AI", "TOOL"}
+                                            or not isinstance(current_rubric.get("execution_mode"), str)
+                                            or not current_rubric.get("execution_mode")
+                                            or (expected_executors and task["executor"] not in expected_executors)
+                                        ):
+                                            raise ReviewExecutionError("review task executor is not authorized by the current owner rubric")
                                         packet = build_review_packet(
                                             project_id=project_id, task_id=review_task_id,
                                             task_contract=task_contract, rubric_contract=current_rubric,
