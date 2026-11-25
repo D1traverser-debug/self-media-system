@@ -12,6 +12,21 @@ def test_manifest_owner_scope_epoch_matches_runtime():
     assert contract()["task_admission"]["scope_epoch"] == EPOCH
 
 
+def test_runtime_owner_scope_operations_fail_closed_on_manifest_epoch_drift(monkeypatch, tmp_path):
+    import social_media_studio.scope as scope
+    stale = {"task_admission": {"scope_epoch": "VIDEO_TASK_NEUTRAL_20261124", "retired_project_ids": []}}
+    monkeypatch.setattr(scope, "contract", lambda: stale)
+    with pytest.raises(ValueError, match="owner scope epoch mismatch"):
+        scope.bind_owner_brief("fresh", {"goal": "caption", "audience": "test", "deliverables": ["caption"]})
+    with pytest.raises(ValueError, match="owner scope epoch mismatch"):
+        scope.resolve_intake(tmp_path, {"mode": "NEW", "goal": "caption"})
+    with pytest.raises(ValueError, match="owner scope epoch mismatch"):
+        scope.validate_task_binding(
+            {"scope_epoch": EPOCH, "deliverables": ["caption"]},
+            {"requirements": {"deliverable_refs": ["caption"]}},
+        )
+
+
 def test_new_request_is_not_a_default_task_and_does_not_mutate(tmp_path):
     root = tmp_path / "not-created"
     for goal in ("Write a title only", "Edit source video without touching audio", "Design an original cover"):
