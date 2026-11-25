@@ -26,8 +26,8 @@ def validate_workspace_mode(
     path by a marker. This is an accidental-mixing guard, not an authentication system.
     """
     candidate = Path(root).expanduser()
-    if candidate.is_symlink():
-        raise ValueError("workspace root cannot be a symlink")
+    if offline_fixture and candidate.is_symlink():
+        raise ValueError("offline fixture root cannot be a symlink")
     workspace = candidate.resolve()
     if workspace.exists() and not workspace.is_dir():
         raise ValueError("workspace root must be a directory")
