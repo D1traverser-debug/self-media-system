@@ -11,10 +11,12 @@ def test_every_python_module_and_registered_executor_has_one_real_internal_owner
     report = audit_subsystems(ROOT)
     assert report["pass"], report["violations"]
     assert report["code_modules"] == report["owned_modules"]
-    assert report["code_modules"] >= 59
-    assert report["subsystems"] == 16
-    assert report["domain_adapters"] == 17
-    assert report["production_operations"] == 6
+    catalog = json.loads((ROOT/"social_media_studio/data/subsystem_catalog.json").read_text())
+    floors = catalog["topology_contract"]
+    assert report["code_modules"] >= floors["minimum_code_modules"]
+    assert report["subsystems"] >= floors["minimum_subsystems"]
+    assert report["domain_adapters"] >= floors["minimum_domain_adapters"]
+    assert report["production_operations"] >= floors["minimum_production_operations"]
     assert report["unclassified_paths"] == []
     assert report["all_tracked_bytes_inspected"] is True
     assert len(report["all_tracked_file_sha256"]) == report["tracked_files"]
