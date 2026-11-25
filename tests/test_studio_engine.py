@@ -1498,6 +1498,8 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         "expires_at": (now + timedelta(minutes=10)).isoformat(),
         "nonce": "strict-human-cold-read-nonce-001",
         "execution_id": "strict-human-cold-read-execution-001",
+        "provider_run_id": "strict-human-cold-read-run-001",
+        "trace_id": "strict-human-cold-read-trace-001",
         "review_task_id": "human-cold-read-task",
         "review_contract_digest": review_contract_digest(
             review_task_contract, strict_brief["release_policy"]["review_contracts"]["human-cold-read"],
