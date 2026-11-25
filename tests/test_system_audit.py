@@ -5,7 +5,7 @@ from social_media_studio.system_audit import run_system_audit
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_canonical_video_system_audit_passes_structural_contract():
+def test_canonical_social_media_studio_audit_passes_structural_contract():
     report = run_system_audit(ROOT)
     assert report["pass"] is True, report
     assert report["structural_status"] == "PASS"
@@ -25,7 +25,7 @@ def test_audit_distinguishes_caos_session_governance_from_runtime_independence()
     assert boundary["automatic_publication"] is False
 
 
-def test_audit_checks_only_one_installed_video_cli():
+def test_audit_checks_only_one_installed_social_media_cli():
     import tomllib
 
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
@@ -55,3 +55,10 @@ def test_old_video_red_team_gate_is_not_universal_content_policy():
     assert "red-team" not in tweet["criteria"]
     assert "lookdev" not in tweet["criteria"]
     assert "full_playback" not in tweet["criteria"]
+
+
+def test_system_audit_detects_canonical_scope_and_new_cli_controls():
+    report = run_system_audit(ROOT)
+    checks = {item["id"]: item for item in report["checks"]}
+    assert checks["canonical_owner_scope_and_migration_contract"]["pass"]
+    assert checks["standalone_cli_registration"]["pass"]

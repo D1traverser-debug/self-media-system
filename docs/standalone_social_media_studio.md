@@ -19,7 +19,7 @@ No single visual style, runtime, aspect ratio, duration, model, editor or produc
 Business workstreams are optional objectives, not the full set of professional content domains. Social Media Studio includes the nested Original Identity/IPOS specialist for permanent character and creator identity design. Its installed Skill and private canonical state are separately maintained, while Social Media Studio owns only verified downstream bundle consumption. Ordinary temporary avatars remain general visual craft. The Studio is the **sole active control plane for durable Social Media Studio work**; for bounded direct conversational work no persistent controller is required. This does not give the historical 0.8 runtime authority or turn the Studio into merely a clip renderer. A project graph may cover one workstream or connect several:
 
 - **MEDIA_GROWTH** — audience/problem research, demand signals, platform strategy, portfolio and series hypotheses, packaging, distribution, retention and audience outcomes.
-- **ORIGINAL_DIGITAL_IP** — video-side use of approved IP, recognition/performance evidence, character/asset usage strategy and licensing-use value. Canon, likeness and identity rights remain owned by IPOS.
+- **ORIGINAL_DIGITAL_IP** — media-side use of approved IP, recognition/performance evidence, character/asset usage strategy and licensing-use value. Canon, likeness and identity rights remain owned by IPOS.
 - **COMMERCIALIZATION** — sponsor/category fit, offer hypotheses, deliverable obligations, product-truth requirements, rights scope, measurement and commercial outcomes.
 - **PRODUCTION_SYSTEM** — editorial research and claims, story/shot design, assets/takes, generation, compositing, edit, sound, QA and release.
 
@@ -49,7 +49,7 @@ Continuous responsibilities are evaluated at each applicable decision/effect: co
 - **Artifact records** own exact file identity, digest, version, rights and producer lineage.
 - **Review records** own artifact-bound evaluation evidence.
 - **Event log** is append-only operational history.
-- **IPOS** is an internal professional identity-design bounded context of Social Media Studio. Its existing private canon and owner approval are separately custodied; approved bundles may be imported into downstream Video only with exact provenance.
+- **IPOS** is an internal professional identity-design bounded context of Social Media Studio. Its existing private canon and owner approval are separately custodied; approved bundles may be imported into downstream media-production tasks only with exact provenance.
 
 CAOS governs every owner-facing self-media conversation, decision and action, including revisions, retrieval, method selection, execution and final acceptance. Social Media Studio owns domain execution, project/task state and artifact records. The runtime has no CAOS imports, API, parent task identity or parent lease; this runtime boundary does not waive the active session's CAOS governance. The fixed-stage controller is not loaded by `sms-studio`. specialist content-domain modules are imported only through `social_media_studio.adapters` when a task declares a supported adapter.
 
@@ -246,7 +246,7 @@ The attestation JSON should identify `reviewer_kind`, `execution_mode`, `blind_r
 
 For each new durable demand, use `sms-studio intake REQUEST.json` with a JSON object containing the owner's exact goal and mode NEW. For continuation provide mode RESUME and the exact workspace project_id. No default project, previous brief, preset tasks, IP or source media are selected. A retired repository identity is not resumable. The route is a mechanical projection; CAOS session governance and independently verified outcomes remain separate.
 
-Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Initialize a fresh owner project with `init PROJECT --brief BRIEF.json --owner-task`; `requirements.deliverable_refs` on each task must reference exact current brief deliverable names. The local marker is an epoch/identity check, never evidence of cognition. Mechanical offline regression fixtures deliberately do not carry that marker. The CLI defaults to owner scope; `--offline-fixture` requires an explicit separate root and cannot enter an owner ledger. Only a current owner requirement or verified input can add scope. Examples below are isolated regression fixtures, not task templates or current work.
+Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Initialize a fresh owner project with `init PROJECT --brief BRIEF.json --owner-task`; `requirements.deliverable_refs` on each task must reference exact current brief deliverable names. The local marker is an epoch/identity check, never evidence of cognition. Owner initialization requires explicit `--owner-task`. Mechanical offline regression uses an empty, separate root initialized by `--offline-fixture init`; this writes `.sms-offline-fixture.json`, refuses the configured owner workspace and rejects every owner-scoped project epoch. Only a current owner requirement or verified input can add scope. Examples below are isolated regression fixtures, not task templates or current work.
 
 ### 13.2 Episode-specific example
 

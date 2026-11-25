@@ -69,19 +69,25 @@ def test_stale_or_unrelated_task_binding_fails_without_state_mutation(tmp_path):
     assert engine.list_tasks("fresh")[0]["requirements"]["deliverable_refs"] == ["caption"]
 
 
-def test_cli_rejects_legacy_workspace_on_all_owner_paths(tmp_path, capsys):
+def test_cli_rejects_legacy_workspace_and_requires_explicit_owner_init(tmp_path, capsys):
     from social_media_studio.cli import main
     workspace = tmp_path / "workspace"
     engine = StudioEngine(workspace)
     engine.create_project("old-local", "old", {"goal": "old", "audience": "test", "deliverables": ["old"]})
     assert main(["--root", str(workspace), "status", "old-local"]) == 2
     assert main(["--root", str(workspace), "claim", "old-local", "--worker", "w"]) == 2
-    assert main(["--root", str(workspace), "--offline-fixture", "status", "old-local"]) == 0
+    assert main(["--root", str(workspace), "--offline-fixture", "status", "old-local"]) == 2
     brief = tmp_path / "brief.json"
     brief.write_text(json.dumps({"goal": "new", "audience": "test", "deliverables": ["caption"]}))
-    assert main(["--root", str(workspace), "init", "fresh", "--brief", str(brief)]) == 0
+    assert main(["--root", str(workspace), "init", "fresh", "--brief", str(brief)]) == 2
+    assert not (workspace / "projects" / "fresh").exists()
+    assert main(["--root", str(workspace), "init", "fresh", "--brief", str(brief), "--owner-task"]) == 0
     assert resolve_intake(workspace, {"mode": "RESUME", "project_id": "fresh"})["scope_epoch"] == EPOCH
     assert main(["--root", str(workspace), "--offline-fixture", "status", "fresh"]) == 2
+    fixture_root = tmp_path / "isolated-fixture"
+    assert main(["--root", str(fixture_root), "--offline-fixture", "init", "fixture", "--brief", str(brief)]) == 0
+    assert (fixture_root / ".sms-offline-fixture.json").is_file()
+    assert main(["--root", str(fixture_root), "--offline-fixture", "status", "fixture"]) == 0
     assert main(["--root", str(workspace), "status", "fresh"]) == 0
 
 
@@ -189,3 +195,50 @@ def test_x_article_and_one_time_avatar_dispatch_are_typed_internal_routes(tmp_pa
     assert new["internal_subsystem_routing"]["peer_system_task_authority_inherited"] is False
     assert new["selected_task_graph"] is None
     assert new["effect_authorized"] is False
+
+
+def test_offline_fixture_cannot_use_owner_root_or_any_epoch_project(tmp_path, monkeypatch):
+    from social_media_studio.cli import main
+    from social_media_studio.scope_migration import PRIOR_EPOCH
+
+    owner_root = tmp_path / "configured-owner"
+    monkeypatch.setenv("SMS_STUDIO_HOME", str(owner_root))
+    brief_path = tmp_path / "brief.json"
+    brief_path.write_text(json.dumps({
+        "goal": "fixture only", "audience": "test", "deliverables": ["out"]
+    }), encoding="utf-8")
+    assert main(["--root", str(owner_root), "--offline-fixture", "init",
+                 "blocked", "--brief", str(brief_path)]) == 2
+    assert not owner_root.exists()
+
+    fixture_root = tmp_path / "fixture-root"
+    assert main(["--root", str(fixture_root), "--offline-fixture", "init",
+                 "seed", "--brief", str(brief_path)]) == 0
+    engine = StudioEngine(fixture_root)
+    legacy = {"goal": "prior owner work", "audience": "owner",
+              "deliverables": ["out"], "scope_epoch": PRIOR_EPOCH}
+    # Direct fixture setup simulates a pre-cutover owner workspace inside a
+    # marked test root; offline CLI must still refuse to operate on it.
+    unscoped = {"goal": "temporary", "audience": "test", "deliverables": ["out"]}
+    engine.create_project("legacy-owner", "legacy owner", unscoped)
+    from contextlib import closing
+    with closing(engine._connect("legacy-owner")) as connection:
+        connection.execute("UPDATE projects SET brief_json=? WHERE project_id=?",
+                           (json.dumps(legacy), "legacy-owner"))
+        connection.commit()
+    assert main(["--root", str(fixture_root), "--offline-fixture", "status",
+                 "legacy-owner"]) == 2
+
+
+def test_offline_fixture_rejects_nonempty_unmarked_root(tmp_path):
+    from social_media_studio.cli import main
+    root = tmp_path / "not-a-fixture"
+    root.mkdir()
+    (root / "owner-data.txt").write_text("do not touch", encoding="utf-8")
+    brief = tmp_path / "brief.json"
+    brief.write_text(json.dumps({
+        "goal": "test", "audience": "test", "deliverables": ["out"]
+    }), encoding="utf-8")
+    assert main(["--root", str(root), "--offline-fixture", "init",
+                 "fixture", "--brief", str(brief)]) == 2
+    assert not (root / ".sms-offline-fixture.json").exists()

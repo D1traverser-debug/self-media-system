@@ -47,6 +47,9 @@ def _brand_violations(root: Path) -> list[str]:
         "video" + "_studio", "video" + "_growth_agent", "vga" + "-",
         "VGA" + "_", "VIDEO" + "_GROWTH_AGENT",
         "Video" + " Growth Agent", "Universal" + " Content Studio",
+        "Video" + " state", "Video" + " domain adapter",
+        "explicit Video" + " adapter", "Historical Video 0.8" + " domain models",
+        "downstream Video", "Video evolution-evidence",
     )
     violations = []
     for candidate in paths:
@@ -67,7 +70,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
 
     This is a repository-level structural/readiness audit. It exercises the project
     engine in temporary directories and never mutates the repository or user workspace.
-    A structural PASS does not mean a video has been generated, reviewed or released.
+    A structural PASS does not mean a requested deliverable has been generated, reviewed or released.
     """
     root = Path(repo_root).expanduser().resolve() if repo_root else Path(__file__).resolve().parents[1]
     checks: list[dict[str, Any]] = []
@@ -79,6 +82,10 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         root / "pyproject.toml",
         root / "social_media_studio" / "data" / "studio_manifest.json",
         root / "social_media_studio" / "system_audit.py",
+        root / "social_media_studio" / "data" / "subsystem_catalog.json",
+        root / "social_media_studio" / "scope_migration.py",
+        root / "social_media_studio" / "operation_cycle.py",
+        root / "skills" / "social-media-studio" / "SKILL.md",
         root / "examples" / "technology-explainer.brief.json",
         root / "examples" / "technology-explainer.tasks.json",
         root / "examples" / "news-fictional-media.brief.json",
@@ -167,12 +174,28 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     _check(checks, "social_media_product_identity_no_active_legacy_aliases",
            product_identity_ok, {"violations": brand_violations})
 
-    from .scope import resolve_intake
+    from .scope import EPOCH, resolve_intake
+    from .scope_migration import PRIOR_EPOCH
     index = _read_json(root / "projects" / "PROJECT_INDEX.json")
     admission = studio_manifest.get("task_admission", {})
     retired_ids = {item["project_id"] for item in index["projects"]}
+    migration_contract = studio_manifest.get("scope_migration", {})
+    scope_contract_ok = (
+        admission.get("scope_epoch") == EPOCH
+        and migration_contract.get("previous_epoch") == PRIOR_EPOCH
+        and migration_contract.get("current_epoch") == EPOCH
+        and migration_contract.get("explicit_owner_reason_required") is True
+        and migration_contract.get("automatic_migration") is False
+        and migration_contract.get("running_claims") == "REVOKE_AND_MARK_STALE"
+        and migration_contract.get("events_and_artifacts") == "PRESERVE"
+    )
+    _check(checks, "canonical_owner_scope_and_migration_contract", scope_contract_ok, {
+        "manifest_epoch": admission.get("scope_epoch"), "runtime_epoch": EPOCH,
+        "migration_contract": migration_contract,
+    })
     task_neutral = (
-        index.get("default_project_id") is None
+        admission.get("scope_epoch") == EPOCH
+        and index.get("default_project_id") is None
         and admission.get("default_project_id") is None
         and admission.get("default_task_graph") is None
         and admission.get("automatic_resume") is False
@@ -264,6 +287,9 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         scripts.get("sms-studio") == "social_media_studio.cli:main"
         and "system-audit" in cli_source and "import-manifest" in cli_source
         and "transfer-asset" in cli_source and hasattr(StudioEngine, "transfer_artifact")
+        and "migrate-scope" in cli_source and "work-cycle" in cli_source
+        and "--owner-task" in cli_source and "args.owner_task" in cli_source
+        and "run_work_cycle" in cli_source and "migrate_owner_scope" in cli_source
     )
     _check(checks, "standalone_cli_registration", cli_registered, scripts)
 

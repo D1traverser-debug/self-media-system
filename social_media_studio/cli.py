@@ -21,13 +21,56 @@ def _emit(payload: Any) -> None:
     print(json.dumps(payload, ensure_ascii=False, indent=2))
 
 
+_OFFLINE_FIXTURE_MARKER = ".sms-offline-fixture.json"
+_OFFLINE_FIXTURE_KIND = "SOCIAL_MEDIA_STUDIO_OFFLINE_FIXTURE"
+
+
+def _prepare_offline_fixture_root(root: str | Path, *, command: str) -> Path:
+    """Require a freshly isolated, explicitly marked regression workspace."""
+    import os
+
+    resolved = Path(root).expanduser().resolve()
+    owner_root = Path(
+        os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio")
+    ).expanduser().resolve()
+    if resolved == owner_root:
+        raise StudioError("offline fixtures cannot use the configured owner workspace")
+    marker = resolved / _OFFLINE_FIXTURE_MARKER
+
+    def validate_marker() -> None:
+        if marker.is_symlink() or not marker.is_file():
+            raise StudioError("offline fixture root has no valid isolation marker")
+        try:
+            value = json.loads(marker.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise StudioError("offline fixture isolation marker is unreadable") from exc
+        if value != {"schema_version": 1, "kind": _OFFLINE_FIXTURE_KIND}:
+            raise StudioError("offline fixture isolation marker is invalid")
+
+    if marker.exists() or marker.is_symlink():
+        validate_marker()
+        return resolved
+    if command != "init":
+        raise StudioError("offline fixture root must be initialized by an offline-fixture init command")
+    if resolved.exists() and any(resolved.iterdir()):
+        raise StudioError("first offline fixture initialization requires an empty, separate root")
+    resolved.mkdir(parents=True, exist_ok=True)
+    try:
+        with marker.open("x", encoding="utf-8") as stream:
+            json.dump({"schema_version": 1, "kind": _OFFLINE_FIXTURE_KIND}, stream)
+            stream.write("\n")
+    except FileExistsError:
+        validate_marker()
+    return resolved
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sms-studio",
         description="Standalone outcome-driven Social Media Studio. No CAOS runtime or provider lock-in.",
     )
     parser.add_argument("--root", type=Path, help="workspace root (default: SMS_STUDIO_HOME or ~/.sms-studio)")
-    parser.add_argument("--offline-fixture", action="store_true", help="isolated regression workspace only; never owner work")
+    parser.add_argument("--offline-fixture", action="store_true", help="isolated regression workspace only; requires a fresh marked root and never accesses owner work")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("subsystems", help="source-based audit of all internal systems and import dependencies")
@@ -54,11 +97,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("intake", help="resolve only the current owner demand or exact current workspace identity")
     p.add_argument("request", type=Path)
 
-    p = sub.add_parser("init", help="create a project from an outcome brief")
+    p = sub.add_parser("init", help="create a current owner project from an outcome brief; requires --owner-task outside offline fixtures")
     p.add_argument("project_id")
     p.add_argument("--title", default="")
     p.add_argument("--brief", type=Path, required=True, help="JSON brief with goal, audience and deliverables")
-    p.add_argument("--owner-task", action="store_true", help="bind a fresh task-neutral owner brief; not proof of CAOS activation")
+    p.add_argument("--owner-task", action="store_true", help="explicitly initialize an owner-scoped project; not proof of CAOS activation")
 
     p = sub.add_parser("revise-brief", help="revise the owner outcome and invalidate only affected dependency descendants")
     p.add_argument("project_id")
@@ -111,7 +154,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("status", help="show project and task readiness")
     p.add_argument("project_id")
 
-    p = sub.add_parser("resume", help="reconstruct the project handoff from durable Video state without chat memory")
+    p = sub.add_parser("resume", help="reconstruct the project handoff from durable Social Media Studio state without chat memory")
     p.add_argument("project_id")
     p.add_argument("--event-limit", type=int, default=40)
 
@@ -230,7 +273,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--token", required=True)
     p.add_argument("--input-name", help="declared input artifact name; defaults to the first available input")
 
-    p = sub.add_parser("run-adapter", help="run a declared deterministic Video domain adapter inside a claimed Studio task")
+    p = sub.add_parser("run-adapter", help="run a declared deterministic Social Media Studio domain adapter inside a claimed task")
     p.add_argument("project_id")
     p.add_argument("task_id")
     p.add_argument("--worker", required=True)
@@ -304,6 +347,10 @@ def main(argv: list[str] | None = None) -> int:
             raise StudioError("offline regression requires an explicit separate workspace root")
         import os
         root = args.root or Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
+        if args.offline_fixture:
+            if command == "migrate-scope":
+                raise StudioError("scope upgrade is owner-workspace only, not an offline fixture operation")
+            root = _prepare_offline_fixture_root(root, command=command)
         if command not in {"init", "migrate-scope"}:
             ids = ([args.source_project_id, args.target_project_id] if command == "transfer-asset"
                    else [args.project_id])
@@ -311,10 +358,10 @@ def main(argv: list[str] | None = None) -> int:
                 if not args.offline_fixture:
                     resolve_intake(root, {"mode": "RESUME", "project_id": project_id})
                 else:
-                    # Test execution cannot enter a current owner ledger.
+                    # Any scope epoch means owner history, including a prior epoch.
                     from .scope import read_project_brief
-                    if read_project_brief(root, project_id).get("scope_epoch") == EPOCH:
-                        raise StudioError("offline fixture mode cannot access current owner projects")
+                    if "scope_epoch" in read_project_brief(root, project_id):
+                        raise StudioError("offline fixture mode cannot access any owner-scoped project; use the owner path and explicit migration")
         engine = StudioEngine(root)
         if command == "init":
             brief = _read_json(args.brief)
@@ -322,6 +369,8 @@ def main(argv: list[str] | None = None) -> int:
                 if args.owner_task or "scope_epoch" in brief:
                     raise StudioError("offline fixture cannot create an owner project")
             else:
+                if not args.owner_task:
+                    raise StudioError("owner project initialization requires explicit --owner-task")
                 brief = bind_owner_brief(args.project_id, brief)
             _emit(engine.create_project(args.project_id, args.title, brief))
         elif command == "revise-brief":

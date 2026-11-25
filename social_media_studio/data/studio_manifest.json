@@ -189,7 +189,7 @@
     "project_selection": "EXACT_OWNER_SELECTED_WORKSPACE_ID_ONLY",
     "repository_projects": "RETIRED_EVIDENCE_ONLY",
     "examples": "REGRESSION_FIXTURES_ONLY",
-    "scope_epoch": "VIDEO_TASK_NEUTRAL_20261124",
+    "scope_epoch": "SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125",
     "retired_project_ids": [
       "ai-self-media-commercialization",
       "pilot-001",
@@ -395,5 +395,30 @@
     "OPTIONAL_GROWTH_AND_COMMERCIAL"
   ],
   "product_name_zh": "自媒体系统",
-  "repository_slug": "social-media-studio"
+  "repository_slug": "social-media-studio",
+  "scope_migration": {
+    "command": "sms-studio migrate-scope PROJECT --reason OWNER_APPROVED_REASON",
+    "previous_epoch": "VIDEO_TASK_NEUTRAL_20261124",
+    "current_epoch": "SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125",
+    "explicit_owner_reason_required": true,
+    "automatic_migration": false,
+    "retired_project_ids_migratable": false,
+    "prior_decisions": "PRESERVE_IMMUTABLE_RECEIPTS_AND_APPEND_SUPERSESSION_EVENTS",
+    "running_claims": "REVOKE_AND_MARK_STALE",
+    "events_and_artifacts": "PRESERVE",
+    "fresh_current_decision_required": true
+  },
+  "operational_cycle": {
+    "entrypoint": "sms-studio work-cycle PROJECT",
+    "planning": "READ_ONLY_CURRENT_ADMISSION_AND_PARALLEL_LANE_PROJECTION",
+    "execution": "BOUNDED_REGISTERED_DECISION_ADMITTED_LOCAL_TOOLS_ONLY",
+    "handoff_lanes": [
+      "agent",
+      "human",
+      "external"
+    ],
+    "handoff": "EXACT_INPUT_ARTIFACT_AND_SHA256_PACKET_NO_IMPLICIT_CLAIM_OR_EFFECT",
+    "failure": "ROOT_CAUSE_REPLAN_REQUIRED_NO_BLIND_SAME_INVOCATION_RETRY",
+    "acceptance": "SEPARATE_EXACT_ARTIFACT_INDEPENDENT_RELEASE_CHECK"
+  }
 }

@@ -2,13 +2,13 @@
 
 The source package, command and product identity have been migrated; the GitHub remote address requires a separate administrative rename. This is a CAOS-governed **general digital content system**, not a mandatory video-production pipeline. Its on-demand professional capabilities include original Chinese/English writing and X Articles, platform-native titles/descriptions/tags/cover copy, static/multi-aspect images and prompts, multimedia understanding and editing, exact audio preservation, audiovisual production, and nested Original Identity/IPOS. Each user goal activates only relevant capabilities. The Social Media Studio runtime remains technically independent of the CAOS codebase; CAOS governs the user's selected work at every material decision/effect.
 
-**Current launch authority:** `STUDIO_ENTRY.md` + `social_media_studio/data/studio_manifest.json`. **Detailed candidate architecture:** `docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md` (not automatically promoted). **No existing video/business project or 50-task plan is active by default.** Read only specific historical sources if they are relevant; do not treat a task sample as a current owner goal.
+**Current launch authority:** `STUDIO_ENTRY.md` + `social_media_studio/data/studio_manifest.json`. **Detailed candidate architecture:** `docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md` (not automatically promoted). **No repository project, campaign or 50-task plan is active by default.** Read only specific historical sources if they are relevant; do not treat a task sample as a current owner goal.
 
 ## Durable work: one goal, one ledger, bounded cycles
 
 Use `sms-studio intake REQUEST.json` to identify only the owner's current demand. For a persistent project, bind the exact brief/deliverables, register task dependencies and current CAOS-governed decisions, then inspect `sms-studio work-cycle PROJECT --plan-only`. This projects currently admitted parallel lanes (tool/agent/human/external), exact-input handoff packets and decision/input blockers without claiming external authorization. `sms-studio work-cycle PROJECT --max-workers 2` executes **only locally registered, admitted tool operations** in finite concurrent rounds and then reads actual outcomes back. Revisions invalidate dependent work; failures require cause and method challenge; registered artifacts and independent review precede release. Learned methods remain candidates until independently tested and accepted.
 
-For a project carrying the previous scope epoch, use `sms-studio --root WORKSPACE migrate-scope PROJECT --reason "approved current goal"` once before RESUME. This preserves events and artifacts, supersedes earlier action decisions and revokes running claims; it never auto-resumes retired example projects.
+Owner project initialization requires the explicit `--owner-task` flag; this binds the current scope but does not prove CAOS activation. Offline regression roots are created only from an empty, separate directory and receive a `.sms-offline-fixture.json` isolation marker. They cannot reuse the configured owner workspace or any project carrying an owner scope epoch.\n\nFor a project carrying the previous scope epoch, use `sms-studio --root WORKSPACE migrate-scope PROJECT --reason "approved current goal"` once before RESUME. This preserves events and artifacts, supersedes earlier action decisions and revokes running claims; it never auto-resumes retired example projects.
 
 The research subsystem has a deterministic `source_evidence_audit` tool operation for an immutable claim manifest and declared UTF-8 source artifacts. It verifies exact source digests and quoted passages; it **does not** perform live research, semantic factual verification, automatic publication, or independent content acceptance.
 
@@ -28,15 +28,15 @@ The research subsystem has a deterministic `source_evidence_audit` tool operatio
 - `docs/provider_benchmark_protocol.md` — owner benchmark method for volatile provider quality/cost evidence.
 - `projects/PROJECT_INDEX.json` — retired historical project/program index; not current task or owner-context authority.
 - `social_media_studio/data/business_feedback.json` — task-neutral growth/IP/commercial/production feedback relations.
-- `audits/EVOLUTION_INDEX.json` — canonical historical domain evolution-evidence entrypoint.
+- `audits/EVOLUTION_INDEX.json` — canonical historical Social Media Studio evolution-evidence entrypoint.
 - `social_media_studio/legacy/` — self-media-owned domain logic and data consumed only through the explicit Studio adapter boundary; it is not a second runtime.
 - binary/media stores — evidence only when bound by stable refs/digests; never business authority by presence alone.
 
 The `social_media_studio` package is the sole Social Media Studio runtime: it owns self-media project briefs, task DAGs, leases, artifact history, review receipts, failure recovery and domain execution. CAOS governs session-level requirement interpretation, material decisions, root-cause investigation, cross-domain authorization and independent acceptance when the owner selects Social Media Studio from CAOS. The Social Media Studio runtime has no CAOS API, runtime, task-ID or lease dependency. specialist content-domain modules are imported only through the explicit `social_media_studio.adapters` boundary; the old fixed-stage controller is not an active execution path.
 
-## Historical Video 0.8 domain models (not a universal execution chain)
+## Historical media-domain 0.8 models (not a universal execution chain)
 
-The following historical video-specific structures remain callable only where an explicit Video adapter declares the corresponding work. They do not describe the current general-content workflow. New user content demands route through typed contracts; `social_media_studio.engine.StudioEngine` is the only durable scheduler, and direct conversational tasks need no project.
+The following historical video-specific structures remain callable only where an explicit Social Media Studio media adapter declares the corresponding work. They do not describe the current general-content workflow. New user content demands route through typed contracts; `social_media_studio.engine.StudioEngine` is the only durable scheduler, and direct conversational tasks need no project.
 
 Historical example chain (not a current default or mandatory production order):
 
