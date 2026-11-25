@@ -40,6 +40,30 @@ The canonical manifest defines authority, optional business domains, professiona
 
 Continuous responsibilities are evaluated at each applicable decision/effect: complete owner goal and corrections, CAOS recursive governance, aesthetic and narrative coherence, audience/communication value, rights/truth, exact context and version, independently observed quality, and learning/re-entry. Aesthetic direction remains in scope from concept to final review and upstream revisions; it is not a standalone gate or a task to mark done. Unknowns reopen the earliest affected decision and only invalidate dependent work. There is no default project or default task plan. Old instances are retired; fixtures are for tests only.
 
+## 2.1 Task identity, conversation continuity and adoption
+
+The runtime distinguishes four identities:
+
+- **Subsystem:** a reusable capability boundary, not a work order.
+- **Project ID:** one coherent owner outcome and its durable project context; it may span multiple chat conversations.
+- **Task ID:** one project-local DAG execution node with declared dependencies, inputs, outputs and acceptance.
+- **Conversation:** an ephemeral interaction surface; it is not a project or task authority.
+
+A direct short task need not create a project. A durable task uses one project per coherent owner outcome; independent outcomes use separate projects. Subsystem reuse never imports another project's requirements, images, decisions or state. Cross-project sharing requires an explicit exact-artifact transfer.
+
+The intake modes are:
+- `NEW`: new owner outcome; no project is selected by recency.
+- `RESUME`: one exact current project ID.
+- `ADOPT`: create a new project from a validated conversation-adoption packet when work has already started outside the durable ledger.
+
+An adoption packet (`SOCIAL_MEDIA_STUDIO_ADOPTION_PACKET`, schema 1.0) preserves source references and declared coverage, original/current goal, ordered corrections, constraints, preferences, prohibitions, claimed versus verified completion, prior decisions, failure history, open items, next action and context boundary. `FULL_SOURCE_EXPORT` requires a hashed exact chat export; partial/current-chat/unknown coverage must remain labelled. Prior decisions are imported as context requiring revalidation. A chat claim is not proof of a completed task; verified completion requires current artifact readback. Actual source files are imported separately through `import-manifest`.
+
+A deliberate pause records `PROJECT_CHECKPOINT_RECORDED` with session summary, corrections, source coverage, open items, unregistered work and next action. `resume` reconstructs all task contracts, current artifacts/digests, brief history, decisions, reviews, failures, learning and the latest checkpoint. An exported handoff is a derived read-only projection with Project ID, revision, event cursor and SHA-256; it is not a second source of truth and must be reconciled against the live project ledger before state-changing work. If the live ledger is unavailable, the new Agent must disclose snapshot-only recovery.
+
+Task-level context isolation is declared in `requirements.context_boundary`. The default work packet contains exact declared inputs and the current project brief, but never implicit prior-conversation or sibling-task context. `DECLARED_INPUTS_ONLY` omits the project brief and includes only the exact declared task inputs and task contract. `excluded_context_refs` are explicit. The task handoff is read-only, does not claim work or authorize effects, and cannot prove that the chat platform natively isolated the session. The returned artifact must be imported and verified in the original project before task completion.
+
+Learning remains scoped: task corrections/failures stay in the project; reusable methods remain candidates; system-wide changes require root-cause analysis, cross-task applicability, regression and independent acceptance. One task cannot silently change global rules.
+
 ## 2. Authority and independence
 
 - **Owner request and corrections** define the goal and constraints.
@@ -270,9 +294,9 @@ The attestation JSON should identify `reviewer_kind`, `execution_mode`, `blind_r
 
 ### 13.1 Task-neutral intake and planning
 
-For each new durable demand, use `sms-studio intake REQUEST.json` with a JSON object containing the owner's exact goal and mode NEW. For continuation provide mode RESUME and the exact workspace project_id. No default project, previous brief, preset tasks, IP or source media are selected. A retired repository identity is not resumable. The route is a mechanical projection; CAOS session governance and independently verified outcomes remain separate.
+For each new durable demand, use `sms-studio intake REQUEST.json` with mode NEW and the owner's exact goal. For continuation use mode RESUME and the exact current project_id. For already-started conversation work use mode ADOPT with a new project_id, current brief and validated adoption packet. No default project or recency-based selection exists. A retired repository identity is not resumable. The route is a mechanical projection; CAOS session governance and independently verified outcomes remain separate.
 
-Plan the actual deliverable(s) and dependencies using the applicable capability contracts; a one-step task is valid. Initialize a fresh owner project with `init PROJECT --brief BRIEF.json --owner-task`; `requirements.deliverable_refs` on each task must reference exact current brief deliverable names. The local marker is an epoch/identity check, never evidence of cognition. Mechanical offline regression fixtures deliberately do not carry that marker. Owner project creation requires explicit `--owner-task`. `--offline-fixture` requires an explicit dedicated root that is empty on first initialization; the CLI writes a root-bound `.sms-offline-fixture.json` marker. Fixture mode cannot adopt a pre-existing unmarked workspace, and owner mode cannot open a fixture-marked root. The marker prevents accidental mode mixing; it is not an authentication boundary. Only a current owner requirement or verified input can add owner scope. Examples below are isolated regression fixtures, not task templates or current work.
+Plan only the remaining deliverables and dependencies using the applicable capability contracts; a one-step task is valid. Initialize a fresh owner project with `init PROJECT --brief BRIEF.json --owner-task`; adopt in-progress chat work with `adopt PROJECT --brief BRIEF.json --packet ADOPTION.json --owner-task`. `requirements.deliverable_refs` on each execution task must reference exact current brief deliverable names. The local marker is an epoch/identity check, never evidence of cognition. Mechanical offline regression fixtures deliberately do not carry that marker. Owner project creation requires explicit `--owner-task`. `--offline-fixture` requires an explicit dedicated root that is empty on first initialization; the CLI writes a root-bound `.sms-offline-fixture.json` marker. Fixture mode cannot adopt a pre-existing unmarked workspace, and owner mode cannot open a fixture-marked root. The marker prevents accidental mode mixing; it is not an authentication boundary. Only a current owner requirement or verified input can add owner scope. Examples below are isolated regression fixtures, not task templates or current work.
 
 ### 13.2 Episode-specific example
 
@@ -296,6 +320,15 @@ sms-studio --offline-fixture --root ./studio-work review episode-001 ARTIFACT_ID
 # inspect current state and durable event history
 sms-studio --offline-fixture --root ./studio-work audit episode-001
 sms-studio --offline-fixture --root ./studio-work events episode-001
+
+# export a read-only project handoff to attach in a new chat
+sms-studio --offline-fixture --root ./studio-work resume episode-001 --output ./handoff/episode-001.json
+
+# append a session checkpoint without changing task state
+sms-studio --offline-fixture --root ./studio-work checkpoint episode-001 CHECKPOINT.json
+
+# create a read-only packet for one exact task (no claim/effect authorization)
+sms-studio --offline-fixture --root ./studio-work handoff episode-001 TASK_ID
 ```
 
 `sms-studio --help` lists brief revision/history, task-contract revision, claim heartbeat, complete, fail, wait-input, decision, failure, resolve-failure, invalidate, reopen, learn and release-check commands. `qa-media` runs the built-in FFmpeg/FFprobe measurement adapter against a claimed `technical_measurement` task, writes a digest-bound QA receipt and completes that measurement task. It checks technical properties only; it cannot approve craft, truth, rights or release.
