@@ -186,16 +186,25 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         and set(admission.get("retired_project_ids", [])) == retired_ids
         and all(item["status"] == "RETIRED_EVIDENCE_ONLY" and not item["default_for_generic_domain_intent"] for item in index["projects"])
     )
+    intake_failure = None
     with tempfile.TemporaryDirectory(prefix="sms-intake-") as scope_root:
-        route = resolve_intake(scope_root, {"mode": "NEW", "goal": "Create a short original caption"})
-        task_neutral = task_neutral and route["project_id"] is None and route["selected_task_graph"] is None
-        for retired_id in retired_ids:
-            try:
-                resolve_intake(scope_root, {"mode": "RESUME", "project_id": retired_id})
-            except ValueError:
-                continue
+        try:
+            route = resolve_intake(scope_root, {"mode": "NEW", "goal": "Create a short original caption"})
+            task_neutral = task_neutral and route["project_id"] is None and route["selected_task_graph"] is None
+        except ValueError as exc:
             task_neutral = False
-    _check(checks, "task_neutral_intake_and_retirement", task_neutral, sorted(retired_ids))
+            intake_failure = f"{type(exc).__name__}: {exc}"
+        if intake_failure is None:
+            for retired_id in retired_ids:
+                try:
+                    resolve_intake(scope_root, {"mode": "RESUME", "project_id": retired_id})
+                except ValueError:
+                    continue
+                task_neutral = False
+    _check(checks, "task_neutral_intake_and_retirement", task_neutral, {
+        "retired_project_ids": sorted(retired_ids),
+        "intake_failure": intake_failure,
+    })
 
     workspace_mode_failures: list[str] = []
     try:
