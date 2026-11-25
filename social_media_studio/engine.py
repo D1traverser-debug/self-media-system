@@ -1871,10 +1871,8 @@ class StudioEngine:
                     evidence_refs = _loads(review["evidence_refs_json"], [])
                     if (
                         not isinstance(evidence_refs, list) or not evidence_refs
-                        or any(
-                            not isinstance(ref, str) or not ref.strip()
-                            or ref != ref.strip() for ref in evidence_refs
-                        )
+                        or any(not isinstance(ref, str) or not ref.strip() or ref != ref.strip()
+                               for ref in evidence_refs)
                     ):
                         raise ContractError(
                             f"{role} review requires exact registered evidence artifact IDs: {review['review_id']}"
@@ -1883,13 +1881,40 @@ class StudioEngine:
                         raise ContractError(
                             f"{role} review contains duplicate evidence artifact IDs: {review['review_id']}"
                         )
+                    event_row = connection.execute(
+                        """SELECT payload_json FROM events
+                           WHERE project_id=? AND entity_type='REVIEW' AND entity_id=?
+                             AND event_type='REVIEW_RECORDED'
+                           ORDER BY event_no DESC LIMIT 1""",
+                        (project_id, review["review_id"]),
+                    ).fetchone()
+                    event_payload = _loads(event_row["payload_json"], {}) if event_row else {}
+                    snapshot = event_payload.get("evidence_bindings", {})
+                    snapshots = snapshot.get("review_evidence", []) if isinstance(snapshot, dict) else []
+                    if not isinstance(snapshots, list) or len(snapshots) != len(evidence_refs):
+                        raise ContractError(
+                            f"{role} review lacks review-time evidence digest bindings: {review['review_id']}"
+                        )
                     bindings: list[dict[str, Any]] = []
-                    for evidence_id in evidence_refs:
+                    for index, evidence_id in enumerate(evidence_refs):
+                        binding = snapshots[index]
+                        if not isinstance(binding, dict) or binding.get("reference") != evidence_id or binding.get("resolved") is not True:
+                            raise ContractError(
+                                f"{role} review evidence was not digest-bound when reviewed: {review['review_id']}:{evidence_id}"
+                            )
                         if evidence_id == reviewed_artifact_id:
                             raise ContractError(
                                 f"{role} review cannot cite the reviewed report as its own evidence: {review['review_id']}"
                             )
                         evidence_artifact = verify_artifact(evidence_id, f"{role} review evidence")
+                        if (
+                            int(evidence_artifact["version"]) != binding.get("version")
+                            or evidence_artifact["sha256"] != binding.get("sha256")
+                            or evidence_artifact["producer_id"] != binding.get("producer_id")
+                        ):
+                            raise ContractError(
+                                f"{role} review evidence no longer matches its review-time digest binding: {evidence_id}"
+                            )
                         evidence_producer_id = evidence_artifact["producer_id"]
                         if not isinstance(evidence_producer_id, str) or not evidence_producer_id.strip():
                             raise ContractError(
@@ -2054,12 +2079,63 @@ class StudioEngine:
                 raise ContractError("artifact bytes changed; review must target a verified current digest")
             if reviewer_id == artifact["producer_id"]:
                 raise ContractError("producer cannot independently review its own artifact")
+
+            def snapshot_evidence_reference(reference: Any) -> dict[str, Any]:
+                if (
+                    not isinstance(reference, str) or not reference.strip()
+                    or reference != reference.strip()
+                ):
+                    return {"reference": reference, "resolved": False, "reason": "INVALID_REFERENCE"}
+                evidence_artifact = connection.execute(
+                    "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, reference),
+                ).fetchone()
+                if evidence_artifact is None:
+                    evidence_artifact = self._artifact_by_name(connection, project_id, reference)
+                if evidence_artifact is None or evidence_artifact["status"] not in {"CURRENT", "ACCEPTED"}:
+                    return {"reference": reference, "resolved": False, "reason": "NOT_CURRENT_OR_REGISTERED"}
+                evidence_path = self._project_dir(project_id) / evidence_artifact["relative_path"]
+                if not evidence_path.is_file() or _sha256(evidence_path) != evidence_artifact["sha256"]:
+                    return {
+                        "reference": reference, "resolved": False,
+                        "reason": "BYTES_MISSING_OR_DIGEST_CHANGED",
+                        "artifact_id": evidence_artifact["artifact_id"],
+                    }
+                return {
+                    "reference": reference, "resolved": True,
+                    "artifact_id": evidence_artifact["artifact_id"],
+                    "name": evidence_artifact["name"],
+                    "version": int(evidence_artifact["version"]),
+                    "sha256": evidence_artifact["sha256"],
+                    "kind": evidence_artifact["kind"],
+                    "media_type": evidence_artifact["media_type"],
+                    "producer_id": evidence_artifact["producer_id"],
+                }
+
+            review_evidence_bindings = [
+                snapshot_evidence_reference(reference) for reference in evidence_refs
+            ]
+            finding_evidence_bindings: list[dict[str, Any]] = []
+            findings = dimensions.get("findings", [])
+            if isinstance(findings, list):
+                for finding_index, finding in enumerate(findings):
+                    if isinstance(finding, dict) and "evidence_ref" in finding:
+                        finding_evidence_bindings.append({
+                            "finding_index": finding_index,
+                            **snapshot_evidence_reference(finding.get("evidence_ref")),
+                        })
+            evidence_bindings = {
+                "review_evidence": review_evidence_bindings,
+                "finding_evidence": finding_evidence_bindings,
+                "binding_mode": "REVIEW_TIME_CURRENT_ARTIFACT_ID_VERSION_SHA256_SNAPSHOT",
+            }
             review_id = "r_" + uuid.uuid4().hex[:16]
             payload = {
                 "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
                 "rubric_id": rubric_id, "reviewer_id": reviewer_id,
                 "producer_id": artifact["producer_id"], "outcome": outcome,
-                "dimensions": dimensions, "evidence_refs": evidence_refs, "notes": notes,
+                "dimensions": dimensions, "evidence_refs": evidence_refs,
+                "evidence_bindings": evidence_bindings, "notes": notes,
             }
             connection.execute(
                 """INSERT INTO reviews(project_id,review_id,artifact_id,artifact_digest,rubric_id,reviewer_id,
