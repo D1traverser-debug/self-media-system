@@ -1428,6 +1428,16 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         "review_sessions" in item["path"]
         for item in review_packet["input_artifacts"].values()
     )
+    refreshed_review_packet = engine.claimed_packet(
+        "strict", "human-cold-read-task", "human-review-executor",
+        review_packet["claim"]["claim_token"],
+    )
+    assert "workspace" not in refreshed_review_packet["project"]
+    assert {
+        name: item["path"] for name, item in refreshed_review_packet["input_artifacts"].items()
+    } == {
+        name: item["path"] for name, item in review_packet["input_artifacts"].items()
+    }
     review_evidence_id = evidence_artifacts["cold-read-evidence"]["artifact_id"]
     review_report = {
         "schema_version": 1,
