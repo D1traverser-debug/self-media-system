@@ -113,3 +113,26 @@ def test_agent_handoff_packet_binds_real_input_bytes_without_claim(tmp_path):
     assert packet["claimed"] is False
     assert packet["effect_authorized"] is False
     assert engine.list_tasks("handoff")[0]["status"] == "READY"
+
+
+def test_tampered_input_cannot_be_dispatched_but_unrelated_branch_survives(tmp_path):
+    engine = StudioEngine(tmp_path / "tamper")
+    engine.create_project("evidence", "Current inputs", _brief())
+    file = tmp_path / "evidence.md"
+    file.write_text("original", encoding="utf-8")
+    receipt = engine.import_asset("evidence", "evidence-source", file,
+                                  kind="document", media_type="text/markdown",
+                                  rights_status="OWNED")
+    engine.add_tasks("evidence", [
+        {**_task("source-agent", "agent"), "inputs": ["evidence-source"]},
+        _task("independent-human", "human"),
+    ])
+    stored = __import__("pathlib").Path(receipt["path"])
+    stored.write_text("tampered", encoding="utf-8")
+    result = run_work_cycle(engine, "evidence", execute_tools=False)
+    assert result["after"]["parallel_ready_lanes"]["agent"] == []
+    assert result["after"]["parallel_ready_lanes"]["human"] == ["independent-human"]
+    assert any(x["reason"] == "INPUT_PROVENANCE_INVALID"
+               and x["task_id"] == "source-agent" for x in result["after"]["blocked_tasks"])
+    assert result["after"]["handoff_packets"]["agent"] == []
+    assert len(result["after"]["handoff_packets"]["human"]) == 1

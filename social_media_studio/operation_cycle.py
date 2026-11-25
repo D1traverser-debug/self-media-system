@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 from contextlib import closing
 
-from .engine import StudioEngine
+from .engine import StudioEngine, GateError
 from .production.executors import tool_executor_for_task
 from .production.worker_pool import run_ready_tool_tasks
 
@@ -56,14 +56,27 @@ def _snapshot(engine: StudioEngine, project_id: str) -> dict[str, Any]:
     # It does NOT claim a task or authorize an Agent, human or external effect.
     with closing(engine._connect(project_id)) as connection:
         for executor in ("agent", "human", "external"):
-            for task_id in parallel[executor]:
+            for task_id in list(parallel[executor]):
                 row = connection.execute(
                     "SELECT * FROM tasks WHERE project_id=? AND task_id=? AND status='READY'",
                     (project_id, task_id),
                 ).fetchone()
                 if row is None:
                     continue  # readiness changed while projecting; a claim must recheck
-                packet = engine._work_packet(connection, project_id, row)
+                try:
+                    packet = engine._work_packet(connection, project_id, row)
+                except GateError as exc:
+                    parallel[executor].remove(task_id)
+                    blocked.append({"task_id": task_id, "status": "READY",
+                                    "reason": "INPUT_PROVENANCE_INVALID",
+                                    "detail": str(exc)})
+                    continue
+                if packet["missing_inputs"]:
+                    parallel[executor].remove(task_id)
+                    blocked.append({"task_id": task_id, "status": "READY",
+                                    "reason": "INPUT_OR_EXTERNAL_DEPENDENCY",
+                                    "detail": packet["missing_inputs"]})
+                    continue
                 handoff_packets[executor].append({
                     "task": packet["task"],
                     "input_artifacts": packet["input_artifacts"],
@@ -116,6 +129,8 @@ def run_work_cycle(
         next_actions.append("Obtain actual human review or authorization; do not self-approve.")
     if lanes["external"]:
         next_actions.append("Verify external operation, cost, rights and owner authorization.")
+    if "INPUT_PROVENANCE_INVALID" in reasons:
+        next_actions.append("Audit tampered or missing input bytes; invalidate affected descendants before retry.")
     if "INPUT_OR_EXTERNAL_DEPENDENCY" in reasons:
         next_actions.append("Import required verified input and refresh the dependency graph.")
     if "INVALIDATED_UPSTREAM" in reasons:
