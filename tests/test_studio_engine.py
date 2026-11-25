@@ -1408,6 +1408,13 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
     assert review_packet is not None
     assert review_packet["task"]["task_id"] == "human-cold-read-task"
     assert review_packet["review_packet"]["sibling_verdicts_included"] is False
+    assert "workspace" not in review_packet["project"]
+    assert review_packet["review_isolation"]["shared_workspace_path_exposed"] is False
+    assert review_packet["review_isolation"]["sibling_verdicts_included"] is False
+    assert all(
+        "review_sessions" in item["path"]
+        for item in review_packet["input_artifacts"].values()
+    )
     review_evidence_id = evidence_artifacts["cold-read-evidence"]["artifact_id"]
     review_report = {
         "schema_version": 1,
@@ -1427,6 +1434,7 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         }},
     )
     review_result_artifact = review_result["artifacts"]["cold-read-report"]
+    assert not engine._review_stage_dir("strict", "human-cold-read-task", 1).exists()
     input_bindings = review_result["result"]["input_bindings"]
     input_digests = {item["name"]: item["sha256"] for item in input_bindings}
     now = datetime.now(timezone.utc)
