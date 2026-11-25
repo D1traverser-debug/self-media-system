@@ -2210,19 +2210,31 @@ class StudioEngine:
                 connection.rollback()
                 raise
 
+    @staticmethod
+    def _review_contract_requires_execution(contract: dict[str, Any]) -> bool:
+        return bool(
+            contract.get("require_execution_attestation")
+            or contract.get("reviewer_kind")
+            or contract.get("execution_mode")
+            or contract.get("blind_review")
+            or contract.get("require_digest_attestation")
+            or contract.get("require_context_id")
+            or contract.get("required_media_inspection")
+        )
+
     def record_review(
         self, project_id: str, artifact_id: str, *, reviewer_id: str, rubric_id: str,
         outcome: str, dimensions: dict[str, Any], evidence_refs: list[str], notes: str = "",
-        attestation: dict[str, Any] | None = None,
+        attestation: dict[str, Any] | None = None, review_task_id: str | None = None,
+        review_result_artifact_id: str | None = None,
+        execution_receipt: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         if not isinstance(dimensions, dict):
             raise ContractError("review dimensions must be a JSON object")
-        if "_attestation" in dimensions:
-            raise ContractError("_attestation is reserved; pass reviewer attestation separately")
+        if "_attestation" in dimensions or "_execution_receipt" in dimensions:
+            raise ContractError("review execution proof is reserved and cannot be supplied inside dimensions")
         if attestation is not None:
-            if not isinstance(attestation, dict):
-                raise ContractError("review attestation must be a JSON object")
-            dimensions = {**dimensions, "_attestation": attestation}
+            raise ContractError("caller-supplied attestation fields are not execution proof; use a signed DSSE execution receipt")
         if outcome not in {"PASS", "REVISE", "FAIL", "BLOCKED", "NOT_TESTED"}:
             raise ContractError("invalid review outcome")
         if not reviewer_id or not rubric_id or not evidence_refs:
@@ -2246,6 +2258,135 @@ class StudioEngine:
                 raise ContractError("artifact bytes changed; review must target a verified current digest")
             if reviewer_id == artifact["producer_id"]:
                 raise ContractError("producer cannot independently review its own artifact")
+
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            release_policy = brief.get("release_policy", {})
+            rubric_contracts = release_policy.get("review_contracts", {})
+            rubric_contract = rubric_contracts.get(rubric_id, {}) if isinstance(rubric_contracts, dict) else {}
+            if not isinstance(rubric_contract, dict):
+                raise ContractError("review rubric contract must be an object")
+            requires_execution = self._review_contract_requires_execution(rubric_contract)
+            verified_execution: dict[str, Any] | None = None
+            execution_expected: dict[str, Any] | None = None
+            execution_nonce: str | None = None
+
+            if requires_execution:
+                if not review_task_id or not review_result_artifact_id or not isinstance(execution_receipt, dict):
+                    raise ContractError(
+                        "high-assurance review requires a completed review task, registered review-report artifact, and signed execution receipt"
+                    )
+                _safe_id(review_task_id, "review_task_id")
+                _safe_id(review_result_artifact_id, "review_result_artifact_id")
+                task = connection.execute(
+                    "SELECT * FROM tasks WHERE project_id=? AND task_id=?",
+                    (project_id, review_task_id),
+                ).fetchone()
+                if task is None or task["kind"] != "review" or task["status"] != "COMPLETED":
+                    raise ContractError("high-assurance review must be produced by a completed kind='review' task")
+                task_requirements = _loads(task["requirements_json"], {})
+                task_contract = task_requirements.get("review_contract") if isinstance(task_requirements, dict) else None
+                if not isinstance(task_contract, dict):
+                    raise ContractError("completed review task has no immutable review contract")
+                if task_contract.get("rubric_id") != rubric_id or task_contract.get("reviewer_id") != reviewer_id:
+                    raise ContractError("review task identity does not match the submitted review")
+                if task_contract.get("subject_artifact") != artifact["name"]:
+                    raise ContractError("review task subject does not match the reviewed artifact")
+                task_result = _loads(task["result_json"], {})
+                output_ids = task_result.get("outputs", {}) if isinstance(task_result, dict) else {}
+                if review_result_artifact_id not in set(output_ids.values()):
+                    raise ContractError("review result artifact is not an output of the completed review task")
+                result_artifact = connection.execute(
+                    "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, review_result_artifact_id),
+                ).fetchone()
+                if (
+                    result_artifact is None or result_artifact["status"] not in {"CURRENT", "ACCEPTED"}
+                    or result_artifact["produced_by_task"] != review_task_id
+                    or result_artifact["kind"] != "review_report"
+                    or result_artifact["media_type"] != "application/json"
+                ):
+                    raise ContractError("review result must be a current JSON review_report artifact from the review task")
+                result_path = self._project_dir(project_id) / result_artifact["relative_path"]
+                if not result_path.is_file() or _sha256(result_path) != result_artifact["sha256"]:
+                    raise ContractError("review report bytes are missing or have changed")
+                try:
+                    report_payload = json.loads(result_path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError) as exc:
+                    raise ContractError("review report artifact is not valid JSON") from exc
+                expected_report = {
+                    "schema_version": 1, "outcome": outcome, "dimensions": dimensions,
+                    "evidence_refs": evidence_refs, "notes": notes,
+                }
+                if report_payload != expected_report:
+                    raise ContractError("review arguments do not exactly match the registered review report artifact")
+
+                input_bindings = task_result.get("input_bindings", [])
+                if not isinstance(input_bindings, list):
+                    raise ContractError("completed review task has malformed input bindings")
+                subject_binding = next(
+                    (item for item in input_bindings if isinstance(item, dict) and item.get("name") == artifact["name"]),
+                    None,
+                )
+                if (
+                    not isinstance(subject_binding, dict)
+                    or subject_binding.get("artifact_id") != artifact_id
+                    or subject_binding.get("sha256") != artifact["sha256"]
+                ):
+                    raise ContractError("review task did not inspect the current exact subject artifact")
+                packet_event_row = connection.execute(
+                    """SELECT payload_json FROM events
+                       WHERE project_id=? AND entity_type='TASK' AND entity_id=?
+                         AND event_type='REVIEW_PACKET_BOUND'
+                       ORDER BY event_no DESC LIMIT 1""",
+                    (project_id, review_task_id),
+                ).fetchone()
+                packet_event = _loads(packet_event_row["payload_json"], {}) if packet_event_row else {}
+                packet = packet_event.get("review_packet") if isinstance(packet_event, dict) else None
+                if not isinstance(packet, dict) or packet_event.get("review_packet_digest") != digest_json(packet):
+                    raise ContractError("review task has no intact immutable review packet")
+                expected_packet = build_review_packet(
+                    project_id=project_id, task_id=review_task_id,
+                    task_contract=task_contract, rubric_contract=rubric_contract,
+                    input_bindings=input_bindings,
+                )
+                if packet != expected_packet:
+                    raise ContractError("review packet no longer matches the task contract and exact inputs")
+                packet_digest = digest_json(packet)
+                contract_digest = review_contract_digest(task_contract, rubric_contract)
+                input_digests = {
+                    item["name"]: item["sha256"] for item in input_bindings
+                    if isinstance(item, dict) and isinstance(item.get("name"), str)
+                    and isinstance(item.get("sha256"), str)
+                }
+                execution_expected = {
+                    "review_task_id": review_task_id,
+                    "review_contract_digest": contract_digest,
+                    "reviewer_id": reviewer_id,
+                    "reviewer_kind": rubric_contract.get("reviewer_kind"),
+                    "execution_mode": rubric_contract.get("execution_mode"),
+                    "packet_digest": packet_digest,
+                    "result_digest": result_artifact["sha256"],
+                    "input_digests": input_digests,
+                    "blind_review": bool(rubric_contract.get("blind_review", False)),
+                    "required_media_inspection": rubric_contract.get("required_media_inspection"),
+                    "reviewed_artifact_sha256": artifact["sha256"],
+                    "review_result_sha256": result_artifact["sha256"],
+                    "executor_id": result_artifact["producer_id"],
+                }
+                try:
+                    verified_execution = self.review_trust_registry.verify(
+                        execution_receipt, expected=execution_expected,
+                    )
+                except ReviewExecutionError as exc:
+                    raise ContractError(f"review execution proof rejected: {exc}") from exc
+                execution_nonce = str(verified_execution["nonce"])
+                if connection.execute(
+                    "SELECT 1 FROM review_execution_nonces WHERE project_id=? AND nonce=?",
+                    (project_id, execution_nonce),
+                ).fetchone():
+                    raise ContractError("review execution receipt nonce has already been used")
+            elif any(value is not None for value in (review_task_id, review_result_artifact_id, execution_receipt)):
+                raise ContractError("review execution task/receipt is accepted only when the owner rubric requires high assurance")
 
             def snapshot_evidence_reference(reference: Any) -> dict[str, Any]:
                 if (
@@ -2303,14 +2444,25 @@ class StudioEngine:
                 "producer_id": artifact["producer_id"], "outcome": outcome,
                 "dimensions": dimensions, "evidence_refs": evidence_refs,
                 "evidence_bindings": evidence_bindings, "notes": notes,
+                "review_task_id": review_task_id,
+                "review_result_artifact_id": review_result_artifact_id,
+                "execution_receipt": execution_receipt,
+                "execution_expected": execution_expected,
+                "verified_execution": verified_execution,
             }
             connection.execute(
                 """INSERT INTO reviews(project_id,review_id,artifact_id,artifact_digest,rubric_id,reviewer_id,
                    producer_id,outcome,dimensions_json,evidence_refs_json,notes,created_at)
                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (project_id, review_id, artifact_id, artifact["sha256"], rubric_id, reviewer_id,
-                 artifact["producer_id"], outcome, _json(dimensions), _json(evidence_refs), notes, _iso()),
+                (project_id, review_id, artifact_id, artifact["sha256"],
+                 rubric_id, reviewer_id, artifact["producer_id"], outcome,
+                 _json(dimensions), _json(evidence_refs), notes, _iso()),
             )
+            if execution_nonce is not None:
+                connection.execute(
+                    "INSERT INTO review_execution_nonces(project_id,nonce,review_id,created_at) VALUES(?,?,?,?)",
+                    (project_id, execution_nonce, review_id, _iso()),
+                )
             self._event(connection, project_id, "REVIEW", review_id, "REVIEW_RECORDED", payload)
             connection.commit()
         return {"review_id": review_id, **payload}
