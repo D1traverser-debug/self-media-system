@@ -188,7 +188,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--rubric", required=True)
     p.add_argument("--outcome", choices=["PASS", "REVISE", "FAIL", "BLOCKED", "NOT_TESTED"], required=True)
     p.add_argument("--dimensions", type=Path, required=True, help="JSON scorecard/findings object")
-    p.add_argument("--attestation", type=Path, help="JSON reviewer attestation: reviewer_kind, execution_mode, blind_review, inspected_artifact_digest, context_id")
+    p.add_argument("--attestation", type=Path, help="Deprecated caller declaration; rejected as execution proof")
+    p.add_argument("--review-task", help="Completed kind=review task ID for a high-assurance review")
+    p.add_argument("--review-result", help="Registered review_report artifact ID produced by --review-task")
+    p.add_argument("--execution-receipt", type=Path, help="Signed DSSE/in-toto execution receipt JSON from a trusted reviewer executor")
     p.add_argument("--evidence", action="append", required=True)
     p.add_argument("--notes", default="")
 
@@ -495,7 +498,10 @@ def main(argv: list[str] | None = None) -> int:
                                       reviewer_id=args.reviewer, rubric_id=args.rubric,
                                       outcome=args.outcome, dimensions=_read_json(args.dimensions),
                                       evidence_refs=args.evidence, notes=args.notes,
-                                      attestation=_read_json(args.attestation) if args.attestation else None))
+                                       attestation=_read_json(args.attestation) if args.attestation else None,
+                                       review_task_id=args.review_task,
+                                       review_result_artifact_id=args.review_result,
+                                       execution_receipt=_read_json(args.execution_receipt) if args.execution_receipt else None))
         elif command == "release-check":
             _emit(engine.release_check(args.project_id, args.artifact_id,
                                        required_rubrics=args.rubric, evidence_refs=args.evidence,

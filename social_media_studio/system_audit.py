@@ -10,6 +10,7 @@ import tomllib
 from typing import Any
 
 from .engine import StudioEngine
+from .review_execution import ReviewExecutionTrustRegistry
 
 
 def _read_json(path: Path) -> Any:
@@ -79,6 +80,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         root / "pyproject.toml",
         root / "social_media_studio" / "data" / "studio_manifest.json",
         root / "social_media_studio" / "data" / "subsystem_catalog.json",
+        root / "social_media_studio" / "data" / "review_executors.json",
         root / "social_media_studio" / "scope.py",
         root / "social_media_studio" / "system_audit.py",
         root / "examples" / "technology-explainer.brief.json",
@@ -113,6 +115,48 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         entry = (root / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
         pyproject = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
         studio_manifest = _read_json(root / "social_media_studio" / "data" / "studio_manifest.json")
+        review_registry_config = _read_json(root / "social_media_studio" / "data" / "review_executors.json")
+        review_registry = ReviewExecutionTrustRegistry(config=review_registry_config)
+        review_gate = studio_manifest.get("capabilities", {}).get("release_gates", {}).get("high_assurance_review", {})
+        quality_contract = studio_manifest.get("architecture", {}).get("quality_contract", {})
+        engine_source = (root / "social_media_studio" / "engine.py").read_text(encoding="utf-8")
+        review_markers = (
+            "self.review_trust_registry.verify(",
+            "review_execution_nonces",
+            "REVIEW_PACKET_BOUND",
+            "_stage_review_inputs",
+            "_verify_review_stage_inputs",
+        )
+        review_execution_integrated = all(marker in engine_source for marker in review_markers)
+        review_contract_detection = StudioEngine._review_contract_requires_execution({
+            "reviewer_kind": "HUMAN", "execution_mode": "INDEPENDENT_COLD_READ", "blind_review": True,
+        })
+        review_receipt_semantics_correct = (
+            'high_assurance_status = "VERIFIED"' in engine_source
+            and 'high_assurance_status = "BLOCKED"' in engine_source
+            and "runtime cannot cryptographically prove a human" not in engine_source
+        )
+        review_fail_closed = (
+            not review_registry.config["trusted_executors"]
+            and review_gate.get("default_trusted_executor_count") == 0
+            and review_gate.get("empty_registry_behavior") == "BLOCK_HIGH_ASSURANCE_RELEASE"
+            and review_gate.get("caller_supplied_attestation_is_proof") is False
+            and quality_contract.get("high_assurance_review_proven") is False
+            and quality_contract.get("production_executor_registered") is False
+            and review_execution_integrated and review_contract_detection and review_receipt_semantics_correct
+        )
+        _check(checks, "high_assurance_review_execution_default_fail_closed", review_fail_closed, {
+            "trusted_executor_count": len(review_registry.config["trusted_executors"]),
+            "empty_registry_behavior": review_gate.get("empty_registry_behavior"),
+            "execution_verifier_integrated": review_execution_integrated,
+            "high_assurance_contract_detected": review_contract_detection,
+            "release_receipt_semantics_correct": review_receipt_semantics_correct,
+            "production_executor_registered": quality_contract.get("production_executor_registered"),
+        })
+        if not review_registry.config["trusted_executors"]:
+            capability_gaps.append(
+                "No production high-assurance review executor is registered. Rubrics requiring signed independent execution remain blocked until an executor, identity mapping, signing key and isolation mechanism are independently assessed."
+            )
         program_brief = _read_json(root / "examples" / "ai-self-media-commercialization.brief.json")
         program_tasks = _read_json(root / "examples" / "ai-self-media-commercialization.tasks.json")
         episode_tasks = _read_json(root / "examples" / "program-linked-episode.tasks.json")

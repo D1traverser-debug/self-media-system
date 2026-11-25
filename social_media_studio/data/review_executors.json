@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "policy": {
+    "max_receipt_age_seconds": 86400,
+    "clock_skew_seconds": 120,
+    "signature_algorithm": "Ed25519",
+    "envelope": "DSSE",
+    "statement": "in-toto-v1"
+  },
+  "trusted_executors": {}
+}
