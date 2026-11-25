@@ -55,10 +55,19 @@ def migrate_owner_scope(engine: Any, project_id: str, *, reason: str) -> dict[st
                 engine._event(conn, project_id, "TASK", task_id,
                               "TASK_INVALIDATED_BY_SCOPE_UPGRADE",
                               {"reason": reason, "scope_epoch": EPOCH})
-            n = conn.execute(
-                "UPDATE decisions SET status='SUPERSEDED' WHERE project_id=? AND status='ACTIVE'",
-                (project_id,),
-            ).rowcount
+            # Decision receipts are immutable. Supersession is append-only,
+            # and the claim gate checks these events before honoring authority.
+            active_ids = [
+                x["decision_id"] for x in conn.execute(
+                    "SELECT decision_id FROM decisions WHERE project_id=? AND status='ACTIVE'",
+                    (project_id,),
+                ).fetchall()
+            ]
+            for decision_id in active_ids:
+                engine._event(conn, project_id, "DECISION", decision_id,
+                              "DECISION_SUPERSEDED_BY_SCOPE_UPGRADE",
+                              {"reason": reason, "scope_epoch": EPOCH})
+            n = len(active_ids)
             conn.execute(
                 "UPDATE projects SET brief_json=?,updated_at=? WHERE project_id=?",
                 (json.dumps(new_brief, ensure_ascii=False, sort_keys=True,

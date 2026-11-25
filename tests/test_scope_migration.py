@@ -46,6 +46,7 @@ def test_canonical_scope_and_controlled_upgrade_preserves_history(tmp_path):
     assert migrated["scope_epoch"] == EPOCH
     assert migrated["leases_revoked"] == ["running"]
     assert migrated["decisions_superseded"] == 1
+    assert any(e["event_type"] == "DECISION_SUPERSEDED_BY_SCOPE_UPGRADE" for e in engine.events("owner"))
     assert migrated["historical_records_deleted"] is False
     assert resolve_intake(tmp_path, {"mode": "RESUME", "project_id": "owner"})["scope_epoch"] == EPOCH
     task_state = {item["task_id"]: item["status"] for item in engine.list_tasks("owner")}

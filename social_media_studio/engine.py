@@ -1107,6 +1107,12 @@ class StudioEngine:
             (project_id, decision_id)).fetchone()
         if row is None or row["status"] != "ACTIVE":
             raise GateError("current task-bound decision is missing or inactive")
+        if connection.execute(
+            "SELECT 1 FROM events WHERE project_id=? AND entity_type='DECISION'"
+            " AND entity_id=? AND event_type='DECISION_SUPERSEDED_BY_SCOPE_UPGRADE' LIMIT 1",
+            (project_id, decision_id),
+        ).fetchone() is not None:
+            raise GateError("decision was superseded by owner-scope upgrade; record a new current decision")
         payload = _loads(row["payload_json"], {})
         if payload.get("action_binding") != self._decision_action_snapshot(connection, project_id, task):
             raise GateError("decision no longer binds current goal, task and input bytes; re-decide")
