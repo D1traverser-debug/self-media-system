@@ -1900,7 +1900,7 @@ class StudioEngine:
                         binding = snapshots[index]
                         if not isinstance(binding, dict) or binding.get("reference") != evidence_id or binding.get("resolved") is not True:
                             raise ContractError(
-                                f"{role} review evidence was not digest-bound when reviewed: {review['review_id']}:{evidence_id}"
+                                f"{role} review evidence must reference a registered artifact_id and be digest-bound when reviewed: {review['review_id']}:{evidence_id}"
                             )
                         if evidence_id == reviewed_artifact_id:
                             raise ContractError(
