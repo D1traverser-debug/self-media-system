@@ -268,6 +268,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
     learning_policy = studio_manifest.get("learning_policy", {})
     knowledge_lifecycle = studio_manifest.get("knowledge_lifecycle", {})
     adapter_execution = studio_manifest.get("capabilities", {}).get("domain_adapter_execution", {})
+    minimum_counterexamples = learning_policy.get("minimum_counterexample_trials")
     promotion_contract_ok = (
         learning_policy.get("default_status") == "CANDIDATE"
         and learning_policy.get("requires_evidence") is True
@@ -275,7 +276,9 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         and learning_policy.get("requires_failure_conditions") is True
         and learning_policy.get("requires_independent_replay_for_validation") is True
         and learning_policy.get("minimum_independent_replays") == 2
-        and learning_policy.get("minimum_counterexample_trials", 0) >= 1
+        and isinstance(minimum_counterexamples, int)
+        and not isinstance(minimum_counterexamples, bool)
+        and minimum_counterexamples >= 1
         and learning_policy.get("requires_real_case") is True
         and learning_policy.get("requires_cross_task_transfer") is True
         and learning_policy.get("requires_regression_test") is True
@@ -285,6 +288,11 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         and learning_policy.get("requires_caos_owner_acceptance") is True
         and learning_policy.get("project_candidate_promotion_authorized") is False
         and adapter_execution.get("candidate_promotion_authorized") is False
+        and knowledge_lifecycle.get("active_statuses") == ["ACTIVE_REFERENCE", "VERIFIED_OPERATION"]
+        and knowledge_lifecycle.get("candidate_status") == "CANDIDATE_REQUIRES_REVALIDATION"
+        and knowledge_lifecycle.get("retired_status") == "RETIRED_EVIDENCE_ONLY"
+        and knowledge_lifecycle.get("global_knowledge_promotion")
+        == "VERSIONED_REPOSITORY_CHANGE_AFTER_EVIDENCE_INDEPENDENT_REPLAY_AND_CAOS_ACCEPTANCE"
         and knowledge_lifecycle.get("mutation_authority")
         == "SOCIAL_MEDIA_STUDIO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
     )
