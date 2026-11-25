@@ -10,6 +10,7 @@ import base64
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -228,8 +229,21 @@ class ReviewExecutionTrustRegistry:
                 raise ReviewExecutionError("review media inspection is not bound to the reviewed artifact")
             if required_media_mode not in allowed_media_modes:
                 raise ReviewExecutionError("executor is not authorized for the required media inspection mode")
-            if required_media_mode == "FULL_VIDEO" and media.get("coverage_fraction") != 1:
-                raise ReviewExecutionError("video review does not cover the full source")
+            if required_media_mode == "FULL_VIDEO":
+                if media.get("coverage_fraction") != 1:
+                    raise ReviewExecutionError("video review does not cover the full source")
+                source_duration = media.get("source_duration_seconds")
+                inspected_duration = media.get("inspected_duration_seconds")
+                if (
+                    not isinstance(source_duration, (int, float)) or isinstance(source_duration, bool)
+                    or not math.isfinite(source_duration) or source_duration <= 0
+                    or not isinstance(inspected_duration, (int, float)) or isinstance(inspected_duration, bool)
+                    or not math.isfinite(inspected_duration) or inspected_duration <= 0
+                ):
+                    raise ReviewExecutionError("full-video review must attest finite positive source and inspected durations")
+                tolerance = max(0.05, source_duration * 0.001)
+                if abs(inspected_duration - source_duration) > tolerance:
+                    raise ReviewExecutionError("video review duration does not cover the complete source")
 
         allowed_providers = executor.get("providers", [])
         if allowed_providers and predicate.get("provider") not in allowed_providers:
