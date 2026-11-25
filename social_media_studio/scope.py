@@ -86,10 +86,20 @@ def contract() -> dict[str, Any]:
     return json.loads(files("social_media_studio").joinpath("data", "studio_manifest.json").read_text(encoding="utf-8"))
 
 
+def assert_scope_epoch(manifest: dict[str, Any] | None = None) -> None:
+    """Fail closed when runtime code and the canonical owner-scope contract drift."""
+    current = manifest if manifest is not None else contract()
+    declared = current.get("task_admission", {}).get("scope_epoch")
+    if declared != EPOCH:
+        raise ValueError(f"owner scope epoch mismatch: runtime={EPOCH!r}, manifest={declared!r}")
+
+
 def _id(value: Any) -> str:
     if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", value):
         raise ValueError("exact safe project_id required")
-    if value.casefold() in {item.casefold() for item in contract()["task_admission"]["retired_project_ids"]}:
+    manifest = contract()
+    assert_scope_epoch(manifest)
+    if value.casefold() in {item.casefold() for item in manifest["task_admission"]["retired_project_ids"]}:
         raise ValueError("retired project instance cannot be resumed or reused")
     return value
 
@@ -107,6 +117,7 @@ def bind_owner_brief(project_id: str, brief: dict[str, Any]) -> dict[str, Any]:
 
 
 def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> None:
+    assert_scope_epoch()
     if brief.get("scope_epoch") != EPOCH:
         return  # mechanical compatibility and isolated fixture path
     refs = task.get("requirements", {}).get("deliverable_refs")
@@ -139,6 +150,7 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(request, dict) or request.get("mode") not in {"NEW", "RESUME"}:
         raise ValueError("explicit NEW or RESUME mode required")
     manifest = contract()
+    assert_scope_epoch(manifest)
     mode = request["mode"]
     if mode == "NEW":
         goal = request.get("goal")
