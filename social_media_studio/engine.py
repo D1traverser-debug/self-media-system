@@ -15,6 +15,11 @@ import tempfile
 import uuid
 from typing import Any, Iterable
 
+from .review_execution import (
+    ReviewExecutionError, ReviewExecutionTrustRegistry, build_review_packet,
+    digest_json, review_contract_digest,
+)
+
 
 SCHEMA_VERSION = 1
 TASK_STATES = {
@@ -113,6 +118,7 @@ class StudioEngine:
     def __init__(self, root: str | Path | None = None):
         default = Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
         self.root = Path(root or default).expanduser().resolve()
+        self.review_trust_registry = ReviewExecutionTrustRegistry()
         self.root.mkdir(parents=True, exist_ok=True)
         (self.root / "projects").mkdir(exist_ok=True)
 
@@ -137,6 +143,16 @@ class StudioEngine:
         """Idempotent migrations for projects created by earlier standalone releases."""
         connection.executescript(
             """
+            CREATE TABLE IF NOT EXISTS review_execution_nonces (
+                project_id TEXT NOT NULL,
+                nonce TEXT NOT NULL,
+                review_id TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                PRIMARY KEY(project_id, nonce),
+                UNIQUE(project_id, review_id),
+                FOREIGN KEY(project_id, review_id)
+                    REFERENCES reviews(project_id, review_id)
+            );
             CREATE TABLE IF NOT EXISTS artifact_inputs (
                 project_id TEXT NOT NULL,
                 output_artifact_id TEXT NOT NULL,
