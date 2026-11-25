@@ -2369,9 +2369,6 @@ class StudioEngine:
 
     @staticmethod
     def _review_contract_requires_execution(contract: dict[str, Any]) -> bool:
-        independent_modes = {
-            "INDEPENDENT_COLD_READ", "INDEPENDENT_REPLAY", "ISOLATED_REVIEW",
-        }
         return bool(
             contract.get("require_execution_attestation")
             or contract.get("reviewer_kind")
