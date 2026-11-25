@@ -806,6 +806,10 @@ class StudioEngine:
                 revised = {**current, **patch}
                 from .scope import validate_task_binding
                 brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+                if not isinstance(revised["kind"], str) or not revised["kind"].strip():
+                    raise ContractError("task kind must be a non-empty string")
+                if not isinstance(revised["requirements"], dict):
+                    raise ContractError("requirements must be an object")
                 validate_task_binding(brief, revised)
                 if revised["kind"] == "review":
                     review_contract = revised["requirements"].get("review_contract")
