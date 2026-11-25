@@ -2424,6 +2424,8 @@ class StudioEngine:
                     "schema_version": 1, "outcome": outcome, "dimensions": dimensions,
                     "evidence_refs": evidence_refs, "notes": notes,
                 }
+                if rubric_contract.get("required_media_inspection"):
+                    expected_report["media_inspection"] = report_payload.get("media_inspection")
                 if report_payload != expected_report:
                     raise ContractError("review arguments do not exactly match the registered review report artifact")
 
@@ -2476,6 +2478,7 @@ class StudioEngine:
                     "input_digests": input_digests,
                     "blind_review": bool(rubric_contract.get("blind_review", False)),
                     "required_media_inspection": rubric_contract.get("required_media_inspection"),
+                    "media_inspection": report_payload.get("media_inspection") if rubric_contract.get("required_media_inspection") else None,
                     "reviewed_artifact_sha256": artifact["sha256"],
                     "review_result_sha256": result_artifact["sha256"],
                     "executor_id": result_artifact["producer_id"],
@@ -2949,6 +2952,11 @@ class StudioEngine:
                                         "evidence_refs": _loads(review["evidence_refs_json"], []),
                                         "notes": review["notes"],
                                     }
+                                    if isinstance(current_rubric, dict) and current_rubric.get("required_media_inspection"):
+                                        expected_report["media_inspection"] = (
+                                            report_payload.get("media_inspection")
+                                            if isinstance(report_payload, dict) else None
+                                        )
                                     if report_payload != expected_report:
                                         failures.append(f"review_execution_report_review_record_mismatch:{rubric}:{review['review_id']}")
                                     input_bindings = task_result.get("input_bindings", []) if isinstance(task_result, dict) else []
@@ -3005,6 +3013,7 @@ class StudioEngine:
                                             "input_digests": input_digests,
                                             "blind_review": bool(current_rubric.get("blind_review", False)),
                                             "required_media_inspection": current_rubric.get("required_media_inspection"),
+                                            "media_inspection": report_payload.get("media_inspection") if current_rubric.get("required_media_inspection") and isinstance(report_payload, dict) else None,
                                             "reviewed_artifact_sha256": artifact["sha256"],
                                             "review_result_sha256": result_artifact["sha256"],
                                             "executor_id": result_artifact["producer_id"],
