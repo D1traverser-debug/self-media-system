@@ -3401,7 +3401,12 @@ class StudioEngine:
                 "technical_qa": qa_receipt,
                 "rights_evidence_required": require_rights_evidence,
                 "failures": failures, "pass": not failures,
-                "review_attestation_limit": "Reviewer kind, execution mode, blind review and context are self-attested metadata; the runtime cannot cryptographically prove a human actually performed an independent cold read.",
+                "review_attestation_limit": "Low-assurance reviews retain metadata-only identity; high-assurance rubrics require a signed DSSE/in-toto Ed25519 execution receipt verified at recording and release.",
+                "review_execution_verification": {
+                    "high_assurance": "ED25519_DSSE_IN_TOTO_VERIFIED_AT_RECORD_AND_RELEASE",
+                    "ordinary_review": "LOW_ASSURANCE_METADATA_ONLY",
+                    "trusted_executor_count": len(self.review_trust_registry.config.get("trusted_executors", {})),
+                },
             }
             if not failures:
                 connection.execute("UPDATE artifacts SET status='ACCEPTED' WHERE project_id=? AND artifact_id=?", (project_id, artifact_id))
