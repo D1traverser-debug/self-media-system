@@ -43,6 +43,7 @@ def test_learning_promotion_contract_is_explicit_and_fail_closed():
     assert contract["detail"]["default_project_status"] == "CANDIDATE"
     assert contract["detail"]["minimum_independent_replays"] == 2
     assert contract["detail"]["minimum_counterexample_trials"] >= 1
+    assert contract["detail"]["mutation_authority"] == "SOCIAL_MEDIA_STUDIO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
     assert contract["detail"]["automatic_project_promotion"] is False
 
 
@@ -64,7 +65,7 @@ def test_content_architecture_cases_are_audited_as_structure_not_craft():
     assert report["boundary"]["caos_source_mutation_allowed"] is False
 
 
-def test_old_video_red_team_gate_is_not_universal_content_policy():
+def test_historical_video_red_team_gate_is_not_universal_content_policy():
     report = run_system_audit(ROOT)
     checks = {c["id"]: c for c in report["checks"]}
     assert "hard_release_gates" not in checks
