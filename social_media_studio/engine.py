@@ -2235,23 +2235,48 @@ class StudioEngine:
                         if not isinstance(refs, list) or not refs:
                             failures.append(f"lineage_rights_evidence_missing:{source['name']}:{source['artifact_id']}")
                         else:
+                            rights_evidence_bindings: list[dict[str, Any]] = []
                             for ref in refs:
                                 if not isinstance(ref, str) or not ref.strip():
                                     failures.append(f"lineage_rights_evidence_ref_invalid:{source['name']}:{source['artifact_id']}")
                                     continue
                                 if ref.startswith(("https://", "http://")):
+                                    rights_evidence_bindings.append({
+                                        "reference": ref,
+                                        "verification": "EXTERNAL_REFERENCE_NOT_FETCHED",
+                                    })
                                     continue
                                 evidence_row = connection.execute(
-                                    """SELECT 1 FROM artifacts WHERE project_id=?
-                                       AND (artifact_id=? OR name=?)
-                                       AND status IN ('CURRENT','ACCEPTED') LIMIT 1""",
-                                    (project_id, ref, ref),
+                                    "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                                    (project_id, ref),
                                 ).fetchone()
                                 if evidence_row is None:
+                                    evidence_row = self._artifact_by_name(connection, project_id, ref)
+                                if evidence_row is None or evidence_row["status"] not in {"CURRENT", "ACCEPTED"}:
                                     failures.append(f"lineage_rights_evidence_ref_unresolved:{source['name']}:{ref}")
+                                    continue
+                                evidence_path = self._project_dir(project_id) / evidence_row["relative_path"]
+                                if not evidence_path.is_file() or _sha256(evidence_path) != evidence_row["sha256"]:
+                                    failures.append(f"lineage_rights_evidence_bytes_missing_or_digest_changed:{source['name']}:{ref}")
+                                    continue
+                                rights_evidence_bindings.append({
+                                    "reference": ref,
+                                    "artifact_id": evidence_row["artifact_id"],
+                                    "name": evidence_row["name"],
+                                    "version": int(evidence_row["version"]),
+                                    "sha256": evidence_row["sha256"],
+                                    "kind": evidence_row["kind"],
+                                    "media_type": evidence_row["media_type"],
+                                    "verification": "LOCAL_ARTIFACT_SHA256_RECHECKED",
+                                })
+                    else:
+                        rights_evidence_bindings = []
+                else:
+                    rights_evidence_bindings = []
                 checked_lineage.append({
                     "artifact_id": source["artifact_id"], "name": source["name"],
                     "sha256": source["sha256"], "rights_status": source["rights_status"],
+                    "rights_evidence": rights_evidence_bindings,
                 })
 
             review_rows = connection.execute(
