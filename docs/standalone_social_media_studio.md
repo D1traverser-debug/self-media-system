@@ -177,7 +177,19 @@ Do not assume every failure needs another prompt, reviewer, role, gate or stage.
 - architecture defect;
 - incorrect goal interpretation.
 
-Repair at the causal layer supported by evidence. A failure cannot be marked resolved without independent verification and regression/replay references.
+Repair at the causal layer supported by evidence. A failure cannot be marked resolved by opaque URI strings or caller-declared PASS alone. `verification_refs` and `regression_refs` must each contain distinct exact artifact IDs registered in the current project. Every referenced artifact must be current, its bytes must match its recorded SHA-256, and it must have an exact-digest PASS review under `failure-verification` or `failure-regression`, respectively. Each review must cite separate current artifact IDs whose bytes also match their recorded digests. Import external verification reports, regression reports and the evidence they inspect as artifacts before resolving.
+
+At minimum, the resolution JSON contains the exact registered artifact IDs and the PASS result:
+
+```json
+{
+  "verification_refs": ["<verification-report-artifact-id>"],
+  "regression_refs": ["<regression-report-artifact-id>"],
+  "result": "PASS"
+}
+```
+
+Record the verification report review with rubric `failure-verification`; its `--evidence` values must be the exact artifact IDs of the repaired output or other evidence inspected. Record the regression report review with rubric `failure-regression`; its `--evidence` values must identify the exact replay/test evidence inspected. A review cannot cite its own report as evidence. The engine records the artifact digests, review IDs and evidence-artifact digests it checked. Reviewer IDs must differ from the failed task's output producer, the report producer and every producer of cited evidence. This is structural evidence only, not cryptographic identity proof or semantic acceptance; CAOS still performs the independent owner-level acceptance.
 
 ## 11. Learning and method promotion
 

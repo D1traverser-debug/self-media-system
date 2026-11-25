@@ -1786,24 +1786,237 @@ class StudioEngine:
             connection.commit()
         return {"failure_id": failure_id, "status": "OPEN", "payload": payload}
 
-    def resolve_failure(self, project_id: str, failure_id: str, resolution: dict[str, Any]) -> None:
-        if not resolution.get("verification_refs") or not resolution.get("regression_refs"):
-            raise ContractError("failure resolution requires independent verification_refs and regression_refs")
+    def resolve_failure(
+        self, project_id: str, failure_id: str, resolution: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Close only after current, digest-bound, role-specific reviewed evidence is verified.
+
+        This verifies artifact bytes and structural reviewer/producer separation. It does
+        not authenticate reviewer identity or determine semantic correctness.
+        """
+        if not isinstance(resolution, dict):
+            raise ContractError("failure resolution must be a JSON object")
+        refs_by_role: dict[str, list[str]] = {}
+        for role in ("verification_refs", "regression_refs"):
+            refs = resolution.get(role)
+            if (
+                not isinstance(refs, list) or not refs
+                or any(not isinstance(ref, str) or not ref.strip() or ref != ref.strip() for ref in refs)
+            ):
+                raise ContractError(
+                    f"failure resolution requires a non-empty exact artifact ID list: {role}"
+                )
+            refs_by_role[role] = list(refs)
+        all_refs = refs_by_role["verification_refs"] + refs_by_role["regression_refs"]
+        if len(set(all_refs)) != len(all_refs):
+            raise ContractError(
+                "verification_refs and regression_refs must use distinct artifact IDs"
+            )
+        reserved = {"verified_evidence", "evidence_verification", "reviewer_independence"}
+        if reserved.intersection(resolution):
+            raise ContractError("failure resolution contains reserved engine verification fields")
         if resolution.get("result") != "PASS":
-            raise ContractError("failure can be resolved only when independent verification and regression result are PASS")
+            raise ContractError(
+                "failure can be resolved only when independent verification and regression result are PASS"
+            )
+
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
-            row = connection.execute("SELECT * FROM failures WHERE project_id=? AND failure_id=?", (project_id, failure_id)).fetchone()
-            if row is None:
-                raise ProjectNotFound(failure_id)
-            if row["status"] != "OPEN":
-                raise ContractError("only OPEN failures can be resolved")
-            connection.execute(
-                "UPDATE failures SET status='RESOLVED',resolution_json=?,updated_at=? WHERE project_id=? AND failure_id=?",
-                (_json(resolution), _iso(), project_id, failure_id),
-            )
-            self._event(connection, project_id, "FAILURE", failure_id, "FAILURE_RESOLVED", resolution)
-            connection.commit()
+            try:
+                self._refresh_cross_project_transfers_in_tx(connection, project_id)
+                self._refresh_in_tx(connection, project_id)
+                row = connection.execute(
+                    "SELECT * FROM failures WHERE project_id=? AND failure_id=?",
+                    (project_id, failure_id),
+                ).fetchone()
+                if row is None:
+                    raise ProjectNotFound(failure_id)
+                if row["status"] != "OPEN":
+                    raise ContractError("only OPEN failures can be resolved")
+                original_task_producer_ids: set[str] = set()
+                if row["task_id"]:
+                    original_producers = connection.execute(
+                        """SELECT DISTINCT producer_id FROM artifacts
+                           WHERE project_id=? AND produced_by_task=?""",
+                        (project_id, row["task_id"]),
+                    ).fetchall()
+                    original_task_producer_ids = {
+                        producer["producer_id"] for producer in original_producers
+                        if isinstance(producer["producer_id"], str) and producer["producer_id"].strip()
+                    }
+
+                def verify_artifact(artifact_id: str, role: str) -> sqlite3.Row:
+                    artifact = connection.execute(
+                        "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                        (project_id, artifact_id),
+                    ).fetchone()
+                    if artifact is None:
+                        raise ContractError(
+                            f"{role} must reference a registered artifact_id in this project: {artifact_id}"
+                        )
+                    if artifact["status"] not in {"CURRENT", "ACCEPTED"}:
+                        raise ContractError(
+                            f"{role} artifact is not current: {artifact_id}:{artifact['status']}"
+                        )
+                    artifact_path = self._project_dir(project_id) / artifact["relative_path"]
+                    if not artifact_path.is_file() or _sha256(artifact_path) != artifact["sha256"]:
+                        raise ContractError(
+                            f"{role} artifact bytes are missing or changed: {artifact_id}"
+                        )
+                    return artifact
+
+                def verify_review_evidence(
+                    review: sqlite3.Row, reviewed_artifact_id: str, role: str,
+                ) -> list[dict[str, Any]]:
+                    evidence_refs = _loads(review["evidence_refs_json"], [])
+                    if (
+                        not isinstance(evidence_refs, list) or not evidence_refs
+                        or any(
+                            not isinstance(ref, str) or not ref.strip()
+                            or ref != ref.strip() for ref in evidence_refs
+                        )
+                    ):
+                        raise ContractError(
+                            f"{role} review requires exact registered evidence artifact IDs: {review['review_id']}"
+                        )
+                    if len(set(evidence_refs)) != len(evidence_refs):
+                        raise ContractError(
+                            f"{role} review contains duplicate evidence artifact IDs: {review['review_id']}"
+                        )
+                    bindings: list[dict[str, Any]] = []
+                    for evidence_id in evidence_refs:
+                        if evidence_id == reviewed_artifact_id:
+                            raise ContractError(
+                                f"{role} review cannot cite the reviewed report as its own evidence: {review['review_id']}"
+                            )
+                        evidence_artifact = verify_artifact(evidence_id, f"{role} review evidence")
+                        evidence_producer_id = evidence_artifact["producer_id"]
+                        if not isinstance(evidence_producer_id, str) or not evidence_producer_id.strip():
+                            raise ContractError(
+                                f"{role} review evidence has no recorded producer identity: {evidence_id}"
+                            )
+                        if review["reviewer_id"] == evidence_producer_id:
+                            raise ContractError(
+                                f"{role} reviewer also produced cited evidence artifact: {review['review_id']}:{evidence_id}"
+                            )
+                        bindings.append({
+                            "artifact_id": evidence_id,
+                            "version": int(evidence_artifact["version"]),
+                            "sha256": evidence_artifact["sha256"],
+                            "kind": evidence_artifact["kind"],
+                            "media_type": evidence_artifact["media_type"],
+                            "producer_id": evidence_producer_id,
+                        })
+                    return bindings
+
+                def verify_evidence_refs(role: str) -> list[dict[str, Any]]:
+                    verified: list[dict[str, Any]] = []
+                    rubric_id = (
+                        "failure-verification"
+                        if role == "verification_refs"
+                        else "failure-regression"
+                    )
+                    for artifact_id in refs_by_role[role]:
+                        artifact = verify_artifact(artifact_id, role)
+                        producer_id = artifact["producer_id"]
+                        if not isinstance(producer_id, str) or not producer_id.strip():
+                            raise ContractError(
+                                f"{role} artifact has no recorded producer identity: {artifact_id}"
+                            )
+                        reviews = connection.execute(
+                            """SELECT * FROM reviews
+                               WHERE project_id=? AND artifact_id=? AND artifact_digest=? AND rubric_id=?
+                               ORDER BY created_at,review_id""",
+                            (project_id, artifact_id, artifact["sha256"], rubric_id),
+                        ).fetchall()
+                        if not reviews:
+                            raise ContractError(
+                                f"{role} artifact requires an exact-digest PASS {rubric_id} review: {artifact_id}"
+                            )
+                        if any(review["outcome"] != "PASS" for review in reviews):
+                            raise ContractError(
+                                f"{role} artifact has a non-PASS or conflicting {rubric_id} review: {artifact_id}"
+                            )
+                        if any(
+                            review["producer_id"] != producer_id
+                            or not review["reviewer_id"]
+                            or review["reviewer_id"] == producer_id
+                            for review in reviews
+                        ):
+                            raise ContractError(
+                                f"{role} artifact review lacks structural reviewer/producer separation: {artifact_id}"
+                            )
+                        review_receipts = []
+                        for review in reviews:
+                            reviewer_id = review["reviewer_id"]
+                            if reviewer_id in original_task_producer_ids:
+                                raise ContractError(
+                                    f"{role} reviewer also produced the failed task output: {review['review_id']}"
+                                )
+                            evidence_bindings = verify_review_evidence(
+                                review, artifact_id, role,
+                            )
+                            evidence_producer_ids = {
+                                item["producer_id"] for item in evidence_bindings
+                            }
+                            if reviewer_id in evidence_producer_ids:
+                                raise ContractError(
+                                    f"{role} reviewer also produced cited evidence artifact: {review['review_id']}"
+                                )
+                            review_receipts.append({
+                                "review_id": review["review_id"],
+                                "rubric_id": rubric_id,
+                                "reviewer_id": reviewer_id,
+                                "separated_from_producer_ids": sorted({
+                                    producer_id,
+                                    *original_task_producer_ids,
+                                    *evidence_producer_ids,
+                                }),
+                                "evidence_artifacts": evidence_bindings,
+                            })
+                        verified.append({
+                            "artifact_id": artifact_id,
+                            "version": int(artifact["version"]),
+                            "sha256": artifact["sha256"],
+                            "kind": artifact["kind"],
+                            "media_type": artifact["media_type"],
+                            "producer_id": producer_id,
+                            "review_ids": sorted(review["review_id"] for review in reviews),
+                            "reviewer_ids": sorted({review["reviewer_id"] for review in reviews}),
+                            "review_receipts": review_receipts,
+                        })
+                    return verified
+
+                verification = verify_evidence_refs("verification_refs")
+                regression = verify_evidence_refs("regression_refs")
+                verified_resolution = {
+                    **resolution,
+                    "verification_refs": [item["artifact_id"] for item in verification],
+                    "regression_refs": [item["artifact_id"] for item in regression],
+                    "verified_evidence": {
+                        "verification": verification,
+                        "regression": regression,
+                    },
+                    "evidence_verification": "CURRENT_ARTIFACT_BYTES_AND_EXACT_DIGEST_ROLE_SPECIFIC_PASS_REVIEWS",
+                    "reviewer_independence": "STRUCTURAL_SEPARATION_FROM_REPORT_FAILED_TASK_AND_CITED_EVIDENCE_PRODUCERS_ONLY_NOT_CRYPTOGRAPHIC",
+                }
+                connection.execute(
+                    "UPDATE failures SET status='RESOLVED',resolution_json=?,updated_at=? WHERE project_id=? AND failure_id=?",
+                    (_json(verified_resolution), _iso(), project_id, failure_id),
+                )
+                self._event(
+                    connection, project_id, "FAILURE", failure_id,
+                    "FAILURE_RESOLVED", verified_resolution,
+                )
+                connection.commit()
+                return {
+                    "failure_id": failure_id,
+                    "status": "RESOLVED",
+                    "resolution": verified_resolution,
+                }
+            except Exception:
+                connection.rollback()
+                raise
 
     def record_review(
         self, project_id: str, artifact_id: str, *, reviewer_id: str, rubric_id: str,

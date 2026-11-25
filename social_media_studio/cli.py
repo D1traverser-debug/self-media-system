@@ -176,7 +176,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project_id")
     p.add_argument("payload", type=Path)
 
-    p = sub.add_parser("resolve-failure", help="close a failure only with independent verification and regression evidence")
+    p = sub.add_parser("resolve-failure", help="close a failure only with current artifact IDs, role-specific PASS reviews and digest-verified review evidence")
     p.add_argument("project_id")
     p.add_argument("failure_id")
     p.add_argument("resolution", type=Path)
@@ -489,8 +489,7 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "failure":
             _emit(engine.record_failure(args.project_id, _read_json(args.payload)))
         elif command == "resolve-failure":
-            engine.resolve_failure(args.project_id, args.failure_id, _read_json(args.resolution))
-            _emit({"failure_id": args.failure_id, "status": "RESOLVED"})
+            _emit(engine.resolve_failure(args.project_id, args.failure_id, _read_json(args.resolution)))
         elif command == "review":
             _emit(engine.record_review(args.project_id, args.artifact_id,
                                       reviewer_id=args.reviewer, rubric_id=args.rubric,
