@@ -2979,6 +2979,22 @@ class StudioEngine:
                 "explicit_external_wait_tasks": explicit_waits,
                 "open_failures": open_failures, "event_count": events}
 
+    def capture_continuity(self, project_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        from .continuity import capture
+        return capture(self, project_id, payload)
+
+    def continuity_records(self, project_id: str) -> list[dict[str, Any]]:
+        from .continuity import records
+        return records(self, project_id)
+
+    def handoff(self, project_id: str) -> dict[str, Any]:
+        from .continuity import handoff
+        return handoff(self, project_id)
+
+    def verify_handoff(self, project_id: str, packet: dict[str, Any]) -> dict[str, Any]:
+        from .continuity import verify_handoff
+        return verify_handoff(self, project_id, packet)
+
     def resume(self, project_id: str, *, event_limit: int = 40) -> dict[str, Any]:
         """Reconstruct an actionable project handoff from durable Video state only."""
         self.refresh(project_id)
@@ -3062,6 +3078,8 @@ class StudioEngine:
                 for row in learning_rows
             ],
             "recent_events": self.events(project_id, event_limit),
+            "continuity_records": self.continuity_records(project_id),
+            "conversation_coverage": "RECORDED_PROJECT_STATE_ONLY",
             "open_failure_count": status["open_failures"],
             "next_action": next_action,
             "release_authorized": False,
