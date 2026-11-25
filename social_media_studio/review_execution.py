@@ -115,8 +115,12 @@ class ReviewExecutionTrustRegistry:
                 raise ReviewExecutionError(f"cannot load review executor trust registry: {exc}") from exc
         if not isinstance(self.config, dict):
             raise ReviewExecutionError("review executor trust registry must be an object")
+        if self.config.get("schema_version") != 1:
+            raise ReviewExecutionError("unsupported review executor trust registry schema version")
         if not isinstance(self.config.get("trusted_executors", {}), dict):
             raise ReviewExecutionError("trusted_executors must be an object")
+        if not isinstance(self.config.get("policy", {}), dict):
+            raise ReviewExecutionError("review executor trust policy must be an object")
 
     def verify(
         self, envelope: dict[str, Any], *, expected: dict[str, Any],
@@ -177,7 +181,10 @@ class ReviewExecutionTrustRegistry:
         current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
         issued_at = _parse_time(predicate.get("issued_at"), "issued_at")
         expires_at = _parse_time(predicate.get("expires_at"), "expires_at")
-        if issued_at > current + timedelta(minutes=2):
+        clock_skew = int(self.config.get("policy", {}).get("clock_skew_seconds", 120))
+        if clock_skew < 0 or clock_skew > 600:
+            raise ReviewExecutionError("review executor clock-skew policy is invalid")
+        if issued_at > current + timedelta(seconds=clock_skew):
             raise ReviewExecutionError("review execution receipt is from the future")
         if expires_at <= current or expires_at <= issued_at:
             raise ReviewExecutionError("review execution receipt is expired or has an invalid validity window")
@@ -186,7 +193,7 @@ class ReviewExecutionTrustRegistry:
             raise ReviewExecutionError("review execution receipt exceeds the maximum age")
 
         required_fields = (
-            "nonce", "review_task_id", "review_contract_digest", "reviewer_id",
+            "nonce", "execution_id", "review_task_id", "review_contract_digest", "reviewer_id",
             "reviewer_kind", "execution_mode", "packet_digest", "result_digest",
             "input_digests", "context_id", "isolation_mode",
         )
@@ -200,9 +207,16 @@ class ReviewExecutionTrustRegistry:
             if predicate.get(field) != expected.get(field):
                 raise ReviewExecutionError(f"review execution {field} does not match the current contract")
         observed = predicate.get("observed_input_digests")
-        required = set(expected.get("input_digests", {}).values())
-        if not isinstance(observed, list) or not required.issubset(set(observed)):
-            raise ReviewExecutionError("review executor did not attest observing every exact input digest")
+        expected_input_digests = expected.get("input_digests", {})
+        if not isinstance(expected_input_digests, dict) or not all(
+            isinstance(name, str) and isinstance(digest, str) for name, digest in expected_input_digests.items()
+        ):
+            raise ReviewExecutionError("review contract input digest map is malformed")
+        required = set(expected_input_digests.values())
+        if not isinstance(observed, list) or not all(isinstance(item, str) for item in observed):
+            raise ReviewExecutionError("review executor observed-input digest list is malformed")
+        if set(observed) != required:
+            raise ReviewExecutionError("review executor did not attest observing exactly every declared input digest")
         if predicate.get("blind_review") is not expected.get("blind_review"):
             raise ReviewExecutionError("review execution blind-review mode does not match the contract")
         if expected.get("blind_review") and predicate.get("sibling_verdicts_visible") is not False:
