@@ -61,7 +61,18 @@
     "requires_evidence": true,
     "requires_counterexamples": true,
     "requires_failure_conditions": true,
-    "requires_independent_replay_for_validation": true
+    "requires_independent_replay_for_validation": true,
+    "minimum_independent_replays": 2,
+    "minimum_counterexample_trials": 1,
+    "requires_real_case": true,
+    "requires_cross_task_transfer": true,
+    "requires_regression_test": true,
+    "requires_rollback": true,
+    "requires_owner_burden_cost_or_na": true,
+    "requires_independent_readback": true,
+    "requires_caos_owner_acceptance": true,
+    "project_candidate_promotion_authorized": false,
+    "global_knowledge_promotion": "VERSIONED_REPOSITORY_CHANGE_AFTER_EVIDENCE_INDEPENDENT_REPLAY_AND_CAOS_ACCEPTANCE"
   },
   "ip_authority": {
     "original_identity_canon": "IPOS",
@@ -369,10 +380,16 @@
     "candidate_status": "CANDIDATE_REQUIRES_REVALIDATION",
     "retired_status": "RETIRED_EVIDENCE_ONLY",
     "rules": [
-      "Exact source/version before use",
+      "Exact source and version before use",
       "No historical project facts as new-task constraints",
       "Source changes invalidate dependent claims",
-      "Promotion requires scoped independent replay",
+      "Promotion requires a real case and scoped independent replay on at least two distinct tasks",
+      "Promotion requires at least one counterexample trial and explicit applicability and failure conditions",
+      "Promotion requires a regression test, rollback path, cross-task transfer and measured owner burden/cost or a reasoned N/A",
+      "Promotion requires independent readback and CAOS owner-level acceptance",
+      "Project learning candidates remain CANDIDATE and are never automatically promoted",
+      "ACTIVE_REFERENCE is a source locator, not proof of operational efficacy",
+      "Shared knowledge promotion requires a versioned repository change with evidence and independent replay",
       "Retirement removes active authority, not provenance",
       "No physical delete without authority and reference checks"
     ],
@@ -382,7 +399,7 @@
       "LEGACY_REFERENCE_ONLY",
       "RETIRED_EVIDENCE_ONLY"
     ],
-    "mutation_authority": "VIDEO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
+    "mutation_authority": "SOCIAL_MEDIA_STUDIO_REPOSITORY_VERSIONED_CHANGE_WITH_EVIDENCE_AND_INDEPENDENT_REPLAY"
   },
   "product_scope": [
     "LONG_FORM_AND_SHORT_EDITORIAL",
