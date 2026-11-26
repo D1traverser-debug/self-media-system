@@ -4,7 +4,40 @@
 **Scope:** Current authoritative architecture, core domain/runtime boundaries, and active PRs #48, #50, #52, #53.  
 **Status:** Preliminary architecture review; **not an architecture promotion or production-readiness sign-off**.
 
-## 1. Executive decision
+
+
+> **Historical-baseline notice:** Sections 1 onward below preserve the preliminary review of main at 7cd1cff. Its original instruction not to merge PRs #52/#53 is superseded by the integrated review branch described here. Do not use the historical merge recommendation as the current decision.
+
+## Current integration status — PR #56
+
+**Review branch:** refactor/sms-complete-professional-studio-20261126  
+**Current code head at this audit update:** e3e6a60e1e24b74b3c7a63b76e24884b3339993e  
+**PR:** draft integration PR #56; main remains unchanged.  
+**Validation:** latest head's CI result is pending at the time of this update. No production-readiness sign-off is implied.
+
+### Integrated and structurally corrected
+
+1. **User-need model:** four business domains now map explicitly to the existing workstreams: content creation/production → PRODUCTION_SYSTEM; account operations/growth → MEDIA_GROWTH; original IP/brand → ORIGINAL_DIGITAL_IP; commercialization → COMMERCIALIZATION. Professional capabilities, typed deliverables and platform variants are separate axes, dynamically composed rather than serialized into a fixed pipeline.
+2. **Professional capability routing:** each of the nine on-demand capability groups now binds knowledge references, method IDs, Skill sections, professional roles, domain adapters and local production operations. capability_lookup resolves those references and exposes their status and known gaps; it does not authorize execution or certify an outcome.
+3. **Task-service boundary:** ProjectTaskService now depends on a five-operation ProjectTaskInfrastructurePort (workspace path, connection, schema, event write and review-stage cleanup). Project/task application methods no longer call back into StudioEngine's public application API. A narrow-port regression test exercises the service without exposing those application methods.
+4. **Domain-adapter authority:** the registry is immutable; public metadata reflects the actual spec; required configuration, output identities and local-only/non-promoting effect boundaries are checked before handler execution. Handlers receive declared data only and no longer receive the StudioEngine object.
+5. **Demand evolution:** the explicit demand contract and one-time scope migration are integrated. Source authenticity and semantic completeness remain explicitly unverified; a typed declaration is not treated as proof that the owner's intent has been fully understood.
+6. **High-assurance review:** signed DSSE/in-toto execution receipts, exact artifact binding and blind-review staging are integrated. The trusted executor registry is intentionally empty, so high-assurance release remains fail-closed.
+7. **Governance and data lifecycle:** the active manifest now states the five event-triggered loops, Direct Session versus Durable Studio selection, mutable versus append-only versus immutable records, the horizontal harness gates and the separation between professional quality, independent review, CAOS owner-outcome acceptance, release and publication.
+
+### Remaining acceptance gates — not closed by structural tests
+
+- The 35-scenario architecture acceptance matrix remains unverified at runtime; route and unit tests are not equivalent to 35 independently accepted user outcomes.
+- No trusted human/AI/tool reviewer is registered. High-assurance review must continue to block until an executor is independently assessed and explicitly admitted.
+- No paid or external creative provider calls were made in CI. Image/video generation, semantic understanding, aesthetic judgement and real platform performance are not proven by the local adapter registry.
+- Native CAOS runtime dependency remains false by design. CAOS parent-session governance is required, but this branch does not claim that the CAOS runtime itself is embedded or automatically activated.
+- Demand source authenticity and semantic completeness remain false until owner-source evidence and independent interpretation checks are supplied.
+- The domain-adapter output descriptions remain partly human-readable contracts; exact task output names and generic artifact admission are enforced, but provider-specific semantic output schemas and real-world quality are not universally proven.
+- Production readiness remains PARTIAL. A passing CI run would establish repository-level structural and regression acceptance only, not owner acceptance or production readiness.
+
+**Current decision:** continue validation on PR #56; do not merge to main until the full CI suite, system audit, subsystem topology audit, standalone smoke tests and independent owner-outcome review pass. Do not merge the older dependent PRs separately.
+
+## 1. Historical executive decision
 
 Keep Social Media Studio as a **modular monolith** with one public \`StudioEngine\` facade, one project-scoped SQLite/event ledger, one scheduler/worker control plane, and one canonical CLI. Preserve both Direct Session and Durable Studio execution surfaces.
 
