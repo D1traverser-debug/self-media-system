@@ -6,7 +6,7 @@ import shutil
 import sqlite3
 from typing import Any, Iterable, Protocol
 
-from ..engine_support import ContractError, ProjectNotFound, _iso, _json, _loads, _safe_id
+from ..engine_support import ContractError, ProjectNotFound, _iso, _json, _loads, _safe_id, _sha256
 
 
 class ProjectTaskEnginePort(Protocol):
