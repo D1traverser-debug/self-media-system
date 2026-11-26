@@ -17,7 +17,7 @@ from typing import Any, Iterable
 
 from .review_execution import (
     ReviewExecutionError, ReviewExecutionTrustRegistry, build_review_packet,
-    digest_json, review_contract_digest,
+    digest_json, review_contract_digest, review_contract_requires_execution,
 )
 
 from .engine_support import (
