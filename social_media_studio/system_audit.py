@@ -394,9 +394,10 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
                 if module == "caos" or module.startswith("caos.") or module.startswith("cognition_agent_os"):
                     import_failures.append(f"{path.relative_to(root)} imports {module}")
                 if module == "social_media_studio.legacy" or module.startswith("social_media_studio.legacy."):
+                    relative_parts = path.relative_to(root).parts
                     is_explicit_adapter_layer = (
                         path.name == "adapters.py"
-                        or path.parts[:2] == ("social_media_studio", "domain_adapters")
+                        or relative_parts[:2] == ("social_media_studio", "domain_adapters")
                     )
                     if not is_explicit_adapter_layer:
                         import_failures.append(f"{path.relative_to(root)} imports legacy domain code outside the explicit domain-adapter boundary: {module}")
