@@ -4,7 +4,7 @@ from .common import *
 from ..legacy.continuity import *
 from ..legacy.model_registry import *
 from ..legacy.timeline import *
-from ..legacy.media_graph import MediaGraph
+from ..legacy.media_graph import AssetRef, MediaGraph
 
 def timeline_spec_from_dict(payload: Mapping[str, Any]) -> TimelineSpec:
     data = _mapping(payload, "TimelineSpec")
