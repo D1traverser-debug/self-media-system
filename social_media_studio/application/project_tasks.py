@@ -7,29 +7,19 @@ import shutil
 import sqlite3
 from typing import Any, Iterable, Protocol
 
-from ..engine_support import ContractError, ProjectNotFound, _iso, _json, _loads, _safe_id, _sha256
+from ..engine_support import ContractError, ProjectNotFound, _iso, _json, _loads, _safe_id, _sha256, validate_brief
+from ..review_execution import review_contract_requires_execution
 
 
-class ProjectTaskEnginePort(Protocol):
+class ProjectTaskInfrastructurePort(Protocol):
+    """Narrow persistence/workspace/event boundary; no project/task application API."""
     def _project_dir(self, project_id: str): ...
     def _connect(self, project_id: str) -> sqlite3.Connection: ...
-    def _project_row(self, connection: sqlite3.Connection, project_id: str) -> sqlite3.Row: ...
     @staticmethod
     def _schema(connection: sqlite3.Connection) -> None: ...
     def _event(self, connection: sqlite3.Connection, project_id: str, entity_type: str,
                entity_id: str, event_type: str, payload: dict[str, Any]) -> None: ...
-    @staticmethod
-    def _validate_brief(brief: dict[str, Any]) -> None: ...
-    def _artifact_by_name(self, connection: sqlite3.Connection, project_id: str, name: str): ...
-    def _task_map(self, connection: sqlite3.Connection, project_id: str) -> dict[str, dict[str, Any]]: ...
-    @staticmethod
-    def _descendant_closure(tasks: dict[str, dict[str, Any]], roots: Iterable[str]) -> set[str]: ...
-    def _validate_graph(self, all_tasks: dict[str, dict[str, Any]]) -> None: ...
-    def _refresh_in_tx(self, connection: sqlite3.Connection, project_id: str) -> None: ...
-    def _refresh_cross_project_transfers_in_tx(self, connection: sqlite3.Connection, project_id: str) -> None: ...
-    def project(self, project_id: str) -> dict[str, Any]: ...
-    def brief_history(self, project_id: str) -> list[dict[str, Any]]: ...
-    def list_tasks(self, project_id: str) -> list[dict[str, Any]]: ...
+    def _cleanup_review_stage(self, project_id: str, task_id: str, attempt: int) -> None: ...
 
 
 class ProjectTaskService:
@@ -39,16 +29,32 @@ class ProjectTaskService:
     scheduler, workspace, event stream or second authority; those remain on the engine.
     """
 
-    def __init__(self, engine: ProjectTaskEnginePort):
-        self.engine = engine
+    def __init__(self, infrastructure: ProjectTaskInfrastructurePort):
+        self.infrastructure = infrastructure
+
+    @staticmethod
+    def _project_row(connection: sqlite3.Connection, project_id: str) -> sqlite3.Row:
+        row = connection.execute("SELECT * FROM projects WHERE project_id=?", (project_id,)).fetchone()
+        if row is None:
+            raise ProjectNotFound(project_id)
+        return row
+
+
+    @staticmethod
+    def _artifact_by_name(connection: sqlite3.Connection, project_id: str, name: str) -> sqlite3.Row | None:
+        return connection.execute(
+            "SELECT * FROM artifacts WHERE project_id=? AND name=? AND status IN ('CURRENT','ACCEPTED') ORDER BY version DESC LIMIT 1",
+            (project_id, name),
+        ).fetchone()
+
 
     def create_project(self, project_id: str, title: str, brief: dict[str, Any]) -> dict[str, Any]:
         project_id = _safe_id(project_id, "project_id")
-        self.engine._validate_brief(brief)
+        validate_brief(brief)
         if "scope_epoch" in brief:
             from ..scope import bind_owner_brief
             bind_owner_brief(project_id, brief)
-        directory = self.engine._project_dir(project_id)
+        directory = self.infrastructure._project_dir(project_id)
         directory.mkdir(parents=True, exist_ok=False)
         (directory / "assets").mkdir()
         (directory / "artifacts").mkdir()
@@ -56,14 +62,14 @@ class ProjectTaskService:
         connection = sqlite3.connect(db_path, timeout=30, isolation_level=None)
         connection.row_factory = sqlite3.Row
         try:
-            self.engine._schema(connection)
+            self.infrastructure._schema(connection)
             connection.execute("BEGIN IMMEDIATE")
             now = _iso()
             connection.execute(
                 "INSERT INTO projects(project_id,title,brief_json,created_at,updated_at) VALUES(?,?,?,?,?)",
                 (project_id, title or project_id, _json(brief), now, now),
             )
-            self.engine._event(connection, project_id, "PROJECT", project_id, "PROJECT_CREATED", {"title": title, "brief": brief})
+            self.infrastructure._event(connection, project_id, "PROJECT", project_id, "PROJECT_CREATED", {"title": title, "brief": brief})
             connection.commit()
         except Exception:
             connection.rollback()
@@ -71,17 +77,17 @@ class ProjectTaskService:
             raise
         finally:
             connection.close()
-        return self.engine.project(project_id)
+        return self.project(project_id)
 
 
     def project(self, project_id: str) -> dict[str, Any]:
-        with closing(self.engine._connect(project_id)) as connection:
-            row = self.engine._project_row(connection, project_id)
+        with closing(self.infrastructure._connect(project_id)) as connection:
+            row = self._project_row(connection, project_id)
             return {
                 "project_id": row["project_id"], "title": row["title"],
                 "brief": _loads(row["brief_json"], {}), "revision": row["revision"],
                 "created_at": row["created_at"], "updated_at": row["updated_at"],
-                "workspace": str(self.engine._project_dir(project_id)),
+                "workspace": str(self.infrastructure._project_dir(project_id)),
             }
 
 
@@ -100,7 +106,7 @@ class ProjectTaskService:
 
 
     def brief_history(self, project_id: str) -> list[dict[str, Any]]:
-        with closing(self.engine._connect(project_id)) as connection:
+        with closing(self.infrastructure._connect(project_id)) as connection:
             rows = connection.execute(
                 "SELECT * FROM events WHERE project_id=? AND entity_type='PROJECT' AND event_type IN ('PROJECT_CREATED','PROJECT_BRIEF_REVISED') ORDER BY event_no",
                 (project_id,),
@@ -112,19 +118,19 @@ class ProjectTaskService:
         self, project_id: str, brief: dict[str, Any], *, reason: str,
         affected_task_ids: list[str] | None = None,
     ) -> dict[str, Any]:
-        self.engine._validate_brief(brief)
+        validate_brief(brief)
         if not isinstance(reason, str) or not reason.strip():
             raise ContractError("brief revision requires a reason")
-        with closing(self.engine._connect(project_id)) as connection:
+        with closing(self.infrastructure._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
-                project = self.engine._project_row(connection, project_id)
-                tasks = self.engine._task_map(connection, project_id)
+                project = self._project_row(connection, project_id)
+                tasks = self._task_map(connection, project_id)
                 roots = list(tasks) if affected_task_ids is None else list(affected_task_ids)
                 unknown = sorted(set(roots) - set(tasks))
                 if unknown:
                     raise ContractError(f"unknown affected_task_ids: {unknown}")
-                invalidated = self.engine._descendant_closure(tasks, roots) if roots else set()
+                invalidated = self._descendant_closure(tasks, roots) if roots else set()
                 old_brief = _loads(project["brief_json"], {})
                 if "scope_epoch" in old_brief:
                     if brief.get("scope_epoch") != old_brief["scope_epoch"]:
@@ -148,7 +154,7 @@ class ProjectTaskService:
                 )
                 for task_id in invalidated:
                     if tasks[task_id]["kind"] == "review":
-                        self.engine._cleanup_review_stage(project_id, task_id, tasks[task_id]["attempts"])
+                        self.infrastructure._cleanup_review_stage(project_id, task_id, tasks[task_id]["attempts"])
                     connection.execute(
                         "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": reason, "brief_revision": int(project["revision"]) + 1}), now, project_id, task_id),
@@ -157,20 +163,20 @@ class ProjectTaskService:
                         "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
                         (project_id, task_id),
                     )
-                    self.engine._event(connection, project_id, "TASK", task_id, "TASK_INVALIDATED_BY_BRIEF_REVISION", {
+                    self.infrastructure._event(connection, project_id, "TASK", task_id, "TASK_INVALIDATED_BY_BRIEF_REVISION", {
                         "reason": reason, "project_revision": int(project["revision"]) + 1,
                     })
-                self.engine._event(connection, project_id, "PROJECT", project_id, "PROJECT_BRIEF_REVISED", {
+                self.infrastructure._event(connection, project_id, "PROJECT", project_id, "PROJECT_BRIEF_REVISED", {
                     "previous_brief": old_brief, "brief": brief,
                     "previous_sha256": old_digest, "sha256": new_digest,
                     "reason": reason, "invalidated_tasks": sorted(invalidated),
                 })
-                self.engine._refresh_in_tx(connection, project_id)
+                self._refresh_in_tx(connection, project_id)
                 connection.commit()
             except Exception:
                 connection.rollback()
                 raise
-        return {"project": self.engine.project(project_id), "invalidated_tasks": sorted(invalidated), "brief_history": self.engine.brief_history(project_id)}
+        return {"project": self.project(project_id), "invalidated_tasks": sorted(invalidated), "brief_history": self.brief_history(project_id)}
 
 
     def _validate_graph(self, all_tasks: dict[str, dict[str, Any]]) -> None:
@@ -279,10 +285,10 @@ class ProjectTaskService:
     def add_tasks(self, project_id: str, tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not isinstance(tasks, list) or not tasks:
             raise ContractError("tasks must be a non-empty array")
-        with closing(self.engine._connect(project_id)) as connection:
+        with closing(self.infrastructure._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
-                project = self.engine._project_row(connection, project_id)
+                project = self._project_row(connection, project_id)
                 from ..scope import validate_task_binding
                 brief = _loads(project["brief_json"], {})
                 existing_rows = connection.execute(
@@ -370,7 +376,7 @@ class ProjectTaskService:
                                     raise ContractError(f"{task_id}: review task {field} differs from the owner rubric contract")
                         reviewer_kind = rubric_contract.get("reviewer_kind")
                         execution_mode = rubric_contract.get("execution_mode")
-                        if self.engine._review_contract_requires_execution(rubric_contract):
+                        if review_contract_requires_execution(rubric_contract):
                             if reviewer_kind not in {"HUMAN", "AI", "TOOL"}:
                                 raise ContractError(f"{task_id}: high-assurance review requires reviewer_kind HUMAN, AI or TOOL")
                             if not isinstance(execution_mode, str) or not execution_mode.strip():
@@ -394,7 +400,7 @@ class ProjectTaskService:
                     prepared.append(task)
                     graph[task_id] = task
                     new_ids.add(task_id)
-                self.engine._validate_graph(graph)
+                self._validate_graph(graph)
                 now = _iso()
                 for task in prepared:
                     connection.execute(
@@ -405,7 +411,7 @@ class ProjectTaskService:
                          _json(task["depends_on"]), _json(task["inputs"]), _json(task["outputs"]),
                          _json(task["acceptance"]), _json(task["requirements"]), task["priority"], task["max_attempts"], now, now),
                     )
-                    self.engine._event(connection, project_id, "TASK", task["task_id"], "TASK_ADDED", task)
+                    self.infrastructure._event(connection, project_id, "TASK", task["task_id"], "TASK_ADDED", task)
                 connection.execute(
                     "UPDATE projects SET revision=revision+1,updated_at=? WHERE project_id=?",
                     (now, project_id),
@@ -414,8 +420,8 @@ class ProjectTaskService:
             except Exception:
                 connection.rollback()
                 raise
-        self.engine.refresh(project_id)
-        return self.engine.list_tasks(project_id)
+        self.refresh(project_id)
+        return self.list_tasks(project_id)
 
 
     def revise_task(self, project_id: str, task_id: str, patch: dict[str, Any], *, reason: str) -> dict[str, Any]:
@@ -428,10 +434,10 @@ class ProjectTaskService:
         unknown_fields = sorted(set(patch) - allowed)
         if unknown_fields:
             raise ContractError(f"unsupported task revision fields: {unknown_fields}")
-        with closing(self.engine._connect(project_id)) as connection:
+        with closing(self.infrastructure._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
-                rows = self.engine._task_map(connection, project_id)
+                rows = self._task_map(connection, project_id)
                 if task_id not in rows:
                     raise ProjectNotFound(task_id)
                 old = rows[task_id]
@@ -444,7 +450,7 @@ class ProjectTaskService:
                 }
                 revised = {**current, **patch}
                 from ..scope import validate_task_binding
-                brief = _loads(self.engine._project_row(connection, project_id)["brief_json"], {})
+                brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
                 if not isinstance(revised["kind"], str) or not revised["kind"].strip():
                     raise ContractError("task kind must be a non-empty string")
                 if not isinstance(revised["requirements"], dict):
@@ -471,7 +477,7 @@ class ProjectTaskService:
                                 raise ContractError(f"review task revision {field} differs from the owner rubric contract")
                     reviewer_kind = rubric_contract.get("reviewer_kind")
                     execution_mode = rubric_contract.get("execution_mode")
-                    if self.engine._review_contract_requires_execution(rubric_contract):
+                    if review_contract_requires_execution(rubric_contract):
                         if reviewer_kind not in {"HUMAN", "AI", "TOOL"} or not isinstance(execution_mode, str) or not execution_mode.strip():
                             raise ContractError("high-assurance review task revision requires a typed reviewer and execution_mode")
                     expected_executors = {"HUMAN": {"human"}, "AI": {"agent", "external"}, "TOOL": {"tool"}}.get(reviewer_kind)
@@ -520,11 +526,11 @@ class ProjectTaskService:
                 }
                 if existing_artifact_names.intersection(revised["outputs"]):
                     raise ContractError(f"task outputs cannot reuse imported asset names: {sorted(existing_artifact_names.intersection(revised['outputs']))}")
-                self.engine._validate_graph(graph)
-                descendants = self.engine._descendant_closure(rows, [task_id]) - {task_id}
+                self._validate_graph(graph)
+                descendants = self._descendant_closure(rows, [task_id]) - {task_id}
                 now = _iso()
                 if old["kind"] == "review":
-                    self.engine._cleanup_review_stage(project_id, task_id, old["attempts"])
+                    self.infrastructure._cleanup_review_stage(project_id, task_id, old["attempts"])
                 connection.execute(
                     """UPDATE tasks SET title=?,kind=?,executor=?,depends_on_json=?,inputs_json=?,outputs_json=?,
                        acceptance_json=?,requirements_json=?,priority=?,max_attempts=?,status='PENDING',
@@ -537,7 +543,7 @@ class ProjectTaskService:
                 )
                 for descendant in descendants:
                     if rows[descendant]["kind"] == "review":
-                        self.engine._cleanup_review_stage(project_id, descendant, rows[descendant]["attempts"])
+                        self.infrastructure._cleanup_review_stage(project_id, descendant, rows[descendant]["attempts"])
                     connection.execute(
                         "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": f"upstream task {task_id} contract changed"}), now, project_id, descendant),
@@ -546,19 +552,19 @@ class ProjectTaskService:
                         "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
                         (project_id, descendant),
                     )
-                    self.engine._event(connection, project_id, "TASK", descendant, "TASK_INVALIDATED_BY_UPSTREAM_CONTRACT", {"upstream_task": task_id, "reason": reason})
+                    self.infrastructure._event(connection, project_id, "TASK", descendant, "TASK_INVALIDATED_BY_UPSTREAM_CONTRACT", {"upstream_task": task_id, "reason": reason})
                 connection.execute(
                     "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
                     (project_id, task_id),
                 )
                 connection.execute("UPDATE projects SET revision=revision+1,updated_at=? WHERE project_id=?", (now, project_id))
-                self.engine._event(connection, project_id, "TASK", task_id, "TASK_CONTRACT_REVISED", {"previous": current, "revised": revised, "reason": reason, "invalidated_descendants": sorted(descendants)})
-                self.engine._refresh_in_tx(connection, project_id)
+                self.infrastructure._event(connection, project_id, "TASK", task_id, "TASK_CONTRACT_REVISED", {"previous": current, "revised": revised, "reason": reason, "invalidated_descendants": sorted(descendants)})
+                self._refresh_in_tx(connection, project_id)
                 connection.commit()
             except Exception:
                 connection.rollback()
                 raise
-        return {"task": next(item for item in self.engine.list_tasks(project_id) if item["task_id"] == task_id), "invalidated_descendants": sorted(descendants)}
+        return {"task": next(item for item in self.list_tasks(project_id) if item["task_id"] == task_id), "invalidated_descendants": sorted(descendants)}
 
 
     def _task_map(self, connection: sqlite3.Connection, project_id: str) -> dict[str, dict[str, Any]]:
@@ -567,7 +573,7 @@ class ProjectTaskService:
 
 
     def _refresh_in_tx(self, connection: sqlite3.Connection, project_id: str) -> None:
-        tasks = self.engine._task_map(connection, project_id)
+        tasks = self._task_map(connection, project_id)
         now = _iso()
         for task_id, row in tasks.items():
             status = row["status"]
@@ -580,7 +586,7 @@ class ProjectTaskService:
             elif not all(state == "COMPLETED" for state in dep_states):
                 # Do not label an expected upstream output as an external missing input.
                 new_status = "PENDING"
-            elif not all(self.engine._artifact_by_name(connection, project_id, name) is not None for name in _loads(row["inputs_json"], [])):
+            elif not all(self._artifact_by_name(connection, project_id, name) is not None for name in _loads(row["inputs_json"], [])):
                 new_status = "WAITING_INPUT"
             else:
                 new_status = "READY"
@@ -595,7 +601,7 @@ class ProjectTaskService:
                     "UPDATE tasks SET status=?,updated_at=? WHERE project_id=? AND task_id=?",
                     (new_status, now, project_id, task_id),
                 )
-                self.engine._event(connection, project_id, "TASK", task_id, "TASK_READINESS_CHANGED", {"from": status, "to": new_status})
+                self.infrastructure._event(connection, project_id, "TASK", task_id, "TASK_READINESS_CHANGED", {"from": status, "to": new_status})
 
 
     def _refresh_cross_project_transfers_in_tx(self, connection: sqlite3.Connection, project_id: str) -> None:
@@ -626,7 +632,7 @@ class ProjectTaskService:
             )
             if valid:
                 try:
-                    with closing(self.engine._connect(source_project_id)) as source_connection:
+                    with closing(self.infrastructure._connect(source_project_id)) as source_connection:
                         source = source_connection.execute(
                             "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
                             (source_project_id, source_artifact_id),
@@ -639,7 +645,7 @@ class ProjectTaskService:
                             and source["status"] in {"CURRENT", "ACCEPTED"}
                         )
                         if valid:
-                            source_root = self.engine._project_dir(source_project_id).resolve()
+                            source_root = self.infrastructure._project_dir(source_project_id).resolve()
                             source_path = (source_root / source["relative_path"]).resolve(strict=True)
                             valid = source_path.is_relative_to(source_root) and source_path.is_file() and _sha256(source_path) == source_digest
                 except (ProjectNotFound, OSError, sqlite3.Error):
@@ -672,7 +678,7 @@ class ProjectTaskService:
             now = _iso()
             for task_id in sorted(affected):
                 if task_map[task_id]["kind"] == "review":
-                    self.engine._cleanup_review_stage(project_id, task_id, task_map[task_id]["attempts"])
+                    self.infrastructure._cleanup_review_stage(project_id, task_id, task_map[task_id]["attempts"])
                 connection.execute(
                     """UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,
                        claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=?
@@ -688,12 +694,12 @@ class ProjectTaskService:
                     "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
                     (project_id, task_id),
                 )
-                self.engine._event(connection, project_id, "TASK", task_id, "TASK_INVALIDATED_BY_CROSS_PROJECT_SOURCE", {
+                self.infrastructure._event(connection, project_id, "TASK", task_id, "TASK_INVALIDATED_BY_CROSS_PROJECT_SOURCE", {
                     "source_project_id": source_project_id,
                     "source_artifact_id": source_artifact_id,
                     "transferred_artifact_id": row["artifact_id"],
                 })
-            self.engine._event(connection, project_id, "ARTIFACT", row["artifact_id"], "CROSS_PROJECT_SOURCE_STALE", {
+            self.infrastructure._event(connection, project_id, "ARTIFACT", row["artifact_id"], "CROSS_PROJECT_SOURCE_STALE", {
                 "source_project_id": source_project_id,
                 "source_artifact_id": source_artifact_id,
                 "source_artifact_version": source_version,
@@ -703,15 +709,15 @@ class ProjectTaskService:
 
 
     def refresh(self, project_id: str) -> None:
-        with closing(self.engine._connect(project_id)) as connection:
+        with closing(self.infrastructure._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
-            self.engine._refresh_cross_project_transfers_in_tx(connection, project_id)
-            self.engine._refresh_in_tx(connection, project_id)
+            self._refresh_cross_project_transfers_in_tx(connection, project_id)
+            self._refresh_in_tx(connection, project_id)
             connection.commit()
 
 
     def list_tasks(self, project_id: str) -> list[dict[str, Any]]:
-        with closing(self.engine._connect(project_id)) as connection:
+        with closing(self.infrastructure._connect(project_id)) as connection:
             rows = connection.execute(
                 "SELECT * FROM tasks WHERE project_id=? ORDER BY priority DESC,created_at,task_id",
                 (project_id,),

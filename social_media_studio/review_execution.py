@@ -37,6 +37,19 @@ def digest_json(value: Any) -> str:
     return hashlib.sha256(canonical_json(value)).hexdigest()
 
 
+
+def review_contract_requires_execution(contract: dict[str, Any]) -> bool:
+    """Return whether a rubric requires authenticated reviewer execution evidence."""
+    return bool(
+        contract.get("require_execution_attestation")
+        or contract.get("reviewer_kind")
+        or contract.get("execution_mode")
+        or contract.get("blind_review")
+        or contract.get("require_digest_attestation")
+        or contract.get("require_context_id")
+        or contract.get("required_media_inspection")
+    )
+
 def review_contract_digest(
     task_contract: dict[str, Any], rubric_contract: dict[str, Any],
 ) -> str:

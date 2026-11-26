@@ -24,7 +24,7 @@ from .engine_support import (
     SCHEMA_VERSION, TASK_STATES, RIGHTS_ALLOWED, _ID,
     StudioError, ProjectNotFound, ContractError, ClaimError, GateError,
     _now, _iso, _parse_time, _json, _loads, _safe_id, _sha256, _inside,
-    TaskClaim,
+    TaskClaim, validate_brief,
 )
 from .application.project_tasks import ProjectTaskService
 
@@ -274,64 +274,13 @@ class StudioEngine:
             (project_id, entity_type, entity_id, event_type, _json(payload), _iso()),
         )
 
-    @staticmethod
-    def _project_row(connection: sqlite3.Connection, project_id: str) -> sqlite3.Row:
-        row = connection.execute("SELECT * FROM projects WHERE project_id=?", (project_id,)).fetchone()
-        if row is None:
-            raise ProjectNotFound(project_id)
-        return row
+    def _project_row(self, connection: sqlite3.Connection, project_id: str) -> sqlite3.Row:
+        return self._project_task_service._project_row(connection, project_id)
 
     @staticmethod
     def _validate_brief(brief: dict[str, Any]) -> None:
-        if not isinstance(brief, dict):
-            raise ContractError("brief must be a JSON object")
-        required = ["goal", "audience", "deliverables"]
-        missing = [key for key in required if not brief.get(key)]
-        if missing:
-            raise ContractError(f"brief is missing required outcome fields: {missing}")
-        if not isinstance(brief["goal"], str) or not isinstance(brief["audience"], str):
-            raise ContractError("brief.goal and brief.audience must be strings")
-        if not isinstance(brief["deliverables"], list) or not all(isinstance(item, str) and item.strip() for item in brief["deliverables"]):
-            raise ContractError("brief.deliverables must be a non-empty array of strings")
-        policy = brief.get("release_policy", {})
-        if not isinstance(policy, dict):
-            raise ContractError("brief.release_policy must be an object")
-        for field in (
-            "required_evidence_refs", "required_evidence_artifact_names",
-            "required_review_rubrics", "required_artifact_names",
-            "required_asset_names", "required_rights_statuses",
-            "technical_qa_required_check_ids",
-        ):
-            value = policy.get(field, [])
-            if not isinstance(value, list) or not all(isinstance(item, str) and item.strip() for item in value):
-                raise ContractError(f"release_policy.{field} must be an array of non-empty strings")
-        allowed_rights = set(policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)))
-        if not allowed_rights.issubset(RIGHTS_ALLOWED):
-            raise ContractError("release_policy.required_rights_statuses contains a non-cleared rights status")
-        contracts = policy.get("review_contracts", {})
-        if not isinstance(contracts, dict) or not all(isinstance(value, dict) for value in contracts.values()):
-            raise ContractError("release_policy.review_contracts must map rubric IDs to objects")
-        for rubric, contract in contracts.items():
-            _safe_id(rubric, "review rubric")
-            for count_field in ("min_reviewers", "min_findings"):
-                if count_field in contract and int(contract[count_field]) < 0:
-                    raise ContractError(f"review_contracts.{rubric}.{count_field} cannot be negative")
-            for mapping_field in ("dimension_floors",):
-                if mapping_field in contract and not isinstance(contract[mapping_field], dict):
-                    raise ContractError(f"review_contracts.{rubric}.{mapping_field} must be an object")
-            for boolean_field in (
-                "reviewer_kind", "execution_mode", "blind_review", "require_digest_attestation",
-                "require_context_id", "require_evidence_per_finding", "require_disposition_per_finding",
-                "require_resolvable_evidence_refs", "distinct_contexts",
-            ):
-                if boolean_field in contract and boolean_field not in {"reviewer_kind", "execution_mode"} and not isinstance(contract[boolean_field], bool):
-                    raise ContractError(f"review_contracts.{rubric}.{boolean_field} must be boolean")
-            if "score_dimensions" in contract and not isinstance(contract["score_dimensions"], list):
-                raise ContractError(f"review_contracts.{rubric}.score_dimensions must be an array")
-        if policy.get("require_technical_qa") and not isinstance(
-            policy.get("technical_qa_artifact_name", "technical-qa-receipt"), str
-        ):
-            raise ContractError("release_policy.technical_qa_artifact_name must be a string")
+        return validate_brief(brief)
+
 
     def create_project(self, project_id: str, title: str, brief: dict[str, Any]) -> dict[str, Any]:
         return self._project_task_service.create_project(project_id, title, brief)
@@ -365,10 +314,7 @@ class StudioEngine:
     def list_tasks(self, project_id: str) -> list[dict[str, Any]]:
         return self._project_task_service.list_tasks(project_id)
     def _artifact_by_name(self, connection: sqlite3.Connection, project_id: str, name: str) -> sqlite3.Row | None:
-        return connection.execute(
-            "SELECT * FROM artifacts WHERE project_id=? AND name=? AND status IN ('CURRENT','ACCEPTED') ORDER BY version DESC LIMIT 1",
-            (project_id, name),
-        ).fetchone()
+        return self._project_task_service._artifact_by_name(connection, project_id, name)
 
     def _work_packet(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> dict[str, Any]:
         input_names = _loads(task["inputs_json"], [])
@@ -1694,15 +1640,7 @@ class StudioEngine:
 
     @staticmethod
     def _review_contract_requires_execution(contract: dict[str, Any]) -> bool:
-        return bool(
-            contract.get("require_execution_attestation")
-            or contract.get("reviewer_kind")
-            or contract.get("execution_mode")
-            or contract.get("blind_review")
-            or contract.get("require_digest_attestation")
-            or contract.get("require_context_id")
-            or contract.get("required_media_inspection")
-        )
+        return review_contract_requires_execution(contract)
 
     def record_review(
         self, project_id: str, artifact_id: str, *, reviewer_id: str, rubric_id: str,
