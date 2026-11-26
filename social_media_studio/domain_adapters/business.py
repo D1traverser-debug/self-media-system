@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from .common import *
-from ..legacy.business_metrics import *
-from ..legacy.business_objects import *
-from ..legacy.editorial_planning import EpisodeIntent
+from social_media_studio.legacy.business_metrics import *
+from social_media_studio.legacy.business_objects import *
+from social_media_studio.legacy.editorial_planning import EpisodeIntent
 
 def business_object_from_dict(object_type: str, payload: Mapping[str, Any]) -> Any:
     classes = {
