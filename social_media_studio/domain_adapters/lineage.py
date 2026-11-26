@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .common import *
-from ..legacy.media_graph import ContextRecord, MediaGraph
+from social_media_studio.legacy.media_graph import ContextRecord, MediaGraph
 
 def handle_media_graph_initialize(engine, project_id, packet, config, outputs, output_dir, attempt, name):
     contexts = config.get("contexts", [])
