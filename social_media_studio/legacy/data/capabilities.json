@@ -770,7 +770,8 @@
         "long_form_editorial",
         "short_form_copy",
         "narrative_and_script",
-        "multilingual_localization"
+        "multilingual_localization",
+        "news_satire_packaging"
       ],
       "adapters": [
         "editorial_plan_validate"
@@ -782,18 +783,10 @@
       "activation": "DEMAND_SELECTED_ONLY",
       "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
       "knowledge_refs": [
-        "benchmark-policy",
-        "professional-aesthetics",
-        "technique-library",
-        "EDITORIAL_PACKAGING"
+        "quality-gates",
+        "professional-aesthetics"
       ],
-      "method_ids": [
-        "T-002",
-        "T-005",
-        "T-006",
-        "T-007",
-        "T-014"
-      ],
+      "method_ids": [],
       "role_ids": [
         "writer",
         "story_editor",
@@ -802,9 +795,160 @@
       ],
       "skill_sections": [
         "2. Outcome contract",
+        "2B. Audience and communication intent",
+        "2C. Demand-specific skill routing",
         "3. Research and evidence",
-        "4. Decision loop"
-      ]
+        "4. Decision loop",
+        "8. Independent review and release"
+      ],
+      "demand_profiles": {
+        "short_form_copy": {
+          "knowledge_refs": [
+            "short-form-social-copy",
+            "audience-response"
+          ],
+          "method_ids": [
+            "T-002"
+          ],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "SHORT_COPY"
+          ],
+          "avoid_when": [
+            "NEWS_SATIRE_METHOD_NOT_APPLICABLE_TO_NON_NEWS_CONTENT",
+            "NO_UNSUPPORTED_VIEWER_OR_CREATOR_LIFE_STORY",
+            "NO_GENERIC_NEWS_NARRATION"
+          ],
+          "selection_notes": "Use for standalone short posts and captions. Ground the angle in the actual source; T-002 is optional and applies only when a question or contrast is immediately legible."
+        },
+        "long_form_editorial": {
+          "knowledge_refs": [
+            "long-form-editorial",
+            "audience-response"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor",
+            "creative_director"
+          ],
+          "applies_to": [
+            "LONG_ARTICLE"
+          ],
+          "avoid_when": [
+            "STANDALONE_ONE_LINE_COPY",
+            "VIDEO_SCRIPT_ONLY"
+          ],
+          "selection_notes": "Build a reader journey around the material and reader job. Select structure from the argument; do not force a universal article template."
+        },
+        "narrative_and_script": {
+          "knowledge_refs": [
+            "technique-library"
+          ],
+          "method_ids": [
+            "T-002",
+            "T-005",
+            "T-007"
+          ],
+          "skill_sections": [
+            "3. Research and evidence",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "ORIGINAL_VIDEO"
+          ],
+          "avoid_when": [
+            "STANDALONE_SOCIAL_CAPTION",
+            "TEXT_ONLY_ARTICLE"
+          ],
+          "selection_notes": "Use narrative and script techniques only when a narrative/script deliverable is requested; do not inherit video stages for a text-only task."
+        },
+        "multilingual_localization": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "audience-response"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "WORD_FOR_WORD_TRANSLATION",
+            "UNREQUESTED_SEPARATE_CHANNEL_POSITIONING"
+          ],
+          "selection_notes": "Preserve the underlying content promise while localizing idiom, rhythm and cultural references for each requested language."
+        },
+        "news_satire_packaging": {
+          "knowledge_refs": [
+            "EDITORIAL_PACKAGING",
+            "audience-response"
+          ],
+          "method_ids": [
+            "T-002"
+          ],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "researcher",
+            "fact_checker",
+            "writer",
+            "story_editor",
+            "red_team"
+          ],
+          "applies_to": [
+            "NEWS_OR_CURRENT_AFFAIRS_VIDEO_SATIRE"
+          ],
+          "avoid_when": [
+            "GAMEPLAY_OR_FICTIONAL_ENTERTAINMENT",
+            "PET_OR_GENERAL_ENTERTAINMENT",
+            "NON_NEWS_SOURCE",
+            "ORDINARY_CREATOR_CAPTION"
+          ],
+          "selection_notes": "Candidate only. Select only when the source is genuinely news/current affairs and the requested treatment is satire; preserve factual and fiction boundaries."
+        }
+      }
     },
     {
       "id": "visual_design",
@@ -984,17 +1128,10 @@
       "activation": "DEMAND_SELECTED_ONLY",
       "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
       "knowledge_refs": [
-        "benchmark-policy",
-        "professional-aesthetics",
-        "provider-benchmark",
-        "technique-library",
-        "EDITORIAL_PACKAGING"
+        "quality-gates",
+        "professional-aesthetics"
       ],
-      "method_ids": [
-        "T-002",
-        "T-005",
-        "T-014"
-      ],
+      "method_ids": [],
       "role_ids": [
         "growth_strategist",
         "writer",
@@ -1005,9 +1142,175 @@
       ],
       "skill_sections": [
         "2. Outcome contract",
+        "2B. Audience and communication intent",
+        "2C. Demand-specific skill routing",
         "3. Research and evidence",
-        "6. Production method and tool choice"
-      ]
+        "4. Decision loop",
+        "8. Independent review and release"
+      ],
+      "demand_profiles": {
+        "platform_title": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "audience-response"
+          ],
+          "method_ids": [
+            "T-002"
+          ],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "growth_strategist",
+            "writer",
+            "story_editor"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "PROMISE_EXCEEDS_SOURCE",
+            "GENERIC_HOOK_WITHOUT_A_CONTENT_REASON"
+          ],
+          "selection_notes": "The title earns entry with a truthful promise or point of tension; it is not a plot summary or a guaranteed CTR device."
+        },
+        "platform_description": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "short-form-social-copy",
+            "audience-response"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "PLOT_RECAP_WHEN_NOT_REQUESTED",
+            "NEWS_NARRATION_FOR_NON_NEWS_CONTENT",
+            "GENERIC_FILLER"
+          ],
+          "selection_notes": "The description supplies context, voice or meaning that the title does not already perform."
+        },
+        "platform_tags": {
+          "knowledge_refs": [
+            "platform-packaging"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence"
+          ],
+          "role_ids": [
+            "growth_strategist",
+            "writer"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "HASHTAG_STUFFING",
+            "IRRELEVANT_TAGS",
+            "UNSUPPORTED_TREND_CLAIMS"
+          ],
+          "selection_notes": "Use relevant discovery context only. No fixed hashtag count unless the owner or current platform specification requires one."
+        },
+        "cover_copy": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "audience-response"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "art_director"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "TITLE_DUPLICATION",
+            "UNSUPPORTED_COVER_PROMISE",
+            "VISUAL_SUBJECT_DOES_NOT_DELIVER_THE_PROMISE"
+          ],
+          "selection_notes": "Cover text has its own visual click job. The image concept may be art-directed beyond a literal video frame, but must remain grounded in the content."
+        },
+        "platform_native_variant": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "short-form-social-copy",
+            "long-form-editorial",
+            "audience-response"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "growth_strategist",
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "WORD_FOR_WORD_TRANSLATION",
+            "PLATFORM_CARICATURE",
+            "UNVERIFIED_PLATFORM_RULE"
+          ],
+          "selection_notes": "Adapt the same underlying content promise to the requested platform and locale; do not invent separate channel strategies unless requested."
+        },
+        "platform_spec_research": {
+          "knowledge_refs": [
+            "platform-packaging"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "4. Decision loop"
+          ],
+          "role_ids": [
+            "researcher",
+            "growth_strategist"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "ALGORITHM_GUESSING",
+            "STALE_FORMAT_CLAIM",
+            "UNSOURCED_LENGTH_LIMIT"
+          ],
+          "selection_notes": "Research current official platform specifications only when they materially affect the requested output."
+        }
+      }
     },
     {
       "id": "identity_collaboration",
@@ -1079,7 +1382,8 @@
         "provider-benchmark",
         "benchmark-policy",
         "self-learning",
-        "coordination-policy"
+        "coordination-policy",
+        "audience-response"
       ],
       "method_ids": [
         "T-006",
@@ -1092,6 +1396,7 @@
         "showrunner"
       ],
       "skill_sections": [
+        "2B. Audience and communication intent",
         "2A. Optional historical media-business workstreams",
         "3. Research and evidence",
         "4. Decision loop",

@@ -7,6 +7,8 @@ from __future__ import annotations
 import re
 from typing import Any, Mapping
 
+from .communication import CommunicationIntent, CommunicationIntentError
+
 class EditorialContractError(ValueError):
     pass
 
@@ -47,10 +49,70 @@ def _tags(value: Any) -> list[str]:
         raise EditorialContractError("duplicate hashtags")
     return list(value)
 
+
+def _source_refs(value: Any, field: str = "source_refs") -> list[str]:
+    if not isinstance(value, list) or any(not isinstance(x, str) or not x.strip() for x in value):
+        raise EditorialContractError(f"{field} must be a list of source identities")
+    if len(value) != len(set(value)):
+        raise EditorialContractError(f"{field} must not contain duplicates")
+    return list(value)
+
+
+def _communication(value: Any) -> CommunicationIntent | None:
+    if value is None:
+        return None
+    try:
+        return CommunicationIntent.from_mapping(value)
+    except CommunicationIntentError as exc:
+        raise EditorialContractError(str(exc)) from exc
+
+
+def _communication_fields(value: CommunicationIntent | None) -> dict[str, Any]:
+    return {"communication_intent": value.as_dict() if value else None}
+
+
+def inspect_short_copy(data: Mapping[str, Any]) -> dict[str, Any]:
+    """Validate a standalone short text without imposing a length, CTA or media pipeline."""
+    allowed = {
+        "schema_version", "text", "platform", "platform_name", "locale",
+        "content_intent", "call_to_action", "source_refs", "communication_intent",
+    }
+    if not isinstance(data, Mapping) or data.get("schema_version") != "1.0":
+        raise EditorialContractError("short copy needs schema_version 1.0")
+    unknown = set(data) - allowed
+    if unknown:
+        raise EditorialContractError(f"unknown short-copy fields: {sorted(unknown)}")
+    text = _text(data.get("text"), "text")
+    platform = data.get("platform")
+    if platform not in PLATFORMS:
+        raise EditorialContractError("unknown platform; use OTHER with an explicit platform name")
+    platform_name = _text(data.get("platform_name"), "platform_name") if platform == "OTHER" else None
+    if platform != "OTHER" and data.get("platform_name") is not None:
+        raise EditorialContractError("platform_name is only valid with platform OTHER")
+    locale = _locale(data.get("locale"))
+    content_intent = _text(data.get("content_intent"), "content_intent")
+    call_to_action = _text(data.get("call_to_action"), "call_to_action", optional=True)
+    if call_to_action and _norm(call_to_action) == _norm(text):
+        raise EditorialContractError("call_to_action cannot repeat the short-copy text")
+    source_refs = _source_refs(data.get("source_refs", []))
+    communication_intent = _communication(data.get("communication_intent"))
+    if communication_intent and not set(communication_intent.grounding_refs).issubset(set(source_refs)):
+        raise EditorialContractError("communication_intent grounding_refs must resolve through source_refs")
+    return {
+        "schema_version": "1.0", "text": text, "platform": platform,
+        "platform_name": platform_name, "locale": locale,
+        "content_intent": content_intent, "call_to_action": call_to_action,
+        "source_refs": source_refs, **_communication_fields(communication_intent),
+        "structural_status": "PASS", "creative_quality_verified": False,
+        "semantic_accuracy_verified": False, "native_language_verified": False,
+        "platform_spec_current_verified": False, "publication_authorized": False,
+    }
+
 def inspect_platform_package(data: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(data, Mapping) or data.get("schema_version") != "1.0":
         raise EditorialContractError("platform package needs schema_version 1.0")
     intent = _text(data.get("content_intent"), "content_intent")
+    communication_intent = _communication(data.get("communication_intent"))
     variants = data.get("variants")
     if not isinstance(variants, list) or not variants:
         raise EditorialContractError("platform package must contain platform variants")
@@ -70,17 +132,14 @@ def inspect_platform_package(data: Mapping[str, Any]) -> dict[str, Any]:
             raise EditorialContractError("OTHER requires platform_name")
         locale = _locale(v.get("locale"))
         fields = {name: _text(v.get(name), name, optional=True)
-                  for name in ("title", "description", "cover_copy")}
+                  for name in ("title", "description", "cover_copy", "call_to_action")}
         if not any(fields.values()):
             raise EditorialContractError("platform variant has no public text or cover copy")
         strings = [(name, _norm(text)) for name, text in fields.items() if text]
         if len({x[1] for x in strings}) != len(strings):
-            raise EditorialContractError("title, description and cover_copy cannot repeat exactly")
+            raise EditorialContractError("title, description, cover_copy and call_to_action cannot repeat exactly")
         tags = _tags(v.get("hashtags", []))
-        source_refs = v.get("source_refs", [])
-        if (not isinstance(source_refs, list)
-                or any(not isinstance(x, str) or not x.strip() for x in source_refs)):
-            raise EditorialContractError("source_refs must be a list of source identities")
+        source_refs = _source_refs(v.get("source_refs", []))
         results.append({
             "variant_id": identifier, "platform": platform,
             "platform_name": v.get("platform_name") if platform == "OTHER" else None,
@@ -90,8 +149,12 @@ def inspect_platform_package(data: Mapping[str, Any]) -> dict[str, Any]:
             "native_language_verified": False,
             "click_through_rate_observed": False,
         })
+    all_source_refs = {ref for item in results for ref in item["source_refs"]}
+    if communication_intent and not set(communication_intent.grounding_refs).issubset(all_source_refs):
+        raise EditorialContractError("communication_intent grounding_refs must resolve through variant source_refs")
     return {
-        "schema_version": "1.0", "content_intent": intent, "variants": results,
+        "schema_version": "1.0", "content_intent": intent,
+        **_communication_fields(communication_intent), "variants": results,
         "structural_status": "PASS", "creative_quality_verified": False,
         "semantic_accuracy_verified": False, "publication_authorized": False,
         "no_automatic_posting": True,
@@ -126,6 +189,7 @@ def inspect_long_article(data: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(claims, list):
         raise EditorialContractError("factual_claims must be a list")
     claim_ids = set()
+    claim_source_refs = set()
     for claim in claims:
         if not isinstance(claim, Mapping):
             raise EditorialContractError("factual claim must be an object")
@@ -137,6 +201,10 @@ def inspect_long_article(data: Mapping[str, Any]) -> dict[str, Any]:
         refs = claim.get("source_refs", [])
         if not isinstance(refs, list) or any(not isinstance(x, str) or not x for x in refs):
             raise EditorialContractError("factual source refs must be a list")
+        claim_source_refs.update(refs)
+    communication_intent = _communication(data.get("communication_intent"))
+    if communication_intent and not set(communication_intent.grounding_refs).issubset(claim_source_refs | claim_ids):
+        raise EditorialContractError("communication_intent grounding_refs must resolve through article claim/source references")
     visual_slots = data.get("visual_slots", [])
     if not isinstance(visual_slots, list):
         raise EditorialContractError("visual_slots must be a list")
@@ -151,6 +219,7 @@ def inspect_long_article(data: Mapping[str, Any]) -> dict[str, Any]:
         "schema_version": "1.0", "title": title, "locale": locale,
         "intent_kind": kind, "section_count": len(sections),
         "factual_claim_count": len(claims), "visual_slot_count": len(visual_slots),
+        **_communication_fields(communication_intent),
         "structural_status": "PASS", "fact_check_verified": False,
         "argument_quality_verified": False, "originality_verified": False,
         "native_language_verified": False, "owner_outcome_verified": False,

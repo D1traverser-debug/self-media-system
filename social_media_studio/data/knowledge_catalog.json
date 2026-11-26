@@ -13,7 +13,7 @@
       "id": "benchmark-policy",
       "ref": "skills/social-media-studio/references/benchmark-policy.md",
       "status": "ACTIVE_REFERENCE",
-      "scope": "Generic method only; legacy controller or project instance text is non-authoritative"
+      "scope": "Conditional visual/motion calibration for complex, long-form, high-cost or quality-critical production only. Not a default method for short copy, articles, prompt-only tasks, a single static image or routine edits."
     },
     {
       "id": "visual-development",
@@ -127,7 +127,7 @@
       "id": "EDITORIAL_PACKAGING",
       "ref": "projects/ai-self-media-commercialization/EDITORIAL_PACKAGING.md",
       "status": "CANDIDATE_REQUIRES_REVALIDATION",
-      "scope": "Extract general method only; no historical identity, subject or task state"
+      "scope": "Candidate for news/current-affairs video editorial satire only. Requires a real news source, a defensible satirical target and a clear fact/fiction boundary. Not a default method for gameplay, pets, fictional entertainment or ordinary creator captions."
     },
     {
       "id": "PRODUCTION_AND_COST_STRATEGY",
@@ -182,6 +182,30 @@
       "ref": "docs/agent_operability_scenarios.md",
       "status": "LEGACY_REFERENCE_ONLY",
       "scope": "Historical scenario and counterexample evidence"
+    },
+    {
+      "id": "audience-response",
+      "ref": "skills/social-media-studio/references/audience-response.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Research-informed hypotheses about audience segment, audience value and think/feel/do responses. Not a virality formula, performance prediction or measured outcome. Never infer private audience psychology, demographics or shared life experience without evidence."
+    },
+    {
+      "id": "short-form-social-copy",
+      "ref": "skills/social-media-studio/references/short-form-social-copy.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Standalone short posts, captions, hooks and compact social text. Source-grounded, audience-value-led and platform-native. Not a universal news narration method, long-form article structure or video-production pipeline."
+    },
+    {
+      "id": "long-form-editorial",
+      "ref": "skills/social-media-studio/references/long-form-editorial.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Long-form articles, essays and X Articles. Reader contract, argument/story architecture, information progression and payoff. Does not impose finance-specific evidence rules or short-form/video stages."
+    },
+    {
+      "id": "platform-packaging",
+      "ref": "skills/social-media-studio/references/platform-packaging.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Platform-native field roles, localization, cover-copy separation and current-spec research. A packaging method, not an algorithm predictor or automatic copy generator."
     }
   ]
 }

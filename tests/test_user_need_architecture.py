@@ -51,6 +51,16 @@ def test_professional_capability_axis_resolves_knowledge_methods_skills_roles_an
         assert set(group["method_ids"]) <= method_ids
         assert set(group["role_ids"]) <= role_ids
         assert all(f"## {section}" in skill_text for section in group["skill_sections"])
+        profiles = group.get("demand_profiles", {})
+        assert set(profiles) <= set(group["demands"])
+        for demand_id, demand_profile in profiles.items():
+            assert set(demand_profile["knowledge_refs"]) <= knowledge_ids
+            assert set(demand_profile["method_ids"]) <= method_ids
+            assert set(demand_profile["role_ids"]) <= role_ids
+            assert all(f"## {section}" in skill_text for section in demand_profile["skill_sections"])
+            for ref in demand_profile["knowledge_refs"]:
+                source = next(item["ref"] for item in _json("social_media_studio/data/knowledge_catalog.json")["entries"] if item["id"] == ref)
+                assert (ROOT / source).is_file(), (demand_id, ref, source)
 
     profile = capability_lookup()
     assert all("knowledge_resources" in group and "methods" in group
@@ -149,3 +159,35 @@ def test_group_filtered_lookup_returns_resolved_resources_for_only_the_requested
     assert group["professional_roles"]
     assert group["executor_routes"]["production_operations"] == group["operations"]
     assert filtered["legacy_capabilities"] == []
+
+
+
+def test_demand_profiles_are_scoped_and_unknown_profiles_fall_back_visibly():
+    short = capability_lookup("editorial_writing", demand_id="short_form_copy")["groups"][0]
+    short_ids = {item["id"] for item in short["knowledge_resources"]}
+    assert {"quality-gates", "professional-aesthetics", "short-form-social-copy", "audience-response"} <= short_ids
+    assert not {"benchmark-policy", "EDITORIAL_PACKAGING"} & short_ids
+    assert short["demand_resolution"] == "EXACT_DEMAND_PROFILE"
+    assert short["selected_demand_profile"]["applies_to"] == ["SHORT_COPY"]
+
+    long = capability_lookup("editorial_writing", demand_id="long_form_editorial")["groups"][0]
+    long_ids = {item["id"] for item in long["knowledge_resources"]}
+    assert {"long-form-editorial", "audience-response"} <= long_ids
+    assert not {"benchmark-policy", "EDITORIAL_PACKAGING"} & long_ids
+
+    news = capability_lookup("editorial_writing", demand_id="news_satire_packaging")["groups"][0]
+    news_resources = {item["id"]: item for item in news["knowledge_resources"]}
+    assert "EDITORIAL_PACKAGING" in news_resources
+    assert "news/current-affairs video editorial satire only" in news_resources["EDITORIAL_PACKAGING"]["scope"]
+    assert "GAMEPLAY_OR_FICTIONAL_ENTERTAINMENT" in news["selected_demand_profile"]["avoid_when"]
+
+    cover = capability_lookup("platform_packaging", demand_id="cover_copy")["groups"][0]
+    cover_ids = {item["id"] for item in cover["knowledge_resources"]}
+    assert {"quality-gates", "platform-packaging", "audience-response"} <= cover_ids
+    assert "benchmark-policy" not in cover_ids
+
+    fallback = capability_lookup(demand_id="video_generation")
+    assert fallback["demand_resolution"] == "GROUP_LEVEL_FALLBACK"
+    assert fallback["routing_warning"] is not None
+    with pytest.raises(ValueError, match="demand identity"):
+        capability_lookup("platform_packaging", demand_id="short_form_copy")

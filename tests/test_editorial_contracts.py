@@ -2,7 +2,7 @@ import json
 import pytest
 
 from social_media_studio.domain.editorial import (
-    EditorialContractError, inspect_long_article, inspect_platform_package,
+    EditorialContractError, inspect_long_article, inspect_platform_package, inspect_short_copy,
 )
 
 
@@ -78,3 +78,53 @@ def test_malformed_proposals_and_false_sources_are_not_silently_passed():
         inspect_long_article({"schema_version":"1.0","title":"Topic","locale":"en-US",
                               "intent_kind":"ARGUMENT","sections":[{"section_id":"a","body":"first"},
                                                                     {"section_id":"a","body":"dup"}]})
+
+
+
+def test_short_copy_is_a_first_class_standalone_contract_without_hardcoded_length_or_forced_cta():
+    report = inspect_short_copy({
+        "schema_version": "1.0",
+        "text": "A concise, source-grounded thought that does not need a forced question.",
+        "platform": "TIKTOK",
+        "locale": "zh-CN",
+        "content_intent": "Entertainment",
+        "source_refs": ["source-video"],
+    })
+    assert report["structural_status"] == "PASS"
+    assert report["call_to_action"] is None
+    assert report["creative_quality_verified"] is False
+    assert report["publication_authorized"] is False
+    assert report["platform_spec_current_verified"] is False
+
+    with pytest.raises(EditorialContractError, match="platform"):
+        inspect_short_copy({
+            "schema_version": "1.0", "text": "A line", "platform": "UNKNOWN",
+            "locale": "zh-CN", "content_intent": "Entertainment",
+        })
+
+
+def test_platform_package_supports_optional_cta_without_collapsing_field_roles():
+    report = inspect_platform_package({
+        "schema_version": "1.0",
+        "content_intent": "A compact entertainment post",
+        "variants": [{
+            "variant_id": "x-en", "platform": "X", "locale": "en-US",
+            "title": "A truthful opening hook",
+            "description": "One additional context line",
+            "cover_copy": "A separate visual cue",
+            "call_to_action": "Send this to the friend who would get the joke",
+            "hashtags": ["#Gaming"],
+            "source_refs": ["source-video"],
+        }],
+    })
+    assert report["variants"][0]["call_to_action"].startswith("Send this")
+    assert report["publication_authorized"] is False
+    with pytest.raises(EditorialContractError, match="repeat"):
+        inspect_platform_package({
+            "schema_version": "1.0", "content_intent": "A compact entertainment post",
+            "variants": [{
+                "variant_id": "x-en", "platform": "X", "locale": "en-US",
+                "title": "A truthful opening hook",
+                "call_to_action": "A truthful opening hook",
+            }],
+        })

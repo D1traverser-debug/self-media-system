@@ -281,3 +281,16 @@ The integration branch has advanced beyond the initial architecture findings. Th
 - The system audit, manifest and subsystem ownership metadata include the high-assurance review gate. The trusted executor registry remains empty by design, so high-assurance release remains blocked.
 
 **Validation boundary:** these are source-level integration facts, not claims that the current head has passed CI. The exact-head workflow must complete the standalone system audit, full subsystem/source ownership inspection, test suite, standalone CLI smoke tests and historical Program regression fixture. Even if those checks pass, the 35 scenario outcomes, actual creative/media quality, provider-backed execution, native CAOS runtime selection and independent owner acceptance remain unverified. Do not merge or promote on the basis of structural tests alone.
+
+
+## 13. Follow-up architecture correction — demand-specific editorial resources
+
+**Observed source defect:** capability_lookup previously accepted only a group ID. It returned every group-level knowledge reference, method, Skill section and role for every demand in that group. The exact demand names existed, but did not select exact resources. The repository already had a short-copy section in quality-gates, yet no standalone SHORT_COPY inspector or exact short-copy resource route existed.
+
+**Observed applicability defect:** benchmark-policy is a conditional visual/motion method, while EDITORIAL_PACKAGING is a news/current-affairs video satire method. Neither should be retrieved as a default method for ordinary gameplay, pets, fictional entertainment or a standalone caption.
+
+**Selected correction:** keep one capability registry and add optional demand_profiles inside its existing groups. Exact demand lookup returns EXACT_DEMAND_PROFILE; unprofiled demands return GROUP_LEVEL_FALLBACK with a visible warning. This is deliberately partial coverage, not a claim that every one of the system's demands now has a profile. Group-level executor routes remain candidate metadata and must be checked against the exact task and current session.
+
+**Audience contract:** public-facing deliverables may optionally record audience segment, value promise, think/feel/do hypotheses, a reasoned primary action, speaker relationship, source references and assumptions. The status remains HYPOTHESIS_UNMEASURED. No viral prediction, mandatory CTA, fake controversy or invented viewer psychology is allowed.
+
+**Acceptance boundary:** new reference methods remain candidates. Structural tests can prove routing and contract behavior only; actual naturalness, humor, audience fit, visual quality, observed sharing/comment/follow behavior and owner satisfaction still require real output review and owner outcome trials.

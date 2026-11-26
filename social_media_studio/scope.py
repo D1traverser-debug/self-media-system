@@ -235,39 +235,52 @@ def knowledge_lookup(method_id: str | None = None, *, include_nonactive: bool = 
             "native_caos_activation": "NOT_VERIFIED_BY_RUNTIME", "automatic_task_selection": False}
 
 
-def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Read-only discovery, with no inference of provider access, decision, or task."""
+def capability_lookup(
+    group_id: str | None = None, *, demand_id: str | None = None,
+    profile: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Resolve scoped professional resources; discovery never selects tasks or authorizes effects."""
     from .domain_adapters.registry import DOMAIN_ADAPTERS, SUPPORTED_DOMAIN_ADAPTERS, public_domain_adapter_registry
     from .production.registry import PRODUCTION_EXECUTORS
+
     data = profile if profile is not None else json.loads(
         files("social_media_studio.legacy").joinpath("data", "capabilities.json").read_text(encoding="utf-8"))
     groups = data["professional_capability_groups"]
-    ids = [g["id"] for g in groups]
+    ids = [group["id"] for group in groups]
     if len(ids) != len(set(ids)):
         raise ValueError("duplicate professional capability group")
-    demands = [d for g in groups for d in g["demands"]]
+    demands = [demand for group in groups for demand in group["demands"]]
     if len(demands) != len(set(demands)):
         raise ValueError("ambiguous professional demand identity")
-    adapters = {x for g in groups for x in g["adapters"]}
-    operations = {x for g in groups for x in g["operations"]}
+
+    adapters = {name for group in groups for name in group["adapters"]}
+    operations = {name for group in groups for name in group["operations"]}
     if adapters != set(SUPPORTED_DOMAIN_ADAPTERS) or operations != set(PRODUCTION_EXECUTORS.operations()):
         raise ValueError("professional capability routes diverge from actual executor registries")
     if any(DOMAIN_ADAPTERS[name].capability_group != group["id"]
            for group in groups for name in group["adapters"]):
         raise ValueError("domain adapter operation is assigned to the wrong capability group")
-    if any(g["activation"] != "DEMAND_SELECTED_ONLY" or not g["gaps"] for g in groups):
+    if any(group["activation"] != "DEMAND_SELECTED_ONLY" or not group["gaps"] for group in groups):
         raise ValueError("professional groups must be demand-selected and disclose limits")
 
-    # Professional classification must resolve the knowledge/method/role/Skill
-    # resources as well as the actual local executor registries.
     knowledge_data = json.loads(files("social_media_studio").joinpath("data", "knowledge_catalog.json").read_text(encoding="utf-8"))
     technique_data = json.loads(files("social_media_studio.legacy").joinpath("data", "techniques.json").read_text(encoding="utf-8"))
     role_data = json.loads(files("social_media_studio.legacy").joinpath("data", "roles.json").read_text(encoding="utf-8"))
     knowledge_by_id = {item["id"]: item for item in knowledge_data["entries"]}
     methods_by_id = {item["id"]: item for item in technique_data["techniques"]}
     roles_by_id = role_data["roles"]
+    resource_fields = (
+        ("knowledge_refs", knowledge_by_id),
+        ("method_ids", methods_by_id),
+        ("role_ids", roles_by_id),
+    )
+    profile_fields = {
+        "knowledge_refs", "method_ids", "role_ids", "skill_sections",
+        "applies_to", "avoid_when", "selection_notes",
+    }
+
     for group in groups:
-        for field, available in (("knowledge_refs", knowledge_by_id), ("method_ids", methods_by_id), ("role_ids", roles_by_id)):
+        for field, available in resource_fields:
             refs = group.get(field)
             if (not isinstance(refs, list)
                     or any(not isinstance(ref, str) or not ref.strip() for ref in refs)
@@ -278,22 +291,80 @@ def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | 
                 or any(not isinstance(section, str) or not section.strip() for section in sections)
                 or len(sections) != len(set(sections))):
             raise ValueError(f"{group['id']}: skill_sections must be a non-empty unique list")
-    if any(not item.get("current_route", {}).get("status") for item in data["capabilities"]):
-        raise ValueError("legacy capability must have explicit current disposition")
-    selected = [g for g in groups if group_id is None or g["id"] == group_id]
-    if not selected:
-        raise ValueError("exact professional capability group not found")
+
+        demand_profiles = group.get("demand_profiles", {})
+        if not isinstance(demand_profiles, dict) or not set(demand_profiles).issubset(set(group["demands"])):
+            raise ValueError(f"{group['id']}: demand_profiles must map only declared demands")
+        for exact_demand, spec in demand_profiles.items():
+            if not isinstance(spec, dict) or set(spec) - profile_fields:
+                raise ValueError(f"{group['id']}.{exact_demand}: malformed demand profile")
+            for field, available in resource_fields:
+                refs = spec.get(field, [])
+                if (not isinstance(refs, list)
+                        or any(not isinstance(ref, str) or not ref.strip() for ref in refs)
+                        or len(refs) != len(set(refs)) or not set(refs).issubset(available)):
+                    raise ValueError(f"{group['id']}.{exact_demand}: unresolved or duplicate {field}")
+            for field in ("skill_sections", "applies_to", "avoid_when"):
+                values = spec.get(field, [])
+                if (not isinstance(values, list)
+                        or any(not isinstance(value, str) or not value.strip() for value in values)
+                        or len(values) != len(set(values))):
+                    raise ValueError(f"{group['id']}.{exact_demand}: {field} must be a unique text list")
+            if not spec.get("applies_to") or not isinstance(spec.get("selection_notes"), str) or not spec["selection_notes"].strip():
+                raise ValueError(f"{group['id']}.{exact_demand}: applies_to and selection_notes are required")
+
+    if demand_id is not None:
+        if not isinstance(demand_id, str) or not demand_id.strip():
+            raise ValueError("exact nonempty demand_id required")
+        matching = [group for group in groups if demand_id in group["demands"]]
+        if group_id is not None:
+            matching = [group for group in matching if group["id"] == group_id]
+        if len(matching) != 1:
+            raise ValueError("exact professional demand identity not found in the requested group")
+        selected = matching
+        effective_group_id = matching[0]["id"]
+    else:
+        selected = [group for group in groups if group_id is None or group["id"] == group_id]
+        if not selected:
+            raise ValueError("exact professional capability group not found")
+        effective_group_id = group_id
+
     resolved_groups = []
     for group in selected:
+        selected_profile = group.get("demand_profiles", {}).get(demand_id) if demand_id else None
+
+        def merged(field: str) -> list[str]:
+            extra = selected_profile.get(field, []) if selected_profile else []
+            return list(dict.fromkeys([*group[field], *extra]))
+
+        knowledge_refs = merged("knowledge_refs")
+        method_ids = merged("method_ids")
+        role_ids = merged("role_ids")
+        skill_sections = merged("skill_sections")
+        resolution = (
+            "EXACT_DEMAND_PROFILE" if selected_profile
+            else "GROUP_LEVEL_FALLBACK" if demand_id
+            else "GROUP_OVERVIEW"
+        )
         resolved_groups.append({
             **group,
-            "knowledge_resources": [knowledge_by_id[ref] for ref in group["knowledge_refs"]],
-            "methods": [methods_by_id[ref] for ref in group["method_ids"]],
-            "professional_roles": [{"id": role_id, **roles_by_id[role_id]} for role_id in group["role_ids"]],
+            "knowledge_resources": [knowledge_by_id[ref] for ref in knowledge_refs],
+            "methods": [methods_by_id[ref] for ref in method_ids],
+            "professional_roles": [{"id": role_id, **roles_by_id[role_id]} for role_id in role_ids],
+            "skill_sections": skill_sections,
+            "available_demand_profiles": sorted(group.get("demand_profiles", {}).keys()),
+            "selected_demand_id": demand_id,
+            "demand_resolution": resolution,
+            "selected_demand_profile": ({
+                "applies_to": selected_profile["applies_to"],
+                "avoid_when": selected_profile["avoid_when"],
+                "selection_notes": selected_profile["selection_notes"],
+            } if selected_profile else None),
             "executor_routes": {
                 "domain_adapters": [item for item in public_domain_adapter_registry()
                                     if item["name"] in group["adapters"]],
                 "production_operations": list(group["operations"]),
+                "route_scope": "GROUP_LEVEL_CANDIDATE__VERIFY_EXACT_TASK_OPERATION_BEFORE_EXECUTION",
                 "nonlocal_execution": "CURRENT_SESSION_CAPABILITY_HANDSHAKE__AGENT_HUMAN_EXTERNAL_HANDOFF",
             },
         })
@@ -301,10 +372,23 @@ def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | 
         "groups": resolved_groups,
         "domain_operations": [
             item for item in public_domain_adapter_registry()
-            if group_id is None or item["capability_group"] == group_id
+            if effective_group_id is None or item["capability_group"] == effective_group_id
         ],
-        "legacy_capabilities": data["capabilities"] if group_id is None else [],
+        "legacy_capabilities": data["capabilities"] if effective_group_id is None and demand_id is None else [],
         "registry_alignment": "VERIFIED_STRUCTURE_ONLY",
-        "selected_task_graph": None, "effect_authorized": False,
-        "native_activation": "NOT_VERIFIED_BY_RUNTIME", "business_outcome_verified": False,
+        "selected_demand_id": demand_id,
+        "demand_resolution": (
+            "EXACT_DEMAND_PROFILE" if demand_id and resolved_groups[0]["demand_resolution"] == "EXACT_DEMAND_PROFILE"
+            else "GROUP_LEVEL_FALLBACK" if demand_id
+            else "GROUP_OVERVIEW"
+        ),
+        "routing_warning": (
+            "No exact demand profile is registered; returned resources are group-level only."
+            if demand_id and resolved_groups[0]["demand_resolution"] == "GROUP_LEVEL_FALLBACK"
+            else None
+        ),
+        "selected_task_graph": None,
+        "effect_authorized": False,
+        "native_activation": "NOT_VERIFIED_BY_RUNTIME",
+        "business_outcome_verified": False,
     }

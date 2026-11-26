@@ -221,3 +221,42 @@ def test_unrelated_content_has_no_ipos_dependency(tmp_path):
     assert route["identity_mode"] == "NO_IDENTITY"
     assert route["requires_current_canon_bundle"] is False
     assert route["historical_project_snapshot_authority"] is False
+
+
+
+def test_communication_intent_is_optional_source_bound_and_never_a_performance_claim():
+    intent = {
+        "schema_version": "1.0",
+        "audience": "Viewers who enjoy relaxed open-world roaming and driving immersion",
+        "value_promise": "A short moment of getting absorbed in the game world",
+        "think": "This is the kind of in-game moment I enjoy",
+        "feel": "Immersed and relaxed",
+        "do": ["SHARE"],
+        "primary_action": "SHARE",
+        "mechanism": "Recognition and shared player identity",
+        "action_rationale": "The moment is easy to send to a friend who enjoys free-roaming.",
+        "speaker_relation": "Player-to-player, without presuming a shared personal history",
+        "grounding_refs": ["source-video"],
+        "assumptions": [],
+    }
+    result = inspect_declared_deliverables([{
+        "id": "caption", "type": "SHORT_COPY",
+        "source_refs": ["source-video"],
+        "communication_intent": intent,
+    }])
+    resolved = result["deliverables"][0]
+    assert resolved["communication_intent"]["primary_action"] == "SHARE"
+    assert resolved["communication_intent"]["status"] == "HYPOTHESIS_UNMEASURED"
+    assert result["quality_verified"] is False
+    assert result["effect_authorized"] is False
+
+    with pytest.raises(ContentContractError, match="public-facing"):
+        inspect_declared_deliverables([{
+            "id": "edit", "type": "MEDIA_TRANSFORM",
+            "source_refs": ["source-video"], "communication_intent": intent,
+        }])
+    with pytest.raises(ContentContractError, match="grounding_refs"):
+        inspect_declared_deliverables([{
+            "id": "caption", "type": "SHORT_COPY",
+            "source_refs": [], "communication_intent": intent,
+        }])

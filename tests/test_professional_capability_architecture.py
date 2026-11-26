@@ -65,3 +65,19 @@ def test_identity_capability_is_nested_and_on_demand():
     assert item["activation"] == "DEMAND_SELECTED_ONLY"
     assert len([x for x in item["adapters"] if x.startswith("ipos_")]) == 5
     assert identity["effect_authorized"] is False
+
+
+
+def test_exact_demand_lookup_returns_scoped_resources_without_authorizing_execution():
+    short = capability_lookup("editorial_writing", demand_id="short_form_copy")
+    assert short["selected_demand_id"] == "short_form_copy"
+    assert short["demand_resolution"] == "EXACT_DEMAND_PROFILE"
+    assert short["effect_authorized"] is False
+    assert short["selected_task_graph"] is None
+    assert short["groups"][0]["executor_routes"]["route_scope"] == (
+        "GROUP_LEVEL_CANDIDATE__VERIFY_EXACT_TASK_OPERATION_BEFORE_EXECUTION"
+    )
+
+    fallback = capability_lookup("motion_production", demand_id="video_generation")
+    assert fallback["demand_resolution"] == "GROUP_LEVEL_FALLBACK"
+    assert fallback["effect_authorized"] is False

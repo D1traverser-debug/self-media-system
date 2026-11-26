@@ -35,6 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("capabilities", help="inspect professional capability coverage and actual registered routes")
     p.add_argument("--group", help="exact professional capability group ID")
+    p.add_argument("--demand", help="exact professional demand ID; may identify its group")
 
     p = sub.add_parser("quality-plan", help="derive deliverable-specific quality criteria, no PASS assertion")
     p.add_argument("source", type=Path)
@@ -44,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("inspect-editorial", help="read-only structural check for a cross-platform package or long article")
     p.add_argument("source", type=Path)
-    p.add_argument("--kind", choices=["package", "article"], required=True)
+    p.add_argument("--kind", choices=["package", "article", "short-copy"], required=True)
 
     p = sub.add_parser("knowledge", help="locate reusable methods without activating task history")
     p.add_argument("--id", help="exact knowledge method ID")
@@ -270,7 +271,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if report["pass"] else 2
         if command == "capabilities":
             from .scope import capability_lookup
-            _emit(capability_lookup(args.group))
+            _emit(capability_lookup(args.group, demand_id=args.demand))
             return 0
         if command == "quality-plan":
             from .domain.assurance import build_quality_plan
@@ -289,9 +290,14 @@ def main(argv: list[str] | None = None) -> int:
             _emit(result)
             return 0
         if command == "inspect-editorial":
-            from .domain.editorial import inspect_long_article, inspect_platform_package
+            from .domain.editorial import inspect_long_article, inspect_platform_package, inspect_short_copy
             try:
-                result = (inspect_platform_package if args.kind == "package" else inspect_long_article)(_read_json(args.source))
+                inspectors = {
+                    "package": inspect_platform_package,
+                    "article": inspect_long_article,
+                    "short-copy": inspect_short_copy,
+                }
+                result = inspectors[args.kind](_read_json(args.source))
             except ValueError as exc:
                 raise StudioError(str(exc)) from exc
             _emit(result)
