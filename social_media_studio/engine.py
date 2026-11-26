@@ -318,17 +318,6 @@ class StudioEngine:
     @staticmethod
     def _descendant_closure(tasks: dict[str, dict[str, Any]], roots: Iterable[str]) -> set[str]:
         return ProjectTaskService._descendant_closure(tasks, roots)
-    def _descendant_closure(tasks: dict[str, dict[str, Any]], roots: Iterable[str]) -> set[str]:
-        closure = set(roots)
-        changed = True
-        while changed:
-            changed = False
-            for candidate, row in tasks.items():
-                deps = _loads(row["depends_on_json"], []) if "depends_on_json" in row else row.get("depends_on", [])
-                if candidate not in closure and any(dep in closure for dep in deps):
-                    closure.add(candidate)
-                    changed = True
-        return closure
 
     def brief_history(self, project_id: str) -> list[dict[str, Any]]:
         return self._project_task_service.brief_history(project_id)
