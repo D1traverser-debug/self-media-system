@@ -202,3 +202,36 @@ The design covers all named deliverable families and most forbidden implicit eff
 The two identity-use scenarios (S15 and S31) should be corrected at the ontology level: the output remains the actual content deliverable (for example, image or video); approved IP use is a constraint/dependency on that deliverable, not a substitute deliverable type. This avoids conflating creating an identity asset with consuming an approved identity.
 
 No scenario should be marked runtime-verified solely because its contract exists, an enum accepts its type, a task graph is green, or a fixture test passes.
+
+
+## 10. Decision-loop alternatives and falsifiers
+
+| Alternative | Decision | Reason |
+|---|---|---|
+| Patch only the missing \`supports_domain_adapter\` symbol in PR #53 | Reject as the complete solution | It would clear the first CI exception but leave the registry's descriptive-only contracts, mutable dual views and broad engine injection unchanged. The missing symbol is the visible failure, not the full boundary problem. |
+| Merge PR #52 immediately because 457 tests pass | Reject for now | The tests support behavior preservation, but the application service still depends on a 15-method engine-shaped port and calls back through the facade. That is not yet the intended one-way boundary. |
+| Abandon extraction and keep the 3,135-line engine untouched | Reject | It preserves current behavior but leaves project/task, artifact, decision, review, release and learning responsibilities entangled. |
+| Big-bang rewrite or add a second scheduler/controller/database | Reject | No observed requirement demonstrates that the existing SQLite ledger, dynamic DAG, leases or worker pool are insufficient. A second authority would increase state and recovery risk. |
+| Treat green CI or the 35-route smoke as production readiness | Reject | Neither proves actual authoring, pixels, media quality, provider execution, independent review or owner outcome. |
+| **Staged modular monolith with a typed demand foundation** | **Select conditionally** | Preserve one authority and the current runtime surface; close demand semantics and capability/effect contracts before further planner extraction; validate every boundary with behavior and owner-outcome evidence. |
+
+**Falsifiers that reopen this decision:**
+
+- If concurrency, lease recovery or event replay cannot be preserved behind the proposed ports, revisit the application boundary before extracting more services.
+- If a versioned \`DemandContract\` cannot represent a real owner correction without losing prior intent or invalidating unrelated branches, reopen the demand ontology.
+- If PR #52 cannot be made one-way without changing public API, transaction boundaries or event order, retain it only as a mechanical file extraction and do not describe it as a decoupled application service.
+- If PR #53 cannot enforce operation contracts without duplicating manifest/registry authority, rename its record to descriptive metadata and keep runtime validation in one explicit handler boundary.
+- If no genuinely independent reviewer/executor can be registered, high-assurance review remains unavailable; do not weaken the trust gate.
+- If a current provider or platform capability is unavailable or unauthorized, block or explicitly downgrade the effect; never substitute a fictitious capability.
+- If actual output trials fail the owner's stated purpose, reopen the demand/creative decision rather than polishing the failed artifact locally.
+
+## 11. CAOS execution record
+
+- **Goal recovered:** continue SMS as a task-neutral, owner-outcome-driven self-media studio under CAOS parent governance; preserve direct and durable work, avoid fixed video stages and avoid local patches that cement a wrong architecture.
+- **Evidence checked:** current manifest/entry, domain contracts, scope/intake, subsystem map, current architecture proposal and all 35 scenario declarations, active PR heads, exact-head CI records, PR #53 failure logs.
+- **Root causes selected:** unpromoted/stale architecture baseline; untyped demand revision; incomplete application-service boundary; descriptive rather than enforceable adapter registry; incomplete real-output acceptance.
+- **Method selected:** modular-monolith evolution, one authority, typed demand first, then capability/effect ports, then task-service extraction; preserve the separate signed-review lane.
+- **Execution performed:** created this isolated documentation-only audit branch and PR #54; mapped all 35 scenarios to current source controls and explicit gaps.
+- **Readback:** the report was fetched from GitHub after each write; all 35 scenario rows and findings are present.
+- **Independent acceptance:** not yet obtained. The two adversarial reviews in this report are model-authored and cannot substitute for an external independent reviewer or owner acceptance.
+- **Runtime change:** none. Main, CAOS, IPOS, workspaces, project databases, media files, provider accounts and publication state remain untouched.
