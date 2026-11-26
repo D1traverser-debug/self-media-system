@@ -394,16 +394,32 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
                 if module == "caos" or module.startswith("caos.") or module.startswith("cognition_agent_os"):
                     import_failures.append(f"{path.relative_to(root)} imports {module}")
                 if module == "social_media_studio.legacy" or module.startswith("social_media_studio.legacy."):
-                    if path.name != "adapters.py":
-                        import_failures.append(f"{path.relative_to(root)} imports legacy domain code outside the explicit adapter bridge: {module}")
+                    is_explicit_adapter_layer = (
+                        path.name == "adapters.py"
+                        or path.parts[:2] == ("social_media_studio", "domain_adapters")
+                    )
+                    if not is_explicit_adapter_layer:
+                        import_failures.append(f"{path.relative_to(root)} imports legacy domain code outside the explicit domain-adapter boundary: {module}")
     _check(checks, "runtime_dependency_boundary", not import_failures, import_failures)
 
-    adapter_source = (root / "social_media_studio" / "adapters.py").read_text(encoding="utf-8")
-    implemented_adapters = set(re.findall(r"""(?:if|elif) name == ["']([^"']+)["']""", adapter_source))
+    from .domain_adapters.registry import DOMAIN_ADAPTERS, SUPPORTED_DOMAIN_ADAPTERS
+    implemented_adapters = set(DOMAIN_ADAPTERS)
     declared_adapters = set(studio_manifest.get("capabilities", {}).get("domain_adapters", {}))
-    from .adapters import SUPPORTED_DOMAIN_ADAPTERS, supports_domain_adapter
     supported_adapters = set(SUPPORTED_DOMAIN_ADAPTERS)
-    adapter_registry_ok = declared_adapters == implemented_adapters == supported_adapters
+    manifest_adapter_refs = studio_manifest.get("capabilities", {}).get("domain_adapters", {})
+    handler_ref_mismatches = sorted(
+        name for name, spec in DOMAIN_ADAPTERS.items()
+        if manifest_adapter_refs.get(name) != spec.handler_ref
+    )
+    handler_integrity_failures = sorted(
+        name for name, spec in DOMAIN_ADAPTERS.items()
+        if not callable(spec.handler) or spec.name != name or not spec.handler_ref
+    )
+    adapter_registry_ok = (
+        declared_adapters == implemented_adapters == supported_adapters
+        and not handler_ref_mismatches
+        and not handler_integrity_failures
+    )
     _check(checks, "domain_adapter_registry_matches_manifest", adapter_registry_ok, {
         "declared_count": len(declared_adapters),
         "implemented_count": len(implemented_adapters),
@@ -411,6 +427,8 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         "undeclared_supported": sorted(supported_adapters - declared_adapters),
         "declared_without_implementation": sorted(declared_adapters - implemented_adapters),
         "implemented_without_support_registration": sorted(implemented_adapters - supported_adapters),
+        "handler_ref_mismatches": handler_ref_mismatches,
+        "handler_integrity_failures": handler_integrity_failures,
     })
 
     from .production.executors import tool_executor_for_task
