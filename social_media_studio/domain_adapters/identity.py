@@ -19,7 +19,7 @@ def ipos_import_receipt_from_dict(payload: Mapping[str, Any]) -> IPIdentityImpor
         invalidated_refs=tuple(AssetRef(**_mapping(item, "invalidated_ref")) for item in data.get("invalidated_refs", [])),
     )
 
-def handle_ipos_bundle_inspect(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_ipos_bundle_inspect(project_id, packet, config, outputs, output_dir, attempt, name):
     input_name = str(config["bundle_input"])
     readiness = inspect_ipos_bundle(_input_json(packet, input_name))
     if not readiness.ready:
@@ -80,7 +80,7 @@ def handle_ipos_bundle_inspect(engine, project_id, packet, config, outputs, outp
     return artifact_outputs, result
 
 
-def handle_ipos_bundle_import(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_ipos_bundle_import(project_id, packet, config, outputs, output_dir, attempt, name):
     bundle_name = str(config["bundle_input"])
     graph_name = str(config["media_graph_input"])
     graph = MediaGraph.from_dict(_input_json(packet, graph_name))
@@ -111,7 +111,7 @@ def handle_ipos_bundle_import(engine, project_id, packet, config, outputs, outpu
     return artifact_outputs, result
 
 
-def handle_ipos_shot_bind(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_ipos_shot_bind(project_id, packet, config, outputs, output_dir, attempt, name):
     bundle = _input_json(packet, str(config["bundle_input"]))
     receipt = ipos_import_receipt_from_dict(_input_json(packet, str(config["import_receipt_input"])))
     graph = MediaGraph.from_dict(_input_json(packet, str(config["media_graph_input"])))
@@ -149,7 +149,7 @@ def handle_ipos_shot_bind(engine, project_id, packet, config, outputs, output_di
     return artifact_outputs, result
 
 
-def handle_ipos_continuity_snapshot(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_ipos_continuity_snapshot(project_id, packet, config, outputs, output_dir, attempt, name):
     bundle = _input_json(packet, str(config["bundle_input"]))
     shot_id = str(config["shot_id"])
     snapshot = build_ipos_continuity_snapshot(shot_id, bundle)
@@ -167,7 +167,7 @@ def handle_ipos_continuity_snapshot(engine, project_id, packet, config, outputs,
     return artifact_outputs, result
 
 
-def handle_ipos_continuity_link(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_ipos_continuity_link(project_id, packet, config, outputs, output_dir, attempt, name):
     bundle = _input_json(packet, str(config["bundle_input"]))
     link = build_ipos_continuity_link(
         str(config["from_shot_id"]), str(config["to_shot_id"]), bundle,

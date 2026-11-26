@@ -3,7 +3,7 @@ from __future__ import annotations
 from .common import *
 from social_media_studio.legacy.media_graph import ContextRecord, MediaGraph
 
-def handle_media_graph_initialize(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_media_graph_initialize(project_id, packet, config, outputs, output_dir, attempt, name):
     contexts = config.get("contexts", [])
     if not isinstance(contexts, list) or not contexts:
         raise DomainAdapterError("media_graph_initialize requires a non-empty contexts array")

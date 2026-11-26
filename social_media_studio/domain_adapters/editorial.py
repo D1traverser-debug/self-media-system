@@ -65,7 +65,7 @@ def validate_shot_against_editorial_plan(plan: EditorialPlan, shot: Any) -> None
             f"contract={sorted(contract_modes)}, plan={sorted(permitted_modes)}"
         )
 
-def handle_editorial_plan_validate(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_editorial_plan_validate(project_id, packet, config, outputs, output_dir, attempt, name):
     input_name = str(config["editorial_plan_input"])
     plan = editorial_plan_from_dict(_input_json(packet, input_name))
     output_name = str(config.get("output_name", outputs[0]))
@@ -92,7 +92,7 @@ def handle_editorial_plan_validate(engine, project_id, packet, config, outputs, 
     return artifact_outputs, result
 
 
-def handle_shot_contract_materialize(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_shot_contract_materialize(project_id, packet, config, outputs, output_dir, attempt, name):
     plan_name = str(config["editorial_plan_input"])
     plan = editorial_plan_from_dict(_input_json(packet, plan_name))
     references = config.get("references", [])
@@ -130,7 +130,7 @@ def handle_shot_contract_materialize(engine, project_id, packet, config, outputs
     return artifact_outputs, result
 
 
-def handle_shot_contract_validate(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_shot_contract_validate(project_id, packet, config, outputs, output_dir, attempt, name):
     input_name = str(config["shot_contract_input"])
     shot = shot_contract_from_dict(_input_json(packet, input_name))
     editorial_plan_name = str(config.get("editorial_plan_input", "")).strip()

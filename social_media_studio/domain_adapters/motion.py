@@ -175,7 +175,7 @@ def _model_routing_request(payload: Mapping[str, Any]) -> tuple[ShotRoutingReque
             raise DomainAdapterError(f"invalid model observation {index}: {exc}") from exc
     return request, tuple(engines)
 
-def handle_timeline_validate(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_timeline_validate(project_id, packet, config, outputs, output_dir, attempt, name):
     timeline = timeline_spec_from_dict(_input_json(packet, str(config["timeline_input"])))
     graph = MediaGraph.from_dict(_input_json(packet, str(config["media_graph_input"])))
     timeline.validate_against_graph(
@@ -207,7 +207,7 @@ def handle_timeline_validate(engine, project_id, packet, config, outputs, output
     return artifact_outputs, result
 
 
-def handle_shot_route(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_shot_route(project_id, packet, config, outputs, output_dir, attempt, name):
     now_value = str(config.get("now", "")).strip()
     now = datetime.fromisoformat(now_value.replace("Z", "+00:00")) if now_value else None
     route = route_shot(
@@ -242,7 +242,7 @@ def handle_shot_route(engine, project_id, packet, config, outputs, output_dir, a
     return artifact_outputs, result
 
 
-def handle_continuity_assess(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_continuity_assess(project_id, packet, config, outputs, output_dir, attempt, name):
     continuity = assess_shot_continuity(_input_json(packet, str(config["continuity_input"])))
     if not continuity["hard_pass"] and config.get("block_on_hard_fail", True):
         violations = continuity["assessment"]["violations"]

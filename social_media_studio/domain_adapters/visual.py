@@ -8,7 +8,7 @@ from ..legacy.programmatic_graphics import (
 )
 from .editorial import editorial_plan_from_dict, validate_shot_against_editorial_plan
 
-def handle_programmatic_graphic_render(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_programmatic_graphic_render(project_id, packet, config, outputs, output_dir, attempt, name):
     spec_name = str(config["graphic_spec_input"])
     shot_name = str(config["shot_contract_input"])
     font_name = str(config["font_input"])

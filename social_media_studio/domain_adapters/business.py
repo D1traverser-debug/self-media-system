@@ -85,7 +85,7 @@ def outcome_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
         "objective_vector": _jsonable(receipt.objective_vector()),
     }
 
-def handle_business_object_validate(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_business_object_validate(project_id, packet, config, outputs, output_dir, attempt, name):
     object_type=str(config.get("object_type","")).strip(); input_name=str(config.get("input_name","")).strip()
     obj=business_object_from_dict(object_type,_input_json(packet,input_name)); output_name=str(config.get("output_name",outputs[0]))
     path=output_dir/f"{_safe_filename(output_name)}-attempt-{attempt}.json"; _write_json(path,{"schema_version":"1.0","adapter":name,"object_type":object_type,"object":_jsonable(obj)})
@@ -95,7 +95,7 @@ def handle_business_object_validate(engine, project_id, packet, config, outputs,
     return artifact_outputs, result
 
 
-def handle_episode_intent_validate(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_episode_intent_validate(project_id, packet, config, outputs, output_dir, attempt, name):
     handoff_input = str(config.get("handoff_input", "")).strip()
     expected_program_id = str(config.get("program_id") or "").strip() or None
     raw_handoff = _input_json(packet, handoff_input)
@@ -104,7 +104,7 @@ def handle_episode_intent_validate(engine, project_id, packet, config, outputs, 
         if imported is None:
             raise DomainAdapterError(f"validated Program handoff input is unavailable: {handoff_input}")
         transfer = _mapping(imported.get("metadata", {}).get("cross_project_transfer"), "cross_project_transfer")
-        target_project_id = engine.project(project_id)["project_id"]
+        target_project_id = project_id
         if transfer.get("schema_version") != "1.0" or transfer.get("transfer_mode") != "IMMUTABLE_COPY":
             raise DomainAdapterError("Episode handoff must arrive through a schema 1.0 immutable cross-project transfer")
         if transfer.get("source_project_id") != expected_program_id:
@@ -185,7 +185,7 @@ def handle_episode_intent_validate(engine, project_id, packet, config, outputs, 
     return artifact_outputs, result
 
 
-def handle_business_outcome_metrics(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_business_outcome_metrics(project_id, packet, config, outputs, output_dir, attempt, name):
     metrics = outcome_metrics(_input_json(packet, str(config["outcome_receipt_input"])))
     output_name = str(config.get("output_name", outputs[0]))
     path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"

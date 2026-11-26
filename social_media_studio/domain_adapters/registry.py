@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from typing import Any, Callable, Mapping
+from pathlib import Path
 from types import MappingProxyType
 
 from .business import handle_business_object_validate, handle_episode_intent_validate, handle_business_outcome_metrics
@@ -16,10 +17,13 @@ from .motion import handle_timeline_validate, handle_shot_route, handle_continui
 from .visual import handle_programmatic_graphic_render
 
 
+DomainAdapterHandler = Callable[[str, dict[str, Any], dict[str, Any], list[str], Path, int, str], tuple[dict[str, Any], dict[str, Any]]]
+
+
 @dataclass(frozen=True)
 class DomainAdapterSpec:
     name: str
-    handler: Callable[..., tuple[dict[str, Any], dict[str, Any]]]
+    handler: DomainAdapterHandler
     handler_ref: str
     capability_group: str
     required_config: tuple[str, ...]

@@ -67,7 +67,7 @@ def run_claimed_domain_adapter(
             raise DomainAdapterError(f"unsupported domain adapter: {name}")
         validate_domain_adapter_contract(spec, config, outputs)
         artifact_outputs, result = spec.handler(
-            engine, project_id, packet, config, outputs, output_dir, attempt, name,
+            project_id, packet, config, outputs, output_dir, attempt, name,
         )
         if set(artifact_outputs) != set(outputs):
             raise DomainAdapterError(

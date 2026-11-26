@@ -3,7 +3,7 @@ from __future__ import annotations
 from .common import *
 from ..legacy.media_qa import MediaQAChecker
 
-def handle_extended_media_qa(engine, project_id, packet, config, outputs, output_dir, attempt, name):
+def handle_extended_media_qa(project_id, packet, config, outputs, output_dir, attempt, name):
     media_name = str(config["media_input"])
     media_path = _input_path(packet, media_name)
     report = MediaQAChecker().inspect(media_path).to_dict()
