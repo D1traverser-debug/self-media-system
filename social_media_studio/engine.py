@@ -471,6 +471,10 @@ class StudioEngine:
                 if "scope_epoch" in old_brief:
                     if brief.get("scope_epoch") != old_brief["scope_epoch"]:
                         raise ContractError("owner task scope epoch cannot change")
+                    from .scope import bind_owner_brief
+                    from .domain.demand import validate_demand_revision
+                    bind_owner_brief(project_id, brief)
+                    validate_demand_revision(old_brief, brief)
                     if brief != old_brief:
                         # Until a task-level semantic dependency oracle proves a narrower
                         # change set, the whole owner brief is the governing upstream input.

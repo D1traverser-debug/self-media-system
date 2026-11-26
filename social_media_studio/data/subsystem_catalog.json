@@ -26,6 +26,7 @@
         "social_media_studio/__main__.py",
         "social_media_studio/cli.py",
         "social_media_studio/scope.py",
+        "social_media_studio/domain/demand.py",
         "social_media_studio/engine.py",
         "social_media_studio/adapters.py",
         "social_media_studio/production/__init__.py",

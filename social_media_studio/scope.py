@@ -110,9 +110,8 @@ def bind_owner_brief(project_id: str, brief: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("exact current owner goal is required")
     if brief.get("scope_epoch", EPOCH) != EPOCH:
         raise ValueError("cannot reuse a retired scope epoch")
-    if "deliverable_specs" in brief:
-        from .domain.contracts import inspect_declared_deliverables
-        inspect_declared_deliverables(brief["deliverable_specs"], expected_ids=brief.get("deliverables"))
+    from .domain.demand import inspect_demand
+    inspect_demand(brief, durable=True)
     return {**brief, "scope_epoch": EPOCH}
 
 
@@ -163,17 +162,20 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
                 raise ValueError("NEW cannot reuse an existing project")
         brief = None
     else:
+        extra = set(request) - {"mode", "project_id"}
+        if extra:
+            raise ValueError(
+                "RESUME is read-only and cannot apply owner corrections; revise the "
+                f"stored brief explicitly before resuming: {sorted(extra)}"
+            )
         project_id = _id(request.get("project_id"))
         brief = read_project_brief(root, project_id)
         if brief.get("scope_epoch") != EPOCH:
             raise ValueError("pre-cutover task instance is retired; create a fresh owner demand")
         goal = brief["goal"]
-    declarations = request.get("deliverable_specs") if mode == "NEW" else brief.get("deliverable_specs")
-    typed = None
-    if declarations is not None:
-        from .domain.contracts import inspect_declared_deliverables
-        typed = inspect_declared_deliverables(
-            declarations, expected_ids=(brief.get("deliverables") if mode == "RESUME" else request.get("deliverables")))
+    from .domain.demand import inspect_demand
+    demand = inspect_demand(request if mode == "NEW" else brief, durable=mode == "RESUME")
+    typed = demand["typed_deliverables"]
     from .domain.identity import identity_route
     identity_routing = identity_route(typed["deliverables"]) if typed else None
     from .subsystems import route_declared_content
@@ -181,6 +183,7 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
     return {
         "mode": mode, "goal": goal, "project_id": project_id, "brief": brief,
         "typed_deliverables": typed,
+        "demand": demand,
         "identity_routing": identity_routing,
         "internal_subsystem_routing": internal_subsystem_routing,
         "scope_epoch": EPOCH, "selected_task_graph": None,

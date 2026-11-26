@@ -7,7 +7,7 @@ import hashlib
 import json
 from typing import Any
 
-from .scope import EPOCH, _id
+from .scope import EPOCH, _id, bind_owner_brief
 
 # Historical database discriminator retained solely for a safe, auditable
 # transition of already-created owner workspaces. Never used for new intake.
@@ -35,7 +35,7 @@ def migrate_owner_scope(engine: Any, project_id: str, *, reason: str) -> dict[st
                         "leases_revoked": [], "historical_records_deleted": False}
             if old_epoch != PRIOR_EPOCH:
                 raise ValueError("scope upgrade is limited to the previous owner scope; unmarked history remains retired")
-            new_brief = {**old_brief, "scope_epoch": EPOCH}
+            new_brief = bind_owner_brief(project_id, {**old_brief, "scope_epoch": EPOCH})
             now = datetime.now(timezone.utc).isoformat()
             running = conn.execute(
                 "SELECT task_id FROM tasks WHERE project_id=? AND status='RUNNING'",
