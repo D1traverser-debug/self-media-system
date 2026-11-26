@@ -416,7 +416,7 @@
       "deliverables": {
         "types": "social_media_studio.domain.contracts.DELIVERABLE_TYPES",
         "ownership": "social_media_studio/data/subsystem_catalog.json#deliverable_ownership",
-        "semantics": "Each requested outcome has its own typed contract and acceptance. Public-facing deliverables may optionally declare communication_intent. No default video final."
+        "semantics": "EACH_REQUESTED_OUTCOME_HAS_ITS_OWN_TYPED_CONTRACT_AND_ACCEPTANCE__NO_DEFAULT_VIDEO_FINAL__OPTIONAL_PUBLIC_FACING_COMMUNICATION_INTENT"
       },
       "platform_adaptation": {
         "variant_schema": "social_media_studio.domain.contracts.DeliverableVariant",

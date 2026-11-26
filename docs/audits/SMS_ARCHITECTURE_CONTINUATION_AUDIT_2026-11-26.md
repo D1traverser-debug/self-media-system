@@ -8,7 +8,9 @@
 
 > **Historical-baseline notice:** Sections 1 onward below preserve the preliminary review of main at 7cd1cff. Its original instruction not to merge PRs #52/#53 is superseded by the integrated review branch described here. Do not use the historical merge recommendation as the current decision.
 
-## Current integration status — PR #56
+## Historical integration observation — PR #56
+
+**Supersession:** the live construction checkpoint is `docs/SMS_CONSTRUCTION_CHECKPOINT.json` (read it at the current PR head). The observation below is preserved as historical evidence, not current CI or task authority.
 
 **Review branch:** refactor/sms-complete-professional-studio-20261126  
 **Current code head at this audit update:** 9d411570c047ad6c51401fbbaf4fa4dfc3e0e861  

@@ -149,7 +149,7 @@ class DeliverableContract:
     prohibitions: tuple[str, ...]
     constraints: dict[str, Any]
     acceptance: dict[str, Any]
-    communication_intent: CommunicationIntent | None
+    communication_intent: CommunicationIntent | None = None
 
     @classmethod
     def from_mapping(cls, value: Mapping[str, Any]) -> "DeliverableContract":

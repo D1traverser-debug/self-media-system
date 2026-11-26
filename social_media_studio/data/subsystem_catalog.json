@@ -76,7 +76,8 @@
         "social_media_studio/domain/assurance.py",
         "social_media_studio/legacy/execution_attestation.py",
         "social_media_studio/legacy/reviewer_providers.py",
-        "social_media_studio/review_execution.py"
+        "social_media_studio/review_execution.py",
+        "social_media_studio/domain/communication.py"
       ],
       "domain_adapters": [],
       "production_operations": [],

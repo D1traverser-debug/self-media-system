@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "kind": "SMS_REPOSITORY_CONSTRUCTION_CHECKPOINT",
+  "project": "SOCIAL_MEDIA_STUDIO",
+  "purpose": "Complete actual owner-demand outcomes across the whole SMS product, under read-only CAOS governance. Not a business runtime task or second scheduler.",
+  "authority": {
+    "entry": "STUDIO_ENTRY.md",
+    "architecture": "docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md",
+    "acceptance": "docs/SOCIAL_MEDIA_STUDIO_ARCH_ACCEPTANCE_V2.json",
+    "catalog": "social_media_studio/data/subsystem_catalog.json",
+    "manifest": "social_media_studio/data/studio_manifest.json",
+    "owner_original_status": "NOT_FULLY_RECOVERED",
+    "private_owner_original_precedes_this_checkpoint": true
+  },
+  "integration": {
+    "branch": "refactor/sms-complete-professional-studio-20261126",
+    "pull_request": 56,
+    "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
+    "observed_head": "9b9544516b1e905e0f4a49545838f1b820b754be",
+    "observed_ci_run": 45802784271,
+    "observed_ci": "FAILURE",
+    "observed_failure": "System audit: domain/communication.py unowned and unclassified. Remaining tests skipped. Manifest regression: NO_DEFAULT_VIDEO_FINAL invariant removed by previous edit.",
+    "new_changes": "Assign pure communication contract to owner of typed domain contracts; restore manifest invariant; preserve optional dataclass constructor; add construction checkpoint, references and consistency test. New exact-head CI required.",
+    "status": "DRAFT_NOT_MERGED"
+  },
+  "decision": {
+    "problem": "Repeated session drift despite product runtime recovery; no current construction-wide task map in inspected tree, historical audit head stale, previous local change missed cross-subsystem contract.",
+    "alternatives": [
+      {
+        "route": "Rewrite engine or duplicate CAOS/runtime ledger",
+        "disposition": "REJECT: wrong layer, risks duplicate state and loss of valid functionality."
+      },
+      {
+        "route": "Continue independent subsystem patches or create more PRs",
+        "disposition": "REJECT: dependencies, current goal and verification drift."
+      },
+      {
+        "route": "Single Git-versioned construction checkpoint in existing integration PR, existing canonical product entry locates it, structural tests verify coverage",
+        "disposition": "SELECT conditionally; no runtime controller or new authority. Actual owner outcomes remain the oracle."
+      }
+    ],
+    "falsifier": "If a new session cannot recover exact task/branch/evidence from the checkpoint, or a mapped scenario/owner outcome fails, reopen the relevant ancestor; do not add another parallel plan.",
+    "rollback": "Revert this commit on integration branch if necessary; main untouched. Never erase earlier evidence."
+  },
+  "protocol": {
+    "resume": "Read current PR head, then this checkpoint at that head, exact-head CI, and relevant source; owner correction outranks checkpoint. If branch diverges or another task owner changed it, reconcile before writing. Do not use most recent timestamp alone.",
+    "selection": "Execute all lawful ready obligations by causal priority, first recover goal and restore broken baseline; parallelize independent evidence where useful. Do not narrow whole goal to last changed subsystem. Revisit upstream decisions when contradicted.",
+    "checkpoint": "In the same logical change, update affected obligations, evidence, blocker and next action; Git history preserves previous observations. Never store raw private goals or secrets in repository. Never claim external actions occurred without readback.",
+    "acceptance": "A task may be VERIFIED only with explicit exact-version evidence of its own acceptance and all dependencies VERIFIED; CI proves code checks only. External permissions, independently reviewed actual outputs and native client selection stay unknown until proven.",
+    "stop": "All obligations VERIFIED with actual owner outcome; otherwise retain open/blocked tasks and concrete next action. No background work claim."
+  },
+  "tasks": [
+    {
+      "id": "B00",
+      "goal": "Restore exact-head regression baseline",
+      "depends_on": [],
+      "subsystems": [],
+      "scenario_ids": [],
+      "status": "IN_PROGRESS",
+      "acceptance": "System audit, topology, full tests and all CLI smoke checks pass on actual integration head; failures investigated, not suppressed.",
+      "next_action": "Inspect new exact-head CI jobs; if a gate fails, investigate first causal error and dependent contracts. Do not mark complete on old-head CI.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B01",
+      "goal": "Recover and reconcile full owner demand, corrections and final outcome",
+      "depends_on": [],
+      "subsystems": [],
+      "scenario_ids": [],
+      "status": "OPEN",
+      "acceptance": "Private original/corrections mapped to stable obligations; distinguish unknowns and user preferences; no historical work order reactivation.",
+      "next_action": "Retrieve original owner records via private source; reconcile with current entry and frozen V2. Library retrieval in this turn did not locate authoritative SMS original.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B02",
+      "goal": "Whole-architecture source mapping and adversarial review",
+      "depends_on": [
+        "B01"
+      ],
+      "subsystems": [],
+      "scenario_ids": [],
+      "status": "OPEN",
+      "acceptance": "Every current subsystem, contract, interface, scenario and forbidden effect traced to exact code/tests; conflicting architecture assumptions resolved; independent conceptual review recorded.",
+      "next_action": "Reconcile the 35 frozen scenarios with current candidate head; review system topology and cross-boundary calls before choosing deeper changes.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B03",
+      "goal": "Demand admission, direct/durable continuity and execution invariants",
+      "depends_on": [
+        "B00",
+        "B02"
+      ],
+      "subsystems": [
+        "execution_and_owner_scope",
+        "cognition_and_audit",
+        "compatibility_data_models",
+        "legacy_agent_control_plane"
+      ],
+      "scenario_ids": [
+        "S18",
+        "S19",
+        "S22",
+        "S25",
+        "S28"
+      ],
+      "status": "OPEN",
+      "acceptance": "Owner revision, resume, independent tasks, explicit scope and retired-project negative cases work; direct conversational requests require no artificial project; no stale effect.",
+      "next_action": "Trace demand correction authenticity, decision bindings, invalidation, scope isolation and actual owner-task readback. Preserve single ledger.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B04",
+      "goal": "Source understanding, evidence, knowledge and rights",
+      "depends_on": [
+        "B00",
+        "B02"
+      ],
+      "subsystems": [
+        "research_and_understanding",
+        "source_and_asset_lineage",
+        "knowledge_roles_and_methods"
+      ],
+      "scenario_ids": [
+        "S16",
+        "S21",
+        "S26",
+        "S27"
+      ],
+      "status": "OPEN",
+      "acceptance": "Source truth, semantic understanding, lineage, rights, scoped CRUD and independent method replays proven by actual evidence; stale claims cannot authorize effects.",
+      "next_action": "Inventory current source interfaces; verify actual search/inspection capabilities and method provenance, test source replacement and scoped CRUD.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B05",
+      "goal": "Editorial, language and platform variants",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "subsystems": [
+        "editorial_and_language",
+        "platform_packaging_delivery"
+      ],
+      "scenario_ids": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S12"
+      ],
+      "status": "OPEN",
+      "acceptance": "Actual natural-language short and long copy, multilingual variants and nonrepeating packaging meet explicit audience/owner intent; no invented claims; professional review.",
+      "next_action": "Audit demand routing across all craft groups (not only editorial); replay authentic short, article and platform requests with actual outputs and independent critique.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B06",
+      "goal": "Visual craft and original identity",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "subsystems": [
+        "visual_and_static_design",
+        "original_identity_ipos"
+      ],
+      "scenario_ids": [
+        "S06",
+        "S07",
+        "S08",
+        "S14",
+        "S15",
+        "S17",
+        "S29",
+        "S30",
+        "S31",
+        "S32",
+        "S33",
+        "S34",
+        "S35"
+      ],
+      "status": "OPEN",
+      "acceptance": "Actual visual briefs and outputs satisfy intent, hierarchy, licensed fonts, aspect and preparation-only scope; only current approved IPOS canon is consumed; dependency-specific revocation verified.",
+      "next_action": "Compare actual available visual tool operations and approved IPOS bundles; review multi-aspect and no-generation contracts; run independent artifact review.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B07",
+      "goal": "Motion, sound and media transform",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "subsystems": [
+        "motion_and_production",
+        "media_understanding_and_transform"
+      ],
+      "scenario_ids": [
+        "S09",
+        "S10",
+        "S11",
+        "S13",
+        "S23"
+      ],
+      "status": "OPEN",
+      "acceptance": "Actual original-video and transformation results with correct full-duration/audio preservation, requested scope, visual quality and media QA; real files, exact digests.",
+      "next_action": "Inspect transform limitations and provider contracts; test eligible packet-copy, edit, enhancement and original motion against separate oracles.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B08",
+      "goal": "Growth, commerce, capability and effect boundaries",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "subsystems": [
+        "business_growth_commercial",
+        "provider_capability_routing"
+      ],
+      "scenario_ids": [
+        "S20",
+        "S24"
+      ],
+      "status": "OPEN",
+      "acceptance": "Growth/commercial advice uses actual evidence; unavailable and unapproved provider/paid/posting routes fail closed; no performance claims without measurement.",
+      "next_action": "Map account/growth/commercial cases beyond frozen matrix; verify capability handshakes without paid or posting side effects.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B09",
+      "goal": "Independent typed assurance and architecture acceptance",
+      "depends_on": [
+        "B03",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B08"
+      ],
+      "subsystems": [
+        "quality_and_assurance"
+      ],
+      "scenario_ids": [],
+      "status": "OPEN",
+      "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
+      "next_action": "Register no unverified reviewer; obtain applicable independent assessment and exact input/output receipts; reopen upstream failures. Blocked for required high-assurance executions until a trusted executor is evaluated.",
+      "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
+      "evidence": []
+    },
+    {
+      "id": "B10",
+      "goal": "Integration and final handoff",
+      "depends_on": [
+        "B00",
+        "B01",
+        "B02",
+        "B09"
+      ],
+      "subsystems": [],
+      "scenario_ids": [],
+      "status": "OPEN",
+      "acceptance": "All required obligations and acceptance scenarios independently satisfied or explicitly owner-approved scope change; exact-head CI; clean rollback, repeatable entry/resume and owner-facing handoff. No automatic merge or publish.",
+      "next_action": "Recheck latest head and all open obligations, compare against owner goal; request only actual missing permissions if needed. Keep PR draft until gates pass.",
+      "blocker": null,
+      "evidence": []
+    }
+  ]
+}

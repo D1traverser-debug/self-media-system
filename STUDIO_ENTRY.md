@@ -7,6 +7,10 @@ CLI: `sms-studio`
 Manifest: `social_media_studio/data/studio_manifest.json`
 Operating manual: `docs/standalone_social_media_studio.md`
 
+## Repository construction / continuation (not a content task)
+
+For explicit SMS architecture construction, repair or interrupted construction continuation, resolve the active integration PR and read `docs/SMS_CONSTRUCTION_CHECKPOINT.json` at its actual head before further mutations. This checkpoint tracks construction obligations, dependencies, evidence and blockers; it is not runtime task authority, not a new scheduler, and does not activate for ordinary creative requests. Owner corrections supersede it. Refresh exact-head CI and preserve independent acceptance boundaries; a partial commit is not overall completion.
+
 ## Mission
 
 Turn the owner's actual content goal—including independent writing, still images, IP identity, media editing, platform packaging and original video—into an independently checked deliverable. The system is outcome-driven, not stage-driven. Direct tasks need no artificial project or graph. Durable projects use a task graph derived from the specific brief; independent tasks can run concurrently, and only declared dependencies block work.
