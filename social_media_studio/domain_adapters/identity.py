@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from .common import *
-from ..legacy.ip_identity import *
-from ..legacy.media_graph import AssetRef, MediaGraph
-from ..legacy.production_os import ReferenceBinding
-from ..legacy.programmatic_graphics import shot_contract_from_dict
+from social_media_studio.legacy.ip_identity import *
+from social_media_studio.legacy.media_graph import AssetRef, MediaGraph
+from social_media_studio.legacy.production_os import ReferenceBinding
+from social_media_studio.legacy.programmatic_graphics import shot_contract_from_dict
 
 def ipos_import_receipt_from_dict(payload: Mapping[str, Any]) -> IPIdentityImportReceipt:
     data = _mapping(payload, "IPOS import receipt")
