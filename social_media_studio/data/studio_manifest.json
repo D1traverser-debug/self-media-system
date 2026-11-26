@@ -408,7 +408,9 @@
         ],
         "nonlocal_execution": "CURRENT_SESSION_CAPABILITY_HANDSHAKE__AGENT_HUMAN_EXTERNAL_HANDOFF",
         "selection": "DEMAND_SELECTED_ONLY__CURRENT_AVAILABILITY_AND_GAPS_MUST_BE_CHECKED",
-        "semantics": "A capability group locates the relevant knowledge, methods, skills and roles, then verifies the actual executor route; a catalog entry is not proof of execution availability."
+        "semantics": "A capability group locates the relevant knowledge, methods, skills and roles, then verifies the actual executor route; a catalog entry is not proof of execution availability.",
+        "group_resource_binding": "Each group binds knowledge_refs, method_ids, skill_sections, role_ids, adapters and operations; capability_lookup resolves exact resource metadata and executor routes.",
+        "executor_availability": "REGISTERED_LOCAL_ROUTE_OR_CURRENT_SESSION_HANDSHAKE__NEVER_INFER_AVAILABILITY_FROM_CATALOG"
       },
       "deliverables": {
         "types": "social_media_studio.domain.contracts.DELIVERABLE_TYPES",

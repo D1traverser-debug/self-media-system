@@ -269,10 +269,14 @@ def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | 
     for group in groups:
         for field, available in (("knowledge_refs", knowledge_by_id), ("method_ids", methods_by_id), ("role_ids", roles_by_id)):
             refs = group.get(field)
-            if not isinstance(refs, list) or len(refs) != len(set(refs)) or not set(refs).issubset(available):
+            if (not isinstance(refs, list)
+                    or any(not isinstance(ref, str) or not ref.strip() for ref in refs)
+                    or len(refs) != len(set(refs)) or not set(refs).issubset(available)):
                 raise ValueError(f"{group['id']}: unresolved or duplicate {field}")
         sections = group.get("skill_sections")
-        if not isinstance(sections, list) or not sections or len(sections) != len(set(sections)):
+        if (not isinstance(sections, list) or not sections
+                or any(not isinstance(section, str) or not section.strip() for section in sections)
+                or len(sections) != len(set(sections))):
             raise ValueError(f"{group['id']}: skill_sections must be a non-empty unique list")
     if any(not item.get("current_route", {}).get("status") for item in data["capabilities"]):
         raise ValueError("legacy capability must have explicit current disposition")

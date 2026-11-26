@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
+
+import pytest
 
 from social_media_studio.domain.contracts import DELIVERABLE_TYPES
 from social_media_studio.domain.editorial import PLATFORMS
@@ -120,3 +123,29 @@ def test_data_lifecycle_and_acceptance_keep_mutable_state_immutable_evidence_and
     surfaces = arch["execution_surfaces"]
     assert "NO_MANDATORY_LEDGER" in surfaces["DIRECT_SESSION"]
     assert "VERSIONED_TASKS" in surfaces["DURABLE_STUDIO"]
+
+
+def test_capability_resource_references_fail_closed_when_unknown_or_malformed():
+    profile = _json("social_media_studio/legacy/data/capabilities.json")
+    bad = copy.deepcopy(profile)
+    bad["professional_capability_groups"][0]["knowledge_refs"].append("unknown-method-book")
+    with pytest.raises(ValueError, match="knowledge_refs"):
+        capability_lookup(profile=bad)
+
+    bad = copy.deepcopy(profile)
+    bad["professional_capability_groups"][0]["role_ids"].append({"role": "researcher"})
+    with pytest.raises(ValueError, match="role_ids"):
+        capability_lookup(profile=bad)
+
+
+def test_group_filtered_lookup_returns_resolved_resources_for_only_the_requested_group():
+    all_groups = capability_lookup()["groups"]
+    selected = all_groups[0]
+    filtered = capability_lookup(selected["id"])
+    assert len(filtered["groups"]) == 1
+    group = filtered["groups"][0]
+    assert group["id"] == selected["id"]
+    assert group["knowledge_resources"]
+    assert group["professional_roles"]
+    assert group["executor_routes"]["production_operations"] == group["operations"]
+    assert filtered["legacy_capabilities"] == []
