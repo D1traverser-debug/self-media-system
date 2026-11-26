@@ -45,7 +45,7 @@ class ProjectTaskService:
         project_id = _safe_id(project_id, "project_id")
         self.engine._validate_brief(brief)
         if "scope_epoch" in brief:
-            from .scope import bind_owner_brief
+            from ..scope import bind_owner_brief
             bind_owner_brief(project_id, brief)
         directory = self.engine._project_dir(project_id)
         directory.mkdir(parents=True, exist_ok=False)
@@ -276,7 +276,7 @@ class ProjectTaskService:
             connection.execute("BEGIN IMMEDIATE")
             try:
                 project = self.engine._project_row(connection, project_id)
-                from .scope import validate_task_binding
+                from ..scope import validate_task_binding
                 brief = _loads(project["brief_json"], {})
                 existing_rows = connection.execute(
                     "SELECT task_id,title,kind,executor,depends_on_json,inputs_json,outputs_json,acceptance_json,requirements_json,priority,max_attempts FROM tasks WHERE project_id=?",
@@ -405,7 +405,7 @@ class ProjectTaskService:
                     "priority": old["priority"], "max_attempts": old["max_attempts"],
                 }
                 revised = {**current, **patch}
-                from .scope import validate_task_binding
+                from ..scope import validate_task_binding
                 validate_task_binding(_loads(self.engine._project_row(connection, project_id)["brief_json"], {}), revised)
                 if revised["executor"] not in {"agent", "tool", "human", "external"}:
                     raise ContractError(f"unsupported executor: {revised['executor']}")
