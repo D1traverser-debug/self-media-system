@@ -6,7 +6,28 @@ from typing import Any
 
 from ..engine import StudioEngine, StudioError
 from .common import DomainAdapterError, _mapping, _safe_filename
-from .registry import DOMAIN_ADAPTERS
+from .registry import DOMAIN_ADAPTERS, DomainAdapterSpec
+
+
+def validate_domain_adapter_contract(
+    spec: DomainAdapterSpec, config: dict[str, Any], outputs: list[str],
+) -> None:
+    """Enforce the registry's declared local-effect and input/output boundary."""
+    if not isinstance(config, dict):
+        raise DomainAdapterError("domain adapter config must be an object")
+    missing = sorted(set(spec.required_config) - set(config))
+    if missing:
+        raise DomainAdapterError(f"adapter {spec.name} missing required config: {missing}")
+    if not spec.output_contract or not isinstance(spec.output_contract, str):
+        raise DomainAdapterError(f"adapter {spec.name} has no declared output contract")
+    if spec.effect_scope not in {"PROJECT_LOCAL_ARTIFACT_WRITE", "PROJECT_LOCAL_CANDIDATE_RENDER"}:
+        raise DomainAdapterError(f"adapter {spec.name} has an unsupported effect scope")
+    if spec.external_effects or spec.promotes_candidate or spec.publishes:
+        raise DomainAdapterError(f"adapter {spec.name} exceeds the local non-promoting effect boundary")
+    if not outputs or any(not isinstance(item, str) or not item.strip() for item in outputs):
+        raise DomainAdapterError(f"adapter {spec.name} requires explicit nonempty output identities")
+    if len(outputs) != len(set(outputs)):
+        raise DomainAdapterError(f"adapter {spec.name} output identities must be unique")
 
 
 def run_claimed_domain_adapter(
@@ -44,6 +65,7 @@ def run_claimed_domain_adapter(
         spec = DOMAIN_ADAPTERS.get(name)
         if spec is None:
             raise DomainAdapterError(f"unsupported domain adapter: {name}")
+        validate_domain_adapter_contract(spec, config, outputs)
         artifact_outputs, result = spec.handler(
             engine, project_id, packet, config, outputs, output_dir, attempt, name,
         )

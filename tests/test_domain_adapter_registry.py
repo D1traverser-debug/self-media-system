@@ -77,3 +77,32 @@ def test_registry_metadata_does_not_upgrade_structural_tools_into_quality_or_rel
     assert registry["shot_route"]["assurance_ceiling"] == "DECISION_SUPPORT_NOT_PROVIDER_EXECUTION"
     assert registry["business_outcome_metrics"]["assurance_ceiling"] == "DERIVED_METRICS_NOT_CAUSAL_GROWTH"
     assert registry["programmatic_graphic_render"]["assurance_ceiling"] == "CANDIDATE_RENDER_NOT_PROMOTION_OR_RELEASE"
+
+
+def test_domain_adapter_registry_is_immutable_and_public_metadata_reflects_the_spec():
+    import pytest
+    from social_media_studio.domain_adapters.registry import DomainAdapterSpec
+
+    with pytest.raises(TypeError):
+        DOMAIN_ADAPTERS["fake"] = next(iter(DOMAIN_ADAPTERS.values()))
+    records = {item["name"]: item for item in public_domain_adapter_registry()}
+    for name, spec in DOMAIN_ADAPTERS.items():
+        record = records[name]
+        assert record["external_effects"] == spec.external_effects
+        assert record["promotes_candidate"] == spec.promotes_candidate
+        assert record["publishes"] == spec.publishes
+        assert record["effect_scope"] == spec.effect_scope
+
+
+def test_domain_adapter_dispatch_enforces_required_config_and_local_effect_boundary():
+    import pytest
+    from social_media_studio.domain_adapters.dispatch import validate_domain_adapter_contract
+
+    spec = DOMAIN_ADAPTERS["editorial_plan_validate"]
+    with pytest.raises(DomainAdapterError, match="missing required config"):
+        validate_domain_adapter_contract(spec, {}, ["receipt"])
+    validate_domain_adapter_contract(spec, {"editorial_plan_input": "plan"}, ["receipt"])
+
+    unsafe = DomainAdapterSpec(**{**spec.__dict__, "publishes": True})
+    with pytest.raises(DomainAdapterError, match="exceeds the local"):
+        validate_domain_adapter_contract(unsafe, {"editorial_plan_input": "plan"}, ["receipt"])

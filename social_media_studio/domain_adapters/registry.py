@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
+from types import MappingProxyType
 
 from .business import handle_business_object_validate, handle_episode_intent_validate, handle_business_outcome_metrics
 from .editorial import handle_editorial_plan_validate, handle_shot_contract_materialize, handle_shot_contract_validate
@@ -34,9 +35,6 @@ class DomainAdapterSpec:
         record = asdict(self)
         record.pop("handler", None)
         record["handler_registered"] = callable(self.handler)
-        record["external_effects"] = False
-        record["promotes_candidate"] = False
-        record["publishes"] = False
         return record
 
 
@@ -57,7 +55,7 @@ def _spec(name, handler, group, required, output, assurance, gap, *, effect="PRO
     )
 
 
-DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
+_DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
     "business_object_validate": _spec(
         "business_object_validate", handle_business_object_validate, "growth_commercial",
         ("object_type", "input_name"), "task-declared JSON business-object artifact", "STRUCTURAL_TYPE_VALIDATION",
@@ -150,6 +148,7 @@ DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
     ),
 }
 
+DOMAIN_ADAPTERS: Mapping[str, DomainAdapterSpec] = MappingProxyType(_DOMAIN_ADAPTERS)
 SUPPORTED_DOMAIN_ADAPTERS = frozenset(DOMAIN_ADAPTERS)
 
 
