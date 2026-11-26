@@ -284,7 +284,9 @@
       "cognition_dependency": "CAOS read-only parent governance at every material decision/effect, recursively reopen contradicted ancestors; no duplicate cognition controller",
       "knowledge": "social_media_studio/data/knowledge_catalog.json; exact source, scope, lifecycle, not execution authority",
       "execution_resources": "actual domain adapter and production registry; current session external capabilities checked separately",
-      "acceptance": "task-specific domain outcome and independent overall owner outcome, neither CI nor technical QA substitutes"
+      "acceptance": "task-specific domain outcome and independent overall owner outcome, neither CI nor technical QA substitutes",
+      "deliverables": "social_media_studio.domain.contracts.DELIVERABLE_TYPES + social_media_studio/data/subsystem_catalog.json#deliverable_ownership",
+      "platform_adaptation": "DeliverableVariant(locale, platform, shape.width, shape.height, shape.orientation, shape.aspect_ratio); platform-specific package contracts are independently versioned"
     },
     "continuous_responsibilities": {
       "owner_goal_fidelity": "ALL_DECISIONS_AND_ACTIONS",
@@ -386,6 +388,94 @@
       "product_ipos": "INTERNAL_SOURCE_AND_SPECIFIC_CANON_CUSTODY",
       "cognition_caos": "EXTERNAL_READ_ONLY_PARENT_AUTHORITY_NOT_PEER_PRODUCT",
       "assurance": "STRUCTURE_NOT_SEMANTIC_OUTCOME"
+    },
+    "user_need_model": {
+      "business_domains": {
+        "CONTENT_CREATION_AND_PRODUCTION": "PRODUCTION_SYSTEM",
+        "ACCOUNT_OPERATIONS_AND_GROWTH": "MEDIA_GROWTH",
+        "ORIGINAL_IP_AND_BRAND": "ORIGINAL_DIGITAL_IP",
+        "COMMERCIALIZATION": "COMMERCIALIZATION"
+      },
+      "professional_capabilities": {
+        "groups": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups",
+        "knowledge": "social_media_studio/data/knowledge_catalog.json",
+        "methods": "social_media_studio/legacy/data/techniques.json",
+        "skills": "skills/social-media-studio/SKILL.md",
+        "roles": "social_media_studio/legacy/data/roles.json",
+        "local_executors": [
+          "social_media_studio/domain_adapters/registry.py",
+          "social_media_studio/production/registry.py"
+        ],
+        "nonlocal_execution": "CURRENT_SESSION_CAPABILITY_HANDSHAKE__AGENT_HUMAN_EXTERNAL_HANDOFF",
+        "selection": "DEMAND_SELECTED_ONLY__CURRENT_AVAILABILITY_AND_GAPS_MUST_BE_CHECKED",
+        "semantics": "A capability group locates the relevant knowledge, methods, skills and roles, then verifies the actual executor route; a catalog entry is not proof of execution availability."
+      },
+      "deliverables": {
+        "types": "social_media_studio.domain.contracts.DELIVERABLE_TYPES",
+        "ownership": "social_media_studio/data/subsystem_catalog.json#deliverable_ownership",
+        "semantics": "EACH_REQUESTED_OUTCOME_HAS_ITS_OWN_TYPED_CONTRACT_AND_ACCEPTANCE__NO_DEFAULT_VIDEO_FINAL"
+      },
+      "platform_adaptation": {
+        "variant_schema": "social_media_studio.domain.contracts.DeliverableVariant",
+        "platform_registry": "social_media_studio.domain.editorial.PLATFORMS",
+        "dimensions": [
+          "locale",
+          "platform",
+          "shape.width",
+          "shape.height",
+          "shape.orientation",
+          "shape.aspect_ratio"
+        ],
+        "semantics": "ADAPT_ONLY_REQUESTED_VARIANTS__VERIFY_CURRENT_PLATFORM_RULES__NO_HARDCODED_LIMITS"
+      },
+      "implementation_subsystems": "social_media_studio/data/subsystem_catalog.json#subsystems; internal code ownership only, not user-need categories or permanent agents",
+      "composition": "DYNAMIC_CROSS_AXIS_COMPOSITION__NO_FIXED_PIPELINE"
+    },
+    "control_loops": {
+      "coordination": "EVENT_OR_CONDITION_TRIGGERED__NOT_SERIAL_STAGES",
+      "decision": "UNKNOWN_OR_CONTRADICTED_PREMISE__COMPETING_HYPOTHESES__RESEARCH__COMPARISON__COUNTEREVIDENCE__FALSIFIER__REVERSIBLE_SELECTION",
+      "execution": "ADMITTED_ACTION__PRECHECK__EXECUTE__READ_BACK_REAL_EFFECT__INDEPENDENT_CHECK__REPAIR_OR_REDECIDE",
+      "requirement_feedback": "OWNER_CORRECTION__TRACE_TO_SOURCE_AND_REVISION__INVALIDATE_ONLY_AFFECTED_DEPENDENTS_WHEN_PROVEN_SAFE__REDECIDE__REEXECUTE__REACCEPT",
+      "failure_root_cause": "OBSERVED_SYMPTOM__COMPETING_ROOT_CAUSES__METHOD_CHALLENGE__ISOLATED_REPAIR__INDEPENDENT_VERIFICATION__REGRESSION",
+      "learning": "SOURCE_AND_SCOPE__CANDIDATE__POSITIVE_AND_NEGATIVE_TRIALS__INDEPENDENT_REPLAY__CAOS_OWNER_ACCEPTANCE__VERSIONED_PROMOTION",
+      "owner": "CAOS_PARENT_SESSION_GOVERNS_ALL_MATERIAL_DECISIONS_AND_EFFECTS; Studio runtime does not claim native CAOS activation"
+    },
+    "data_lifecycle": {
+      "store": "SQLite_WAL_PER_PROJECT",
+      "mutable_current_state": [
+        "projects",
+        "tasks",
+        "artifact_currentness",
+        "failure_resolution",
+        "learning_candidate_status"
+      ],
+      "append_only_evidence": [
+        "events",
+        "decisions",
+        "reviews",
+        "execution_receipts"
+      ],
+      "artifact_identity": "IMMUTABLE_VERSIONED_BYTES_WITH_SHA256_AND_LINEAGE",
+      "revision": "NEW_REVISION__REVALIDATE__INVALIDATE_AFFECTED_DEPENDENTS__PRESERVE_PRIOR_HISTORY",
+      "deletion": "NO_GENERIC_PHYSICAL_DELETE_FOR_AUDITABLE_DECISIONS_REVIEWS_EVENTS_OR_SOURCE_ARTIFACTS"
+    },
+    "harness_contract": {
+      "scope": "OWNER_SCOPED_WORKSPACE_AND_EXPLICIT_EXECUTION_SURFACE",
+      "validation": "BRIEF_TASK_DELIVERABLE_AND_INPUT_CONTRACTS",
+      "admission": "CURRENT_DECISION_AND_AUTHORIZATION_REQUIRED_WHERE_APPLICABLE",
+      "dependency": "EXACT_CURRENT_INPUTS_AND_DECLARED_DEPENDENCIES",
+      "concurrency": "ATOMIC_CLAIM_AND_LEASE_RECOVERY",
+      "retries": "BOUNDED_RETRY_BUDGET_WITH_DIAGNOSIS_BEFORE_REENTRY",
+      "integrity": "SHA256_AND_ARTIFACT_LINEAGE",
+      "rights": "RIGHTS_EVIDENCE_REQUIRED_WHERE_APPLICABLE",
+      "observability": "APPEND_ONLY_EVENT_HISTORY_AND_EFFECT_READBACK",
+      "release": "QUALITY_ACCEPTANCE_DOES_NOT_AUTHORIZE_PUBLICATION"
+    },
+    "acceptance_model": {
+      "professional": "SOCIAL_MEDIA_STUDIO_CHECKS_DOMAIN_CRAFT_AND_DELIVERABLE_SPECIFIC_QUALITY",
+      "independent": "INDEPENDENT_REVIEW_CHECKS_THE_EXACT_CURRENT_ARTIFACT_AND_EVIDENCE",
+      "owner_outcome": "CAOS_CHECKS_THE_FINAL_RESULT_AGAINST_THE_OWNER'S_ORIGINAL_GOAL_AND_ALL_CORRECTIONS",
+      "separation": "DOMAIN_QUALITY__INDEPENDENT_REVIEW__OWNER_OUTCOME__RELEASE__PUBLICATION_ARE_DISTINCT_STATES"
     }
   },
   "knowledge_lifecycle": {

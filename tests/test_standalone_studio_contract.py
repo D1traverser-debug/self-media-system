@@ -86,10 +86,18 @@ def test_standalone_control_plane_is_independent_and_domain_bridge_is_explicit()
         assert "import caos" not in source.lower()
 
     adapters = (ROOT / "social_media_studio" / "adapters.py").read_text(encoding="utf-8")
-    assert "from social_media_studio.legacy." in adapters
+    assert "from social_media_studio.legacy." not in adapters
+    assert "from .domain_adapters.registry" in adapters
+    assert "from .domain_adapters.dispatch import run_claimed_domain_adapter" in adapters
     assert "from caos" not in adapters.lower()
     assert "import caos" not in adapters.lower()
     assert "run_claimed_domain_adapter" in adapters
+
+    # Legacy specialist imports are confined to the explicit domain-owned adapter boundary.
+    bridge_sources = [p.read_text(encoding="utf-8") for p in
+                      (ROOT / "social_media_studio" / "domain_adapters").glob("*.py")]
+    assert any("social_media_studio.legacy" in source or "from ..legacy" in source
+               for source in bridge_sources)
 
 
 def test_standalone_manifest_registers_explicit_domain_adapters_and_font_rights_metadata():
