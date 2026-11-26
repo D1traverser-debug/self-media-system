@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+import base64
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 from pathlib import Path
 import threading
 
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from social_media_studio.engine import ClaimError, ContractError, StudioEngine
+from social_media_studio.engine import ClaimError, ContractError, GateError, StudioEngine
+from social_media_studio.review_execution import (
+    ReviewExecutionTrustRegistry, build_review_statement, digest_json, review_contract_digest,
+    sign_review_statement,
+)
 from social_media_studio.scope import validate_workspace_mode
 
 
@@ -1257,6 +1265,31 @@ def test_release_check_fails_closed_on_uncleared_source_asset_in_final_lineage(t
 
 def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_red_team(tmp_path):
     engine = StudioEngine(tmp_path / "strict-workspace")
+    private_key = Ed25519PrivateKey.generate()
+    public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )
+    engine.review_trust_registry = ReviewExecutionTrustRegistry(config={
+        "schema_version": 1,
+        "policy": {"max_receipt_age_seconds": 3600},
+        "trusted_executors": {
+            "human-review-executor": {
+                "status": "ACTIVE",
+                "key_id": "strict-review-key",
+                "public_key": base64.b64encode(public_key).decode("ascii"),
+                "issuer": "strict-review-test",
+                "isolation_mechanism": "ephemeral-review-container",
+                "reviewer_kinds": ["HUMAN"],
+                "execution_modes": ["INDEPENDENT_COLD_READ"],
+                "reviewer_ids": ["human-cold-reader"],
+                "providers": ["test-provider"],
+                "models": ["human-cold-read-v1"],
+                "media_inspection_modes": ["FULL_VIDEO"],
+                "media_inspection_methods": ["CONTINUOUS_PLAYBACK"],
+            }
+        },
+    })
     strict_brief = brief()
     strict_brief["release_policy"] = {
         "require_rights": True,
@@ -1273,6 +1306,8 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
                 "blind_review": True,
                 "require_digest_attestation": True,
                 "require_context_id": True,
+                "require_execution_attestation": True,
+                "required_media_inspection": "FULL_VIDEO",
                 "require_resolvable_evidence_refs": True,
             },
             "red-team": {
@@ -1291,11 +1326,12 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         media_type="text/plain", rights_status="OWNED",
     )
     evidence_paths = {}
+    evidence_artifacts = {}
     for evidence_name in ("cold-read-evidence", "red-team-review-evidence", "frame-001", "frame-012", "frame-018"):
         evidence_path = tmp_path / f"{evidence_name}.txt"
         evidence_path.write_text(f"Evidence for {evidence_name}", encoding="utf-8")
         evidence_paths[evidence_name] = evidence_path
-        engine.import_asset(
+        evidence_artifacts[evidence_name] = engine.import_asset(
             "strict", evidence_name, evidence_path, kind="evidence",
             media_type="text/plain", rights_status="NOT_APPLICABLE",
         )
@@ -1349,18 +1385,165 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
         rubric_id="editorial", outcome="PASS", dimensions={},
         evidence_refs=["review://editorial"],
     )
+    with pytest.raises(ContractError, match="caller-supplied attestation fields"):
+        engine.record_review(
+            "strict", final_artifact["artifact_id"], reviewer_id="human-cold-reader",
+            rubric_id="human-cold-read", outcome="PASS", dimensions={},
+            evidence_refs=[evidence_artifacts["cold-read-evidence"]["artifact_id"]],
+            attestation={
+                "reviewer_kind": "HUMAN",
+                "execution_mode": "INDEPENDENT_COLD_READ",
+                "blind_review": True,
+                "inspected_artifact_digest": final_artifact["sha256"],
+                "context_id": "forged-context",
+            },
+        )
+    review_task_contract = {
+        "rubric_id": "human-cold-read",
+        "reviewer_id": "human-cold-reader",
+        "subject_artifact": "final-video",
+        "reviewer_kind": "HUMAN",
+        "execution_mode": "INDEPENDENT_COLD_READ",
+        "blind_review": True,
+        "required_media_inspection": "FULL_VIDEO",
+    }
+    engine.add_tasks("strict", [{
+        "task_id": "human-cold-read-task",
+        "title": "Independent full-video cold read",
+        "kind": "review",
+        "executor": "human",
+        "depends_on": ["qa"],
+        "inputs": ["final-video", "cold-read-evidence"],
+        "outputs": ["cold-read-report"],
+        "acceptance": {"observable": "A signed review report is produced against the exact full video digest."},
+        "requirements": {"review_contract": review_task_contract},
+    }])
+    review_packet = engine.claim_next("strict", "human-review-executor")
+    assert review_packet is not None
+    assert review_packet["task"]["task_id"] == "human-cold-read-task"
+    assert review_packet["review_packet"]["sibling_verdicts_included"] is False
+    assert "workspace" not in review_packet["project"]
+    assert review_packet["review_isolation"]["shared_workspace_path_exposed"] is False
+    assert review_packet["review_isolation"]["sibling_verdicts_included"] is False
+    assert all(
+        "review_sessions" in item["path"]
+        for item in review_packet["input_artifacts"].values()
+    )
+    refreshed_review_packet = engine.claimed_packet(
+        "strict", "human-cold-read-task", "human-review-executor",
+        review_packet["claim"]["claim_token"],
+    )
+    assert "workspace" not in refreshed_review_packet["project"]
+    assert {
+        name: item["path"] for name, item in refreshed_review_packet["input_artifacts"].items()
+    } == {
+        name: item["path"] for name, item in review_packet["input_artifacts"].items()
+    }
+    review_evidence_id = evidence_artifacts["cold-read-evidence"]["artifact_id"]
+    media_inspection = {
+        "mode": "FULL_VIDEO",
+        "method": "CONTINUOUS_PLAYBACK",
+        "artifact_sha256": final_artifact["sha256"],
+        "coverage_fraction": 1,
+        "inspected_duration_seconds": 60,
+        "source_duration_seconds": 60,
+        "coverage_intervals": [[0, 60]],
+    }
+    media_inspection["trace_sha256"] = digest_json({
+        "artifact_sha256": media_inspection["artifact_sha256"],
+        "mode": media_inspection["mode"],
+        "method": media_inspection["method"],
+        "source_duration_seconds": media_inspection["source_duration_seconds"],
+        "coverage_intervals": media_inspection["coverage_intervals"],
+    })
+    review_report = {
+        "schema_version": 1,
+        "outcome": "PASS",
+        "dimensions": {},
+        "evidence_refs": [review_evidence_id],
+        "notes": "",
+        "media_inspection": media_inspection,
+    }
+    review_report_path = engine._project_dir("strict") / "artifacts" / "cold-read-report.json"
+    review_report_path.write_text(json.dumps(review_report, sort_keys=True), encoding="utf-8")
+    staged_video = Path(review_packet["input_artifacts"]["final-video"]["path"])
+    original_staged_video = staged_video.read_bytes()
+    staged_video.write_bytes(b"reviewer-mutated-source-copy")
+    with pytest.raises(GateError, match="review staged input bytes changed"):
+        engine.complete_task(
+            "strict", "human-cold-read-task", "human-review-executor",
+            review_packet["claim"]["claim_token"],
+            {"cold-read-report": {
+                "path": str(review_report_path), "kind": "review_report",
+                "media_type": "application/json", "rights_status": "NOT_APPLICABLE",
+            }},
+        )
+    staged_video.write_bytes(original_staged_video)
+    review_result = engine.complete_task(
+        "strict", "human-cold-read-task", "human-review-executor",
+        review_packet["claim"]["claim_token"],
+        {"cold-read-report": {
+            "path": str(review_report_path), "kind": "review_report",
+            "media_type": "application/json", "rights_status": "NOT_APPLICABLE",
+        }},
+    )
+    review_result_artifact = review_result["artifacts"]["cold-read-report"]
+    assert not engine._review_stage_dir("strict", "human-cold-read-task", 1).exists()
+    input_bindings = review_result["result"]["input_bindings"]
+    input_digests = {item["name"]: item["sha256"] for item in input_bindings}
+    now = datetime.now(timezone.utc)
+    predicate = {
+        "executor_id": "human-review-executor",
+        "issued_at": (now - timedelta(seconds=1)).isoformat(),
+        "expires_at": (now + timedelta(minutes=10)).isoformat(),
+        "nonce": "strict-human-cold-read-nonce-001",
+        "execution_id": "strict-human-cold-read-execution-001",
+        "provider_run_id": "strict-human-cold-read-run-001",
+        "trace_id": "strict-human-cold-read-trace-001",
+        "review_task_id": "human-cold-read-task",
+        "review_contract_digest": review_contract_digest(
+            review_task_contract, strict_brief["release_policy"]["review_contracts"]["human-cold-read"],
+        ),
+        "reviewer_id": "human-cold-reader",
+        "reviewer_kind": "HUMAN",
+        "execution_mode": "INDEPENDENT_COLD_READ",
+        "packet_digest": review_packet["review_packet_digest"],
+        "result_digest": review_result_artifact["sha256"],
+        "input_digests": input_digests,
+        "observed_input_digests": list(input_digests.values()),
+        "context_id": "cold-read-session-001",
+        "isolation_mode": "ephemeral-review-container",
+        "blind_review": True,
+        "sibling_verdicts_visible": False,
+        "provider": "test-provider",
+        "model": "human-cold-read-v1",
+        "media_inspection": media_inspection,
+    }
+    review_statement = build_review_statement(
+        reviewed_artifact_sha256=final_artifact["sha256"],
+        review_result_sha256=review_result_artifact["sha256"],
+        predicate=predicate,
+    )
+    execution_receipt = sign_review_statement(
+        review_statement, key_id="strict-review-key", private_key=private_key,
+    )
     engine.record_review(
         "strict", final_artifact["artifact_id"], reviewer_id="human-cold-reader",
         rubric_id="human-cold-read", outcome="PASS", dimensions={},
-        evidence_refs=["cold-read-evidence"],
-        attestation={
-            "reviewer_kind": "HUMAN",
-            "execution_mode": "INDEPENDENT_COLD_READ",
-            "blind_review": True,
-            "inspected_artifact_digest": final_artifact["sha256"],
-            "context_id": "cold-read-session-001",
-        },
+        evidence_refs=[review_evidence_id],
+        review_task_id="human-cold-read-task",
+        review_result_artifact_id=review_result_artifact["artifact_id"],
+        execution_receipt=execution_receipt,
     )
+    with pytest.raises(ContractError, match="nonce has already been used"):
+        engine.record_review(
+            "strict", final_artifact["artifact_id"], reviewer_id="human-cold-reader",
+            rubric_id="human-cold-read", outcome="PASS", dimensions={},
+            evidence_refs=[review_evidence_id],
+            review_task_id="human-cold-read-task",
+            review_result_artifact_id=review_result_artifact["artifact_id"],
+            execution_receipt=execution_receipt,
+        )
     engine.record_review(
         "strict", final_artifact["artifact_id"], reviewer_id="red-team-reviewer",
         rubric_id="red-team", outcome="PASS",
@@ -1373,9 +1556,24 @@ def test_release_check_requires_exact_digest_technical_qa_human_cold_read_and_re
     )
     release = engine.release_check("strict", final_artifact["artifact_id"], required_rubrics=[])
     assert release["pass"] is True, release["failures"]
+    assert release["review_execution_verification"]["high_assurance"] == "VERIFIED"
+    assert release["review_execution_verification"]["trusted_executor_count"] == 1
+    assert release["review_execution_verification"]["high_assurance_review_count"] == 1
+    assert release["review_execution_verification"]["high_assurance_verified_count"] == 1
     assert release["technical_qa"]["media_sha256"] == final_artifact["sha256"]
     assert len(release["review_summary"]["red-team"]["review_ids"]) == 1
     assert engine.audit("strict")["pass"] is True
+    evidence_path = Path(evidence_artifacts["cold-read-evidence"]["path"])
+    original_evidence_bytes = evidence_path.read_bytes()
+    evidence_path.write_bytes(b"cold-read-evidence-was-replaced-after-review")
+    stale_release = engine.release_check("strict", final_artifact["artifact_id"], required_rubrics=[])
+    assert stale_release["pass"] is False
+    assert any(
+        item.startswith("review_execution_inputs_stale_or_incomplete:human-cold-read")
+        for item in stale_release["failures"]
+    )
+    evidence_path.write_bytes(original_evidence_bytes)
+    assert engine.release_check("strict", final_artifact["artifact_id"], required_rubrics=[])["pass"] is True
 
 
 def test_release_check_rejects_tampered_review_evidence_artifact_bytes(tmp_path):

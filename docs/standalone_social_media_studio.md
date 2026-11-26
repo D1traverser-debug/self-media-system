@@ -347,6 +347,74 @@ sms-studio --offline-fixture --root ./studio-work import-asset adapter-demo font
 
 The example is an adapter integration proof, not a claim that a title card alone is a finished film or that external generative-video providers are connected.
 
+### 13.3 High-assurance review execution
+
+Ordinary reviews can still be recorded directly when the owner contract does not require trusted independent execution. A high-assurance rubric is different: caller-supplied `attestation` JSON is rejected and cannot satisfy the release gate.
+
+Declare a dedicated review task in the project DAG. Its `requirements.review_contract` must bind the exact rubric, reviewer and subject artifact, and its declared inputs must include the subject:
+
+```json
+{
+  "task_id": "human-cold-read",
+  "title": "Independent full-video cold read",
+  "kind": "review",
+  "executor": "human",
+  "depends_on": ["technical-qa"],
+  "inputs": ["final-video", "cold-read-evidence"],
+  "outputs": ["cold-read-report"],
+  "acceptance": {
+    "observable": "A signed review report is produced against the exact full video digest."
+  },
+  "requirements": {
+    "review_contract": {
+      "rubric_id": "human-cold-read",
+      "reviewer_id": "human-reviewer-01",
+      "subject_artifact": "final-video",
+      "reviewer_kind": "HUMAN",
+      "execution_mode": "INDEPENDENT_COLD_READ",
+      "blind_review": true,
+      "required_media_inspection": "FULL_VIDEO"
+    }
+  }
+}
+```
+
+The matching `release_policy.review_contracts.human-cold-read` is the owner authority. Task admission rejects mismatches. When claimed, the review worker receives only digest-verified copies of declared inputs in an isolated staging directory; the shared project workspace path is omitted. A blind review cannot consume outputs from another review task. The staging directory is cleaned after completion, failure, wait-input or lease expiry. The executor must run in the isolation mechanism pinned in the trusted executor registry; a sanitized packet alone is not proof of OS-level isolation.
+
+Complete the task with a JSON artifact whose kind is `review_report` and media type is `application/json`. Its base schema is:
+
+```json
+{
+  "schema_version": 1,
+  "outcome": "PASS",
+  "dimensions": {},
+  "evidence_refs": ["EXACT_EVIDENCE_ARTIFACT_ID"],
+  "notes": ""
+}
+```
+
+For a `FULL_VIDEO` contract, the report must additionally contain `media_inspection`: the exact source `artifact_sha256`, `mode: "FULL_VIDEO"`, an executor-authorized inspection `method`, source and inspected durations, `coverage_fraction: 1`, timestamped `coverage_intervals`, and a `trace_sha256`. The trace digest is SHA-256 over compact, key-sorted UTF-8 JSON containing exactly `artifact_sha256`, `mode`, `method`, `source_duration_seconds` and `coverage_intervals`. Intervals must cover the complete source duration without gaps beyond the verifier tolerance. A screenshot set or partial clip cannot satisfy full-video review.
+
+The trusted executor signs a DSSE envelope containing an in-toto statement with Ed25519. The receipt binds the subject artifact digest, review-report digest, review task, contract digest, immutable packet digest, every input digest, reviewer and executor identities, execution mode, isolated context, one-time nonce and media inspection trace. The engine verifies it when recording the review and verifies it again during release, recomputing the current task, rubric, report and input lineage.
+
+The registry is `social_media_studio/data/review_executors.json`. It is intentionally empty in the repository. Until an executor, public key, reviewer mapping, provider/model permissions, isolation mechanism and media inspection methods are independently assessed and explicitly registered, high-assurance review remains BLOCKED. Do not register test keys or treat a self-declared provider run ID as trusted identity.
+
+Record the completed review only after its report artifact and signed receipt exist:
+
+```bash
+sms-studio review PROJECT_ID FINAL_ARTIFACT_ID \
+  --reviewer human-reviewer-01 \
+  --rubric human-cold-read \
+  --outcome PASS \
+  --dimensions review-dimensions.json \
+  --evidence EXACT_EVIDENCE_ARTIFACT_ID \
+  --review-task human-cold-read \
+  --review-result REVIEW_REPORT_ARTIFACT_ID \
+  --execution-receipt review-execution.dsse.json
+```
+
+This mechanism is activated only by a rubric that explicitly requires high assurance. It does not impose a human reviewer or third-party service on ordinary short copy, simple images or routine media edits. The empty production trust registry is an intentional fail-closed state, not a missing default key to be filled with a placeholder.
+
 ## 14. Single runtime and governance boundary
 
 `STUDIO_ENTRY.md` is the only self-media startup entry. `sms-studio` is the only installed CLI and `social_media_studio.engine.StudioEngine` is the only active project runtime. CAOS parent governance is applied at the ChatGPT session level; the Social Media Studio runtime does not create a second parent controller or make runtime/API calls to CAOS. specialist content-domain logic is accessed only through the Studio adapter registry.
