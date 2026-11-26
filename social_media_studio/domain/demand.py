@@ -99,7 +99,7 @@ def inspect_demand(brief: dict[str, Any], *, durable: bool = False) -> dict[str,
             if target != "@brief" and not _ID.fullmatch(target):
                 raise ContentContractError("invalid amendment target")
             action = amendment["action"]
-            if action not in {"ADD", "REVISE", "RETIRE"}:
+            if not isinstance(action, str) or action not in {"ADD", "REVISE", "RETIRE"}:
                 raise ContentContractError("invalid amendment action")
             source = _text(amendment["source_ref"], "amendment source_ref")
             if source not in sources:

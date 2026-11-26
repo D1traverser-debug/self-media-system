@@ -148,3 +148,13 @@ def test_resume_rejects_unapplied_owner_correction(tmp_path):
         with pytest.raises(ValueError, match="cannot apply owner corrections"):
             resolve_intake(tmp_path, {"mode": "RESUME", "project_id": "fresh", **bad})
     assert resolve_intake(tmp_path, {"mode": "RESUME", "project_id": "fresh"})["goal"] == brief()["goal"]
+
+def test_malformed_amendment_action_fails_with_contract_error(tmp_path):
+    for action in ([], {}, None, 3):
+        candidate = brief()
+        candidate["demand_contract"]["amendments"] = [
+            {"id": "bad-action", "target": "@brief", "action": action,
+             "source_ref": "owner-message", "reason": "test"}
+        ]
+        with pytest.raises(ContentContractError, match="invalid amendment action"):
+            bind_owner_brief("fresh", candidate)
