@@ -11,9 +11,9 @@
 ## Current integration status — PR #56
 
 **Review branch:** refactor/sms-complete-professional-studio-20261126  
-**Current code head at this audit update:** e3e6a60e1e24b74b3c7a63b76e24884b3339993e  
+**Current code head at this audit update:** 9d411570c047ad6c51401fbbaf4fa4dfc3e0e861  
 **PR:** draft integration PR #56; main remains unchanged.  
-**Validation:** latest head's CI result is pending at the time of this update. No production-readiness sign-off is implied.
+**Validation:** CI run 45785821146 for this exact head is still in progress; the Install FFmpeg step is running and the audit, topology, test and smoke-test steps have not started. No production-readiness sign-off is implied.
 
 ### Integrated and structurally corrected
 
@@ -268,3 +268,16 @@ No scenario should be marked runtime-verified solely because its contract exists
 - **Readback:** the report was fetched from GitHub after each write; all 35 scenario rows and findings are present.
 - **Independent acceptance:** not yet obtained. The two adversarial reviews in this report are model-authored and cannot substitute for an external independent reviewer or owner acceptance.
 - **Runtime change:** none. Main, CAOS, IPOS, workspaces, project databases, media files, provider accounts and publication state remain untouched.
+
+
+## 12. Follow-up implementation and exact-head validation checkpoint
+
+The integration branch has advanced beyond the initial architecture findings. The following changes are now present on the recorded code head:
+
+- The four user-need business domains are explicit and separate from professional capabilities, deliverable contracts, platform variants and internal subsystem ownership. Their composition is demand-driven, not a fixed sequence.
+- Each of the nine professional capability groups has resolvable knowledge references, method IDs, Skill sections, professional roles, registered domain adapters and local production operations. Lookup fails closed on unknown or malformed references and exposes executor routes without authorizing them.
+- ProjectTaskService depends on a five-operation infrastructure port rather than calling back into the StudioEngine application API. A narrow-port regression test exercises the service without exposing those application methods.
+- The domain-adapter registry is immutable. Public metadata is derived from the actual operation specification; dispatch validates required configuration, output identities and the local/non-promoting effect boundary. Handler call signatures no longer receive the StudioEngine object.
+- The system audit, manifest and subsystem ownership metadata include the high-assurance review gate. The trusted executor registry remains empty by design, so high-assurance release remains blocked.
+
+**Validation boundary:** these are source-level integration facts, not claims that the current head has passed CI. The exact-head workflow must complete the standalone system audit, full subsystem/source ownership inspection, test suite, standalone CLI smoke tests and historical Program regression fixture. Even if those checks pass, the 35 scenario outcomes, actual creative/media quality, provider-backed execution, native CAOS runtime selection and independent owner acceptance remain unverified. Do not merge or promote on the basis of structural tests alone.
