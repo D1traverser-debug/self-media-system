@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from .common import *
-from ..legacy.editorial_planning import *
-from ..legacy.production_os import ReferenceBinding
-from ..legacy.programmatic_graphics import shot_contract_from_dict
+from social_media_studio.legacy.editorial_planning import *
+from social_media_studio.legacy.production_os import ReferenceBinding
+from social_media_studio.legacy.programmatic_graphics import shot_contract_from_dict
 
 def editorial_plan_from_dict(payload: Mapping[str, Any]) -> EditorialPlan:
     data = _mapping(payload, "EditorialPlan")
