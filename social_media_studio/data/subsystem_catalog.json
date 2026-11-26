@@ -28,6 +28,10 @@
         "social_media_studio/application/__init__.py",
         "social_media_studio/application/project_tasks.py",
         "social_media_studio/cli.py",
+        "social_media_studio/domain_adapters/__init__.py",
+        "social_media_studio/domain_adapters/common.py",
+        "social_media_studio/domain_adapters/dispatch.py",
+        "social_media_studio/domain_adapters/registry.py",
         "social_media_studio/engine.py",
         "social_media_studio/engine_support.py",
         "social_media_studio/operation_cycle.py",
@@ -100,8 +104,9 @@
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
         "social_media_studio/domain/editorial.py",
-        "social_media_studio/legacy/editorial_planning.py",
+        "social_media_studio/domain_adapters/editorial.py",
         "social_media_studio/legacy/editorial_packaging.py",
+        "social_media_studio/legacy/editorial_planning.py",
         "social_media_studio/legacy/plan_graph_bridge.py"
       ],
       "domain_adapters": [
@@ -118,6 +123,7 @@
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
         "social_media_studio/domain/creative.py",
+        "social_media_studio/domain_adapters/visual.py",
         "social_media_studio/legacy/programmatic_graphics.py",
         "social_media_studio/production/frame_worker.py",
         "social_media_studio/production/python_frame_renderer.py"
@@ -138,6 +144,7 @@
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
         "social_media_studio/domain/identity.py",
+        "social_media_studio/domain_adapters/identity.py",
         "social_media_studio/legacy/ip_identity.py"
       ],
       "domain_adapters": [
@@ -157,13 +164,14 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
-        "social_media_studio/legacy/production_os.py",
+        "social_media_studio/domain_adapters/motion.py",
         "social_media_studio/legacy/continuity.py",
-        "social_media_studio/legacy/timeline.py",
         "social_media_studio/legacy/editorial_interchange.py",
+        "social_media_studio/legacy/generation_guard.py",
+        "social_media_studio/legacy/production_os.py",
+        "social_media_studio/legacy/timeline.py",
         "social_media_studio/production/contracts.py",
-        "social_media_studio/production/ffmpeg_assembler.py",
-        "social_media_studio/legacy/generation_guard.py"
+        "social_media_studio/production/ffmpeg_assembler.py"
       ],
       "domain_adapters": [
         "shot_contract_materialize",
@@ -184,9 +192,10 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
+        "social_media_studio/domain_adapters/media_qa.py",
+        "social_media_studio/legacy/media_qa.py",
         "social_media_studio/media.py",
-        "social_media_studio/production/audio_preserve.py",
-        "social_media_studio/legacy/media_qa.py"
+        "social_media_studio/production/audio_preserve.py"
       ],
       "domain_adapters": [
         "extended_media_qa"
@@ -219,6 +228,7 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "OPTIONAL_BUSINESS_DOMAIN",
       "code_paths": [
+        "social_media_studio/domain_adapters/business.py",
         "social_media_studio/legacy/business_metrics.py",
         "social_media_studio/legacy/business_objects.py",
         "social_media_studio/legacy/experiments.py",
@@ -254,6 +264,7 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
+        "social_media_studio/domain_adapters/lineage.py",
         "social_media_studio/legacy/media_graph.py"
       ],
       "domain_adapters": [

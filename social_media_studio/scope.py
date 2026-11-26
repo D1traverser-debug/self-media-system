@@ -234,7 +234,7 @@ def knowledge_lookup(method_id: str | None = None, *, include_nonactive: bool = 
 
 def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | None = None) -> dict[str, Any]:
     """Read-only discovery, with no inference of provider access, decision, or task."""
-    from .adapters import SUPPORTED_DOMAIN_ADAPTERS
+    from .domain_adapters.registry import DOMAIN_ADAPTERS, SUPPORTED_DOMAIN_ADAPTERS, public_domain_adapter_registry
     from .production.registry import PRODUCTION_EXECUTORS
     data = profile if profile is not None else json.loads(
         files("social_media_studio.legacy").joinpath("data", "capabilities.json").read_text(encoding="utf-8"))
@@ -249,6 +249,9 @@ def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | 
     operations = {x for g in groups for x in g["operations"]}
     if adapters != set(SUPPORTED_DOMAIN_ADAPTERS) or operations != set(PRODUCTION_EXECUTORS.operations()):
         raise ValueError("professional capability routes diverge from actual executor registries")
+    if any(DOMAIN_ADAPTERS[name].capability_group != group["id"]
+           for group in groups for name in group["adapters"]):
+        raise ValueError("domain adapter operation is assigned to the wrong capability group")
     if any(g["activation"] != "DEMAND_SELECTED_ONLY" or not g["gaps"] for g in groups):
         raise ValueError("professional groups must be demand-selected and disclose limits")
     if any(not item.get("current_route", {}).get("status") for item in data["capabilities"]):
@@ -257,7 +260,12 @@ def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | 
     if not selected:
         raise ValueError("exact professional capability group not found")
     return {
-        "groups": selected, "legacy_capabilities": data["capabilities"] if group_id is None else [],
+        "groups": selected,
+        "domain_operations": [
+            item for item in public_domain_adapter_registry()
+            if group_id is None or item["capability_group"] == group_id
+        ],
+        "legacy_capabilities": data["capabilities"] if group_id is None else [],
         "registry_alignment": "VERIFIED_STRUCTURE_ONLY",
         "selected_task_graph": None, "effect_authorized": False,
         "native_activation": "NOT_VERIFIED_BY_RUNTIME", "business_outcome_verified": False,
