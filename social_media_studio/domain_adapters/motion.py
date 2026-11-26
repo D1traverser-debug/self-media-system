@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from .common import *
-from ..legacy.continuity import *
-from ..legacy.model_registry import *
-from ..legacy.timeline import *
-from ..legacy.media_graph import AssetRef, MediaGraph
+from social_media_studio.legacy.continuity import *
+from social_media_studio.legacy.model_registry import *
+from social_media_studio.legacy.timeline import *
+from social_media_studio.legacy.media_graph import AssetRef, MediaGraph
 
 def timeline_spec_from_dict(payload: Mapping[str, Any]) -> TimelineSpec:
     data = _mapping(payload, "TimelineSpec")
