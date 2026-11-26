@@ -60,12 +60,12 @@ def _spec(name, handler, group, required, output, assurance, gap, *, effect="PRO
 DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
     "business_object_validate": _spec(
         "business_object_validate", handle_business_object_validate, "growth_commercial",
-        (), "task-declared JSON business-object artifact", "STRUCTURAL_TYPE_VALIDATION",
+        ("object_type", "input_name"), "task-declared JSON business-object artifact", "STRUCTURAL_TYPE_VALIDATION",
         "Schema-valid business objects are not evidence of commercial success.",
     ),
     "episode_intent_validate": _spec(
         "episode_intent_validate", handle_episode_intent_validate, "growth_commercial",
-        (), "task-declared JSON episode-intent evidence", "STRUCTURAL_SOURCE_BINDING",
+        ("handoff_input",), "task-declared JSON episode-intent evidence", "STRUCTURAL_SOURCE_BINDING",
         "Validates an existing program handoff; does not create a program or prove audience demand.",
     ),
     "editorial_plan_validate": _spec(
@@ -90,17 +90,17 @@ DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
     ),
     "media_graph_initialize": _spec(
         "media_graph_initialize", handle_media_graph_initialize, "motion_production",
-        (), "task-declared JSON project-local media-graph state", "STRUCTURAL_PROVENANCE_GRAPH",
+        ("contexts",), "task-declared JSON project-local media-graph state", "STRUCTURAL_PROVENANCE_GRAPH",
         "Initializes local graph metadata; does not authenticate external source truth.",
     ),
     "ipos_bundle_import": _spec(
         "ipos_bundle_import", handle_ipos_bundle_import, "identity_collaboration",
-        ("bundle_input", "media_graph_input"), "task-declared JSON local import receipt and graph state",
+        ("bundle_input", "media_graph_input", "program_context_id", "media_graph_output", "receipt_output"), "task-declared JSON local import receipt and graph state",
         "APPROVED_BUNDLE_LOCAL_IMPORT_ONLY", "Imports only into the Studio project; no canonical IPOS mutation.",
     ),
     "ipos_shot_bind": _spec(
         "ipos_shot_bind", handle_ipos_shot_bind, "identity_collaboration",
-        ("bundle_input", "import_receipt_input", "media_graph_input", "shot_contract_input"),
+        ("bundle_input", "import_receipt_input", "media_graph_input", "shot_contract_input", "shot_contract_output", "continuity_rules_output"),
         "task-declared JSON shot binding and continuity-rules artifacts",
         "APPROVED_IDENTITY_BINDING_ONLY", "Binding metadata does not establish final rendered identity fidelity.",
     ),
