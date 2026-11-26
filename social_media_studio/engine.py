@@ -15,10 +15,6 @@ import tempfile
 import uuid
 from typing import Any, Iterable
 
-
-SCHEMA_VERSION = 1
-TASK_STATES = {
-
 from .engine_support import (
     SCHEMA_VERSION, TASK_STATES, RIGHTS_ALLOWED, _ID,
     StudioError, ProjectNotFound, ContractError, ClaimError, GateError,
@@ -26,6 +22,7 @@ from .engine_support import (
     TaskClaim,
 )
 from .application.project_tasks import ProjectTaskService
+
 
 class StudioEngine:
     """Outcome-driven, standalone project and production runtime.
@@ -40,7 +37,6 @@ class StudioEngine:
         self.root = Path(root or default).expanduser().resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         (self.root / "projects").mkdir(exist_ok=True)
-        self._project_task_service = ProjectTaskService(self)
         self._project_task_service = ProjectTaskService(self)
 
     def _project_dir(self, project_id: str) -> Path:
