@@ -129,6 +129,10 @@ class ProjectTaskService:
                 if "scope_epoch" in old_brief:
                     if brief.get("scope_epoch") != old_brief["scope_epoch"]:
                         raise ContractError("owner task scope epoch cannot change")
+                    from ..scope import bind_owner_brief
+                    from ..domain.demand import validate_demand_revision
+                    brief = bind_owner_brief(project_id, brief)
+                    validate_demand_revision(old_brief, brief)
                     if brief != old_brief:
                         # Until a task-level semantic dependency oracle proves a narrower
                         # change set, the whole owner brief is the governing upstream input.
@@ -143,6 +147,8 @@ class ProjectTaskService:
                     (_json(brief), now, project_id),
                 )
                 for task_id in invalidated:
+                    if tasks[task_id]["kind"] == "review":
+                        self.engine._cleanup_review_stage(project_id, task_id, tasks[task_id]["attempts"])
                     connection.execute(
                         "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": reason, "brief_revision": int(project["revision"]) + 1}), now, project_id, task_id),
@@ -343,6 +349,37 @@ class ProjectTaskService:
                         raise ContractError(f"{task_id}: acceptance must be a non-empty object")
                     if not isinstance(requirements, dict):
                         raise ContractError(f"{task_id}: requirements must be an object")
+                    if kind == "review":
+                        review_contract = requirements.get("review_contract")
+                        if not isinstance(review_contract, dict):
+                            raise ContractError(f"{task_id}: review task requires requirements.review_contract")
+                        rubric_id = review_contract.get("rubric_id")
+                        subject_name = review_contract.get("subject_artifact")
+                        reviewer_id = review_contract.get("reviewer_id")
+                        if not all(isinstance(value, str) and value.strip() for value in (rubric_id, subject_name, reviewer_id)):
+                            raise ContractError(f"{task_id}: review contract requires rubric_id, subject_artifact and reviewer_id")
+                        if subject_name not in inputs:
+                            raise ContractError(f"{task_id}: review subject_artifact must be an exact declared task input")
+                        rubric_contracts = brief.get("release_policy", {}).get("review_contracts", {})
+                        rubric_contract = rubric_contracts.get(rubric_id) if isinstance(rubric_contracts, dict) else None
+                        if not isinstance(rubric_contract, dict):
+                            raise ContractError(f"{task_id}: review rubric must exist in the owner release contract")
+                        for field in ("reviewer_kind", "execution_mode", "blind_review", "required_media_inspection"):
+                            if field in rubric_contract or field in review_contract:
+                                if review_contract.get(field) != rubric_contract.get(field):
+                                    raise ContractError(f"{task_id}: review task {field} differs from the owner rubric contract")
+                        reviewer_kind = rubric_contract.get("reviewer_kind")
+                        execution_mode = rubric_contract.get("execution_mode")
+                        if self.engine._review_contract_requires_execution(rubric_contract):
+                            if reviewer_kind not in {"HUMAN", "AI", "TOOL"}:
+                                raise ContractError(f"{task_id}: high-assurance review requires reviewer_kind HUMAN, AI or TOOL")
+                            if not isinstance(execution_mode, str) or not execution_mode.strip():
+                                raise ContractError(f"{task_id}: high-assurance review requires an explicit execution_mode")
+                        expected_executors = {"HUMAN": {"human"}, "AI": {"agent", "external"}, "TOOL": {"tool"}}.get(reviewer_kind)
+                        if expected_executors and executor not in expected_executors:
+                            raise ContractError(f"{task_id}: executor {executor} cannot satisfy reviewer_kind {reviewer_kind}")
+                    elif "review_contract" in requirements:
+                        raise ContractError(f"{task_id}: review_contract is valid only for kind='review'")
                     max_attempts = int(raw.get("max_attempts", 3))
                     if max_attempts < 1 or max_attempts > 20:
                         raise ContractError(f"{task_id}: max_attempts must be 1..20")
@@ -407,7 +444,41 @@ class ProjectTaskService:
                 }
                 revised = {**current, **patch}
                 from ..scope import validate_task_binding
-                validate_task_binding(_loads(self.engine._project_row(connection, project_id)["brief_json"], {}), revised)
+                brief = _loads(self.engine._project_row(connection, project_id)["brief_json"], {})
+                if not isinstance(revised["kind"], str) or not revised["kind"].strip():
+                    raise ContractError("task kind must be a non-empty string")
+                if not isinstance(revised["requirements"], dict):
+                    raise ContractError("requirements must be an object")
+                validate_task_binding(brief, revised)
+                if revised["kind"] == "review":
+                    review_contract = revised["requirements"].get("review_contract")
+                    if not isinstance(review_contract, dict):
+                        raise ContractError("review task revision requires requirements.review_contract")
+                    rubric_id = review_contract.get("rubric_id")
+                    subject_name = review_contract.get("subject_artifact")
+                    reviewer_id = review_contract.get("reviewer_id")
+                    if not all(isinstance(value, str) and value.strip() for value in (rubric_id, subject_name, reviewer_id)):
+                        raise ContractError("review task revision requires rubric_id, subject_artifact and reviewer_id")
+                    if subject_name not in revised["inputs"]:
+                        raise ContractError("review task revision subject_artifact must be an exact declared input")
+                    rubric_contracts = brief.get("release_policy", {}).get("review_contracts", {})
+                    rubric_contract = rubric_contracts.get(rubric_id) if isinstance(rubric_contracts, dict) else None
+                    if not isinstance(rubric_contract, dict):
+                        raise ContractError("review task revision rubric is not declared in the owner release contract")
+                    for field in ("reviewer_kind", "execution_mode", "blind_review", "required_media_inspection"):
+                        if field in rubric_contract or field in review_contract:
+                            if review_contract.get(field) != rubric_contract.get(field):
+                                raise ContractError(f"review task revision {field} differs from the owner rubric contract")
+                    reviewer_kind = rubric_contract.get("reviewer_kind")
+                    execution_mode = rubric_contract.get("execution_mode")
+                    if self.engine._review_contract_requires_execution(rubric_contract):
+                        if reviewer_kind not in {"HUMAN", "AI", "TOOL"} or not isinstance(execution_mode, str) or not execution_mode.strip():
+                            raise ContractError("high-assurance review task revision requires a typed reviewer and execution_mode")
+                    expected_executors = {"HUMAN": {"human"}, "AI": {"agent", "external"}, "TOOL": {"tool"}}.get(reviewer_kind)
+                    if expected_executors and revised["executor"] not in expected_executors:
+                        raise ContractError("review task revision executor does not match reviewer_kind")
+                elif "review_contract" in revised["requirements"]:
+                    raise ContractError("review_contract is valid only for kind='review'")
                 if revised["executor"] not in {"agent", "tool", "human", "external"}:
                     raise ContractError(f"unsupported executor: {revised['executor']}")
                 for field in ("depends_on", "inputs", "outputs"):
@@ -452,6 +523,8 @@ class ProjectTaskService:
                 self.engine._validate_graph(graph)
                 descendants = self.engine._descendant_closure(rows, [task_id]) - {task_id}
                 now = _iso()
+                if old["kind"] == "review":
+                    self.engine._cleanup_review_stage(project_id, task_id, old["attempts"])
                 connection.execute(
                     """UPDATE tasks SET title=?,kind=?,executor=?,depends_on_json=?,inputs_json=?,outputs_json=?,
                        acceptance_json=?,requirements_json=?,priority=?,max_attempts=?,status='PENDING',
@@ -463,6 +536,8 @@ class ProjectTaskService:
                      _json({"reason": reason}), now, project_id, task_id),
                 )
                 for descendant in descendants:
+                    if rows[descendant]["kind"] == "review":
+                        self.engine._cleanup_review_stage(project_id, descendant, rows[descendant]["attempts"])
                     connection.execute(
                         "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                         (_json({"reason": f"upstream task {task_id} contract changed"}), now, project_id, descendant),
@@ -577,7 +652,7 @@ class ProjectTaskService:
                 (project_id, row["artifact_id"]),
             )
             task_rows = connection.execute(
-                "SELECT task_id,depends_on_json,inputs_json FROM tasks WHERE project_id=?",
+                "SELECT * FROM tasks WHERE project_id=?",
                 (project_id,),
             ).fetchall()
             task_map = {item["task_id"]: item for item in task_rows}
@@ -596,6 +671,8 @@ class ProjectTaskService:
                         changed = True
             now = _iso()
             for task_id in sorted(affected):
+                if task_map[task_id]["kind"] == "review":
+                    self.engine._cleanup_review_stage(project_id, task_id, task_map[task_id]["attempts"])
                 connection.execute(
                     """UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,
                        claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=?
