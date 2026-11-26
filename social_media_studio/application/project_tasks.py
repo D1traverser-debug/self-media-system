@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import closing
 import hashlib
+import re
 import shutil
 import sqlite3
 from typing import Any, Iterable, Protocol
