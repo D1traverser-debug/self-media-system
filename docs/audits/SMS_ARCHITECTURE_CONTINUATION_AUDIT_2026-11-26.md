@@ -55,11 +55,11 @@ The current source inventory records 16 internal subsystems, 17 domain adapters,
 
 ### A2 — P1: Deliverables are typed; the owner demand is not yet typed
 
-**Evidence:** \`domain/contracts.py\` defines \`DeliverableContract\`, \`DeliverableVariant\`, and \`MediaShape\`. \`scope.py\` still binds a general-purpose brief with a goal and deliverable list; it validates optional typed deliverable specs but has no \`DemandContract\` for original-goal identity, correction chronology, hard constraints, soft preferences, prohibitions, expected outcome, authorization, and unresolved unknowns.
+**Evidence:** \`domain/contracts.py\` defines \`DeliverableContract\`, \`DeliverableVariant\`, and \`MediaShape\`. \`scope.py\` still binds a general-purpose brief with a goal and deliverable list; it validates optional typed deliverable specs but has no \`DemandContract\` for original-goal identity, correction chronology, hard constraints, soft preferences, prohibitions, expected outcome, authorization, and unresolved unknowns. Scoped creator-voice and point-of-view preferences are also not represented as versioned demand constraints.
 
-**Impact:** The system can type what must be produced more precisely than it types why it is being produced and how later owner corrections supersede earlier premises. That weakens revision propagation and decision/effect binding.
+**Impact:** The system can type what must be produced more precisely than it types why it is being produced and how later owner corrections supersede earlier premises. It also cannot reliably distinguish a task-specific creator voice/point-of-view preference from a universal writing rule. That weakens revision propagation and decision/effect binding.
 
-**Required action:** Implement a pure, versioned demand contract before further planner refactors. Preserve the original owner goal and ordered correction references; distinguish hard constraints from preferences; keep authorization explicit and non-inferred; bind deliverables by stable IDs. Do not make a typed demand automatically create tasks or authorize effects.
+**Required action:** Implement a pure, versioned demand contract before further planner refactors. Preserve the original owner goal and ordered correction references; distinguish hard constraints from preferences; allow scoped creator-voice/point-of-view preferences with explicit overrides rather than hard-coding one style globally; keep authorization explicit and non-inferred; bind deliverables by stable IDs. Do not make a typed demand automatically create tasks or authorize effects.
 
 ### A3 — P1: PR #52 is a successful extraction, but not yet a one-way application boundary
 
@@ -103,6 +103,15 @@ The proposed \`DomainAdapterSpec\` is a useful metadata record, but:
 ### A7 — P2: The capability split is useful, but must not become a second capability authority
 
 The main branch still has a 1,091-line \`adapters.py\` with a large conditional dispatcher. PR #53's domain package is directionally useful. Preserve one source of truth per concept: domain operation, production operation, role, method, provider availability, and reviewer trust are different registries and must not be collapsed or duplicated. Manifest references must be read back against the actual executable registry.
+
+
+### A8 — P1: The 35-scenario test is a routing smoke, not scenario acceptance
+
+**Evidence:** \`tests/test_content_domain_contracts.py::test_every_architecture_scenario_has_a_typed_route_without_effect\` iterates the 35 declarations, but constructs a minimal deliverable with only its ID/type (and pre-normalized shape where needed). It asserts that intake returns a typed route, no selected task graph and no authorized effect. It does not exercise each scenario's \`required_contexts\`, \`owner_outcome_oracle\`, or \`forbidden_implicit_effect\`. For S35, the test itself calls \`MediaShape.from_ratio\` and inserts the normalized shape before intake.
+
+**Impact:** This is a useful architecture-route smoke and should remain, but it cannot be reported as behavioral coverage of the 35 owner scenarios. The JSON correctly leaves every scenario \`runtime_verified=false\`; tests must preserve that distinction.
+
+**Required action:** Keep the route smoke, then add scenario-specific positive and negative tests. Each test must exercise the declared owner oracle and forbidden effect, use the real intake boundary, and state whether it is a structural fixture, real local media execution, current external-provider execution, or owner-observed creative result. Do not flip \`runtime_verified\` from a type-route test.
 
 ## 5. Adversarial review summary
 
@@ -184,7 +193,7 @@ The following is a source-mapped design review, **not runtime verification**. Th
 | S32 | Continue IPOS research before final visual approval | Persistent identity design route | Scoped specialist research can continue without canon approval or blocking unrelated work. Text research is not final visual identity approval. |
 | S33 | Historical R39 state conflicts with current private IPOS state | Separate IPOS source custody and bundle readback | The architecture correctly rejects the historical snapshot as current authority. SMS cannot resolve the conflict until the exact current IPOS source is actually read. |
 | S34 | Revoked identity approval invalidates only dependent content | Artifact lineage and identity bundle boundary | Selective invalidation is the correct target. Live revocation detection and dependency propagation from current IPOS state are not demonstrated by a route preview that reports current state as not loaded. |
-| S35 | TikTok cover ratio explicitly stated as 4:3 height:width | \`MediaShape.from_ratio\` with explicit \`ratio_order\` | The type supports explicit axis order and the expected 1080×1440 portrait shape. The exact owner scenario remains unverified until an end-to-end request/contract/render/readback test passes. |
+| S35 | TikTok cover ratio explicitly stated as 4:3 height:width | \`MediaShape.from_ratio\` with explicit \`ratio_order\` | The helper and unit test support explicit axis order and the expected 1080×1440 portrait shape. However, the scenario test normalizes the raw ratio in test code before calling \`resolve_intake\`; the owner-facing intake does not itself parse \`requested_ratio\`/\`ratio_convention\`. Exact request-to-render/readback remains unverified. |
 
 ### Scenario mapping conclusion
 
