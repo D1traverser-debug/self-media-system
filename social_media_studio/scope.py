@@ -162,6 +162,12 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
                 raise ValueError("NEW cannot reuse an existing project")
         brief = None
     else:
+        extra = set(request) - {"mode", "project_id"}
+        if extra:
+            raise ValueError(
+                "RESUME is read-only and cannot apply owner corrections; revise the "
+                f"stored brief explicitly before resuming: {sorted(extra)}"
+            )
         project_id = _id(request.get("project_id"))
         brief = read_project_brief(root, project_id)
         if brief.get("scope_epoch") != EPOCH:

@@ -81,6 +81,12 @@ def test_revision_cannot_bypass_shared_boundary_or_drop_declarations(tmp_path):
     changed["goal"] = "Owner corrected the video edit"
     changed["demand_contract"]["owner_source_refs"].append("owner-correction")
     changed["demand_contract"]["clauses"][0]["source_ref"] = "owner-correction"
+    changed["demand_contract"]["amendments"] = [
+        {"id": "correct-goal", "target": "@brief", "action": "REVISE",
+         "source_ref": "owner-correction", "reason": "owner changed the goal"},
+        {"id": "correct-audio", "target": "audio", "action": "REVISE",
+         "source_ref": "owner-correction", "reason": "bind audio constraint to correction"},
+    ]
     result = engine.revise_brief("fresh", changed, reason="fixture correction")
     assert result["project"]["brief"] == changed
     assert resolve_intake(tmp_path, {"mode": "RESUME", "project_id": "fresh"})["goal"] == changed["goal"]
@@ -93,3 +99,52 @@ def test_unstructured_direct_request_stays_read_only(tmp_path):
     assert route["demand"]["clauses"] == []
     assert route["selected_task_graph"] is None
     assert not root.exists()
+
+def test_cannot_silently_delete_a_prohibition_or_rewrite_the_goal(tmp_path):
+    engine = StudioEngine(tmp_path)
+    original = bind_owner_brief("fresh", brief())
+    engine.create_project("fresh", "fresh", original)
+    changed = copy.deepcopy(original)
+    changed["goal"] = "Something different"
+    with pytest.raises(ContentContractError, match="explicit new amendment"):
+        engine.revise_brief("fresh", changed, reason="unproven change")
+    changed = copy.deepcopy(original)
+    changed["demand_contract"]["clauses"] = changed["demand_contract"]["clauses"][:1]
+    with pytest.raises(ContentContractError, match="explicit new amendment"):
+        engine.revise_brief("fresh", changed, reason="silently remove no-publish")
+    assert engine.project("fresh")["brief"] == original
+
+
+def test_explicit_retirement_requires_fresh_correction_source(tmp_path):
+    engine = StudioEngine(tmp_path)
+    original = bind_owner_brief("fresh", brief())
+    engine.create_project("fresh", "fresh", original)
+    changed = copy.deepcopy(original)
+    contract = changed["demand_contract"]
+    contract["clauses"].pop()
+    contract["amendments"] = [
+        {"id": "retire-publish", "target": "publish", "action": "RETIRE",
+         "source_ref": "owner-message", "reason": "owner correction"}
+    ]
+    with pytest.raises(ContentContractError, match="newly declared"):
+        engine.revise_brief("fresh", changed, reason="spoofed correction")
+    contract["owner_source_refs"].append("owner-message-correction-2")
+    contract["amendments"][0]["source_ref"] = "owner-message-correction-2"
+    engine.revise_brief("fresh", changed, reason="explicit correction")
+    current = engine.project("fresh")["brief"]
+    assert current["demand_contract"]["amendments"][0]["action"] == "RETIRE"
+    assert "publish" not in {c["id"] for c in current["demand_contract"]["clauses"]}
+    with pytest.raises(ContentContractError, match="append-only"):
+        again = copy.deepcopy(current)
+        again["demand_contract"]["amendments"] = []
+        engine.revise_brief("fresh", again, reason="erase history")
+
+
+def test_resume_rejects_unapplied_owner_correction(tmp_path):
+    engine = StudioEngine(tmp_path)
+    engine.create_project("fresh", "fresh", bind_owner_brief("fresh", brief()))
+    for bad in ({"goal": "Different goal"}, {"owner_correction": "No longer edit audio"},
+                {"deliverable_specs": []}, {"demand_contract": {}}):
+        with pytest.raises(ValueError, match="cannot apply owner corrections"):
+            resolve_intake(tmp_path, {"mode": "RESUME", "project_id": "fresh", **bad})
+    assert resolve_intake(tmp_path, {"mode": "RESUME", "project_id": "fresh"})["goal"] == brief()["goal"]

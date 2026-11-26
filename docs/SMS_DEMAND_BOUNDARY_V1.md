@@ -24,3 +24,31 @@ Alternative rejected: force all direct requests into a durable typed project, or
 
 ## Verification and rollback
 Tests cover shared validation, no workspace mutation on intake, invalid typed revision rollback, source and deliverable references, explicit no-effect flags and no silent schema downgrade. Existing scope epoch, task decisions, event identity, release gates, scheduler and provider paths remain unchanged. Revert the candidate commit before promotion if compatibility or topology fails. No migration of existing data is required. Actual owner-source authenticity, correction completeness, semantic contradiction handling, selective invalidation and direct-session adoption remain OPEN. This slice does not promote Architecture V2 or supersede the frozen acceptance matrix.
+
+## Adversarial governance re-entry — 2026-11-26
+
+**Reopened assumption:** A shared structural validator does not prevent silent intent loss.
+The initial implementation permitted removing any existing prohibition or rewriting a
+structured clause without an acknowledged correction, and RESUME silently discarded
+extra user instructions. Both contradict the owner requirement to retain corrections.
+
+**Rival explanations:** (1) model execution drift alone (insufficient; bypass reproducible
+from API semantics), (2) missing orchestration framework (not evidenced), (3) incomplete
+shared demand evolution boundary (supported by code and targeted regressions).
+Read the real scope/intake, engine.revise_brief, existing event history and tests before
+choosing the fix. An untrusted owner_source_ref remains an assertion, not approval proof.
+
+**Selected correction:** Keep the single existing brief and event ledger. Structured
+contract revisions now require append-only owner source references and explicit
+amendments for each changed clause, plus one `@brief` amendment if the enclosing brief
+changes. Every new amendment must cite a newly declared correction source. Retiring
+a prohibition requires an explicit RETIRE amendment; RESUME with any new fields
+fails visibly and instructs the caller to revise the stored brief. This is fail-closed,
+not autonomous interpretation, nor unverified permission for public posting.
+
+**Strong counterexamples still OPEN:** A model could invent a source ref; an actual user
+may correct two global constraints but the single `@brief` record is not field-level
+dependency proof; direct-session messages have no native hook; accepted creative
+output and true provider effects are not established. Separate, independent review,
+actual user-supplied source binding, and real-result trials remain required.
+Rollback: revert candidate branch; no data migration, no mainline mutation.
