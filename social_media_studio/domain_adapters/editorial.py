@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from .common import *
 from ..legacy.editorial_planning import *
-from ..legacy.production_os import ReferenceBinding, ShotContract
+from ..legacy.production_os import ReferenceBinding
 from ..legacy.programmatic_graphics import shot_contract_from_dict
 
 def editorial_plan_from_dict(payload: Mapping[str, Any]) -> EditorialPlan:
