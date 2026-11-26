@@ -746,7 +746,22 @@
         "Deterministic source-byte and quote-grounding checks are registered; no live search, external fact oracle or semantic video/audio/image understanding provider is registered."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "benchmark-policy",
+        "provider-benchmark",
+        "self-learning"
+      ],
+      "method_ids": [],
+      "role_ids": [
+        "researcher",
+        "fact_checker",
+        "showrunner"
+      ],
+      "skill_sections": [
+        "3. Research and evidence",
+        "4. Decision loop"
+      ]
     },
     {
       "id": "editorial_writing",
@@ -765,7 +780,31 @@
         "EditorialPlan validation is not long-form writing or native-language creative quality."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "benchmark-policy",
+        "professional-aesthetics",
+        "technique-library",
+        "EDITORIAL_PACKAGING"
+      ],
+      "method_ids": [
+        "T-002",
+        "T-005",
+        "T-006",
+        "T-007",
+        "T-014"
+      ],
+      "role_ids": [
+        "writer",
+        "story_editor",
+        "retention_editor",
+        "creative_director"
+      ],
+      "skill_sections": [
+        "2. Outcome contract",
+        "3. Research and evidence",
+        "4. Decision loop"
+      ]
     },
     {
       "id": "visual_design",
@@ -790,7 +829,33 @@
         "Local render routes are limited graphics/rendering mechanisms; no registered general image generation, editing or enhancement executor."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "visual-development",
+        "generation-governance",
+        "quality-gates",
+        "professional-aesthetics",
+        "GPT_IMAGE_PROMPTING_METHOD_V2",
+        "GPT_IMAGE_POSITIVE_MORPH_LANGUAGE_RULE_V1"
+      ],
+      "method_ids": [
+        "T-002",
+        "T-003",
+        "T-004",
+        "T-007",
+        "T-008",
+        "T-014"
+      ],
+      "role_ids": [
+        "art_director",
+        "asset_director",
+        "creative_director",
+        "storyboard_artist"
+      ],
+      "skill_sections": [
+        "6. Production method and tool choice",
+        "8. Independent review and release"
+      ]
     },
     {
       "id": "motion_production",
@@ -819,7 +884,40 @@
         "Shot routing and validation do not generate a video; generative providers require current-session handshake."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "production-intelligence",
+        "generation-governance",
+        "quality-gates",
+        "benchmark-policy",
+        "visual-development",
+        "reviewer-execution-attestation",
+        "PRODUCTION_AND_COST_STRATEGY"
+      ],
+      "method_ids": [
+        "T-008",
+        "T-009",
+        "T-010",
+        "T-011",
+        "T-012",
+        "T-013",
+        "T-014"
+      ],
+      "role_ids": [
+        "director",
+        "storyboard_artist",
+        "motion_director",
+        "editor",
+        "sound_director",
+        "technical_director",
+        "creative_director",
+        "retention_editor"
+      ],
+      "skill_sections": [
+        "6. Production method and tool choice",
+        "7. Worker execution and artifact custody",
+        "8. Independent review and release"
+      ]
     },
     {
       "id": "media_transform",
@@ -844,7 +942,26 @@
         "Only video passthrough, geometry crop, and end-trim can prove copied encoded-audio payloads; advanced content restoration, AI enhancement and multitrack transformations remain unavailable."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "production-intelligence",
+        "quality-gates",
+        "reviewer-execution-attestation",
+        "benchmark-policy"
+      ],
+      "method_ids": [
+        "T-013"
+      ],
+      "role_ids": [
+        "editor",
+        "sound_director",
+        "technical_director"
+      ],
+      "skill_sections": [
+        "6. Production method and tool choice",
+        "8A. Non-negotiable media release gates",
+        "9. Failure, repair and recovery loop"
+      ]
     },
     {
       "id": "platform_packaging",
@@ -865,7 +982,32 @@
         "Legacy editorial_packaging.py is a narrow case validator, not a registered generic packaging executor. Delivery packaging does not write promotional copy."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "benchmark-policy",
+        "professional-aesthetics",
+        "provider-benchmark",
+        "technique-library",
+        "EDITORIAL_PACKAGING"
+      ],
+      "method_ids": [
+        "T-002",
+        "T-005",
+        "T-014"
+      ],
+      "role_ids": [
+        "growth_strategist",
+        "writer",
+        "story_editor",
+        "retention_editor",
+        "art_director",
+        "compliance_editor"
+      ],
+      "skill_sections": [
+        "2. Outcome contract",
+        "3. Research and evidence",
+        "6. Production method and tool choice"
+      ]
     },
     {
       "id": "identity_collaboration",
@@ -890,7 +1032,27 @@
         "IPOS is an internal product subsystem, but its current Skill/private canonical state is not copied or stored as Video owner data. Only verified approved bundles enter downstream media effects."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "visual-development",
+        "generation-governance",
+        "professional-aesthetics",
+        "HUMAN_CORE_CONSTRUCTION_STACK_V2"
+      ],
+      "method_ids": [
+        "T-008"
+      ],
+      "role_ids": [
+        "asset_director",
+        "art_director",
+        "creative_director",
+        "director"
+      ],
+      "skill_sections": [
+        "2. Outcome contract",
+        "6. Production method and tool choice",
+        "8. Independent review and release"
+      ]
     },
     {
       "id": "growth_commercial",
@@ -911,7 +1073,30 @@
         "Outcome measurement is not live audience validation or commercial success."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "commercial",
+        "provider-benchmark",
+        "benchmark-policy",
+        "self-learning",
+        "coordination-policy"
+      ],
+      "method_ids": [
+        "T-006",
+        "T-014"
+      ],
+      "role_ids": [
+        "growth_strategist",
+        "commercial_director",
+        "researcher",
+        "showrunner"
+      ],
+      "skill_sections": [
+        "2A. Optional historical media-business workstreams",
+        "3. Research and evidence",
+        "4. Decision loop",
+        "10. Learning and method evolution"
+      ]
     },
     {
       "id": "verification_delivery",
@@ -933,7 +1118,30 @@
         "Technical measurement is not aesthetic or editorial acceptance; independent reviewer availability must be verified."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "quality-gates",
+        "reviewer-execution-attestation",
+        "benchmark-policy",
+        "self-learning",
+        "professional-aesthetics"
+      ],
+      "method_ids": [
+        "T-012",
+        "T-013"
+      ],
+      "role_ids": [
+        "technical_director",
+        "compliance_editor",
+        "red_team",
+        "creative_director",
+        "art_director"
+      ],
+      "skill_sections": [
+        "8. Independent review and release",
+        "9. Failure, repair and recovery loop",
+        "11. Continuation and completion"
+      ]
     }
   ],
   "current_route_policy": "Current route is authoritative only for locating actual registered mechanisms; historical fields never confer execution authority; no automatic task selection."

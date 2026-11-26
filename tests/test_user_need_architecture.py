@@ -38,7 +38,21 @@ def test_professional_capability_axis_resolves_knowledge_methods_skills_roles_an
     assert all((ROOT / path).is_file() for path in model["local_executors"])
     assert model["selection"] == "DEMAND_SELECTED_ONLY__CURRENT_AVAILABILITY_AND_GAPS_MUST_BE_CHECKED"
 
+    raw_profile = _json("social_media_studio/legacy/data/capabilities.json")
+    knowledge_ids = {item["id"] for item in _json("social_media_studio/data/knowledge_catalog.json")["entries"]}
+    method_ids = {item["id"] for item in _json("social_media_studio/legacy/data/techniques.json")["techniques"]}
+    role_ids = set(_json("social_media_studio/legacy/data/roles.json")["roles"])
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    for group in raw_profile["professional_capability_groups"]:
+        assert set(group["knowledge_refs"]) <= knowledge_ids
+        assert set(group["method_ids"]) <= method_ids
+        assert set(group["role_ids"]) <= role_ids
+        assert all(f"## {section}" in skill_text for section in group["skill_sections"])
+
     profile = capability_lookup()
+    assert all("knowledge_resources" in group and "methods" in group
+               and "professional_roles" in group and "executor_routes" in group
+               for group in profile["groups"])
     assert len(profile["groups"]) == 9
     assert set(DOMAIN_ADAPTERS) == {name for group in profile["groups"] for name in group["adapters"]}
     assert set(PRODUCTION_EXECUTORS.operations()) == {name for group in profile["groups"] for name in group["operations"]}

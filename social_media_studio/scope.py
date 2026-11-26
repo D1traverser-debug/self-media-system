@@ -257,13 +257,44 @@ def capability_lookup(group_id: str | None = None, *, profile: dict[str, Any] | 
         raise ValueError("domain adapter operation is assigned to the wrong capability group")
     if any(g["activation"] != "DEMAND_SELECTED_ONLY" or not g["gaps"] for g in groups):
         raise ValueError("professional groups must be demand-selected and disclose limits")
+
+    # Professional classification must resolve the knowledge/method/role/Skill
+    # resources as well as the actual local executor registries.
+    knowledge_data = json.loads(files("social_media_studio").joinpath("data", "knowledge_catalog.json").read_text(encoding="utf-8"))
+    technique_data = json.loads(files("social_media_studio.legacy").joinpath("data", "techniques.json").read_text(encoding="utf-8"))
+    role_data = json.loads(files("social_media_studio.legacy").joinpath("data", "roles.json").read_text(encoding="utf-8"))
+    knowledge_by_id = {item["id"]: item for item in knowledge_data["entries"]}
+    methods_by_id = {item["id"]: item for item in technique_data["techniques"]}
+    roles_by_id = role_data["roles"]
+    for group in groups:
+        for field, available in (("knowledge_refs", knowledge_by_id), ("method_ids", methods_by_id), ("role_ids", roles_by_id)):
+            refs = group.get(field)
+            if not isinstance(refs, list) or len(refs) != len(set(refs)) or not set(refs).issubset(available):
+                raise ValueError(f"{group['id']}: unresolved or duplicate {field}")
+        sections = group.get("skill_sections")
+        if not isinstance(sections, list) or not sections or len(sections) != len(set(sections)):
+            raise ValueError(f"{group['id']}: skill_sections must be a non-empty unique list")
     if any(not item.get("current_route", {}).get("status") for item in data["capabilities"]):
         raise ValueError("legacy capability must have explicit current disposition")
     selected = [g for g in groups if group_id is None or g["id"] == group_id]
     if not selected:
         raise ValueError("exact professional capability group not found")
+    resolved_groups = []
+    for group in selected:
+        resolved_groups.append({
+            **group,
+            "knowledge_resources": [knowledge_by_id[ref] for ref in group["knowledge_refs"]],
+            "methods": [methods_by_id[ref] for ref in group["method_ids"]],
+            "professional_roles": [{"id": role_id, **roles_by_id[role_id]} for role_id in group["role_ids"]],
+            "executor_routes": {
+                "domain_adapters": [item for item in public_domain_adapter_registry()
+                                    if item["name"] in group["adapters"]],
+                "production_operations": list(group["operations"]),
+                "nonlocal_execution": "CURRENT_SESSION_CAPABILITY_HANDSHAKE__AGENT_HUMAN_EXTERNAL_HANDOFF",
+            },
+        })
     return {
-        "groups": selected,
+        "groups": resolved_groups,
         "domain_operations": [
             item for item in public_domain_adapter_registry()
             if group_id is None or item["capability_group"] == group_id
