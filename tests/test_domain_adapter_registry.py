@@ -11,6 +11,7 @@ from social_media_studio.adapters import (
 )
 from social_media_studio.domain_adapters.registry import (
     DOMAIN_ADAPTERS,
+    DomainAdapterSpec,
     public_domain_adapter_registry,
 )
 from social_media_studio.scope import capability_lookup
