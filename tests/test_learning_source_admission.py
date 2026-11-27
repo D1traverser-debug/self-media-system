@@ -92,5 +92,5 @@ def test_exact_demand_profiles_point_to_the_expected_editorial_and_packaging_sou
 def test_self_learning_protocol_has_unique_ordered_sections():
     import re
     text = POLICY.read_text(encoding="utf-8")
-    numbers = [int(x) for x in re.findall(r"^## (\\d+)\\.", text, flags=re.MULTILINE)]
+    numbers = [int(x) for x in re.findall(r"^## (\d+)\.", text, flags=re.MULTILINE)]
     assert numbers == list(range(1, len(numbers) + 1))
