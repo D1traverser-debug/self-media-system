@@ -160,5 +160,8 @@ def completion_guidance(deliverable_progress: dict[str, Any]) -> dict[str, str]:
     if deliverable_progress["candidate_coverage_complete"] is False:
         return {"state": "DELIVERABLE_CANDIDATES_INCOMPLETE",
                 "next_action": "Task graph complete but current deliverable variants lack bound candidates; reconcile the owner outcome and plan the missing work."}
+    if deliverable_progress.get("artifact_release_coverage_complete") is False:
+        return {"state": "ARTIFACT_RELEASE_COVERAGE_INCOMPLETE",
+                "next_action": "Task graph complete with candidates, but some current deliverable variants lack an artifact-level release check; verify each actual output before independent owner outcome review."}
     return {"state": "QUALITY_AND_OWNER_OUTCOME_UNVERIFIED",
-            "next_action": "Task graph complete; verify actual deliverable quality and owner outcome separately, and run release checks only where requested."}
+            "next_action": "Task graph complete; verify actual deliverable quality and owner outcome separately; artifact release is not owner approval or publication."}

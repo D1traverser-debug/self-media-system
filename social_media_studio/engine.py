@@ -2140,11 +2140,13 @@ class StudioEngine:
                     "media_type": artifact["media_type"], "artifact_status": artifact["status"],
                     "format_and_quality_verified": False,
                 })
+        from .domain.outcome_assurance import variant_release_coverage
         variants = list(by_key.values())
+        coverage = variant_release_coverage(variants)
         return {"status": "CANDIDATE_COVERAGE_ONLY",
                 "variants": variants, "rejected_bindings": rejected,
                 "candidate_coverage_complete": all(v["candidates"] for v in variants),
-                "owner_outcome_verified": False, "release_authorized": False}
+                "release_authorized": False, **coverage}
 
     def status(self, project_id: str) -> dict[str, Any]:
         project = self.project(project_id)

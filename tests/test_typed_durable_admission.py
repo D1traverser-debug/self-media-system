@@ -93,6 +93,10 @@ def test_complete_graph_does_not_mean_complete_delivery(tmp_path):
     assert resumed["project_status"] == "TASK_GRAPH_COMPLETE"
     progress = resumed["deliverable_progress"]
     assert progress["candidate_coverage_complete"] is False
+    assert progress["artifact_release_coverage_complete"] is False
+    assert progress["individually_released_variant_count"] == 0
+    assert {v["deliverable_id"] for v in progress["unreleased_variants"]} == {"caption", "article"}
+    assert progress["whole_demand_accepted"] is False
     assert progress["owner_outcome_verified"] is False
     by_id = {v["deliverable_id"]: v for v in progress["variants"]}
     assert by_id["caption"]["candidates"][0]["artifact_id"] == artifact_id
