@@ -13,7 +13,7 @@ from typing import Any, Mapping
 
 from .contracts import FrameRenderSpec, ProductionContractError
 from .ffmpeg_assembler import RenderExecutionError, sha256_file, _write_json_exclusive
-from .effect_gate import require_exact_code_grant
+from .effect_gate import require_exact_code_grant, snapshot_exact_operator_granted_source
 
 
 class PythonFrameRenderer:
@@ -74,9 +74,14 @@ class PythonFrameRenderer:
                 env[key] = os.environ[key]
         with tempfile.TemporaryDirectory(prefix="sms-frame-", dir=root) as temp_dir:
             temp = Path(temp_dir)
+            # Snapshot exact authorized bytes so the worker never loads a
+            # mutable source path after the operator's digest check.
+            executable_source = snapshot_exact_operator_granted_source(
+                renderer_path, temp, renderer_meta["sha256"],
+            )
             config_path = temp / "worker-config.json"
             config = {
-                "renderer_path": str(renderer_path), "entrypoint": spec.entrypoint,
+                "renderer_path": str(executable_source), "entrypoint": spec.entrypoint,
                 "width": spec.width, "height": spec.height, "fps": spec.fps,
                 "frame_count": spec.frame_count, "assets": asset_paths, "params": dict(spec.params),
             }

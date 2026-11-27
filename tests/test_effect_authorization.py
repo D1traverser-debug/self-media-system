@@ -79,3 +79,32 @@ def test_discovery_discloses_unsafe_effect_without_claiming_operator_approval():
         "operation": "ffmpeg_video_audio_copy", "risk_class": LOCAL_DETERMINISTIC,
         "independent_operator_grant_required": False, "current_operator_grant_verified": False,
     }]
+
+
+def test_authorized_snapshot_is_stable_when_original_path_changes(tmp_path, monkeypatch):
+    from social_media_studio.production.effect_gate import snapshot_exact_operator_granted_source
+    source = tmp_path / "source.py"
+    source.write_text("def render_frame(): return 'approved'", encoding="utf-8")
+    approved = hashlib.sha256(source.read_bytes()).hexdigest()
+    monkeypatch.setenv("SMS_TRUSTED_PYTHON_RENDERER_SHA256", approved)
+    isolated = tmp_path / "isolated"
+    isolated.mkdir()
+    snapshot = snapshot_exact_operator_granted_source(source, isolated, approved)
+    assert snapshot.read_bytes() == source.read_bytes()
+    source.write_text("def render_frame(): return 'attacker-replaced'", encoding="utf-8")
+    assert hashlib.sha256(snapshot.read_bytes()).hexdigest() == approved
+    with pytest.raises(ProductionContractError, match="DIGEST_MISMATCH"):
+        snapshot_exact_operator_granted_source(source, tmp_path, approved)
+
+
+def test_snapshot_never_overwrites_existing_execution_payload(tmp_path, monkeypatch):
+    from social_media_studio.production.effect_gate import snapshot_exact_operator_granted_source
+    source = tmp_path / "code.py"
+    source.write_text("pass", encoding="utf-8")
+    approved = hashlib.sha256(source.read_bytes()).hexdigest()
+    monkeypatch.setenv("SMS_TRUSTED_PYTHON_RENDERER_SHA256", approved)
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    (dest / "authorized-renderer.py").write_text("unrelated existing file", encoding="utf-8")
+    with pytest.raises(ProductionContractError, match="must not overwrite"):
+        snapshot_exact_operator_granted_source(source, dest, approved)

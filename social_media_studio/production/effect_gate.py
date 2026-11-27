@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 
 from ..domain.effects import authorize_effect, TRUSTED_CODE_UNSANDBOXED
 from .contracts import FrameRenderSpec, ProductionContractError
@@ -21,7 +22,11 @@ def require_exact_code_grant(renderer_path: str | Path) -> str:
     source = Path(renderer_path).resolve(strict=True)
     if not source.is_file():
         raise ProductionContractError("trusted renderer source must be a regular file")
-    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    hasher = hashlib.sha256()
+    with source.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            hasher.update(chunk)
+    digest = hasher.hexdigest()
     decision = authorize_effect(
         TRUSTED_CODE_UNSANDBOXED, source_sha256=digest,
         operator_trusted_sha256=os.environ.get(GRANT_ENV),
@@ -58,3 +63,26 @@ def admit_registered_effect(risk_class: str, context) -> None:
     digest = require_exact_code_grant(str(renderer["path"]))
     if renderer.get("sha256") != digest:
         raise ProductionContractError("code execution gate source bytes differ from registered SHA256")
+
+
+def snapshot_exact_operator_granted_source(
+    renderer_path: str | Path, destination_dir: str | Path, expected_sha256: str,
+) -> Path:
+    """Copy a granted exact version into a private one-attempt execution snapshot.
+
+    The worker is pointed at this snapshot, never the mutable registered path.
+    A changed source during the copy fails the post-copy digest comparison.
+    This does not restrict arbitrary imports, filesystem access or networking
+    from the *approved* code once it runs.
+    """
+    source = Path(renderer_path).resolve(strict=True)
+    if require_exact_code_grant(source) != expected_sha256:
+        raise ProductionContractError("registered renderer digest differs from granted source")
+    destination = Path(destination_dir).resolve(strict=True) / "authorized-renderer.py"
+    if destination.exists():
+        raise ProductionContractError("trusted source snapshot must not overwrite an existing file")
+    shutil.copyfile(source, destination)
+    if require_exact_code_grant(destination) != expected_sha256:
+        destination.unlink(missing_ok=True)
+        raise ProductionContractError("trusted source changed while making execution snapshot")
+    return destination

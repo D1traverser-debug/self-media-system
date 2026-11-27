@@ -17,3 +17,6 @@ The `ProductionExecutorRegistry` remains the only local effect operation registr
 Referenced security guidance:
 - OWASP AI Agent Security Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html
 - OpenFeature Provider specification (interfaces vs provider implementation): https://openfeature.dev/specification/sections/providers/
+
+## Exact execution bytes and TOCTOU protection
+The execution worker now receives a per-attempt private snapshot of the exact granted Python source. The source is checked before copy and the snapshot rehashed against both the operator grant and immutable registered input digest before the worker is started. If the original source path changes after copying, the worker still sees the approved snapshot. This protects the authorized file identity against simple time-of-check/time-of-use replacement; it does **not** sandbox imports, file or network effects by authorized Python code. Self-contained renderer source is preferred; companion Python modules are not implicitly trusted source bytes.
