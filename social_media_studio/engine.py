@@ -24,7 +24,7 @@ from .engine_support import (
     SCHEMA_VERSION, TASK_STATES, RIGHTS_ALLOWED, _ID,
     StudioError, ProjectNotFound, ContractError, ClaimError, GateError,
     _now, _iso, _parse_time, _json, _loads, _safe_id, _sha256, _inside,
-    TaskClaim, validate_brief,
+    TaskClaim, validate_brief, completion_guidance,
 )
 from .application.project_tasks import ProjectTaskService
 
@@ -2965,10 +2965,8 @@ class StudioEngine:
             next_action = "Import or produce the missing declared inputs, then refresh the task graph."
         elif unfinished:
             next_action = "Inspect dependency blockers and task failures; revise only the affected descendants."
-        elif status["deliverable_progress"]["candidate_coverage_complete"] is False:
-            next_action = "Task graph complete but current deliverable variants lack bound candidates; reconcile the owner outcome and plan the missing work."
         else:
-            next_action = "Task graph complete; verify actual deliverable quality and owner outcome separately, and run release checks only where requested."
+            next_action = completion_guidance(status["deliverable_progress"])["next_action"]
         return {
             "project": status["project"],
             "project_status": "TASK_GRAPH_COMPLETE" if not unfinished else "IN_PROGRESS",

@@ -99,6 +99,19 @@ def test_complete_graph_does_not_mean_complete_delivery(tmp_path):
     assert by_id["caption"]["candidates"][0]["format_and_quality_verified"] is False
     assert by_id["article"]["candidates"] == []
     assert "lack bound candidates" in resumed["next_action"]
+    from social_media_studio.production.worker_pool import run_ready_tool_tasks
+    from social_media_studio.operation_cycle import run_work_cycle
+
+    worker = run_ready_tool_tasks(engine, "fresh", max_workers=1)
+    assert worker["scheduler_status"] == "DELIVERABLE_CANDIDATES_INCOMPLETE"
+    assert worker["deliverable_progress"] == progress
+    assert worker["next_action"] == resumed["next_action"]
+    cycle = run_work_cycle(engine, "fresh", execute_tools=True)
+    assert cycle["after"]["deliverable_progress"] == progress
+    assert resumed["next_action"] in cycle["next_actions"]
+    assert cycle["tool_execution_requested"] is True
+    assert cycle["tool_execution_performed"] is False
+    assert cycle["release_authorized"] is False
     output.write_text("Changed bytes.", encoding="utf-8")
     progress = engine.status("fresh")["deliverable_progress"]
     assert progress["variants"][0]["candidates"] == []

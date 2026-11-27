@@ -147,3 +147,15 @@ def validate_brief(brief: dict[str, Any]) -> None:
         policy.get("technical_qa_artifact_name", "technical-qa-receipt"), str
     ):
         raise ContractError("release_policy.technical_qa_artifact_name must be a string")
+
+
+def completion_guidance(deliverable_progress: dict[str, Any]) -> dict[str, str]:
+    """Same owner-outcome continuation across resume, workers and cycle.
+
+    Candidate coverage and exact bytes are not semantic quality or approval.
+    """
+    if deliverable_progress["candidate_coverage_complete"] is False:
+        return {"state": "DELIVERABLE_CANDIDATES_INCOMPLETE",
+                "next_action": "Task graph complete but current deliverable variants lack bound candidates; reconcile the owner outcome and plan the missing work."}
+    return {"state": "QUALITY_AND_OWNER_OUTCOME_UNVERIFIED",
+            "next_action": "Task graph complete; verify actual deliverable quality and owner outcome separately, and run release checks only where requested."}

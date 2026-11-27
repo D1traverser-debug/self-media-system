@@ -20,7 +20,7 @@
     "observed_ci_run": 45927195071,
     "observed_ci": "FAILURE",
     "observed_failure": "531 passed, 1 failed: old scoped-resource regression found the applicable professional-aesthetics reference missing for short copy; old missing-profile assertion requires an explicit counterexample now that video_generation is covered.",
-    "new_changes": "Add scoped non-video business observations to the existing business outcome adapter; preserve exact source lineage, missing values, ratio semantics and old Episode compatibility. Previous resource regression fix remains in parent commit; exact integration-head CI required.",
+    "new_changes": "Add scoped non-video business observations to the existing business outcome adapter; preserve exact source lineage, missing values, ratio semantics and old Episode compatibility. Previous resource regression fix remains in parent commit; exact integration-head CI required.; unify completed-graph continuation across resume, worker pool and work cycle, expose current deliverable coverage, distinguish requested from performed tool execution.",
     "status": "DRAFT_NOT_MERGED"
   },
   "decision": {
@@ -122,7 +122,8 @@
       "blocker": null,
       "evidence": [
         "Typed professional demand and exact local dispatcher admission, decision-bound selected route records, and digest-bound output candidate projection implemented; actual exact-head CI and owner outcomes not yet verified.",
-        "A real multi-output audio-copy operation exposed a catalog coverage omission. Existing composition supports one operation across multiple explicitly requested deliverables; scoped report types for actual render/assembly/audio/QA evidence without a parallel execution path."
+        "A real multi-output audio-copy operation exposed a catalog coverage omission. Existing composition supports one operation across multiple explicitly requested deliverables; scoped report types for actual render/assembly/audio/QA evidence without a parallel execution path.",
+        "Re-audit of engine.resume, worker_pool and operation_cycle found contradictory continuation after completed task graph with missing user deliverable. Reuse a single candidate-coverage continuation helper and regression across all three surfaces; no implicit release or actual tool-execution claim."
       ]
     },
     {

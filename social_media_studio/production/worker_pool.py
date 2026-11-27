@@ -5,6 +5,7 @@ from threading import Event, Thread
 from typing import Any
 
 from ..engine import GateError, StudioEngine
+from ..engine_support import completion_guidance
 from .executors import run_claimed_tool_task, tool_executor_for_task
 from .registry import PRODUCTION_EXECUTORS
 
@@ -161,8 +162,11 @@ def run_ready_tool_tasks(
         scheduler_status = "LOCAL_TOOL_WORK_PENDING"
         next_action = "Run another local tool round or increase worker capacity."
     elif all_tasks_complete:
-        scheduler_status = "TASK_GRAPH_COMPLETE_NOT_RELEASED"
-        next_action = "Run release-check against the exact final master; task completion is not release authorization."
+        guidance = completion_guidance(final_admission["deliverable_progress"])
+        scheduler_status = ("DELIVERABLE_CANDIDATES_INCOMPLETE"
+                            if guidance["state"] == "DELIVERABLE_CANDIDATES_INCOMPLETE"
+                            else "TASK_GRAPH_COMPLETE_NOT_RELEASED")
+        next_action = guidance["next_action"]
     elif ready_by_executor.get("agent"):
         scheduler_status = "AWAITING_AGENT_WORK"
         next_action = "Dispatch the READY agent work packets; the local tool pool does not execute agent tasks."
@@ -204,6 +208,7 @@ def run_ready_tool_tasks(
         "completed": completed,
         "failed": failed,
         "task_counts": task_counts,
+        "deliverable_progress": final_admission["deliverable_progress"],
         "ready_by_executor": ready_by_executor,
         "decision_blocked_tasks": final_admission["decision_blocked_tasks"],
         "ready_tool_tasks_without_registered_executor": list(unregistered_by_id.values()),

@@ -11,6 +11,7 @@ from typing import Any
 from contextlib import closing
 
 from .engine import StudioEngine, GateError
+from .engine_support import completion_guidance
 from .production.executors import tool_executor_for_task
 from .production.worker_pool import run_ready_tool_tasks
 
@@ -89,6 +90,7 @@ def _snapshot(engine: StudioEngine, project_id: str) -> dict[str, Any]:
     return {
         "handoff_packets": handoff_packets,
         "task_counts": admission["task_counts"],
+        "deliverable_progress": admission["deliverable_progress"],
         "open_failures": admission["open_failures"],
         "parallel_ready_lanes": {key: sorted(values) for key, values in parallel.items()},
         "blocked_tasks": sorted(blocked, key=lambda item: item["task_id"]),
@@ -117,7 +119,7 @@ def run_work_cycle(
     reasons = {item["reason"] for item in after["blocked_tasks"]}
     lanes = after["parallel_ready_lanes"]
     next_actions: list[str] = []
-    if "ROOT_CAUSE_REPLAN_REQUIRED" in reasons or (execution and execution["failed"]):
+    if after["open_failures"] or "ROOT_CAUSE_REPLAN_REQUIRED" in reasons or (execution and execution["failed"]):
         next_actions.append("Diagnose root causes, challenge the method, repair and independently replay.")
     if "DECISION_REQUIRED" in reasons or "RETRY_BUDGET_EXHAUSTED" in reasons:
         next_actions.append("Bind a current CAOS-governed decision or revise exhausted contracts.")
@@ -138,7 +140,7 @@ def run_work_cycle(
     if lanes["tool"]:
         next_actions.append("Execute admitted local tool tasks in the next bounded cycle.")
     if after["all_tasks_complete"]:
-        next_actions.append("Independently inspect final artifacts and run exact-digest release-check.")
+        next_actions.append(completion_guidance(after["deliverable_progress"])["next_action"])
     if candidates:
         next_actions.append("Replay learning candidates with independent evidence before promotion.")
     if not next_actions:
@@ -147,7 +149,8 @@ def run_work_cycle(
         "project_id": project_id, "cycle": "BOUNDED_OPERATIONAL_LOOP",
         "before": before, "execution": execution, "after": after,
         "learning_candidates": candidates, "next_actions": next_actions,
-        "tool_execution_performed": execute_tools,
+        "tool_execution_requested": execute_tools,
+        "tool_execution_performed": bool(execution and (execution["completed"] or execution["failed"])),
         "caos_native_activation_verified": False,
         "release_authorized": False, "learning_promoted": False,
         "independent_acceptance_verified": False,
