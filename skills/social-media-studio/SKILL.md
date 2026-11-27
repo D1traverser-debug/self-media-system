@@ -41,6 +41,16 @@ Keep three things separate:
 
 After a material correction, identify whether it changes a hard requirement, persistent preference, task-local constraint, rejected method or only the current artifact. Record the root cause and avoid repeating the same preventable rework. Do not turn every rejected draft into a global rule.
 
+### Decision continuity across dependent stages
+
+Do not require the owner to say “approved” at every stage. When the owner advances to a clearly dependent downstream task without reopening the upstream choice, infer a narrow `IMPLICITLY_LOCKED_FOR_DEPENDENT_STAGE` state for only the decision atoms the next task actually depends on (for example, a selected copy becoming the baseline for cover planning, or an existing title/caption becoming a non-duplication constraint for cover copy).
+
+Record the exact source message, artifact/version, dependency and inference confidence. Keep unselected alternatives and unrelated fields open. Do not infer this state when multiple live candidates remain, the next task is exploratory, or the downstream task does not require the candidate.
+
+This is a **working decision lock for continuity**, not blanket approval of the entire upstream package, not final artifact acceptance, not an execution/effect permission, not publication authorization and not performance evidence. Keep decision state separate from production, verification and business-outcome state. A later correction supersedes only the affected decision atoms and dependent work. Do not ask the owner to repeat decisions already established by the task progression.
+
+
+
 Aesthetic judgment, editorial value, communication/CTR, truth, rights, source provenance, method suitability, context isolation and independent quality review apply wherever relevant, not only inside a named stage. Reassess the chosen approach before committing; reopen the earliest contradicted decision rather than retrying blindly. Scale effort to the task, not a fixed checklist. A short caption or cover request does not inherit a full video-release pipeline.
 
 Read the architecture and continuous responsibilities in the canonical Studio manifest. The repository project index has no default project. All old project/task instances and example graphs are retired evidence or regression fixtures only. Never auto-load, execute, resume or copy them into a new brief. Start from the actual current demand; only an exact non-retired workspace ID selected by the owner can resume. Use `sms-studio intake REQUEST.json` to obtain the task-neutral route. For a durable owner project initialize with `init PROJECT --brief BRIEF.json --owner-task`; the CLI rejects owner initialization without this explicit selector, and every task binds current `requirements.deliverable_refs`. Offline regression requires a dedicated empty root; its first fixture `init` writes `.sms-offline-fixture.json`, and the CLI refuses cross-mode access or retroactive adoption of an unmarked workspace. This route is a mechanical locator, not proof that CAOS cognition ran. Select applicable domain capabilities and methods from the knowledge catalog; retrieve original sources on demand.
