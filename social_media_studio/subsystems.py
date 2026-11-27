@@ -149,9 +149,32 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
     unclassified = [path for path in files if _classification(path, owners) is None]
     errors.extend(f"unclassified repository path: {path}" for path in unclassified)
 
+    # Repository source lifecycle is separate from current runtime ownership.
+    # A removed implementation remains auditable through Git, but must not
+    # silently reappear as another authority or invisible compatibility module.
+    retired_records = cat.get("source_retirements", [])
+    retired_paths: set[str] = set()
+    for item in retired_records:
+        path = item.get("path") if isinstance(item, dict) else None
+        if (not isinstance(path, str) or not path.startswith("social_media_studio/legacy/")
+                or not path.endswith(".py") or path in retired_paths):
+            errors.append(f"invalid or duplicate source retirement record: {path}")
+            continue
+        retired_paths.add(path)
+        if item.get("status") != "DELETED_FROM_HEAD" or item.get("source_history_preserved_by_git") is not True:
+            errors.append(f"source retirement is not a versioned permanent removal: {path}")
+        if path in files or (root / path).exists():
+            errors.append(f"retired source path was reintroduced: {path}")
+        if path in owners:
+            errors.append(f"retired source path is still owned by active topology: {path}")
+        old_test = item.get("deleted_test")
+        if isinstance(old_test, str) and (old_test in files or (root / old_test).exists()):
+            errors.append(f"retired source dedicated test was reintroduced: {old_test}")
+
     module_files = {_module(path): path for path in python_files}
     imports: dict[str, set[str]] = {}
     cross: set[tuple[str, str, str, str]] = set()
+    retired_module_names = {_module(path) for path in retired_paths}
     digests: dict[str, str] = {}
     for path in python_files:
         name = _module(path)
@@ -159,6 +182,9 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             digests[path] = hashlib.sha256((root / path).read_bytes()).hexdigest()
             found = set()
             for candidate in _imports(root / path, name):
+                if candidate in retired_module_names or any(
+                        candidate.startswith(retired + ".") for retired in retired_module_names):
+                    errors.append(f"source imports a permanently retired module: {path} -> {candidate}")
                 while candidate not in module_files and "." in candidate:
                     candidate = candidate.rsplit(".", 1)[0]
                 if candidate in module_files:
@@ -174,7 +200,12 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
     if old is None or old.get("activation") != "ISOLATED_HISTORICAL_FIXTURE_ONLY":
         errors.append("legacy controller not explicitly retired")
     retired = {_module(path) for path in old["code_paths"]} if old else set()
-    for start in sorted(n for n in module_files if (n == "social_media_studio" or n.startswith("social_media_studio.")) and not (n == "social_media_studio.legacy" or n.startswith("social_media_studio.legacy."))):
+    active_modules = sorted(n for n in module_files
+                            if (n == "social_media_studio" or n.startswith("social_media_studio."))
+                            and not (n == "social_media_studio.legacy"
+                                     or n.startswith("social_media_studio.legacy.")))
+    live_legacy_reachable: set[str] = set()
+    for start in active_modules:
         seen: set[str] = set()
         to_visit = deque([start])
         while to_visit:
@@ -185,7 +216,23 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             if current in retired:
                 errors.append(f"current module {start} reaches old controller {current}")
                 break
+            if current.startswith("social_media_studio.legacy."):
+                live_legacy_reachable.add(current)
             to_visit.extend(imports.get(current, set()) - seen)
+
+    # These are static source findings, NOT dynamic import/provider execution
+    # evidence or a reason to erase historical fixtures still under regression.
+    legacy_lifecycle: dict[str, str] = {}
+    for name, path in sorted(module_files.items()):
+        if not name.startswith("social_media_studio.legacy.") or name == "social_media_studio.legacy":
+            continue
+        if name in retired:
+            state = "RETIRED_FIXTURE_COMPATIBILITY_NOT_CURRENT_RUNTIME"
+        elif name in live_legacy_reachable:
+            state = "ACTIVE_SPECIALIST_IMPORT_DEPENDENCY_NOT_NEW_CONTROLLER"
+        else:
+            state = "DORMANT_LEGACY_SOURCE_REQUIRES_CONSUMER_REVIEW"
+        legacy_lifecycle[path] = state
 
     from .domain.contracts import DELIVERABLE_TYPES
     routes = cat.get("deliverable_ownership", {})
@@ -256,6 +303,9 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         "dependency_edges": [{"from": a, "to": b, "source": s, "target": t}
                              for a,b,s,t in sorted(cross)],
         "module_sha256": digests,
+        "source_retirements": retired_records,
+        "legacy_module_lifecycle": legacy_lifecycle,
+        "legacy_lifecycle_evidence_scope": "CURRENT_PYTHON_STATIC_IMPORT_GRAPH_ONLY",
         "semantic_line_by_line_complete": False,
         "real_creative_quality_verified": False,
         "native_caos_selection_verified": False,

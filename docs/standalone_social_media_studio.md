@@ -8,6 +8,8 @@ Manifest: `social_media_studio/data/studio_manifest.json`
 
 ## 1. Product outcome
 
+**Repository identity:** `D1traverser-debug/self-media-system` (https://github.com/D1traverser-debug/self-media-system). `social-media-studio` is the installable Python distribution and product identity, not the GitHub repository slug. Source deletion decisions are recorded in `social_media_studio/data/subsystem_catalog.json.source_retirements` and validated by `sms-studio subsystems`. The previous isolated operator snapshot is retired; the authoritative operator/task view is current `StudioEngine.status/resume`. Static lifecycle classification distinguishes current specialist imports, dormant historical code and retired fixture controllers without falsely claiming dynamic provider use or deleting still-tested compatibility assets.
+
 ### Current upper architecture boundaries on integration branch
 
 The **single** `StudioEngine` control plane is a modular monolith: application services carry release transactions and observed outcome inspection, pure domain modules carry release/effect/conformance/owner-trace policies, and the existing registered production executors are the only local effect dispatchers. External model/provider discovery is not an authorization or a claim of availability.

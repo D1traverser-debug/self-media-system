@@ -189,3 +189,32 @@ def test_verified_retired_operator_view_cannot_be_reintroduced(tmp_path):
     assert report["pass"] is False
     assert any("retired source path was reintroduced" in issue
                for issue in report["violations"])
+
+
+def test_legacy_source_lifecycle_distinguishes_live_domain_code_from_old_controller():
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    life = report["legacy_module_lifecycle"]
+    assert life["social_media_studio/legacy/model_registry.py"] == (
+        "ACTIVE_SPECIALIST_IMPORT_DEPENDENCY_NOT_NEW_CONTROLLER"
+    )
+    assert life["social_media_studio/legacy/runtime.py"] == (
+        "RETIRED_FIXTURE_COMPATIBILITY_NOT_CURRENT_RUNTIME"
+    )
+    assert "social_media_studio/legacy/operator_view.py" not in life
+    assert report["legacy_lifecycle_evidence_scope"] == "CURRENT_PYTHON_STATIC_IMPORT_GRAPH_ONLY"
+    assert report["semantic_line_by_line_complete"] is False
+
+
+def test_deleted_legacy_source_import_cannot_be_resurrected_through_active_adapter(tmp_path):
+    _isolated_source_checkout(tmp_path)
+    active = tmp_path / "social_media_studio/domain/editorial.py"
+    active.write_text(
+        active.read_text(encoding="utf-8")
+        + "\nfrom social_media_studio.legacy.operator_view import OperatorSnapshot\n",
+        encoding="utf-8",
+    )
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("source imports a permanently retired module" in item
+               for item in report["violations"])
