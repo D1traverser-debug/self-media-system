@@ -73,10 +73,12 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
+        "social_media_studio/application/outcome_inspection.py",
         "social_media_studio/application/release_service.py",
         "social_media_studio/domain/__init__.py",
         "social_media_studio/domain/assurance.py",
         "social_media_studio/domain/communication.py",
+        "social_media_studio/domain/conformance.py",
         "social_media_studio/domain/contracts.py",
         "social_media_studio/domain/effects.py",
         "social_media_studio/domain/outcome_assurance.py",

@@ -2098,9 +2098,14 @@ class StudioEngine:
             return {"status": "UNTYPED_OR_HISTORICAL", "candidate_coverage_complete": None,
                     "owner_outcome_verified": False}
         items = inspect_demand(brief, durable=True)["typed_deliverables"]["deliverables"]
-        by_key = {(d["id"], v): {"deliverable_id": d["id"], "type": d["type"], "variant_id": v,
-                                  "candidates": []}
-                  for d in items for v in ([x["id"] for x in d["variants"]] or [d["id"]])}
+        by_key = {
+            (d["id"], v["id"]): {
+                "deliverable_id": d["id"], "type": d["type"], "variant_id": v["id"],
+                "expected_shape": v.get("shape") or d.get("shape"), "candidates": [],
+            }
+            for d in items
+            for v in (d["variants"] or [{"id": d["id"], "shape": d.get("shape")}])
+        }
         rejected = []
         if rows is None:
             rows = connection.execute("SELECT * FROM tasks WHERE project_id=?", (project_id,)).fetchall()
@@ -2147,6 +2152,11 @@ class StudioEngine:
                 "variants": variants, "rejected_bindings": rejected,
                 "candidate_coverage_complete": all(v["candidates"] for v in variants),
                 "release_authorized": False, **coverage}
+
+    def inspect_outcome(self, project_id: str) -> dict[str, Any]:
+        """Explicit read-only observation of current typed deliverable file bytes."""
+        from .application.outcome_inspection import OutcomeInspectionService
+        return OutcomeInspectionService(self).inspect(project_id)
 
     def status(self, project_id: str) -> dict[str, Any]:
         project = self.project(project_id)

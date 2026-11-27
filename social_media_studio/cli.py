@@ -113,6 +113,9 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("status", help="show project and task readiness")
     p.add_argument("project_id")
 
+    p = sub.add_parser("inspect-outcome", help="read-only actual file format and dimension checks for current typed deliverables")
+    p.add_argument("project_id")
+
     p = sub.add_parser("resume", help="reconstruct the project handoff from durable Social Media Studio state")
     p.add_argument("project_id")
     p.add_argument("--event-limit", type=int, default=40)
@@ -449,6 +452,8 @@ def main(argv: list[str] | None = None) -> int:
             ))
         elif command == "status":
             _emit(engine.status(args.project_id))
+        elif command == "inspect-outcome":
+            _emit(engine.inspect_outcome(args.project_id))
         elif command == "resume":
             _emit(engine.resume(args.project_id, event_limit=args.event_limit))
         elif command == "tasks":
