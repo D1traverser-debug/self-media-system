@@ -82,6 +82,7 @@
         "social_media_studio/domain/contracts.py",
         "social_media_studio/domain/effects.py",
         "social_media_studio/domain/outcome_assurance.py",
+        "social_media_studio/domain/outcome_traceability.py",
         "social_media_studio/domain/release_policy.py",
         "social_media_studio/legacy/execution_attestation.py",
         "social_media_studio/legacy/reviewer_providers.py",

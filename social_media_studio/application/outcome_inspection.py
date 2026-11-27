@@ -15,6 +15,7 @@ from typing import Any
 from PIL import Image, UnidentifiedImageError
 
 from ..domain.conformance import assess_observation
+from ..domain.outcome_traceability import trace_owner_requirements
 from ..engine_support import _sha256
 
 
@@ -137,8 +138,12 @@ class OutcomeInspectionService:
                     ),
                 })
         observed_complete = bool(variants) and all(v["observable_conformance"] == "MATCH" for v in variants)
+        project = self._engine.project(project_id)
+        trace = trace_owner_requirements(project["brief"], variants)
         return {
             "status": "OBSERVED_ONLY_NOT_OWNER_ACCEPTANCE",
+            "brief_revision": project["revision"],
+            "owner_requirement_trace": trace,
             "project_id": project_id, "variants": variants,
             "declared_variant_count": len(variants),
             "observed_conformance_complete": observed_complete,
