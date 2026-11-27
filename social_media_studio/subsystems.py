@@ -10,6 +10,7 @@ from collections import deque
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 from typing import Any
 
@@ -123,6 +124,38 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
                 parsed_json_count += 1
         except (OSError, UnicodeError, ValueError) as exc:
             errors.append(f"unreadable or malformed tracked source: {tracked}: {exc}")
+    # Current structured source references must point to real current bytes.
+    # Historical docs and the retirement tombstone itself intentionally keep
+    # older path strings as source history, not live import/authority claims.
+    active_config_source_refs: list[dict[str, str]] = []
+    def walk_reference_values(value: Any, location: str):
+        if isinstance(value, dict):
+            for field, item in value.items():
+                walk_reference_values(item, f"{location}.{field}")
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                walk_reference_values(item, f"{location}[{index}]")
+        elif isinstance(value, str) and value.startswith("social_media_studio/"):
+            match = re.match(r"^(social_media_studio/[A-Za-z0-9_./-]+\.py)(?:$|[: ]|[+])", value)
+            if match:
+                path = match.group(1)
+                active_config_source_refs.append({"location": location, "path": path})
+                if path not in files or not (root / path).is_file():
+                    errors.append(f"current config points to missing source: {location} -> {path}")
+
+    for configuration in (
+        "social_media_studio/data/studio_manifest.json",
+        "social_media_studio/legacy/data/domain_manifest.json",
+    ):
+        config_path = root / configuration
+        if config_path.is_file():
+            try:
+                walk_reference_values(
+                    json.loads(config_path.read_text(encoding="utf-8")), configuration,
+                )
+            except (OSError, UnicodeError, ValueError) as exc:
+                errors.append(f"current config source reference check failed: {configuration}: {exc}")
+
     python_files = [x for x in files if x.endswith(".py") and
                     x.startswith(("social_media_studio/", "social_media_studio/legacy/"))]
     topology_minima = {
@@ -306,6 +339,8 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         "source_retirements": retired_records,
         "legacy_module_lifecycle": legacy_lifecycle,
         "legacy_lifecycle_evidence_scope": "CURRENT_PYTHON_STATIC_IMPORT_GRAPH_ONLY",
+        "active_config_source_references": active_config_source_refs,
+        "config_source_reference_scope": "CURRENT_STRUCTURED_MANIFESTS_ONLY_NOT_HISTORICAL_DOCS",
         "semantic_line_by_line_complete": False,
         "real_creative_quality_verified": False,
         "native_caos_selection_verified": False,

@@ -233,3 +233,29 @@ def test_retired_second_program_orchestrator_is_absent_but_owner_adjudication_re
     assert record["path"] not in report["legacy_module_lifecycle"]
     assert any("social_media_studio/legacy/model_registry.py" == p
                for p in report["legacy_module_lifecycle"])
+
+
+def test_current_structured_config_source_refs_have_real_nonretired_files():
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    refs = report["active_config_source_references"]
+    assert len(refs) >= 20
+    assert report["config_source_reference_scope"] == (
+        "CURRENT_STRUCTURED_MANIFESTS_ONLY_NOT_HISTORICAL_DOCS"
+    )
+    assert all((ROOT / item["path"]).is_file() for item in refs)
+    assert not any(item["path"] == "social_media_studio/legacy/operator_view.py" for item in refs)
+
+
+def test_dangling_deleted_source_in_current_manifest_is_rejected(tmp_path):
+    _isolated_source_checkout(tmp_path)
+    domain_path = tmp_path / "social_media_studio/legacy/data/domain_manifest.json"
+    domain_path.parent.mkdir(parents=True, exist_ok=True)
+    domain_path.write_text(
+        json.dumps({"runtime": {"operator_view": "social_media_studio/legacy/operator_view.py"}}),
+        encoding="utf-8",
+    )
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("current config points to missing source" in issue
+               and "legacy/operator_view.py" in issue for issue in report["violations"])

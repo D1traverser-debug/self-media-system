@@ -34,7 +34,6 @@
     "business_objects": "social_media_studio/legacy/business_objects.py",
     "model_registry": "social_media_studio/legacy/model_registry.py",
     "business_metrics": "social_media_studio/legacy/business_metrics.py",
-    "operator_view": "social_media_studio/legacy/operator_view.py",
     "owner_behavior_admission": "social_media_studio/legacy/owner_behavior_admission.py",
     "root_scope_admission": "social_media_studio/legacy/owner_behavior_admission.py:require_root_scope_admission",
     "system_audit": "sms-studio system-audit --repo-root .",
