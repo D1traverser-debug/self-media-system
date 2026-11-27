@@ -268,7 +268,14 @@ def test_current_content_studio_entry_and_product_name_match_nested_identity():
     assert "INSIDE Social Media Studio" in skill
     assert "not a mandatory video-production pipeline" in readme
     assert "Historical example chain" in readme
-    assert manifest["repository_slug"] == "social-media-studio"
+    assert manifest["repository_slug"] == "self-media-system"
+    assert manifest["repository_full_name"] == "D1traverser-debug/self-media-system"
+    assert manifest["repository_url"] == "https://github.com/D1traverser-debug/self-media-system"
+    # GitHub repository identity and installable distribution are separate.
+    import tomllib
+    package = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    assert package["project"]["name"] == "social-media-studio"
+    assert manifest["repository_slug"] != package["project"]["name"]
     assert "legacy_repository_identity" not in manifest
 
 
