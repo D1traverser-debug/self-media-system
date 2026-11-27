@@ -16,21 +16,22 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "7fa1a0fcacb295890de8488084ed2092ab34421c",
-    "observed_ci_run": null,
-    "observed_ci": "EXACT_HEAD_OF_THIS_DOCUMENT_COMMIT_MUST_BE_RECHECKED",
+    "observed_head": "24b4d64bae618d77909d4758a9e075bef738d3c4",
+    "observed_ci_run": 45994365924,
+    "observed_ci": "EXACT_HEAD_BOTH_PUSH_AND_PR_CI_PASS__612_TESTS__SYSTEM_AUDIT_AND_TOPOLOGY_PASS",
     "observed_failure": null,
-    "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability.",
+    "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability. Internal evolution 2026-11-27: private owner preference profile, private cross-chat casebook and process-quality baseline; scoped owner-authorized retrospective cross-chat import; direct-session learning without dummy projects; separate preference/episode/method lifecycles; exact candidate skill references loaded as bounded methods. No raw private chats or owner profile committed to public repository.",
     "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
     "observed_head_semantics": "Most recently inspected parent prior to the checkpoint documentation commit; re-query actual GitHub branch head and exact-head CI. Never use this string as CI authority.",
-    "last_known_green_sha": "98cec7fd097baefc6ae2a309cf08b5b8cd6eb038",
-    "last_known_green_pr_run": 45977978152,
+    "last_known_green_sha": "24b4d64bae618d77909d4758a9e075bef738d3c4",
+    "last_known_green_pr_run": 45994365924,
     "repository_full_name": "D1traverser-debug/self-media-system",
     "repository_url": "https://github.com/D1traverser-debug/self-media-system",
     "rename_checked_repository_id": "1411170938",
     "rename_verified_at": "2026-11-27",
     "rename_previous_slug_historical_only": true,
-    "last_known_green_push_run": 45977971048
+    "last_known_green_push_run": 45994357761,
+    "observed_push_run": 45994357761
   },
   "decision": {
     "problem": "Repeated session drift despite product runtime recovery; no current construction-wide task map in inspected tree, historical audit head stale, previous local change missed cross-subsystem contract.",
@@ -67,14 +68,15 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "System audit, topology, full tests and all CLI smoke checks pass on actual integration head; failures investigated, not suppressed.",
-      "next_action": "Read PR #56 current HEAD; require both exact-head CI jobs and all 590+ tests, system audit, topology and installed-smoke PASS. Do not mark the latest commit VERIFIED using a previous run.",
+      "next_action": "Continue exact-head regression on each new commit; latest verified head 24b4d64 has 612 passed and both CI jobs green. Do not treat it as whole-product or native-session acceptance.",
       "blocker": null,
       "evidence": [
         "Exact previous head 314bef109a92c15dc862ba8808379da16dc069fa CI 45925295903 and 45925301602 PASS; not evidence for new head.",
         "Exact head eaac02f08ac8af0c2167004e2ec815f40ec60fb7 CI 45926143876 / 45926138591: 528 passed, 2 failed; smoke skipped. Investigated original handlers and task/release interfaces. No source runtime guard removal.",
         "Exact previous head 8545f5343558fbf1ab13f6fa5ccb3b346edc765f CI 45926452418 and 45926458785 PASS; not proof for new head.",
         "ab0cc07 run 45927195071: 531 passed, 1 failed, diagnosed and preserved scoped resource boundary.",
-        "Commit 1bdfba4 exact-head PR CI 45958790902 and push CI 45958783530 PASS, including observed-output conformance/owner trace tests. 6cfc858 and this checkpoint update require their own exact-head readback."
+        "Commit 1bdfba4 exact-head PR CI 45958790902 and push CI 45958783530 PASS, including observed-output conformance/owner trace tests. 6cfc858 and this checkpoint update require their own exact-head readback.",
+        "Commit 24b4d64 exact-head PR CI run 45994365924 and push CI run 45994357761 both PASS: 612 tests; standalone system audit, source-topology audit, smoke, historical-program regression and installed-outside-repo checks all PASS."
       ]
     },
     {
@@ -161,10 +163,11 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Source truth, semantic understanding, lineage, rights, scoped CRUD and independent method replays proven by actual evidence; stale claims cannot authorize effects.",
-      "next_action": "Inventory current source interfaces; verify actual search/inspection capabilities and method provenance, test source replacement and scoped CRUD.",
+      "next_action": "On future owner tasks, retrieve exact private owner profile and relevant episodes; append only material episodes with source/provenance confidence. Revalidate any reusable method through distinct real tasks and counterexamples.",
       "blocker": null,
       "evidence": [
-        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "2026-11-27: private owner preference, episodic cross-chat casebook and process-quality baseline now exist in Library; public Skill/manifest support exact private-source discovery and scoped owner-authorized retrospective self-media import. Historical case evidence remains summary-level and private."
       ]
     },
     {
@@ -189,10 +192,11 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Actual natural-language short and long copy, multilingual variants and nonrepeating packaging meet explicit audience/owner intent; no invented claims; professional review.",
-      "next_action": "Audit demand routing across all craft groups (not only editorial); replay authentic short, article and platform requests with actual outputs and independent critique.",
+      "next_action": "Replay short_form_copy, platform_title/description/cover_copy and cover_design in fresh owner tasks using private preferences + exact candidate references; compare owner correction/rework burden and actual accepted output.",
       "blocker": null,
       "evidence": [
-        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "2026-11-27: explicit owner profile captures recurring voice, no-news-narration, source fidelity, field separation, localization and visual/ratio preferences; exact demand routing now explicitly retrieves candidate short-form, platform-packaging and visual references as bounded hypotheses. This does not promote their craft status."
       ]
     },
     {
@@ -303,13 +307,14 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
-      "next_action": "Perform exact-head CI and real owner-selected output playback/semantic review. Technical source-bound audio checks are separately verified from independent craft and owner approval; unresolved external provider, model quality and native CAOS activation must not be marked complete.",
+      "next_action": "Run independent fresh-chat self-media replay: confirm native CAOS/SMS Skill selection where trace is available, exact private profile retrieval, correct demand-to-skill routing, root-cause recovery, final artifact quality and lower preventable owner rework. Keep native selection NOT_TESTED if client trace is unavailable; no method promotion until the evidence ladder passes.",
       "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
         "2026-11-27 inspect-outcome observes actual candidate file type, pixel dimensions and source-scoped owner obligations per variant; entire user demand, semantic value, owner approval and publication remain explicitly UNVERIFIED. Empty trusted review registry remains fail-closed.",
         "Internal assurance 2026-11-27: explicit per-variant artifact selection now blocks multiple unselected candidates and multiple accepted artifacts, surfaces all candidates and rejected source bindings, and tests actual current PNG alternative conflict. MEDIA_TRANSFORM original_audio_promise with no audio stream is a mismatch; presence of a stream remains source-bound identity UNVERIFIED. No creative/owner outcome approval inferred; exact-head CI required.",
-        "Output observer now independently rechecks exact source->result encoded packets for BITSTREAM_IDENTITY using current immutable artifact_inputs lineage, rejects ambiguous options and discards mixed-revision readbacks. Engineering proof is not creative/owner sign-off. Before this checkpoint doc commit, SHA 98cec7 had 602 passed and both GitHub CI green; new exact-head status pending."
+        "Output observer now independently rechecks exact source->result encoded packets for BITSTREAM_IDENTITY using current immutable artifact_inputs lineage, rejects ambiguous options and discards mixed-revision readbacks. Engineering proof is not creative/owner sign-off. Before this checkpoint doc commit, SHA 98cec7 had 602 passed and both GitHub CI green; new exact-head status pending.",
+        "2026-11-27 internal learning/evolution integration: owner-authorized scoped cross-chat retrospective import; private Library owner preference profile, episodic casebook and process-quality baseline; direct-session capture without dummy projects; preference/episode/method separation; candidate skill references must be retrieved for scoped use rather than skipped. Tests cover these contracts and exact demand references. Exact head 24b4d64 has 612 passed and both CI jobs green."
       ]
     },
     {
