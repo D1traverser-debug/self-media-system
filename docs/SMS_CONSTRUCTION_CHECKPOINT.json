@@ -16,11 +16,11 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "9b9544516b1e905e0f4a49545838f1b820b754be",
-    "observed_ci_run": 45802784271,
-    "observed_ci": "FAILURE",
-    "observed_failure": "System audit: domain/communication.py unowned and unclassified. Remaining tests skipped. Manifest regression: NO_DEFAULT_VIDEO_FINAL invariant removed by previous edit.",
-    "new_changes": "Assign pure communication contract to owner of typed domain contracts; restore manifest invariant; preserve optional dataclass constructor; add construction checkpoint, references and consistency test. New exact-head CI required.",
+    "observed_head": "917b1c938ec4518385781741032638d417655bfa",
+    "observed_ci_run": 45818051990,
+    "observed_ci": "SUCCESS",
+    "observed_failure": null,
+    "new_changes": "Whole-architecture composition across demand, business axes, professional routes, typed deliverable/variant, identity, quality and tool support; 54 exact operation support contracts including programmatic motion graphics; no new scheduler or authority. Exact new head CI required.",
     "status": "DRAFT_NOT_MERGED"
   },
   "decision": {
@@ -60,7 +60,9 @@
       "acceptance": "System audit, topology, full tests and all CLI smoke checks pass on actual integration head; failures investigated, not suppressed.",
       "next_action": "Inspect new exact-head CI jobs; if a gate fails, investigate first causal error and dependent contracts. Do not mark complete on old-head CI.",
       "blocker": null,
-      "evidence": []
+      "evidence": [
+        "Exact previous head 917b1c938ec4518385781741032638d417655bfa CI 45818051990 and 45818064028 PASS; not proof for the new commit."
+      ]
     },
     {
       "id": "B01",
@@ -82,11 +84,13 @@
       ],
       "subsystems": [],
       "scenario_ids": [],
-      "status": "OPEN",
+      "status": "IN_PROGRESS",
       "acceptance": "Every current subsystem, contract, interface, scenario and forbidden effect traced to exact code/tests; conflicting architecture assumptions resolved; independent conceptual review recorded.",
-      "next_action": "Reconcile the 35 frozen scenarios with current candidate head; review system topology and cross-boundary calls before choosing deeper changes.",
+      "next_action": "Reconcile all 35 frozen owner outcomes to real current effects; test the new shared composition seam and revisit any failed architecture boundary. Treat architecture design and production validation as distinct obligations.",
       "blocker": null,
-      "evidence": []
+      "evidence": [
+        "Common integration-boundary defect traced through scope.resolve_intake, capability_lookup, domain contracts, subsystem and executor registries, quality planner and identity route. Architecture V2 section Y records comparison, implementation and falsifiers. No real independent product acceptance claimed."
+      ]
     },
     {
       "id": "B03",

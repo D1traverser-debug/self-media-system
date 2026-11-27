@@ -354,6 +354,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         coverage = capability_lookup(profile=_read_json(root / "social_media_studio" / "legacy" / "data" / "capabilities.json"))
         _check(checks, "professional_capability_route_integrity", True, {
             "groups": len(coverage["groups"]),
+            "exact_operation_contracts": sum(len(group["demand_routes"]) for group in coverage["groups"]),
             "registry_alignment": coverage["registry_alignment"],
             "business_outcome_verified": False,
         })

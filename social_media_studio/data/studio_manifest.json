@@ -409,9 +409,10 @@
         "nonlocal_execution": "CURRENT_SESSION_CAPABILITY_HANDSHAKE__AGENT_HUMAN_EXTERNAL_HANDOFF",
         "selection": "DEMAND_SELECTED_ONLY__CURRENT_AVAILABILITY_AND_GAPS_MUST_BE_CHECKED",
         "semantics": "A capability group locates common resources; an exact demand profile narrows relevant knowledge, methods, Skill sections and roles, then verifies the actual executor route. A catalog entry is not proof of execution availability.",
-        "group_resource_binding": "Group resources are common references; optional demand_profiles add scoped knowledge, methods, Skill sections and roles. Exact lookup reports GROUP_LEVEL_FALLBACK when no profile exists. Executor routes remain group-level candidates and require task-specific availability checks.",
+        "group_resource_binding": "Group resources are common references; optional demand_profiles add scoped knowledge, methods, Skill sections and roles. GROUP_LEVEL_FALLBACK explicitly means craft-resource specificity is incomplete. Every declared demand has a separate exact operation-support contract; group-wide executor routes are overview only.",
         "executor_availability": "REGISTERED_LOCAL_ROUTE_OR_CURRENT_SESSION_HANDSHAKE__NEVER_INFER_AVAILABILITY_FROM_CATALOG",
-        "demand_profiles": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups[].demand_profiles"
+        "demand_profiles": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups[].demand_profiles",
+        "operation_contract": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups[].demand_routes"
       },
       "deliverables": {
         "types": "social_media_studio.domain.contracts.DELIVERABLE_TYPES",
@@ -437,6 +438,14 @@
         "schema": "social_media_studio.domain.communication.CommunicationIntent",
         "scope": "OPTIONAL_PUBLIC_FACING_DELIVERABLE_AUDIENCE_VALUE_AND_RESPONSE_HYPOTHESIS",
         "assurance": "HYPOTHESIS_UNMEASURED__NOT_A_PERFORMANCE_PREDICTION_OR_VIRALITY_PROMISE"
+      },
+      "demand_composition": {
+        "entry": "sms-studio intake REQUEST.json [--selection ROUTE_PROPOSAL.json]",
+        "service": "social_media_studio.application.demand_composition.compose_demand",
+        "authority": "CURRENT_OWNER_DEMAND_AND_CORRECTIONS; SEPARATE_ASSISTANT_PROPOSAL_NOT_AUTHORIZATION",
+        "scope": "PER_DELIVERABLE_BUSINESS_AXES_PROFESSIONAL_DEMANDS_VARIANTS_SOURCE_CLAUSES_IDENTITY_AND_QUALITY",
+        "execution": "DIRECT_OR_EXISTING_DURABLE_STUDIO; NO_DEFAULT_GRAPH_OR_EXTERNAL_EFFECT",
+        "unknowns": "UNSELECTED_OR_UNSTRUCTURED_REMAIN_EXPLICIT; NO_FORCED_TYPED_DIRECT_TASK"
       }
     },
     "control_loops": {

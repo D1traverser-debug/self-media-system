@@ -761,7 +761,83 @@
       "skill_sections": [
         "3. Research and evidence",
         "4. Decision loop"
-      ]
+      ],
+      "demand_routes": {
+        "source_media_understanding": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Interpret complete relevant source media; evidence audit is not semantic perception.",
+          "requires_current_method_and_executor_check": true
+        },
+        "source_audio_transcription": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual transcription provider or session tool; distinguish transcript from audio quality.",
+          "requires_current_method_and_executor_check": true
+        },
+        "source_image_understanding": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual image inspection; not generation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "research_and_fact_check": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "source_evidence_audit"
+          ],
+          "scope": "Current original-source research and semantic fact check; local audit verifies supplied bytes/quotes only.",
+          "requires_current_method_and_executor_check": true
+        }
+      }
     },
     {
       "id": "editorial_writing",
@@ -948,6 +1024,61 @@
           ],
           "selection_notes": "Candidate only. Select only when the source is genuinely news/current affairs and the requested treatment is satire; preserve factual and fiction boundaries."
         }
+      },
+      "demand_routes": {
+        "long_form_editorial": {
+          "deliverable_types": [
+            "LONG_ARTICLE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual authoring and independent editorial judgment; video-plan validator is not article writing.",
+          "requires_current_method_and_executor_check": true
+        },
+        "short_form_copy": {
+          "deliverable_types": [
+            "SHORT_COPY"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual concise copy; no video-plan validation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "narrative_and_script": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "LONG_ARTICLE",
+            "SHORT_COPY"
+          ],
+          "local_support_adapters": [
+            "editorial_plan_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Narrative writing; plan validator applies only to explicitly supplied video EditorialPlan.",
+          "requires_current_method_and_executor_check": true
+        },
+        "multilingual_localization": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Native-language adaptation, preserve meaning and platform voice.",
+          "requires_current_method_and_executor_check": true
+        },
+        "news_satire_packaging": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE",
+            "SHORT_COPY",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Only factual current-affairs satire with source evidence, not generic game footage.",
+          "requires_current_method_and_executor_check": true
+        }
       }
     },
     {
@@ -961,7 +1092,8 @@
         "image_generation",
         "image_editing",
         "image_aspect_adaptation",
-        "image_enhancement"
+        "image_enhancement",
+        "programmatic_motion_graphics"
       ],
       "adapters": [
         "programmatic_graphic_render"
@@ -999,7 +1131,113 @@
       "skill_sections": [
         "6. Production method and tool choice",
         "8. Independent review and release"
-      ]
+      ],
+      "demand_routes": {
+        "visual_concept": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Art direction/concept, not actual rendered image; no generation effect.",
+          "requires_current_method_and_executor_check": true
+        },
+        "cover_design": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual cover composition and typography; prepare-only scope does not authorize rendering.",
+          "requires_current_method_and_executor_check": true
+        },
+        "avatar_design": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Temporary avatar design; permanent identity has separate explicit IPOS scope.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_prompt_design": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Prompt specification, not image generation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_generation": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Current image-generation operation required; registered MP4 renderers are not image generators.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_editing": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Current image-edit operation and source reference required.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_aspect_adaptation": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Per-variant composition; do not substitute unrequested crop.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_enhancement": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual enhancement operation and pixel review.",
+          "requires_current_method_and_executor_check": true
+        },
+        "programmatic_motion_graphics": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [
+            "programmatic_graphic_render"
+          ],
+          "local_support_operations": [
+            "python_frame_render"
+          ],
+          "scope": "Motion graphic MP4 candidate only, from a declared render spec, required assets and authorized code; not general image generation or final video acceptance.",
+          "requires_current_method_and_executor_check": true
+        }
+      }
     },
     {
       "id": "motion_production",
@@ -1061,7 +1299,93 @@
         "6. Production method and tool choice",
         "7. Worker execution and artifact custody",
         "8. Independent review and release"
-      ]
+      ],
+      "demand_routes": {
+        "video_concept": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "local_support_adapters": [
+            "media_graph_initialize"
+          ],
+          "local_support_operations": [],
+          "scope": "Concept only; local graph initialization is optional metadata, not video production.",
+          "requires_current_method_and_executor_check": true
+        },
+        "storyboard_and_direction": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "local_support_adapters": [
+            "shot_contract_materialize",
+            "shot_contract_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Storyboard and direction; supplied shot contracts only.",
+          "requires_current_method_and_executor_check": true
+        },
+        "shot_design": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "local_support_adapters": [
+            "shot_contract_materialize",
+            "shot_contract_validate",
+            "shot_route"
+          ],
+          "local_support_operations": [],
+          "scope": "Declared shot design and evidence-bound route support, not generation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_generation": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [
+            "shot_route"
+          ],
+          "local_support_operations": [],
+          "scope": "Current actual generation operation required; no registered generative video executor.",
+          "requires_current_method_and_executor_check": true
+        },
+        "animation_and_motion": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual animation; local programmable motion render only with approved spec, code and inputs.",
+          "requires_current_method_and_executor_check": true
+        },
+        "sound_design": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual sound design; no local audio creation claim.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_assembly": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [
+            "timeline_validate",
+            "continuity_assess"
+          ],
+          "local_support_operations": [
+            "ffmpeg_assemble"
+          ],
+          "scope": "Assembly only from existing inputs and timeline; does not promise original audio packet identity.",
+          "requires_current_method_and_executor_check": true
+        }
+      }
     },
     {
       "id": "media_transform",
@@ -1105,7 +1429,97 @@
         "6. Production method and tool choice",
         "8A. Non-negotiable media release gates",
         "9. Failure, repair and recovery loop"
-      ]
+      ],
+      "demand_routes": {
+        "video_trim": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "ffmpeg_video_audio_copy"
+          ],
+          "scope": "Eligible end-trim only for local packet-copy route; other trims need separate executor.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_merge": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual merge; local packet-copy editor does not merge.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_reframe": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "ffmpeg_video_audio_copy"
+          ],
+          "scope": "Eligible geometry crop only for local packet-copy route; other reframing separate.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_enhancement": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual enhancement; packet-copy operation is not AI enhancement.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_restoration": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual restoration and source-preservation check.",
+          "requires_current_method_and_executor_check": true
+        },
+        "original_audio_preservation": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "ffmpeg_video_audio_copy"
+          ],
+          "scope": "Eligible passthrough/geometry crop/end-trim with exact encoded audio packet proof; reject unsupported transformations.",
+          "requires_current_method_and_executor_check": true
+        },
+        "audio_enhancement": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual audio enhancement, not video packet copy.",
+          "requires_current_method_and_executor_check": true
+        },
+        "audio_restoration": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual audio restoration; scope and audio promise must be compatible.",
+          "requires_current_method_and_executor_check": true
+        },
+        "subtitles": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual transcript, timing and subtitle rendering/sidecar as requested.",
+          "requires_current_method_and_executor_check": true
+        }
+      }
     },
     {
       "id": "platform_packaging",
@@ -1310,6 +1724,82 @@
           ],
           "selection_notes": "Research current official platform specifications only when they materially affect the requested output."
         }
+      },
+      "demand_routes": {
+        "platform_title": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual title writing; archive packaging is not writing.",
+          "requires_current_method_and_executor_check": true
+        },
+        "platform_description": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual description writing.",
+          "requires_current_method_and_executor_check": true
+        },
+        "platform_tags": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Current relevant tags; no invented trends.",
+          "requires_current_method_and_executor_check": true
+        },
+        "cover_copy": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Distinct cover-copy function; no auto-generation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "platform_native_variant": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "delivery_package"
+          ],
+          "scope": "Requested locale/platform/shape only; archive packaging is optional support for already produced assets.",
+          "requires_current_method_and_executor_check": true
+        },
+        "platform_spec_research": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Current platform rules require primary-source verification.",
+          "requires_current_method_and_executor_check": true
+        }
       }
     },
     {
@@ -1355,7 +1845,92 @@
         "2. Outcome contract",
         "6. Production method and tool choice",
         "8. Independent review and release"
-      ]
+      ],
+      "demand_routes": {
+        "temporary_character": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Temporary design only; no IPOS bundle, state or canon access.",
+          "requires_current_method_and_executor_check": true
+        },
+        "approved_identity_use": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "local_support_adapters": [
+            "ipos_bundle_inspect",
+            "ipos_bundle_import",
+            "ipos_shot_bind"
+          ],
+          "local_support_operations": [],
+          "scope": "Exact current approved bundle and rights; read-only canon consumption.",
+          "requires_current_method_and_executor_check": true
+        },
+        "identity_continuity": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "local_support_adapters": [
+            "ipos_continuity_snapshot",
+            "ipos_continuity_link"
+          ],
+          "local_support_operations": [],
+          "scope": "Only current canon-dependent scope; declared metadata does not prove achieved fidelity.",
+          "requires_current_method_and_executor_check": true
+        },
+        "persistent_identity_design": {
+          "deliverable_types": [
+            "IDENTITY_ASSET",
+            "PROMPT_SPEC",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Existing IPOS specialist workflow, separately custodied owner canon; no automatic mutation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "identity_derivative_production": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "local_support_adapters": [
+            "ipos_bundle_inspect",
+            "ipos_bundle_import",
+            "ipos_shot_bind"
+          ],
+          "local_support_operations": [],
+          "scope": "Approved identity derivative only; exact bundle and rights.",
+          "requires_current_method_and_executor_check": true
+        }
+      }
     },
     {
       "id": "growth_commercial",
@@ -1401,7 +1976,60 @@
         "3. Research and evidence",
         "4. Decision loop",
         "10. Learning and method evolution"
-      ]
+      ],
+      "demand_routes": {
+        "audience_strategy": {
+          "deliverable_types": [
+            "ANALYSIS_REPORT",
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [
+            "business_object_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Actual audience evidence and strategy; business object validation only.",
+          "requires_current_method_and_executor_check": true
+        },
+        "commercial_design": {
+          "deliverable_types": [
+            "ANALYSIS_REPORT",
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [
+            "business_object_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Commercial fit, truth and authorized constraints; schema validation only.",
+          "requires_current_method_and_executor_check": true
+        },
+        "experiment_design": {
+          "deliverable_types": [
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [
+            "episode_intent_validate",
+            "business_object_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Hypothesis and experiment design; optional declared episode handoff only.",
+          "requires_current_method_and_executor_check": true
+        },
+        "business_measurement": {
+          "deliverable_types": [
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [
+            "business_outcome_metrics"
+          ],
+          "local_support_operations": [],
+          "scope": "Actual outcome receipts; derived metrics do not prove causation.",
+          "requires_current_method_and_executor_check": true
+        }
+      }
     },
     {
       "id": "verification_delivery",
@@ -1446,7 +2074,83 @@
         "8. Independent review and release",
         "9. Failure, repair and recovery loop",
         "11. Continuation and completion"
-      ]
+      ],
+      "demand_routes": {
+        "technical_media_qa": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [
+            "extended_media_qa"
+          ],
+          "local_support_operations": [
+            "ffprobe_media_qa"
+          ],
+          "scope": "Inspect exact media bytes; technical measurements not aesthetic PASS.",
+          "requires_current_method_and_executor_check": true
+        },
+        "editorial_quality_review": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Inspect actual text and independent evidence where required.",
+          "requires_current_method_and_executor_check": true
+        },
+        "visual_quality_review": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Inspect actual pixels/full playback as applicable; no self-rating substitutes.",
+          "requires_current_method_and_executor_check": true
+        },
+        "independent_acceptance": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Independent reviewer provenance and actual owner result; no self-attestation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "delivery": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Return the requested artifact, not a plan; no posting authorization.",
+          "requires_current_method_and_executor_check": true
+        }
+      }
     }
   ],
   "current_route_policy": "Current route is authoritative only for locating actual registered mechanisms; historical fields never confer execution authority; no automatic task selection."

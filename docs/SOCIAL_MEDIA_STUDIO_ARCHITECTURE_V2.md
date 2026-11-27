@@ -375,3 +375,80 @@ Read project-scoped image design research, GPT Image Prompting Method V2, positi
 
 ## X. Non-universal quality review contracts
 The old video-only lookdev and rough-cut scorecard cannot govern a one-line title, X longform, static image, image prompt or a bounded media trim. Added separate criteria per deliverable type and per aspect-ratio image variant, with owner acceptance and exact-source review obligations. A quality plan never self-certifies pixels, native language, independent craft, true identity approval or publication. Legacy benchmark methods remain scoped optional research, not universal stages. This is review-demand modeling; real output inspection remains OPEN.
+
+
+## Y. Current integration architecture: common demand-composition seam (2026-11-27)
+
+This section reconciles the design with the active PR #56 integration baseline
+`917b1c938ec4518385781741032638d417655bfa`, whose exact-head CI runs
+45818051990 and 45818064028 succeeded. New changes require new CI. The original
+frozen V2 baseline and acceptance oracles are retained, not overwritten. The
+canonical executable contract remains the Studio manifest and actual source.
+
+**Observed architectural gap:** the four independent classification axes were
+represented in separate interfaces. Intake returned typed declarations and
+ownership; capability discovery resolved one group; quality planning was
+separate; most exact demands inherited the entire group's local route list.
+For example image generation could expose an MP4 renderer and platform title
+could expose ZIP packaging, neither of which delivers the requested output.
+This is a common integration-boundary defect, not a missing image or writing
+special case. The earlier tests checked enumeration and route membership but
+did not check this negative oracle.
+
+**Alternatives and counterexamples:** keeping separate discovery calls leaves
+cross-axis composition to ad hoc assistant recall; adding 54 fixed workflows
+conflates deliverables, operations, methods and tasks; replacing the single
+engine or introducing a second planning store duplicates state without fixing
+professional routing. Select a read-only application composition interface
+over the existing demand validator, catalog, typed ownership, quality planner
+and identity route. A prompt-only request must not select image generation;
+a temporary avatar must not select permanent IPOS canon; a short title must
+not inherit video operations; a video merge/enhancement must not claim
+packet-copy compatibility; a local technical review must not assert semantic
+quality. Direct free-form requests remain supported without any new schema
+requirement. Exact resource profiles and exact operation contracts are separate:
+a missing craft profile is openly reported and requires scoped method research.
+
+**Unified architecture views and authorities (not sequential stages):**
+
+| Concern | Authoritative source / boundary | Composition behavior |
+|---|---|---|
+| User demand and corrections | Current owner original + existing brief / demand validator | Current typed clauses and deliverables; no method proposal becomes owner intent |
+| Cognition and evolution | Read-only CAOS, current session | Recursive diagnosis, research, decision, challenge, independent outcome; no duplicated CAOS Host |
+| Business objective | Manifest's independent business-domain axis | Explicit proposed domain(s), not inferred from artifact type |
+| Professional capability | Existing capability catalog, scoped knowledge/method/role and Skill sources | Exact demand support contracts for all registered demands; group fallback remains visible |
+| Internal code responsibility | Existing subsystem catalog | One code owner; optional specialists not automatically selected |
+| Output and variants | Existing DeliverableContract / DeliverableVariant | Exact current deliverable ID, shape, locale, source and exclusions |
+| Identity | Existing identity route and IPOS separately custodied approved canon | Temporary vs persistent vs approved-use; no silent canon inheritance |
+| Evidence and quality | Existing source/evidence, assurance and review modules | Criteria linked per deliverable; independent actual-result proof stays separate |
+| Tools and execution | Existing adapter/production registries and current session tool discovery | Operation-specific local support only; actual availability and grant checked separately |
+| Persistence and concurrency | Existing StudioEngine, brief revisions, tasks and events | Direct session or durable ledger by need; no mandatory DAG |
+| Feedback and knowledge | Existing event history, failure/learning policy and knowledge catalog | Reopen contradicted upstream decisions; no automatic promotion |
+| Engineering continuity | Existing integration PR and construction checkpoint | Not a business task, no second controller |
+
+**Implementation seam:** `scope.resolve_intake` uses
+`application.demand_composition.compose_demand` with the existing
+`domain.demand.inspect_demand`, `subsystems.route_declared_content`,
+`domain.identity.identity_route`, `domain.assurance.build_quality_plan` and
+`scope.capability_lookup`. All 54 registered demand IDs have operation
+support contracts in the existing capability catalog, including a distinct
+programmatic motion graphics operation (MP4, not still-image generation).
+The registries remain the only actual local implementation sources.
+The proposal is read-only, source/demand-bound and separate from the owner brief.
+No graph, project, paid action, publication, provider or approval is invented.
+The interface is extensible by adding a scoped operation contract to an existing
+or genuinely new professional capability, not by adding a scenario-specific
+controller. It does not exhaust all conceivable user needs.
+
+**Falsifiers:** tests must reject phantom demand routes, cross-group operations,
+unknown deliverable references, mismatched output types, implicit persistent
+identity, and a direct substitute for explicit durable resume. A common route
+must return the same owner clauses, variant and quality identities without
+auto-selecting unrelated capabilities. If the contract fails, reopen the shared
+boundary instead of adding per-case fallback. Roll back the atomic integration
+commit if needed; main and existing owner data remain untouched.
+
+**Assurance boundary:** this is a structural integration change, not a declaration
+of native Skill activation, completed professional craft profiles, current
+external tool availability, independent semantic review, or production readiness.
+The frozen 35 outcome scenarios still require real execution/owner evidence.

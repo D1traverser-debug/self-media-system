@@ -144,7 +144,7 @@ def read_project_brief(root: str | Path, project_id: str) -> dict[str, Any]:
     return json.loads(row[0])
 
 
-def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
+def resolve_intake(root: str | Path, request: dict[str, Any], *, selection: dict[str, Any] | None = None) -> dict[str, Any]:
     """Return a read-only route; never create a task, infer a project, or assert CAOS ran."""
     if not isinstance(request, dict) or request.get("mode") not in {"NEW", "RESUME"}:
         raise ValueError("explicit NEW or RESUME mode required")
@@ -180,8 +180,16 @@ def resolve_intake(root: str | Path, request: dict[str, Any]) -> dict[str, Any]:
     identity_routing = identity_route(typed["deliverables"]) if typed else None
     from .subsystems import route_declared_content
     internal_subsystem_routing = route_declared_content(typed["deliverables"]) if typed else None
+    from .application.demand_composition import compose_demand
+    from .domain.assurance import build_quality_plan
+    original = request if mode == "NEW" else brief
+    quality = build_quality_plan(original["deliverable_specs"]) if typed else None
+    composition = compose_demand(demand, mode=mode, selection=selection, quality=quality,
+                                 ownership=internal_subsystem_routing, identity=identity_routing,
+                                 manifest=manifest, lookup=capability_lookup)
     return {
         "mode": mode, "goal": goal, "project_id": project_id, "brief": brief,
+        "demand_composition": composition,
         "typed_deliverables": typed,
         "demand": demand,
         "identity_routing": identity_routing,
@@ -279,7 +287,26 @@ def capability_lookup(
         "applies_to", "avoid_when", "selection_notes",
     }
 
+    from .domain.contracts import DELIVERABLE_TYPES
+    route_fields = {"deliverable_types", "local_support_adapters", "local_support_operations",
+                    "scope", "requires_current_method_and_executor_check"}
     for group in groups:
+        routes = group.get("demand_routes")
+        if not isinstance(routes, dict) or set(routes) != set(group["demands"]):
+            raise ValueError(f"{group['id']}: operation route must cover every declared demand exactly")
+        for key, route in routes.items():
+            if not isinstance(route, dict) or set(route) != route_fields:
+                raise ValueError(f"{key}: malformed demand operation route")
+            for field, allowed in (("deliverable_types", DELIVERABLE_TYPES),
+                                   ("local_support_adapters", set(group["adapters"])),
+                                   ("local_support_operations", set(group["operations"]))):
+                values = route[field]
+                if (not isinstance(values, list) or any(not isinstance(v, str) for v in values)
+                        or len(values) != len(set(values)) or not set(values) <= allowed):
+                    raise ValueError(f"{key}: invalid {field}")
+            if (not route["deliverable_types"] or not isinstance(route["scope"], str)
+                    or not route["scope"].strip() or route["requires_current_method_and_executor_check"] is not True):
+                raise ValueError(f"{key}: missing operation scope or verification boundary")
         for field, available in resource_fields:
             refs = group.get(field)
             if (not isinstance(refs, list)
@@ -332,6 +359,9 @@ def capability_lookup(
     resolved_groups = []
     for group in selected:
         selected_profile = group.get("demand_profiles", {}).get(demand_id) if demand_id else None
+        selected_route = group["demand_routes"][demand_id] if demand_id else None
+        route_adapters = selected_route["local_support_adapters"] if selected_route else group["adapters"]
+        route_operations = selected_route["local_support_operations"] if selected_route else group["operations"]
 
         def merged(field: str) -> list[str]:
             extra = selected_profile.get(field, []) if selected_profile else []
@@ -354,6 +384,7 @@ def capability_lookup(
             "skill_sections": skill_sections,
             "available_demand_profiles": sorted(group.get("demand_profiles", {}).keys()),
             "selected_demand_id": demand_id,
+            "selected_operation_contract": selected_route,
             "demand_resolution": resolution,
             "selected_demand_profile": ({
                 "applies_to": selected_profile["applies_to"],
@@ -362,9 +393,11 @@ def capability_lookup(
             } if selected_profile else None),
             "executor_routes": {
                 "domain_adapters": [item for item in public_domain_adapter_registry()
-                                    if item["name"] in group["adapters"]],
-                "production_operations": list(group["operations"]),
-                "route_scope": "GROUP_LEVEL_CANDIDATE__VERIFY_EXACT_TASK_OPERATION_BEFORE_EXECUTION",
+                                    if item["name"] in route_adapters],
+                "production_operations": list(route_operations),
+                "route_scope": ("EXACT_DEMAND_SUPPORT_CANDIDATES__NOT_EXECUTOR_ADMISSION" if selected_route
+                                else "GROUP_LEVEL_CANDIDATE__VERIFY_EXACT_TASK_OPERATION_BEFORE_EXECUTION"),
+                "actual_executor_verified": False,
                 "nonlocal_execution": "CURRENT_SESSION_CAPABILITY_HANDSHAKE__AGENT_HUMAN_EXTERNAL_HANDOFF",
             },
         })
@@ -372,7 +405,7 @@ def capability_lookup(
         "groups": resolved_groups,
         "domain_operations": [
             item for item in public_domain_adapter_registry()
-            if effective_group_id is None or item["capability_group"] == effective_group_id
+            if (item["name"] in {a["name"] for g in resolved_groups for a in g["executor_routes"]["domain_adapters"]})
         ],
         "legacy_capabilities": data["capabilities"] if effective_group_id is None and demand_id is None else [],
         "registry_alignment": "VERIFIED_STRUCTURE_ONLY",

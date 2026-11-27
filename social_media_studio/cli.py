@@ -54,6 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("intake", help="resolve only the current owner demand or exact current workspace identity")
     p.add_argument("request", type=Path)
+    p.add_argument("--selection", type=Path, help="optional separate assistant route proposal; never owner authority")
 
     p = sub.add_parser("init", help="create a project from an outcome brief")
     p.add_argument("project_id")
@@ -310,7 +311,8 @@ def main(argv: list[str] | None = None) -> int:
             import os
             from .scope import resolve_intake
             root = args.root or Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
-            _emit(resolve_intake(root, _read_json(args.request)))
+            _emit(resolve_intake(root, _read_json(args.request),
+                                 selection=_read_json(args.selection) if args.selection else None))
             return 0
         from .scope import EPOCH, bind_owner_brief, resolve_intake, validate_workspace_mode
         if args.offline_fixture and args.root is None:

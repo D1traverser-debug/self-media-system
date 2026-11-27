@@ -75,7 +75,7 @@ def test_exact_demand_lookup_returns_scoped_resources_without_authorizing_execut
     assert short["effect_authorized"] is False
     assert short["selected_task_graph"] is None
     assert short["groups"][0]["executor_routes"]["route_scope"] == (
-        "GROUP_LEVEL_CANDIDATE__VERIFY_EXACT_TASK_OPERATION_BEFORE_EXECUTION"
+        "EXACT_DEMAND_SUPPORT_CANDIDATES__NOT_EXECUTOR_ADMISSION"
     )
 
     fallback = capability_lookup("motion_production", demand_id="video_generation")
