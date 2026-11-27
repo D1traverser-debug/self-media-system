@@ -16,15 +16,20 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "6cfc858565da643a011e055c33b23645dc3a4bef",
-    "observed_ci_run": 45958790902,
-    "observed_ci": "PASS_ON_PREVIOUS_EXACT_COMMIT_ONLY",
+    "observed_head": "b7db930f85ca59bdca9fe090cb2e36a5b3c1add9",
+    "observed_ci_run": 45959228172,
+    "observed_ci": "PASS_PREVIOUS_BASELINE_ONLY_NOT_CURRENT_CHANGE",
     "observed_failure": null,
     "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability.",
     "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
     "observed_head_semantics": "Most recently inspected parent prior to the checkpoint documentation commit; re-query actual GitHub branch head and exact-head CI. Never use this string as CI authority.",
-    "last_known_green_sha": "1bdfba4a522bc512c0542d089f83d481b7e8a690",
-    "last_known_green_pr_run": 45958790902
+    "last_known_green_sha": "b7db930f85ca59bdca9fe090cb2e36a5b3c1add9",
+    "last_known_green_pr_run": 45959228172,
+    "repository_full_name": "D1traverser-debug/self-media-system",
+    "repository_url": "https://github.com/D1traverser-debug/self-media-system",
+    "rename_checked_repository_id": "1411170938",
+    "rename_verified_at": "2026-11-27",
+    "rename_previous_slug_historical_only": true
   },
   "decision": {
     "problem": "Repeated session drift despite product runtime recovery; no current construction-wide task map in inspected tree, historical audit head stale, previous local change missed cross-subsystem contract.",
@@ -98,7 +103,9 @@
       "evidence": [
         "Common integration-boundary defect traced through scope.resolve_intake, capability_lookup, domain contracts, subsystem and executor registries, quality planner and identity route. Architecture V2 section Y records comparison, implementation and falsifiers. No real independent product acceptance claimed.",
         "Re-audit traced common gaps between composition and local task admission, and between task completion and deliverable variant coverage; implemented shared admission and derived evidence projection. Independent product acceptance remains open.",
-        "Read 2026-11-27 full-tree audit F01-F17 and code paths. Architecture ADRs now separate domain release/authority/conformance/trace from application service/registry. Architecture structure tests pass on prior exact commits; actual owner outcomes remain OPEN."
+        "Read 2026-11-27 full-tree audit F01-F17 and code paths. Architecture ADRs now separate domain release/authority/conformance/trace from application service/registry. Architecture structure tests pass on prior exact commits; actual owner outcomes remain OPEN.",
+        "GitHub repository rename verified by metadata: canonical D1traverser-debug/self-media-system, repository id 1411170938, existing PR #56 and original integration branch unchanged. Python product/distribution names remain independent.",
+        "Isolated legacy operator_view.py and its old dedicated tests are removed as unused duplicate of canonical status/resume; this is not permission to remove still-tested retired runtime/orchestrator/storage paths. Repository topology declares a permanent removal record; exact-head regression required."
       ]
     },
     {
@@ -123,7 +130,7 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Owner revision, resume, independent tasks, explicit scope and retired-project negative cases work; direct conversational requests require no artificial project; no stale effect.",
-      "next_action": "Continue negative replay for request revisions, current source authentication and typed/untyped isolation; real owner conversation must be retrieved from authorized source, not from project fixtures.",
+      "next_action": "Validate current status/resume outcome needs and static reachability. Clean only proven unused legacy controls while preserving historical behavioral regression and direct owner effect boundaries.",
       "blocker": null,
       "evidence": [
         "Typed professional demand and exact local dispatcher admission, decision-bound selected route records, and digest-bound output candidate projection implemented; actual exact-head CI and owner outcomes not yet verified.",

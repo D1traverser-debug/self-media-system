@@ -325,8 +325,7 @@
         "social_media_studio/legacy/orchestrator.py",
         "social_media_studio/legacy/runtime.py",
         "social_media_studio/legacy/storage.py",
-        "social_media_studio/legacy/studio_agents.py",
-        "social_media_studio/legacy/operator_view.py"
+        "social_media_studio/legacy/studio_agents.py"
       ],
       "domain_adapters": [],
       "production_operations": [],
@@ -504,5 +503,17 @@
       ]
     }
   },
-  "product_zh": "自媒体系统"
+  "product_zh": "自媒体系统",
+  "source_retirements": [
+    {
+      "path": "social_media_studio/legacy/operator_view.py",
+      "status": "DELETED_FROM_HEAD",
+      "original_baseline_commit": "b7db930f85ca59bdca9fe090cb2e36a5b3c1add9",
+      "successor": "social_media_studio.engine.StudioEngine.status / .resume",
+      "reason": "Legacy standalone operator snapshot is not imported by any current runtime entry or domain adapter; its only direct consumer was the retired self-test module. Current operator task readiness and resume are served by the canonical single ledger; no second status projection is needed.",
+      "deleted_test": "tests/test_operator_view.py",
+      "user_workspaces_touched": false,
+      "source_history_preserved_by_git": true
+    }
+  ]
 }

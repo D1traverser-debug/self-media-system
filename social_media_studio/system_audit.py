@@ -11,7 +11,6 @@ from typing import Any
 
 from .engine import StudioEngine
 from .review_execution import ReviewExecutionTrustRegistry
-from .review_execution import ReviewExecutionTrustRegistry
 
 
 def _read_json(path: Path) -> Any:
@@ -211,7 +210,10 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         studio_manifest.get("product_name") == "Social Media Studio"
         and studio_manifest.get("product_name_zh") == "自媒体系统"
         and studio_manifest.get("owner") == "SOCIAL_MEDIA_STUDIO"
-        and studio_manifest.get("repository_slug") == "social-media-studio"
+        and studio_manifest.get("repository_slug") == "self-media-system"
+        and studio_manifest.get("repository_full_name") == "D1traverser-debug/self-media-system"
+        and studio_manifest.get("repository_url") == "https://github.com/D1traverser-debug/self-media-system"
+        and studio_manifest.get("repository_identity_kind") == "GITHUB_REPOSITORY__DISTINCT_FROM_PYPI_DISTRIBUTION"
         and pyproject["project"]["name"] == "social-media-studio"
         and pyproject["project"]["scripts"] == {"sms-studio": "social_media_studio.cli:main"}
         and not brand_violations

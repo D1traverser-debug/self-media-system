@@ -542,5 +542,8 @@
     "OPTIONAL_GROWTH_AND_COMMERCIAL"
   ],
   "product_name_zh": "自媒体系统",
-  "repository_slug": "social-media-studio"
+  "repository_slug": "self-media-system",
+  "repository_full_name": "D1traverser-debug/self-media-system",
+  "repository_url": "https://github.com/D1traverser-debug/self-media-system",
+  "repository_identity_kind": "GITHUB_REPOSITORY__DISTINCT_FROM_PYPI_DISTRIBUTION"
 }

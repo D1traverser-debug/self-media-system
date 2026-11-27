@@ -169,3 +169,23 @@ def test_current_domain_authority_is_internal_ipos_and_old_external_wording_is_h
     assert identity["studio_mutation_of_canon"] is False
     assert identity["owner_approval_required"] is True
     assert audit_subsystems(ROOT)["pass"]
+
+
+def test_verified_retired_operator_view_cannot_be_reintroduced(tmp_path):
+    """A Git deletion is a reviewed lifecycle change, not a reversible alias."""
+    cat = _isolated_source_checkout(tmp_path)
+    retired = next(item for item in cat["source_retirements"]
+                   if item["path"] == "social_media_studio/legacy/operator_view.py")
+    assert retired["status"] == "DELETED_FROM_HEAD"
+    assert retired["source_history_preserved_by_git"] is True
+    assert retired["user_workspaces_touched"] is False
+    assert not (ROOT / retired["path"]).exists()
+    assert not (ROOT / retired["deleted_test"]).exists()
+    assert not (tmp_path / retired["path"]).exists()
+    obsolete = tmp_path / retired["path"]
+    obsolete.parent.mkdir(parents=True, exist_ok=True)
+    obsolete.write_text("class OperatorSnapshot: pass\n", encoding="utf-8")
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("retired source path was reintroduced" in issue
+               for issue in report["violations"])

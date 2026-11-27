@@ -7,6 +7,8 @@ description: CAOS-governed universal digital content studio for X longform/short
 
 **Startup authority:** repository-root `STUDIO_ENTRY.md`.
 
+**Canonical GitHub repository:** `D1traverser-debug/self-media-system`; keep the product name Social Media Studio and installable package `social-media-studio` distinct.
+
 **Canonical runtime:** `social_media_studio.engine.StudioEngine`.
 
 **Canonical CLI:** `sms-studio` (also `python -m social_media_studio`).

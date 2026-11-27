@@ -1,6 +1,7 @@
 # 自媒体系统 — Social Media Studio · Canonical Entry
 
 Status: `ACTIVE_CANONICAL_ENTRY__PRODUCTION_READINESS_PARTIAL`
+Canonical GitHub repository: `D1traverser-debug/self-media-system` (https://github.com/D1traverser-debug/self-media-system). The Python distribution remains `social-media-studio`; it is not the GitHub repository slug.
 This file, `STUDIO_ENTRY.md`, is the single startup authority for all self-media work.
 Runtime: `social_media_studio.engine.StudioEngine`
 CLI: `sms-studio`
