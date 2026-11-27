@@ -84,6 +84,9 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         root / "social_media_studio" / "data" / "review_executors.json",
         root / "social_media_studio" / "scope.py",
         root / "social_media_studio" / "system_audit.py",
+        root / "social_media_studio" / "application" / "release_service.py",
+        root / "social_media_studio" / "domain" / "release_policy.py",
+        root / "social_media_studio" / "domain" / "outcome_assurance.py",
         root / "examples" / "technology-explainer.brief.json",
         root / "examples" / "technology-explainer.tasks.json",
         root / "examples" / "news-fictional-media.brief.json",
@@ -121,21 +124,22 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         review_gate = studio_manifest.get("capabilities", {}).get("release_gates", {}).get("high_assurance_review", {})
         quality_contract = studio_manifest.get("architecture", {}).get("quality_contract", {})
         engine_source = (root / "social_media_studio" / "engine.py").read_text(encoding="utf-8")
-        review_markers = (
-            "self.review_trust_registry.verify(",
-            "review_execution_nonces",
-            "REVIEW_PACKET_BOUND",
-            "_stage_review_inputs",
-            "_verify_review_stage_inputs",
+        release_source = (root / "social_media_studio" / "application" / "release_service.py").read_text(encoding="utf-8")
+        review_execution_integrated = (
+            "ReleaseAssuranceService(self).release_check(" in engine_source
+            and "self._engine.review_trust_registry.verify(" in release_source
+            and "review_execution_nonces" in release_source
+            and "REVIEW_PACKET_BOUND" in release_source
+            and "_stage_review_inputs" in engine_source
+            and "_verify_review_stage_inputs" in engine_source
         )
-        review_execution_integrated = all(marker in engine_source for marker in review_markers)
         review_contract_detection = StudioEngine._review_contract_requires_execution({
             "reviewer_kind": "HUMAN", "execution_mode": "INDEPENDENT_COLD_READ", "blind_review": True,
         })
         review_receipt_semantics_correct = (
-            'high_assurance_status = "VERIFIED"' in engine_source
-            and 'high_assurance_status = "BLOCKED"' in engine_source
-            and "runtime cannot cryptographically prove a human" not in engine_source
+            'high_assurance_status = "VERIFIED"' in release_source
+            and 'high_assurance_status = "BLOCKED"' in release_source
+            and "runtime cannot cryptographically prove a human" not in release_source
         )
         review_fail_closed = (
             not review_registry.config["trusted_executors"]
