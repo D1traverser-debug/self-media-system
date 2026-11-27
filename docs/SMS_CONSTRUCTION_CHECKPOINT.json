@@ -16,15 +16,15 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "92bf80174d0ee97da214e55dfb6b94ebb8fe7f6d",
-    "observed_ci_run": 46032368297,
-    "observed_ci": "EXACT_HEAD_PULL_REQUEST_CI_PASS__615_TESTS__SYSTEM_AUDIT_TOPOLOGY_AND_ALL_SMOKE_STEPS_PASS",
+    "observed_head": "61744ed17f658357aa131538f9c13741eeec5cf5",
+    "observed_ci_run": 46045524457,
+    "observed_ci": "EXACT_HEAD_PR_CI_PASS__616_TESTS__SYSTEM_AUDIT_TOPOLOGY_AND_ALL_SMOKE_STEPS_PASS",
     "observed_failure": null,
     "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability. Internal evolution 2026-11-27: private owner preference profile, private cross-chat casebook and process-quality baseline; scoped owner-authorized retrospective cross-chat import; direct-session learning without dummy projects; separate preference/episode/method lifecycles; exact candidate skill references loaded as bounded methods. No raw private chats or owner profile committed to public repository.",
     "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
-    "observed_head_semantics": "Exact PR head verified immediately before this checkpoint update. PR workflow run 46032368297 completed successfully. This documentation commit advances the branch; re-query the actual head and exact-head CI after the update. The checkpoint is a resume record, not CI authority.",
-    "last_known_green_sha": "92bf80174d0ee97da214e55dfb6b94ebb8fe7f6d",
-    "last_known_green_pr_run": 46032368297,
+    "observed_head_semantics": "Exact PR head 61744ed was verified and its PR CI run 46045524457 completed successfully: 616 tests and all system/topology/smoke checks passed. This checkpoint commit advances the branch; re-query the actual head and exact-head CI after this update. Checkpoint is a resume record, not CI authority.",
+    "last_known_green_sha": "61744ed17f658357aa131538f9c13741eeec5cf5",
+    "last_known_green_pr_run": 46045524457,
     "repository_full_name": "D1traverser-debug/self-media-system",
     "repository_url": "https://github.com/D1traverser-debug/self-media-system",
     "rename_checked_repository_id": "1411170938",
@@ -69,7 +69,7 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "System audit, topology, full tests and all CLI smoke checks pass on actual integration head; failures investigated, not suppressed.",
-      "next_action": "The pre-update head 92bf80174d0ee97da214e55dfb6b94ebb8fe7f6d passed the PR CI run 46032368297: 615 tests, system audit, topology audit and all smoke steps. This checkpoint update creates a new head; re-query and verify the new exact head before marking the baseline current.",
+      "next_action": "Pre-update exact head 61744ed17f658357aa131538f9c13741eeec5cf5 passed PR CI run 46045524457: 616 tests, system audit, topology audit, standalone/historical-program/installed-outside-repository smoke. This checkpoint commit advances the branch; verify its new exact head and CI before marking baseline current.",
       "blocker": null,
       "evidence": [
         "Exact previous head 314bef109a92c15dc862ba8808379da16dc069fa CI 45925295903 and 45925301602 PASS; not evidence for new head.",
@@ -78,7 +78,8 @@
         "ab0cc07 run 45927195071: 531 passed, 1 failed, diagnosed and preserved scoped resource boundary.",
         "Commit 1bdfba4 exact-head PR CI 45958790902 and push CI 45958783530 PASS, including observed-output conformance/owner trace tests. 6cfc858 and this checkpoint update require their own exact-head readback.",
         "Commit 24b4d64 exact-head PR CI run 45994365924 and push CI run 45994357761 both PASS: 612 tests; standalone system audit, source-topology audit, smoke, historical-program regression and installed-outside-repo checks all PASS.",
-        "2026-11-28 continuation readback: actual PR #56 head 92bf80174d0ee97da214e55dfb6b94ebb8fe7f6d; exact-head PR workflow run 46032368297 completed success. Job test passed; pytest reported 615 passed in 44.95s; standalone system audit, subsystem topology, standalone smoke, historical-program smoke and installed-outside-repository smoke all passed. This proves structural regression on that head only; production readiness remains PARTIAL. Push-event CI for this exact head was not verified."
+        "2026-11-28 continuation readback: actual PR #56 head 92bf80174d0ee97da214e55dfb6b94ebb8fe7f6d; exact-head PR workflow run 46032368297 completed success. Job test passed; pytest reported 615 passed in 44.95s; standalone system audit, subsystem topology, standalone smoke, historical-program smoke and installed-outside-repository smoke all passed. This proves structural regression on that head only; production readiness remains PARTIAL. Push-event CI for this exact head was not verified.",
+        "2026-11-28: exact head 61744ed17f658357aa131538f9c13741eeec5cf5 passed PR workflow run 46045524457. pytest: 616 passed in 40.51s; system audit, topology audit, standalone smoke, historical Program fixture and installed-outside-repository smoke passed. Push-event CI for this head not verified."
       ]
     },
     {
@@ -114,7 +115,8 @@
         "GitHub repository rename verified by metadata: canonical D1traverser-debug/self-media-system, repository id 1411170938, existing PR #56 and original integration branch unchanged. Python product/distribution names remain independent.",
         "Isolated legacy operator_view.py and its old dedicated tests are removed as unused duplicate of canonical status/resume; this is not permission to remove still-tested retired runtime/orchestrator/storage paths. Repository topology declares a permanent removal record; exact-head regression required.",
         "Second source retirement record for unused legacy program_orchestration.py plus test_program_orchestration.py. Original code remains in parent Git commit; historical projects/ and examples/ source data retained.",
-        "2026-11-28 exact-head source review: release_policy.py now enforces non-downgradable rights, media-rights-evidence and video technical-QA floors; test_release_policy.py covers downgrade attempts and removal of the obsolete CLI bypass. outcome_inspection.py performs read-only per-variant byte/type/shape observation and source-bound encoded-audio packet checks, while explicitly keeping owner acceptance false. demand_composition.py checks declared semantic_preconditions and source-ref count but does not independently prove source classification; this only partially mitigates the prior semantic-routing risk. effect_gate.py requires an operator-owned exact renderer SHA256 but explicitly is not an OS/network sandbox. Acceptance V2 has 35 design-only scenarios and zero growth/commercial contexts although the manifest declares four business domains. PR #56 currently has no submitted reviews or inline review threads."
+        "2026-11-28 exact-head source review: release_policy.py now enforces non-downgradable rights, media-rights-evidence and video technical-QA floors; test_release_policy.py covers downgrade attempts and removal of the obsolete CLI bypass. outcome_inspection.py performs read-only per-variant byte/type/shape observation and source-bound encoded-audio packet checks, while explicitly keeping owner acceptance false. demand_composition.py checks declared semantic_preconditions and source-ref count but does not independently prove source classification; this only partially mitigates the prior semantic-routing risk. effect_gate.py requires an operator-owned exact renderer SHA256 but explicitly is not an OS/network sandbox. Acceptance V2 has 35 design-only scenarios and zero growth/commercial contexts although the manifest declares four business domains. PR #56 currently has no submitted reviews or inline review threads.",
+        "2026-11-28: expanded long-form editorial candidate with evidence-derived thesis, claim ledger, paragraph progression, counterexamples, ablation, X Article packaging and visual-anchor boundaries (commit e395d5e); direct-session continuity transaction specified in Skill (commit 6dc362f); regression test added (61744ed). Exact-head PR CI passed 616 tests. Candidate method remains unvalidated and no native Skill runtime hook is claimed."
       ]
     },
     {
@@ -172,7 +174,8 @@
       "blocker": null,
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
-        "2026-11-27: private owner preference, episodic cross-chat casebook and process-quality baseline now exist in Library; public Skill/manifest support exact private-source discovery and scoped owner-authorized retrospective self-media import. Historical case evidence remains summary-level and private."
+        "2026-11-27: private owner preference, episodic cross-chat casebook and process-quality baseline now exist in Library; public Skill/manifest support exact private-source discovery and scoped owner-authorized retrospective self-media import. Historical case evidence remains summary-level and private.",
+        "2026-11-28: direct-session procedure now specifies read-before-decision, material-event capture, write-after-correction/selection/failure/outcome, Library version-conflict protection and exact readback. This is a Skill/Files operating procedure, not a native automatic bridge. Private casebook appended with this continuation episode, uploaded as version 5 and read back at /Social Media Studio/CROSS_CHAT_EXPERIENCE_CASEBOOK.md; preferences remain unchanged and no method promoted."
       ]
     },
     {
@@ -336,7 +339,7 @@
       "scenario_ids": [],
       "status": "OPEN",
       "acceptance": "All required obligations and acceptance scenarios independently satisfied or explicitly owner-approved scope change; exact-head CI; clean rollback, repeatable entry/resume and owner-facing handoff. No automatic merge or publish.",
-      "next_action": "After this checkpoint commit, re-query the actual PR head and its exact-head CI; then reconcile all open B01-B09 with the owner outcome. Keep PR #56 Draft and unmerged until architecture and real owner outcomes are independently accepted.",
+      "next_action": "Re-query live PR head and exact-head CI after this checkpoint commit. Keep PR #56 Draft and unmerged; reconcile B01-B09 against actual owner outcomes before any merge decision.",
       "blocker": null,
       "evidence": []
     }
