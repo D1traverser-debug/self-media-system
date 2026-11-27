@@ -175,7 +175,7 @@ def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> dict[s
             group = capability_lookup(demand_id=key)["groups"][0]
             route = group["selected_operation_contract"]
             if not demand_applies(items[ref], key, route):
-                raise ValueError(f"{ref}: professional demand does not match current deliverable type or identity scope")
+                raise ValueError(f"{ref}: professional demand does not match current deliverable type, identity scope or declared semantic preconditions")
             allowed.update("domain_adapter:" + name for name in route["local_support_adapters"])
             allowed.update("production:" + name for name in route["local_support_operations"])
             records.append({"demand_id": key, "operation_contract": route,
@@ -375,13 +375,27 @@ def capability_lookup(
     from .domain.contracts import DELIVERABLE_TYPES
     route_fields = {"deliverable_types", "local_support_adapters", "local_support_operations",
                     "scope", "requires_current_method_and_executor_check"}
+    optional_route_fields = {"semantic_preconditions"}
     for group in groups:
         routes = group.get("demand_routes")
         if not isinstance(routes, dict) or set(routes) != set(group["demands"]):
             raise ValueError(f"{group['id']}: operation route must cover every declared demand exactly")
         for key, route in routes.items():
-            if not isinstance(route, dict) or set(route) != route_fields:
+            if (not isinstance(route, dict) or not route_fields.issubset(route)
+                    or set(route) - route_fields - optional_route_fields):
                 raise ValueError(f"{key}: malformed demand operation route")
+            if "semantic_preconditions" in route:
+                rule = route["semantic_preconditions"]
+                if (not isinstance(rule, dict)
+                        or set(rule) != {"required_constraints", "min_source_refs"}
+                        or not isinstance(rule["required_constraints"], dict)
+                        or not rule["required_constraints"]
+                        or any(not isinstance(k, str) or not k.strip()
+                               or not isinstance(v, str) or not v.strip()
+                               for k, v in rule["required_constraints"].items())
+                        or type(rule["min_source_refs"]) is not int
+                        or rule["min_source_refs"] < 1):
+                    raise ValueError(f"{key}: malformed semantic preconditions")
             for field, allowed in (("deliverable_types", DELIVERABLE_TYPES),
                                    ("local_support_adapters", set(group["adapters"])),
                                    ("local_support_operations", set(group["operations"]))):

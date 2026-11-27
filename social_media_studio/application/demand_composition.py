@@ -22,6 +22,20 @@ def demand_applies(deliverable, demand_id, route):
     """One typed applicability rule shared by proposal and durable admission."""
     if deliverable["type"] not in route["deliverable_types"]:
         return False
+    # Declarative applicability is a *precondition*, never proof that an
+    # owner's genre classification, source or requested treatment is true.
+    # Shared by direct proposal and durable typed task admission.
+    semantic = route.get("semantic_preconditions")
+    if semantic is not None:
+        constraints = deliverable.get("constraints", {})
+        if not isinstance(constraints, dict):
+            return False
+        for key, value in semantic["required_constraints"].items():
+            if constraints.get(key) != value:
+                return False
+        sources = deliverable.get("source_refs", [])
+        if not isinstance(sources, list) or len(sources) < semantic["min_source_refs"]:
+            return False
     identity_mode = deliverable.get("constraints", {}).get("identity_mode")
     if demand_id in _CANON_USE:
         return identity_mode in {"APPROVED_CANON_USE", "IDENTITY_DERIVATIVE"}
@@ -77,6 +91,8 @@ def compose_demand(demand, *, mode, selection, quality, ownership, identity, man
             resolved = lookup(group_id, demand_id=key)["groups"][0]
             routes.append({
                 "demand_id": key, "group_id": group_id,
+                "applicability_declaration_only": True,
+                "source_and_content_authenticity_verified": False,
                 "operation_contract": resolved["selected_operation_contract"],
                 "resource_resolution": resolved["demand_resolution"],
                 "knowledge_resources": resolved["knowledge_resources"],

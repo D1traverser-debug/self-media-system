@@ -1229,6 +1229,13 @@
           "local_support_adapters": [],
           "local_support_operations": [],
           "scope": "Only factual current-affairs satire with source evidence, not generic game footage.",
+          "semantic_preconditions": {
+            "required_constraints": {
+              "source_content_class": "NEWS_CURRENT_AFFAIRS",
+              "editorial_treatment": "SATIRE"
+            },
+            "min_source_refs": 1
+          },
           "requires_current_method_and_executor_check": true
         }
       }
