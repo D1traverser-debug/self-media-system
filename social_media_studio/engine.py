@@ -27,6 +27,7 @@ from .engine_support import (
     TaskClaim, validate_brief, completion_guidance,
 )
 from .application.project_tasks import ProjectTaskService
+from .domain.release_policy import resolve_release_guards
 
 
 class StudioEngine:
@@ -1982,10 +1983,16 @@ class StudioEngine:
                         break
                 if deliverable_binding is None:
                     failures.append("artifact_not_bound_to_current_deliverable_variant")
-            # CLI flags cannot weaken a hard requirement declared by the owner brief.
-            effective_require_rights = bool(require_rights or release_policy.get("require_rights", True))
-            allowed_rights = set(release_policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)))
-            require_rights_evidence = bool(release_policy.get("require_rights_evidence", True))
+            release_guards = resolve_release_guards(
+                release_policy, artifact_kind=artifact["kind"],
+                media_type=artifact["media_type"],
+                allowed_rights=release_policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)),
+                caller_require_rights=require_rights,
+            )
+            failures.extend(release_guards.disallowed_relaxations)
+            effective_require_rights = release_guards.require_rights
+            allowed_rights = set(release_guards.allowed_rights)
+            require_rights_evidence = release_guards.require_rights_evidence
             if effective_require_rights and artifact["rights_status"] not in allowed_rights:
                 failures.append(f"rights_not_cleared:{artifact['rights_status']}")
 
@@ -2578,7 +2585,7 @@ class StudioEngine:
                             rights_evidence_verified_asset_ids.add(source_asset["artifact_id"])
 
             qa_receipt: dict[str, Any] | None = None
-            requires_technical_qa = bool(release_policy.get("require_technical_qa", artifact["kind"] == "video" or str(artifact["media_type"]).startswith("video/")))
+            requires_technical_qa = release_guards.require_technical_qa
             if requires_technical_qa:
                 qa_name = release_policy.get("technical_qa_artifact_name", "technical-qa-receipt")
                 qa_artifact = self._artifact_by_name(connection, project_id, qa_name)
@@ -2665,6 +2672,9 @@ class StudioEngine:
             receipt = {
                 "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
                 "deliverable_binding": deliverable_binding,
+                "acceptance_scope": "INDIVIDUAL_ARTIFACT_ONLY",
+                "external_publication_authorized": False,
+                "whole_demand_accepted": False,
                 "owner_outcome_verified": False,
                 "required_rubrics": effective_rubrics, "review_summary": review_summary,
                 "required_artifacts": required_artifacts,

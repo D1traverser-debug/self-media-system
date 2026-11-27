@@ -202,7 +202,6 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("artifact_id")
     p.add_argument("--rubric", action="append", default=[])
     p.add_argument("--evidence", action="append", default=[])
-    p.add_argument("--allow-unknown-rights", action="store_true")
 
     p = sub.add_parser("invalidate", help="invalidate a task and only its dependency descendants")
     p.add_argument("project_id")
@@ -512,8 +511,7 @@ def main(argv: list[str] | None = None) -> int:
                                        execution_receipt=_read_json(args.execution_receipt) if args.execution_receipt else None))
         elif command == "release-check":
             _emit(engine.release_check(args.project_id, args.artifact_id,
-                                       required_rubrics=args.rubric, evidence_refs=args.evidence,
-                                       require_rights=not args.allow_unknown_rights))
+                                       required_rubrics=args.rubric, evidence_refs=args.evidence))
         elif command == "invalidate":
             _emit(engine.invalidate(args.project_id, args.task_id, args.reason))
         elif command == "reopen":

@@ -112,6 +112,9 @@ def validate_brief(brief: dict[str, Any]) -> None:
     policy = brief.get("release_policy", {})
     if not isinstance(policy, dict):
         raise ContractError("brief.release_policy must be an object")
+    for boolean_field in ("require_rights", "require_rights_evidence", "require_technical_qa"):
+        if boolean_field in policy and type(policy[boolean_field]) is not bool:
+            raise ContractError(f"release_policy.{boolean_field} must be boolean")
     for field in (
         "required_evidence_refs", "required_evidence_artifact_names",
         "required_review_rubrics", "required_artifact_names",
