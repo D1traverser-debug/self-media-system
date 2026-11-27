@@ -16,11 +16,11 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "8545f5343558fbf1ab13f6fa5ccb3b346edc765f",
-    "observed_ci_run": 45926452418,
-    "observed_ci": "SUCCESS",
-    "observed_failure": null,
-    "new_changes": "54/54 exact professional resource profiles, no group inheritance, evidence status preserved. Exact new-head CI required.",
+    "observed_head": "ab0cc0742d910eeea8dd58b0a0077b63a49183e3",
+    "observed_ci_run": 45927195071,
+    "observed_ci": "FAILURE",
+    "observed_failure": "531 passed, 1 failed: old scoped-resource regression found the applicable professional-aesthetics reference missing for short copy; old missing-profile assertion requires an explicit counterexample now that video_generation is covered.",
+    "new_changes": "Restore applicable cross-deliverable aesthetic reference explicitly, keep exact-only resource semantics and test fallback by removing a profile in isolated fixture.",
     "status": "DRAFT_NOT_MERGED"
   },
   "decision": {
@@ -63,7 +63,8 @@
       "evidence": [
         "Exact previous head 314bef109a92c15dc862ba8808379da16dc069fa CI 45925295903 and 45925301602 PASS; not evidence for new head.",
         "Exact head eaac02f08ac8af0c2167004e2ec815f40ec60fb7 CI 45926143876 / 45926138591: 528 passed, 2 failed; smoke skipped. Investigated original handlers and task/release interfaces. No source runtime guard removal.",
-        "Exact previous head 8545f5343558fbf1ab13f6fa5ccb3b346edc765f CI 45926452418 and 45926458785 PASS; not proof for new head."
+        "Exact previous head 8545f5343558fbf1ab13f6fa5ccb3b346edc765f CI 45926452418 and 45926458785 PASS; not proof for new head.",
+        "ab0cc07 run 45927195071: 531 passed, 1 failed, diagnosed and preserved scoped resource boundary."
       ]
     },
     {

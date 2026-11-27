@@ -186,7 +186,9 @@ def test_demand_profiles_are_scoped_and_unknown_profiles_fall_back_visibly():
     assert {"quality-gates", "platform-packaging", "audience-response"} <= cover_ids
     assert "benchmark-policy" not in cover_ids
 
-    fallback = capability_lookup(demand_id="video_generation")
+    incomplete = _json("social_media_studio/legacy/data/capabilities.json")
+    next(g for g in incomplete["professional_capability_groups"] if g["id"] == "motion_production")["demand_profiles"].pop("video_generation")
+    fallback = capability_lookup(demand_id="video_generation", profile=incomplete)
     assert fallback["demand_resolution"] == "GROUP_LEVEL_FALLBACK"
     assert fallback["routing_warning"] is not None
     with pytest.raises(ValueError, match="demand identity"):

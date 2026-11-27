@@ -1021,7 +1021,8 @@
           "knowledge_refs": [
             "short-form-social-copy",
             "audience-response",
-            "quality-gates"
+            "quality-gates",
+            "professional-aesthetics"
           ],
           "method_ids": [
             "T-002"
@@ -1052,7 +1053,8 @@
           "knowledge_refs": [
             "long-form-editorial",
             "audience-response",
-            "quality-gates"
+            "quality-gates",
+            "professional-aesthetics"
           ],
           "method_ids": [],
           "skill_sections": [
@@ -1081,7 +1083,8 @@
             "technique-library",
             "quality-gates",
             "short-form-social-copy",
-            "long-form-editorial"
+            "long-form-editorial",
+            "professional-aesthetics"
           ],
           "method_ids": [
             "T-002",
@@ -2553,7 +2556,8 @@
           "knowledge_refs": [
             "platform-packaging",
             "audience-response",
-            "quality-gates"
+            "quality-gates",
+            "professional-aesthetics"
           ],
           "method_ids": [],
           "skill_sections": [
