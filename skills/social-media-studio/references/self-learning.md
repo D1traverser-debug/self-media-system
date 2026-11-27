@@ -83,7 +83,7 @@ A direct owner correction is not the same thing as a method validation. A summar
 
 Project candidates remain `CANDIDATE`. Shared knowledge promotion requires a versioned repository change with evidence, independent replay, regression and CAOS owner-level acceptance. There is no automatic promotion command. A method that is deliberately task-specific remains project-local rather than being generalized. Cross-project reuse must respect the declared applicability and be revalidated when the target context materially differs.
 
-## 6. Sample-first is conditional on the deliverable
+## 7. Sample-first is conditional on the deliverable
 
 Before expensive or quality-critical production, test the smallest sample that can falsify the highest-risk assumption:
 
@@ -95,11 +95,11 @@ Before expensive or quality-critical production, test the smallest sample that c
 
 A sample must be judged against the intended final acceptance bar, not merely technical execution. Do not impose motion, audio or video prototypes on text-only or static-image work.
 
-## 7. Research and method selection
+## 8. Research and method selection
 
 When scouting is relevant, compare at least two plausible approaches using primary documentation, inspectable outputs, source code or credible failure reports. Evaluate quality ceiling, repeatability, cost, licensing, observability, coordination burden and lock-in. Distill each promising method into problem, mechanism, evidence, transfer boundary and a falsifiable prototype. Tool names alone never become architecture.
 
-## 8. Governance and execution boundary
+## 9. Governance and execution boundary
 
 Learning is a continuous responsibility, not a mandatory LEARN stage or fixed role pipeline. Roles such as method author, reviewer and owner are temporary responsibilities assigned only when the demand requires them; they are not permanent workers. The task graph is derived from the current goal, and only declared dependencies block parallel work.
 
