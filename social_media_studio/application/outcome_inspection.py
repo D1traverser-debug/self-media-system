@@ -165,7 +165,12 @@ class OutcomeInspectionService:
         self._engine = engine
 
     def inspect(self, project_id: str) -> dict[str, Any]:
-        progress = self._engine.status(project_id)["deliverable_progress"]
+        # The inspection itself is intentionally side-effect-free, but other
+        # workers may revise the owner brief or replace artifacts while it
+        # probes. Bind all observations to one readback snapshot and fail
+        # closed if the brief revision or candidate coverage changes.
+        starting_status = self._engine.status(project_id)
+        progress = starting_status["deliverable_progress"]
         if progress["status"] != "CANDIDATE_COVERAGE_ONLY":
             return {"status": progress["status"], "observed_conformance_complete": False,
                     "owner_outcome_verified": False, "whole_demand_accepted": False,
@@ -247,7 +252,19 @@ class OutcomeInspectionService:
                     ),
                 })
         observed_complete = bool(variants) and all(v["observable_conformance"] == "MATCH" for v in variants)
-        project = self._engine.project(project_id)
+        ending_status = self._engine.status(project_id)
+        if (ending_status["project"]["revision"] != starting_status["project"]["revision"]
+                or ending_status["deliverable_progress"] != progress):
+            return {
+                "status": "INSPECTION_SNAPSHOT_CHANGED_RETRY",
+                "project_id": project_id,
+                "observed_conformance_complete": False,
+                "discarded_mixed_revision_observations": True,
+                "owner_outcome_verified": False,
+                "whole_demand_accepted": False,
+                "external_publication_authorized": False,
+            }
+        project = starting_status["project"]
         trace = trace_owner_requirements(project["brief"], variants)
         return {
             "status": "OBSERVED_ONLY_NOT_OWNER_ACCEPTANCE",

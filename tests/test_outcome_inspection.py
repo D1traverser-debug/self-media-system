@@ -237,3 +237,58 @@ def test_current_multiple_alternative_cover_artifacts_are_not_silently_counted_a
         "MATCH", "MISMATCH",
     }
     assert inspected["whole_demand_accepted"] is False
+
+
+def test_outcome_inspection_refuses_mixed_brief_revision_if_owner_changes_scope_mid_probe(tmp_path, monkeypatch):
+    engine = StudioEngine(tmp_path / "current-scope")
+    brief = bind_owner_brief("rev", {
+        "goal": "Owner can revise cover ratio while a review is in flight",
+        "audience": "owner", "deliverables": ["cover"],
+        "deliverable_specs": [{"id": "cover", "type": "STATIC_IMAGE",
+                               "shape": {"width": 900, "height": 1200, "orientation": "PORTRAIT"}}],
+    })
+    engine.create_project("rev", "rev", brief)
+    original_status = engine.status
+    calls = [0]
+
+    def raced_status(project_id):
+        status = original_status(project_id)
+        calls[0] += 1
+        if calls[0] == 2:
+            status["project"] = dict(status["project"], revision=status["project"]["revision"] + 1)
+        return status
+
+    monkeypatch.setattr(engine, "status", raced_status)
+    report = engine.inspect_outcome("rev")
+    assert calls[0] == 2
+    assert report["status"] == "INSPECTION_SNAPSHOT_CHANGED_RETRY"
+    assert report["discarded_mixed_revision_observations"] is True
+    assert report["observed_conformance_complete"] is False
+    assert report["owner_outcome_verified"] is False
+
+
+def test_inspection_rejects_candidate_changes_between_start_and_end_readback(tmp_path, monkeypatch):
+    engine = StudioEngine(tmp_path / "current-scope")
+    brief = bind_owner_brief("candidate-drift", {
+        "goal": "Observe an exact current final variant",
+        "audience": "owner", "deliverables": ["post"],
+        "deliverable_specs": [{"id": "post", "type": "SHORT_COPY"}],
+    })
+    engine.create_project("candidate-drift", "candidate-drift", brief)
+    original_status = engine.status
+    calls = [0]
+
+    def raced_status(project_id):
+        status = original_status(project_id)
+        calls[0] += 1
+        if calls[0] == 2:
+            status["deliverable_progress"] = dict(
+                status["deliverable_progress"], rejected_bindings=[{"reason": "changed while observing"}],
+            )
+        return status
+
+    monkeypatch.setattr(engine, "status", raced_status)
+    result = engine.inspect_outcome("candidate-drift")
+    assert result["status"] == "INSPECTION_SNAPSHOT_CHANGED_RETRY"
+    assert result["observed_conformance_complete"] is False
+    assert result["whole_demand_accepted"] is False
