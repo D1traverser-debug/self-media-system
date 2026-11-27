@@ -408,8 +408,8 @@
         ],
         "nonlocal_execution": "CURRENT_SESSION_CAPABILITY_HANDSHAKE__AGENT_HUMAN_EXTERNAL_HANDOFF",
         "selection": "DEMAND_SELECTED_ONLY__CURRENT_AVAILABILITY_AND_GAPS_MUST_BE_CHECKED",
-        "semantics": "A capability group locates common resources; an exact demand profile narrows relevant knowledge, methods, Skill sections and roles, then verifies the actual executor route. A catalog entry is not proof of execution availability.",
-        "group_resource_binding": "Group resources are common references; optional demand_profiles add scoped knowledge, methods, Skill sections and roles. GROUP_LEVEL_FALLBACK explicitly means craft-resource specificity is incomplete. Every declared demand has a separate exact operation-support contract; group-wide executor routes are overview only.",
+        "semantics": "A capability group locates common resources; an exact demand profile scopes knowledge, methods, Skill sections and professional lenses. Actual applicability, current sources and executor availability require verification. No catalog reference promotes a method or proves execution.",
+        "group_resource_binding": "Group resources are overview/fallback references only. An exact demand profile selects a scoped resource set without inheriting unrelated group methods or roles. Current catalog has exact profiles for every declared demand; existence is not method validation. Future missing profiles remain explicit GROUP_LEVEL_FALLBACK.",
         "executor_availability": "REGISTERED_LOCAL_ROUTE_OR_CURRENT_SESSION_HANDSHAKE__NEVER_INFER_AVAILABILITY_FROM_CATALOG",
         "demand_profiles": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups[].demand_profiles",
         "operation_contract": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups[].demand_routes"

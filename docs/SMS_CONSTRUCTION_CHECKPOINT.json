@@ -16,11 +16,11 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "eaac02f08ac8af0c2167004e2ec815f40ec60fb7",
-    "observed_ci_run": 45926143876,
-    "observed_ci": "FAILURE",
-    "observed_failure": "Both exact-head runs: system audit and topology passed; pytest 528 passed, 2 failed: existing audio-copy integration fixture omitted mandatory typed demands and operation contract lacked requested companion report; new release negative test supplied no rubric.",
-    "new_changes": "Preserve shared admission; scope actual media operation evidence reports to their existing operation contracts and migrate the real audio fixture; use a valid rubric argument in the negative release test. No runtime admission or review gate weakened.",
+    "observed_head": "8545f5343558fbf1ab13f6fa5ccb3b346edc765f",
+    "observed_ci_run": 45926452418,
+    "observed_ci": "SUCCESS",
+    "observed_failure": null,
+    "new_changes": "54/54 exact professional resource profiles, no group inheritance, evidence status preserved. Exact new-head CI required.",
     "status": "DRAFT_NOT_MERGED"
   },
   "decision": {
@@ -62,7 +62,8 @@
       "blocker": null,
       "evidence": [
         "Exact previous head 314bef109a92c15dc862ba8808379da16dc069fa CI 45925295903 and 45925301602 PASS; not evidence for new head.",
-        "Exact head eaac02f08ac8af0c2167004e2ec815f40ec60fb7 CI 45926143876 / 45926138591: 528 passed, 2 failed; smoke skipped. Investigated original handlers and task/release interfaces. No source runtime guard removal."
+        "Exact head eaac02f08ac8af0c2167004e2ec815f40ec60fb7 CI 45926143876 / 45926138591: 528 passed, 2 failed; smoke skipped. Investigated original handlers and task/release interfaces. No source runtime guard removal.",
+        "Exact previous head 8545f5343558fbf1ab13f6fa5ccb3b346edc765f CI 45926452418 and 45926458785 PASS; not proof for new head."
       ]
     },
     {
@@ -141,11 +142,13 @@
         "S26",
         "S27"
       ],
-      "status": "OPEN",
+      "status": "IN_PROGRESS",
       "acceptance": "Source truth, semantic understanding, lineage, rights, scoped CRUD and independent method replays proven by actual evidence; stale claims cannot authorize effects.",
       "next_action": "Inventory current source interfaces; verify actual search/inspection capabilities and method provenance, test source replacement and scoped CRUD.",
       "blocker": null,
-      "evidence": []
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+      ]
     },
     {
       "id": "B05",
@@ -167,11 +170,13 @@
         "S05",
         "S12"
       ],
-      "status": "OPEN",
+      "status": "IN_PROGRESS",
       "acceptance": "Actual natural-language short and long copy, multilingual variants and nonrepeating packaging meet explicit audience/owner intent; no invented claims; professional review.",
       "next_action": "Audit demand routing across all craft groups (not only editorial); replay authentic short, article and platform requests with actual outputs and independent critique.",
       "blocker": null,
-      "evidence": []
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+      ]
     },
     {
       "id": "B06",
@@ -200,11 +205,13 @@
         "S34",
         "S35"
       ],
-      "status": "OPEN",
+      "status": "IN_PROGRESS",
       "acceptance": "Actual visual briefs and outputs satisfy intent, hierarchy, licensed fonts, aspect and preparation-only scope; only current approved IPOS canon is consumed; dependency-specific revocation verified.",
       "next_action": "Compare actual available visual tool operations and approved IPOS bundles; review multi-aspect and no-generation contracts; run independent artifact review.",
       "blocker": null,
-      "evidence": []
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+      ]
     },
     {
       "id": "B07",
@@ -225,11 +232,13 @@
         "S13",
         "S23"
       ],
-      "status": "OPEN",
+      "status": "IN_PROGRESS",
       "acceptance": "Actual original-video and transformation results with correct full-duration/audio preservation, requested scope, visual quality and media QA; real files, exact digests.",
       "next_action": "Inspect transform limitations and provider contracts; test eligible packet-copy, edit, enhancement and original motion against separate oracles.",
       "blocker": null,
-      "evidence": []
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+      ]
     },
     {
       "id": "B08",
@@ -247,11 +256,13 @@
         "S20",
         "S24"
       ],
-      "status": "OPEN",
+      "status": "IN_PROGRESS",
       "acceptance": "Growth/commercial advice uses actual evidence; unavailable and unapproved provider/paid/posting routes fail closed; no performance claims without measurement.",
       "next_action": "Map account/growth/commercial cases beyond frozen matrix; verify capability handshakes without paid or posting side effects.",
       "blocker": null,
-      "evidence": []
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+      ]
     },
     {
       "id": "B09",
@@ -268,11 +279,13 @@
         "quality_and_assurance"
       ],
       "scenario_ids": [],
-      "status": "OPEN",
+      "status": "IN_PROGRESS",
       "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
       "next_action": "Register no unverified reviewer; obtain applicable independent assessment and exact input/output receipts; reopen upstream failures. Blocked for required high-assurance executions until a trusted executor is evaluated.",
       "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
-      "evidence": []
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+      ]
     },
     {
       "id": "B10",

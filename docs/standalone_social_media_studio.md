@@ -441,3 +441,6 @@ Current new owner work uses `SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125`. Previously c
 The professional capability registry may contain exact demand_profiles. Use the exact demand ID when available; a GROUP_LEVEL_FALLBACK is only a broad locator and must not be described as exact resource selection. Candidate references remain candidates until independently validated.
 
 Public-facing deliverables may optionally carry communication_intent. It records audience value and think/feel/do hypotheses, with one reasoned primary action when an action is declared. It does not predict engagement, verify creative quality or authorize publication. The standalone short-copy inspector checks structure only and does not impose a fixed character count or require a CTA.
+
+
+Every current declared demand has an exact source-located professional reference profile with applicability, counterexamples and selection notes. Exact lookup returns only scoped resources, techniques, professional lenses and Skill sections; the group overview is not inherited. Existing evidence statuses and current-provider verification boundaries remain unchanged. Profile existence is not independent craft validation. Future missing profiles remain explicit group-level gaps.

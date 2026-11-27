@@ -116,7 +116,7 @@ Use the optional communication_intent field on a public-facing deliverable only 
 
 ## 2C. Demand-specific skill routing
 
-A broad capability group is an index, not a complete method selection. Resolve the exact demand when a profile exists, then read the referenced original sources:
+A broad capability group is an index, not a complete method selection. Resolve the exact demand and read the referenced original sources. All 54 current demands have scoped profiles; their existence and legacy technique labels do not establish independently validated execution:
 
 - sms-studio capabilities --group editorial_writing --demand short_form_copy
 - sms-studio capabilities --group editorial_writing --demand long_form_editorial
@@ -282,3 +282,6 @@ sms-studio --offline-fixture --root ./studio-work events episode-001
 ```
 
 Read `docs/standalone_social_media_studio.md` for the complete JSON contracts and runtime semantics. The Social Media Studio control-plane core uses Python's standard library. The explicit domain-adapter layer also uses the project-declared Pillow and filelock dependencies; media QA and local graphics rendering require FFmpeg and FFprobe. Existing specialized modules are imported only through the tested adapter bridge, not as a second controller.
+
+
+Every current declared demand has an exact source-located professional reference profile with applicability, counterexamples and selection notes. Exact lookup returns only scoped resources, techniques, professional lenses and Skill sections; the group overview is not inherited. Existing evidence statuses and current-provider verification boundaries remain unchanged. Profile existence is not independent craft validation. Future missing profiles remain explicit group-level gaps.

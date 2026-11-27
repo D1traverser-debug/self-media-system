@@ -408,7 +408,7 @@ def capability_lookup(
         if not isinstance(demand_profiles, dict) or not set(demand_profiles).issubset(set(group["demands"])):
             raise ValueError(f"{group['id']}: demand_profiles must map only declared demands")
         for exact_demand, spec in demand_profiles.items():
-            if not isinstance(spec, dict) or set(spec) - profile_fields:
+            if not isinstance(spec, dict) or set(spec) != profile_fields:
                 raise ValueError(f"{group['id']}.{exact_demand}: malformed demand profile")
             for field, available in resource_fields:
                 refs = spec.get(field, [])
@@ -448,14 +448,15 @@ def capability_lookup(
         route_adapters = selected_route["local_support_adapters"] if selected_route else group["adapters"]
         route_operations = selected_route["local_support_operations"] if selected_route else group["operations"]
 
-        def merged(field: str) -> list[str]:
-            extra = selected_profile.get(field, []) if selected_profile else []
-            return list(dict.fromkeys([*group[field], *extra]))
+        def scoped(field: str) -> list[str]:
+            # Exact profiles select complete scoped references; group resources
+            # are overview/fallback only, not inherited method authority.
+            return list(selected_profile[field] if selected_profile is not None else group[field])
 
-        knowledge_refs = merged("knowledge_refs")
-        method_ids = merged("method_ids")
-        role_ids = merged("role_ids")
-        skill_sections = merged("skill_sections")
+        knowledge_refs = scoped("knowledge_refs")
+        method_ids = scoped("method_ids")
+        role_ids = scoped("role_ids")
+        skill_sections = scoped("skill_sections")
         resolution = (
             "EXACT_DEMAND_PROFILE" if selected_profile
             else "GROUP_LEVEL_FALLBACK" if demand_id
@@ -471,6 +472,7 @@ def capability_lookup(
             "selected_demand_id": demand_id,
             "selected_operation_contract": selected_route,
             "demand_resolution": resolution,
+            "resource_selection_scope": ("EXACT_PROFILE_ONLY" if selected_profile else "GROUP_OVERVIEW_ONLY"),
             "selected_demand_profile": ({
                 "applies_to": selected_profile["applies_to"],
                 "avoid_when": selected_profile["avoid_when"],

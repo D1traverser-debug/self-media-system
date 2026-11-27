@@ -78,6 +78,37 @@ def test_exact_demand_lookup_returns_scoped_resources_without_authorizing_execut
         "EXACT_DEMAND_SUPPORT_CANDIDATES__NOT_EXECUTOR_ADMISSION"
     )
 
-    fallback = capability_lookup("motion_production", demand_id="video_generation")
+    profile = json.loads((ROOT / "social_media_studio/legacy/data/capabilities.json").read_text())
+    next(g for g in profile["professional_capability_groups"] if g["id"] == "motion_production")["demand_profiles"].pop("video_generation")
+    fallback = capability_lookup("motion_production", demand_id="video_generation", profile=profile)
     assert fallback["demand_resolution"] == "GROUP_LEVEL_FALLBACK"
     assert fallback["effect_authorized"] is False
+
+
+def test_complete_exact_profiles_select_resources_without_group_inheritance():
+    overview = capability_lookup()
+    count = 0
+    for group in overview["groups"]:
+        assert set(group["demands"]) == set(group["demand_profiles"])
+        for demand_id, profile in group["demand_profiles"].items():
+            exact = capability_lookup(group["id"], demand_id=demand_id)["groups"][0]
+            assert exact["demand_resolution"] == "EXACT_DEMAND_PROFILE"
+            assert exact["resource_selection_scope"] == "EXACT_PROFILE_ONLY"
+            assert [x["id"] for x in exact["knowledge_resources"]] == profile["knowledge_refs"]
+            assert [x["id"] for x in exact["methods"]] == profile["method_ids"]
+            assert [x["id"] for x in exact["professional_roles"]] == profile["role_ids"]
+            assert exact["skill_sections"] == profile["skill_sections"]
+            assert profile["avoid_when"] and profile["selection_notes"]
+            assert not exact["executor_routes"]["actual_executor_verified"]
+            count += 1
+    assert count == 54
+    simple = capability_lookup(demand_id="image_enhancement")["groups"][0]
+    assert not simple["methods"]
+    assert "storyboard_artist" not in [x["id"] for x in simple["professional_roles"]]
+    trim = capability_lookup(demand_id="video_trim")["groups"][0]
+    assert not trim["methods"]
+    assert "visual-development" not in [x["id"] for x in trim["knowledge_resources"]]
+    prompt = capability_lookup(demand_id="image_prompt_design")["groups"][0]
+    assert not prompt["executor_routes"]["domain_adapters"]
+    assert not prompt["executor_routes"]["production_operations"]
+    assert any(x["status"] == "CANDIDATE_REQUIRES_REVALIDATION" for x in prompt["knowledge_resources"])

@@ -109,3 +109,6 @@ Run `sms-studio system-audit --repo-root .` for the repository audit. It separat
 ## Completion rule
 
 A project is not complete because a plan exists, a task graph is green, a renderer ran, or CI passed. Completion requires the requested final files, exact artifact identity, all applicable independent reviews, technical QA, rights/truth/disclosure checks, and an owner-visible list of any remaining unknowns.
+
+
+Every current declared demand has an exact source-located professional reference profile with applicability, counterexamples and selection notes. Exact lookup returns only scoped resources, techniques, professional lenses and Skill sections; the group overview is not inherited. Existing evidence statuses and current-provider verification boundaries remain unchanged. Profile existence is not independent craft validation. Future missing profiles remain explicit group-level gaps.
