@@ -2101,7 +2101,8 @@ class StudioEngine:
         by_key = {
             (d["id"], v["id"]): {
                 "deliverable_id": d["id"], "type": d["type"], "variant_id": v["id"],
-                "expected_shape": v.get("shape") or d.get("shape"), "candidates": [],
+                "expected_shape": v.get("shape") or d.get("shape"),
+                "constraints": dict(d.get("constraints") or {}), "candidates": [],
             }
             for d in items
             for v in (d["variants"] or [{"id": d["id"], "shape": d.get("shape")}])

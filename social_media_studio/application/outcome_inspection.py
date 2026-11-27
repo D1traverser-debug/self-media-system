@@ -14,7 +14,7 @@ from typing import Any
 
 from PIL import Image, UnidentifiedImageError
 
-from ..domain.conformance import assess_observation
+from ..domain.conformance import assess_observation, select_variant_candidate
 from ..domain.outcome_traceability import trace_owner_requirements
 from ..engine_support import _sha256
 
@@ -76,7 +76,8 @@ def _probe(path: Path, *, deliverable_type: str, declared_media_type: str) -> di
                     "characters": len(text)}
         if declared_media_type.startswith("text/") or deliverable_type in _TEXT_TYPES:
             return {"kind": "TEXT", "media_type": declared_media_type, "utf8": True,
-                    "characters": len(text)}
+                    "characters": len(text),
+                    "non_whitespace_characters": sum(not x.isspace() for x in text)}
         return {"error": "UNSUPPORTED_MEDIA_TYPE"}
     except (OSError, UnicodeDecodeError, ValueError, json.JSONDecodeError,
             UnidentifiedImageError, subprocess.TimeoutExpired, Image.DecompressionBombError):
@@ -125,16 +126,22 @@ class OutcomeInspectionService:
                                 deliverable_type=variant["type"],
                                 declared_media_type=row["media_type"],
                                 expected_shape=variant.get("expected_shape"), observation=probe,
+                                constraints=variant.get("constraints"),
                             )
                     observed.append({**sample, "conformance": verdict})
+                selection = select_variant_candidate(observed)
+                selected = next(
+                    (x for x in observed if x["artifact_id"] == selection["selected_artifact_id"]),
+                    None,
+                )
                 variants.append({
                     "deliverable_id": variant["deliverable_id"], "variant_id": variant["variant_id"],
                     "type": variant["type"], "expected_shape": variant.get("expected_shape"),
                     "candidates": observed,
+                    "candidate_selection": selection,
                     "observable_conformance": (
-                        "MATCH" if any(x["conformance"]["status"] == "MATCH" for x in observed)
-                        else "MISMATCH" if any(x["conformance"]["status"] == "MISMATCH" for x in observed)
-                        else "UNVERIFIED"
+                        selected["conformance"]["status"] if selected is not None
+                        else "AMBIGUOUS" if selection["status"] == "AMBIGUOUS" else "UNVERIFIED"
                     ),
                 })
         observed_complete = bool(variants) and all(v["observable_conformance"] == "MATCH" for v in variants)
@@ -148,6 +155,8 @@ class OutcomeInspectionService:
             "declared_variant_count": len(variants),
             "observed_conformance_complete": observed_complete,
             "artifact_release_coverage_complete": progress["artifact_release_coverage_complete"],
+            "ambiguous_release_variants": progress.get("ambiguous_release_variants", []),
+            "rejected_output_bindings": progress.get("rejected_bindings", []),
             "owner_outcome_verified": False, "whole_demand_accepted": False,
             "external_publication_authorized": False,
             "remaining_assurance": [

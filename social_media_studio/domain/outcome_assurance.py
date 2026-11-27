@@ -19,6 +19,7 @@ def variant_release_coverage(variants: list[dict[str, Any]]) -> dict[str, Any]:
     missing_candidates: list[dict[str, str]] = []
     unreleased_variants: list[dict[str, str]] = []
     accepted_variants: list[dict[str, str]] = []
+    ambiguous_release_variants: list[dict[str, str]] = []
     for entry in variants:
         key = (entry["deliverable_id"], entry["variant_id"])
         if key in identities:
@@ -28,9 +29,12 @@ def variant_release_coverage(variants: list[dict[str, Any]]) -> dict[str, Any]:
         candidates = entry["candidates"]
         if not candidates:
             missing_candidates.append(record)
-        if any(c.get("artifact_status") == "ACCEPTED" for c in candidates):
+        accepted_count = sum(c.get("artifact_status") == "ACCEPTED" for c in candidates)
+        if accepted_count == 1:
             accepted_variants.append(record)
         else:
+            if accepted_count > 1:
+                ambiguous_release_variants.append(record)
             unreleased_variants.append(record)
     release_complete = bool(variants) and not unreleased_variants
     return {
@@ -38,6 +42,7 @@ def variant_release_coverage(variants: list[dict[str, Any]]) -> dict[str, Any]:
         "individually_released_variant_count": len(accepted_variants),
         "missing_candidate_variants": missing_candidates,
         "unreleased_variants": unreleased_variants,
+        "ambiguous_release_variants": ambiguous_release_variants,
         "artifact_release_coverage_complete": release_complete,
         "owner_outcome_verified": False,
         "external_publication_authorized": False,

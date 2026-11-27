@@ -300,11 +300,12 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
-      "next_action": "Introduce real independent source/content/craft reviews bound to current owner clause, artifact digest, exact variant and isolation evidence. Never promote structural MATCH to owner acceptance.",
+      "next_action": "Run full exact-head CI, then verify independent creative/owner evidence per final selected artifact+revision; test video PCM/bitstream/audio-sync through existing source-bound media QA rather than container metadata.",
       "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
-        "2026-11-27 inspect-outcome observes actual candidate file type, pixel dimensions and source-scoped owner obligations per variant; entire user demand, semantic value, owner approval and publication remain explicitly UNVERIFIED. Empty trusted review registry remains fail-closed."
+        "2026-11-27 inspect-outcome observes actual candidate file type, pixel dimensions and source-scoped owner obligations per variant; entire user demand, semantic value, owner approval and publication remain explicitly UNVERIFIED. Empty trusted review registry remains fail-closed.",
+        "Internal assurance 2026-11-27: explicit per-variant artifact selection now blocks multiple unselected candidates and multiple accepted artifacts, surfaces all candidates and rejected source bindings, and tests actual current PNG alternative conflict. MEDIA_TRANSFORM original_audio_promise with no audio stream is a mismatch; presence of a stream remains source-bound identity UNVERIFIED. No creative/owner outcome approval inferred; exact-head CI required."
       ]
     },
     {

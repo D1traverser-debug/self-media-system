@@ -69,3 +69,17 @@ def test_accepted_artifact_coverage_never_proves_semantic_owner_approval():
     advice = completion_guidance(current)
     assert advice["state"] == "QUALITY_AND_OWNER_OUTCOME_UNVERIFIED"
     assert "not owner approval" in advice["next_action"]
+
+
+def test_multiple_individually_accepted_artifacts_for_same_variant_need_reconciliation():
+    progress = variant_release_coverage([
+        item("cover", "portrait", "ACCEPTED", "ACCEPTED"),
+        item("caption", "zh-CN", "ACCEPTED"),
+    ])
+    assert progress["individually_released_variant_count"] == 1
+    assert progress["ambiguous_release_variants"] == [
+        {"deliverable_id": "cover", "variant_id": "portrait"},
+    ]
+    assert {"deliverable_id": "cover", "variant_id": "portrait"} in progress["unreleased_variants"]
+    assert progress["artifact_release_coverage_complete"] is False
+    assert progress["whole_demand_accepted"] is False
