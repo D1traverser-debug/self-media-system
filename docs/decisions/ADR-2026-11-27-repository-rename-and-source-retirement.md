@@ -16,3 +16,8 @@ Legacy source has three different lifecycle meanings: (1) domain specialist impl
 
 ## Falsifiers
 New canonical manifest fails audit; missing retired code is imported by a current adapter; stale operator view unexpectedly drives user actions; removal breaks current job/legacy regression, smoke, or independent installer. Any such event reopens the earliest mistaken dependency classification rather than relaxing runtime permission gates.
+
+## Second reviewed retirement: obsolete ProgramOrchestrator
+`legacy/program_orchestration.py` maintained a second file-backed mutable ProgramRunState and coordination graph. Real current `ProjectTaskService._validate_graph` and `StudioEngine` already own dynamic task dependencies, independent branches, candidate/owner adjudication and failure recovery through one ledger; old ProgramOrchestrator is not imported by that runtime or an active domain adapter. Its sole original direct test consumer was `tests/test_program_orchestration.py`, which exercised a retired example Program graph. Both source and obsolete test are now deleted, with a tombstone rejecting accidental return; current engine coordination regression tests remain. Historical project JSON examples are not removed and no owner workspace or artifact is changed.
+
+The historical singleton runtime, old fixture CLI and old standalone orchestration in `legacy/runtime.py`, `orchestrator.py` and `studio_agents.py` still retain multiple isolated test consumers and are **not** yet eligible for deletion under the present proof threshold.

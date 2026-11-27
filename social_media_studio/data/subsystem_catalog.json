@@ -243,8 +243,7 @@
         "social_media_studio/domain_adapters/business.py",
         "social_media_studio/legacy/business_metrics.py",
         "social_media_studio/legacy/business_objects.py",
-        "social_media_studio/legacy/experiments.py",
-        "social_media_studio/legacy/program_orchestration.py"
+        "social_media_studio/legacy/experiments.py"
       ],
       "domain_adapters": [
         "business_outcome_metrics",
@@ -514,6 +513,17 @@
       "deleted_test": "tests/test_operator_view.py",
       "user_workspaces_touched": false,
       "source_history_preserved_by_git": true
+    },
+    {
+      "path": "social_media_studio/legacy/program_orchestration.py",
+      "status": "DELETED_FROM_HEAD",
+      "original_baseline_commit": "3a6692446b496cf34a55dd929fdb1a7efdfd3c34",
+      "successor": "social_media_studio.application.project_tasks.ProjectTaskService._validate_graph + social_media_studio.engine.StudioEngine",
+      "reason": "Unused second ProgramOrchestrator maintained a separate JSON state_path and coordination graph; no active runtime/domain adapter imports it, and only obsolete test_program_orchestration imported the retired controller. Modern dynamic project task graph already handles parallel/serial/competitive/owner-adjudication and bounded critique through one SQLite ledger.",
+      "deleted_test": "tests/test_program_orchestration.py",
+      "user_workspaces_touched": false,
+      "source_history_preserved_by_git": true,
+      "retained_current_equivalent_regression": "tests/test_studio_engine.py::test_competitive_candidates_require_owner_adjudication_over_every_candidate"
     }
   ]
 }

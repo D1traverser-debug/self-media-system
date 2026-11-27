@@ -16,9 +16,9 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "b7db930f85ca59bdca9fe090cb2e36a5b3c1add9",
+    "observed_head": "3a6692446b496cf34a55dd929fdb1a7efdfd3c34",
     "observed_ci_run": 45959228172,
-    "observed_ci": "PASS_PREVIOUS_BASELINE_ONLY_NOT_CURRENT_CHANGE",
+    "observed_ci": "BASELINE_GREEN_STATUS_TO_RECHECK_ON_NEW_HEAD",
     "observed_failure": null,
     "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability.",
     "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
@@ -105,7 +105,8 @@
         "Re-audit traced common gaps between composition and local task admission, and between task completion and deliverable variant coverage; implemented shared admission and derived evidence projection. Independent product acceptance remains open.",
         "Read 2026-11-27 full-tree audit F01-F17 and code paths. Architecture ADRs now separate domain release/authority/conformance/trace from application service/registry. Architecture structure tests pass on prior exact commits; actual owner outcomes remain OPEN.",
         "GitHub repository rename verified by metadata: canonical D1traverser-debug/self-media-system, repository id 1411170938, existing PR #56 and original integration branch unchanged. Python product/distribution names remain independent.",
-        "Isolated legacy operator_view.py and its old dedicated tests are removed as unused duplicate of canonical status/resume; this is not permission to remove still-tested retired runtime/orchestrator/storage paths. Repository topology declares a permanent removal record; exact-head regression required."
+        "Isolated legacy operator_view.py and its old dedicated tests are removed as unused duplicate of canonical status/resume; this is not permission to remove still-tested retired runtime/orchestrator/storage paths. Repository topology declares a permanent removal record; exact-head regression required.",
+        "Second source retirement record for unused legacy program_orchestration.py plus test_program_orchestration.py. Original code remains in parent Git commit; historical projects/ and examples/ source data retained."
       ]
     },
     {
@@ -278,7 +279,8 @@
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
         "Re-audit actual legacy business metrics and domain adapter: video-only published_minutes constraint was unsuitable for account/content/commercial reporting. Implemented explicit subject/window + separately imported source JSON extraction and derived ratio receipts through existing adapter; no live external access or causal effect claimed.",
-        "Existing production registry now declares effect risk for all six operations. Unsandboxed Python source needs an external process-operator exact digest grant; absent/mismatched code digest blocks before process launch. No sandbox, publishing provider or owner effect permission inferred."
+        "Existing production registry now declares effect risk for all six operations. Unsandboxed Python source needs an external process-operator exact digest grant; absent/mismatched code digest blocks before process launch. No sandbox, publishing provider or owner effect permission inferred.",
+        "Actual current ProjectTaskService graph already validates dependencies, competitive candidates, owner adjudication, advice, bounded critique and alternative coordination patterns under one durable SQLite ledger. Removed redundant legacy ProgramOrchestrator and obsolete duplicate tests; current engine regression retained; new SHA CI required."
       ]
     },
     {

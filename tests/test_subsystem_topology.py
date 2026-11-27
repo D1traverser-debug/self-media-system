@@ -218,3 +218,18 @@ def test_deleted_legacy_source_import_cannot_be_resurrected_through_active_adapt
     assert report["pass"] is False
     assert any("source imports a permanently retired module" in item
                for item in report["violations"])
+
+
+def test_retired_second_program_orchestrator_is_absent_but_owner_adjudication_remains_current():
+    catalog = json.loads((ROOT / "social_media_studio/data/subsystem_catalog.json").read_text())
+    record = next(item for item in catalog["source_retirements"]
+                  if item["path"] == "social_media_studio/legacy/program_orchestration.py")
+    assert record["status"] == "DELETED_FROM_HEAD"
+    assert not (ROOT / record["path"]).exists()
+    assert not (ROOT / record["deleted_test"]).exists()
+    assert record["retained_current_equivalent_regression"].startswith("tests/test_studio_engine.py")
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    assert record["path"] not in report["legacy_module_lifecycle"]
+    assert any("social_media_studio/legacy/model_registry.py" == p
+               for p in report["legacy_module_lifecycle"])

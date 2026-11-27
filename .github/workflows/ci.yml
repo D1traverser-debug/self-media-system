@@ -141,7 +141,6 @@ jobs:
               "social_media_studio.legacy.runtime",
               "social_media_studio.legacy.orchestrator",
               "social_media_studio.legacy.studio_agents",
-              "social_media_studio.legacy.program_orchestration",
               "social_media_studio.legacy.storage",
           }
           assert not blocked.intersection(sys.modules)
