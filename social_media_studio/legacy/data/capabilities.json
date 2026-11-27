@@ -3040,7 +3040,7 @@
       ],
       "operations": [],
       "gaps": [
-        "Outcome measurement is not live audience validation or commercial success."
+        "Imported source metrics and legacy Episode calculations are supported, but live platform access, semantic comparability, causal inference, audience response and commercial outcomes still require independent current evidence."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
       "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
@@ -3118,7 +3118,7 @@
             "business_outcome_metrics"
           ],
           "local_support_operations": [],
-          "scope": "Actual outcome receipts; derived metrics do not prove causation.",
+          "scope": "Actual account, content, campaign, offer or portfolio observations from declared imported numeric JSON sources; exact byte-bound extraction and explicit ratios. Historical Episode receipts remain a separate supported input. Neither proves platform authenticity, metric semantics, causation or commercial success.",
           "requires_current_method_and_executor_check": true
         }
       },
@@ -3241,7 +3241,7 @@
             "FORECAST_AS_ACTUAL",
             "METRIC_AS_CAUSAL_PROOF"
           ],
-          "selection_notes": "Use dated account evidence, explicit numerator/denominator, cohort, period and baseline; reconcile anomalies and uncertainty. Separate observed conversion/revenue from attribution and estimates."
+          "selection_notes": "Use dated account evidence, explicit numerator/denominator, cohort, period and baseline; reconcile anomalies and uncertainty. Separate observed conversion/revenue from attribution and estimates. The registered business_outcome_metrics adapter accepts explicit SMS_BUSINESS_OBSERVATION_V1 with separate source inputs and declared metric JSON paths; missing data and undefined ratios remain null, without requiring video minutes. Legacy Episode economics are only for actual video scope."
         }
       }
     },

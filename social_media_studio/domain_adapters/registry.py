@@ -138,8 +138,8 @@ _DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
     ),
     "business_outcome_metrics": _spec(
         "business_outcome_metrics", handle_business_outcome_metrics, "growth_commercial",
-        ("outcome_receipt_input",), "task-declared JSON derived outcome metrics",
-        "DERIVED_METRICS_NOT_CAUSAL_GROWTH", "Derived metrics do not prove causal growth or commercial lift.",
+        ("outcome_receipt_input",), "task-declared JSON derived episode metrics or scoped source-bound account/content/campaign/offer/portfolio observations",
+        "DERIVED_METRICS_NOT_CAUSAL_GROWTH", "Exact declared-source numeric extraction or legacy episode derivation; not live platform authenticity, causal growth or commercial lift.",
     ),
     "programmatic_graphic_render": _spec(
         "programmatic_graphic_render", handle_programmatic_graphic_render, "visual_design",

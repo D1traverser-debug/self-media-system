@@ -20,7 +20,7 @@
     "observed_ci_run": 45927195071,
     "observed_ci": "FAILURE",
     "observed_failure": "531 passed, 1 failed: old scoped-resource regression found the applicable professional-aesthetics reference missing for short copy; old missing-profile assertion requires an explicit counterexample now that video_generation is covered.",
-    "new_changes": "Restore applicable cross-deliverable aesthetic reference explicitly, keep exact-only resource semantics and test fallback by removing a profile in isolated fixture.",
+    "new_changes": "Add scoped non-video business observations to the existing business outcome adapter; preserve exact source lineage, missing values, ratio semantics and old Episode compatibility. Previous resource regression fix remains in parent commit; exact integration-head CI required.",
     "status": "DRAFT_NOT_MERGED"
   },
   "decision": {
@@ -259,10 +259,11 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Growth/commercial advice uses actual evidence; unavailable and unapproved provider/paid/posting routes fail closed; no performance claims without measurement.",
-      "next_action": "Map account/growth/commercial cases beyond frozen matrix; verify capability handshakes without paid or posting side effects.",
+      "next_action": "Verify real typed worker integration and invalid-source negative tests; then obtain current authorized account evidence and independent semantic review only when owner actually requests such operations. Continue portfolio, experiment and offer/rights case coverage.",
       "blocker": null,
       "evidence": [
-        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "Re-audit actual legacy business metrics and domain adapter: video-only published_minutes constraint was unsuitable for account/content/commercial reporting. Implemented explicit subject/window + separately imported source JSON extraction and derived ratio receipts through existing adapter; no live external access or causal effect claimed."
       ]
     },
     {

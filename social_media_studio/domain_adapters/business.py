@@ -185,8 +185,139 @@ def handle_episode_intent_validate(project_id, packet, config, outputs, output_d
     return artifact_outputs, result
 
 
+def business_observation_metrics(payload, packet, receipt_input):
+    """Derive scoped non-video observations from exact imported JSON inputs.
+
+    A source value and byte binding is not proof of platform authenticity,
+    metric semantics, causation, performance improvement or commercial success.
+    """
+    import math
+
+    data = _mapping(payload, "business observation")
+    allowed = {"schema_version", "subject", "window", "metrics", "ratios"}
+    if set(data) - allowed or data.get("schema_version") != "SMS_BUSINESS_OBSERVATION_V1":
+        raise DomainAdapterError("invalid business observation schema")
+    subject = _mapping(data.get("subject"), "observation subject")
+    if set(subject) - {"kind", "id", "platform"} or subject.get("kind") not in (
+        "ACCOUNT", "CONTENT", "CAMPAIGN", "OFFER", "PORTFOLIO",
+    ):
+        raise DomainAdapterError("invalid observation subject kind or fields")
+    def required_text(value, label):
+        if not isinstance(value, str) or not value.strip() or value != value.strip():
+            raise DomainAdapterError(f"{label} must be nonempty exact text")
+        return value
+    required_text(subject.get("id"), "subject id")
+    if "platform" in subject:
+        required_text(subject["platform"], "subject platform")
+    window = _mapping(data.get("window"), "observation window")
+    if set(window) != {"start", "end"}:
+        raise DomainAdapterError("observation window requires exact start/end")
+    try:
+        start, end = (datetime.fromisoformat(required_text(window[k], k)) for k in ("start", "end"))
+        if start.utcoffset() is None or end.utcoffset() is None or end <= start:
+            raise ValueError("invalid window")
+    except (ValueError, OverflowError) as exc:
+        raise DomainAdapterError("observation window must have timezone-aware increasing ISO timestamps") from exc
+
+    entries = data.get("metrics")
+    if not isinstance(entries, list) or not entries:
+        raise DomainAdapterError("business observation requires declared metric entries")
+    source_cache = {}
+    by_id = {}
+    for raw in entries:
+        metric = _mapping(raw, "metric")
+        if set(metric) - {"id", "unit", "semantics", "source", "unavailable_reason"}:
+            raise DomainAdapterError("unknown metric fields")
+        key = required_text(metric.get("id"), "metric id")
+        if key in by_id:
+            raise DomainAdapterError("duplicate metric id")
+        unit = required_text(metric.get("unit"), "metric unit")
+        semantics = required_text(metric.get("semantics"), "metric semantics")
+        record = {"id": key, "unit": unit, "semantics": semantics}
+        if ("source" in metric) == ("unavailable_reason" in metric):
+            raise DomainAdapterError("metric requires either exact source or explicit unavailable reason")
+        if "unavailable_reason" in metric:
+            record.update(value=None, status="UNAVAILABLE",
+                          reason=required_text(metric["unavailable_reason"], "unavailable reason"))
+        else:
+            source = _mapping(metric["source"], "metric source")
+            if set(source) != {"input", "path"}:
+                raise DomainAdapterError("metric source requires exact input and JSON path")
+            name = required_text(source["input"], "metric source input")
+            if name == receipt_input:
+                raise DomainAdapterError("observation specification cannot be its own metric source")
+            artifact = packet["input_artifacts"].get(name)
+            if artifact is None:
+                raise DomainAdapterError(f"metric source not a declared input: {name}")
+            if name not in source_cache:
+                source_cache[name] = _input_json(packet, name)
+            value = source_cache[name]
+            path = source["path"]
+            if not isinstance(path, list) or not path:
+                raise DomainAdapterError("metric source path requires exact JSON keys/indices")
+            for part in path:
+                if isinstance(part, str) and isinstance(value, dict) and part in value:
+                    value = value[part]
+                elif type(part) is int and isinstance(value, list) and 0 <= part < len(value):
+                    value = value[part]
+                else:
+                    raise DomainAdapterError(f"metric source path missing or incompatible: {key}")
+            try:
+                finite = type(value) in (int, float) and math.isfinite(value)
+            except OverflowError:
+                finite = False
+            if not finite:
+                raise DomainAdapterError(f"metric source is not a finite JSON number: {key}")
+            record.update(value=value, status="EXTRACTED_FROM_DECLARED_SOURCE",
+                          source_binding={"input": name, "path": path,
+                                          "artifact_id": artifact["artifact_id"],
+                                          "version": artifact["version"], "sha256": artifact["sha256"]})
+        by_id[key] = record
+
+    ratios = data.get("ratios", [])
+    if not isinstance(ratios, list):
+        raise DomainAdapterError("ratios must be an array")
+    derived = {}
+    for raw in ratios:
+        ratio = _mapping(raw, "derived ratio")
+        if set(ratio) != {"id", "numerator", "denominator", "semantics"}:
+            raise DomainAdapterError("derived ratio requires exact id, operands and semantics")
+        key = required_text(ratio["id"], "ratio id")
+        num_key = required_text(ratio["numerator"], "numerator")
+        den_key = required_text(ratio["denominator"], "denominator")
+        if key in derived or key in by_id or num_key not in by_id or den_key not in by_id:
+            raise DomainAdapterError("ratio must use unique identity and known raw metrics")
+        num, den = by_id[num_key], by_id[den_key]
+        record = {"id": key, "numerator": num_key, "denominator": den_key,
+                  "semantics": required_text(ratio["semantics"], "ratio semantics"),
+                  "unit": f'{num["unit"]}/{den["unit"]}', "value": None}
+        if num["value"] is None or den["value"] is None:
+            record["status"] = "UNAVAILABLE_OPERAND"
+        elif den["value"] <= 0:
+            record["status"] = "NONPOSITIVE_DENOMINATOR"
+        else:
+            result = num["value"] / den["value"]
+            if not math.isfinite(result):
+                raise DomainAdapterError("derived ratio is not finite")
+            record.update(value=result, status="DERIVED_FROM_EXTRACTED_VALUES")
+        derived[key] = record
+    return {"schema_version": "SMS_BUSINESS_OBSERVATION_V1", "subject": subject,
+            "window": window, "raw_metrics": by_id, "derived_metrics": derived,
+            "evidence_status": "EXACT_DECLARED_JSON_VALUES_AND_INPUT_BYTES_ONLY",
+            "platform_authenticity_verified": False, "metric_semantics_verified": False,
+            "causal_effect_verified": False, "owner_outcome_verified": False,
+            "effect_authorized": False}
+
+
 def handle_business_outcome_metrics(project_id, packet, config, outputs, output_dir, attempt, name):
-    metrics = outcome_metrics(_input_json(packet, str(config["outcome_receipt_input"])))
+    receipt_input = str(config["outcome_receipt_input"])
+    payload = _input_json(packet, receipt_input)
+    if payload.get("schema_version") == "SMS_BUSINESS_OBSERVATION_V1":
+        metrics = business_observation_metrics(payload, packet, receipt_input)
+        identity = {"subject": metrics["subject"], "observation_schema": metrics["schema_version"]}
+    else:
+        metrics = outcome_metrics(payload)
+        identity = {"episode_id": metrics["episode_id"]}
     output_name = str(config.get("output_name", outputs[0]))
     path = output_dir / f"{_safe_filename(output_name)}-attempt-{attempt}.json"
     _write_json(path, {"adapter": name, **metrics})
@@ -194,10 +325,12 @@ def handle_business_outcome_metrics(project_id, packet, config, outputs, output_
         output_name: {
             "path": str(path), "kind": "evidence", "media_type": "application/json",
             "rights_status": "NOT_APPLICABLE",
-            "metadata": {"adapter": name, "episode_id": metrics["episode_id"]},
+            "metadata": {"adapter": name, **identity},
         }
     }
-    result = {"adapter": name, "episode_id": metrics["episode_id"], "derived_metrics": metrics["derived_metrics"]}
+    result = {"adapter": name, **identity, "derived_metrics": metrics["derived_metrics"]}
+    if "evidence_status" in metrics:
+        result.update(evidence_status=metrics["evidence_status"], owner_outcome_verified=False)
     return artifact_outputs, result
 
 
