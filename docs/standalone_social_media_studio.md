@@ -158,6 +158,12 @@ Each asset has a stable ID, logical name, version, relative path, SHA-256, byte 
 
 An upstream change invalidates only the affected task and dependency descendants. Their prior files and event history remain for audit; unaffected work remains current.
 
+## 9A. Private owner preferences and cross-chat process learning
+
+For owner-facing work, retrieve the owner's private preference profile and episodic casebook by exact filename from the private Library when available. Current instructions override historical preferences. A scoped, explicit owner request may authorize retrospective retrieval from relevant prior self-media chats; do not ingest unrelated chats or treat summaries as full transcript evidence. Keep private owner preferences, episodic records and reusable professional methods separate. Direct-session episodes are preserved privately without creating dummy Studio projects; durable projects retain their existing project-local records. Public repository changes may contain generalized methods and tests, never raw private chats or user-specific preference/case files.
+
+A material task episode should record observable facts only: task scope, source evidence, actual selected skills/tools, rejected approach, owner corrections, root cause, final selected artifact, explicit approval/review state, rework burden, reusable lesson and unresolved proof. Do not serialize hidden chain-of-thought or routine action transcripts. Distinguish owner scope changes from preventable assistant failures.
+
 ## 9. Independent quality review and release
 
 ### Internal result-proof rules (2026-11-27)

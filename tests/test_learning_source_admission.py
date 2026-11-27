@@ -25,3 +25,44 @@ def test_no_learn_exclusion_must_not_be_implemented_as_a_content_denylist():
     assert "exclude it before durable serialization" in text
     assert "Do not create a topic/title/URL/fingerprint denylist" in text
     assert "that would itself persist a trace" in text
+
+
+
+def test_explicit_owner_authorized_cross_chat_import_is_a_scoped_exception():
+    text = POLICY.read_text(encoding="utf-8")
+    assert "scoped retrospective cross-chat source explicitly authorized by the owner" in text
+    assert "relevant self-media history only" in text
+    assert "Ambient conversation, unrelated chats" in text
+    assert "summary-level retrieval" in text
+    assert "Never commit raw private conversation" in text
+
+
+def test_direct_session_learning_uses_private_episode_source_without_dummy_project():
+    text = POLICY.read_text(encoding="utf-8")
+    assert "Direct-session work may not have a Studio project." in text
+    assert "private Library experience casebook" in text
+    assert "rather than creating a dummy project" in text
+
+
+def test_owner_preference_is_not_subject_to_method_promotion_threshold():
+    text = POLICY.read_text(encoding="utf-8")
+    assert "An explicit owner preference is authoritative within its scope" in text
+    assert "does not need two replays" in text
+    assert "A direct owner correction is not the same thing as a method validation." in text
+
+
+def test_private_owner_profile_and_casebook_are_discovered_from_skill_entry():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    for token in ("OWNER_PREFERENCE_PROFILE.md", "CROSS_CHAT_EXPERIENCE_CASEBOOK.md",
+                  "PROCESS_QUALITY_BASELINE.md"):
+        assert token in skill_text
+        assert token in entry_text
+    assert "current owner instructions" in skill_text.lower()
+    assert "do not import unrelated conversations" in skill_text.lower()
+
+
+def test_process_quality_separates_owner_scope_changes_from_preventable_assistant_failures():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "PROCESS_QUALITY_BASELINE.md" in skill_text
+    assert "Do not turn every rejected draft into a global rule." in skill_text

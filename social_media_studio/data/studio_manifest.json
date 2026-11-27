@@ -72,7 +72,16 @@
     "requires_independent_readback": true,
     "requires_caos_owner_acceptance": true,
     "project_candidate_promotion_authorized": false,
-    "global_knowledge_promotion": "VERSIONED_REPOSITORY_CHANGE_AFTER_EVIDENCE_INDEPENDENT_REPLAY_AND_CAOS_ACCEPTANCE"
+    "global_knowledge_promotion": "VERSIONED_REPOSITORY_CHANGE_AFTER_EVIDENCE_INDEPENDENT_REPLAY_AND_CAOS_ACCEPTANCE",
+    "retrospective_cross_chat_import": "EXPLICIT_OWNER_AUTHORIZATION__SCOPED_SELF_MEDIA_HISTORY_ONLY",
+    "direct_session_learning": "PRIVATE_EPISODIC_CASEBOOK__NO_DUMMY_PROJECT",
+    "owner_preferences": "PRIVATE_SOURCE__IMMEDIATE_WITHIN_SCOPE__CURRENT_INSTRUCTION_OVERRIDES",
+    "preference_episode_method_separation": true,
+    "public_repository_must_not_contain": [
+      "RAW_PRIVATE_CONVERSATIONS",
+      "OWNER_SPECIFIC_PREFERENCE_PROFILE",
+      "PRIVATE_CROSS_CHAT_CASE_HISTORY"
+    ]
   },
   "ip_authority": {
     "original_identity_canon": "IPOS",
@@ -545,5 +554,17 @@
   "repository_slug": "self-media-system",
   "repository_full_name": "D1traverser-debug/self-media-system",
   "repository_url": "https://github.com/D1traverser-debug/self-media-system",
-  "repository_identity_kind": "GITHUB_REPOSITORY__DISTINCT_FROM_PYPI_DISTRIBUTION"
+  "repository_identity_kind": "GITHUB_REPOSITORY__DISTINCT_FROM_PYPI_DISTRIBUTION",
+  "private_owner_continuity": {
+    "discovery": "EXACT_FILENAME_SEARCH_IN_PRIVATE_LIBRARY_WHEN_AVAILABLE",
+    "sources": {
+      "owner_preferences": "OWNER_PREFERENCE_PROFILE.md",
+      "episodic_learning": "CROSS_CHAT_EXPERIENCE_CASEBOOK.md",
+      "process_quality": "PROCESS_QUALITY_BASELINE.md"
+    },
+    "scope": "OWNER_AUTHORIZED_SELF_MEDIA_ONLY",
+    "precedence": "CURRENT_OWNER_INSTRUCTION__CURRENT_BRIEF__PRIVATE_PROFILE__INFERRED_PATTERN",
+    "public_repo_storage": false,
+    "unavailable_behavior": "DO_NOT_CLAIM_LOADED_OR_INVENT_CONTENT"
+  }
 }

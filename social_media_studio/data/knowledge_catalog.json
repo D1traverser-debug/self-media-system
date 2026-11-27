@@ -61,7 +61,7 @@
       "id": "self-learning",
       "ref": "skills/social-media-studio/references/self-learning.md",
       "status": "ACTIVE_REFERENCE",
-      "scope": "Task-neutral evidence-gated learning protocol. Project records remain candidates; shared method promotion requires real-case replay, counterexamples, cross-task transfer, regression, rollback, owner-burden evidence, independent readback, CAOS acceptance and a versioned repository change."
+      "scope": "Task-neutral evidence-gated learning protocol; supports explicitly owner-authorized scoped retrospective cross-chat import and direct-session episodic capture in private Library, with owner preferences separated from methods. Project records remain candidates; shared method promotion requires real-case replay, counterexamples, cross-task transfer, regression, rollback, owner-burden evidence, independent readback, CAOS acceptance and a versioned repository change."
     },
     {
       "id": "team",
