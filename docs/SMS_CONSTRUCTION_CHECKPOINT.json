@@ -16,11 +16,11 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "917b1c938ec4518385781741032638d417655bfa",
-    "observed_ci_run": 45818051990,
+    "observed_head": "314bef109a92c15dc862ba8808379da16dc069fa",
+    "observed_ci_run": 45925295903,
     "observed_ci": "SUCCESS",
     "observed_failure": null,
-    "new_changes": "Whole-architecture composition across demand, business axes, professional routes, typed deliverable/variant, identity, quality and tool support; 54 exact operation support contracts including programmatic motion graphics; no new scheduler or authority. Exact new head CI required.",
+    "new_changes": "Close typed durable composition-to-admission and output-to-deliverable identity seams using existing task/decision/artifact ledger. New exact-head CI required.",
     "status": "DRAFT_NOT_MERGED"
   },
   "decision": {
@@ -61,7 +61,7 @@
       "next_action": "Inspect new exact-head CI jobs; if a gate fails, investigate first causal error and dependent contracts. Do not mark complete on old-head CI.",
       "blocker": null,
       "evidence": [
-        "Exact previous head 917b1c938ec4518385781741032638d417655bfa CI 45818051990 and 45818064028 PASS; not proof for the new commit."
+        "Exact previous head 314bef109a92c15dc862ba8808379da16dc069fa CI 45925295903 and 45925301602 PASS; not evidence for new head."
       ]
     },
     {
@@ -89,7 +89,8 @@
       "next_action": "Reconcile all 35 frozen owner outcomes to real current effects; test the new shared composition seam and revisit any failed architecture boundary. Treat architecture design and production validation as distinct obligations.",
       "blocker": null,
       "evidence": [
-        "Common integration-boundary defect traced through scope.resolve_intake, capability_lookup, domain contracts, subsystem and executor registries, quality planner and identity route. Architecture V2 section Y records comparison, implementation and falsifiers. No real independent product acceptance claimed."
+        "Common integration-boundary defect traced through scope.resolve_intake, capability_lookup, domain contracts, subsystem and executor registries, quality planner and identity route. Architecture V2 section Y records comparison, implementation and falsifiers. No real independent product acceptance claimed.",
+        "Re-audit traced common gaps between composition and local task admission, and between task completion and deliverable variant coverage; implemented shared admission and derived evidence projection. Independent product acceptance remains open."
       ]
     },
     {
@@ -112,11 +113,13 @@
         "S25",
         "S28"
       ],
-      "status": "OPEN",
+      "status": "IN_PROGRESS",
       "acceptance": "Owner revision, resume, independent tasks, explicit scope and retired-project negative cases work; direct conversational requests require no artificial project; no stale effect.",
       "next_action": "Trace demand correction authenticity, decision bindings, invalidation, scope isolation and actual owner-task readback. Preserve single ledger.",
       "blocker": null,
-      "evidence": []
+      "evidence": [
+        "Typed professional demand and exact local dispatcher admission, decision-bound selected route records, and digest-bound output candidate projection implemented; actual exact-head CI and owner outcomes not yet verified."
+      ]
     },
     {
       "id": "B04",

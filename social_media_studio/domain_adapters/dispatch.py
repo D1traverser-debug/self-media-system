@@ -45,6 +45,8 @@ def run_claimed_domain_adapter(
     """
     packet = engine.claimed_packet(project_id, task_id, worker_id, claim_token)
     task = packet["task"]
+    if task.get("executor") != "tool":
+        raise DomainAdapterError("local domain adapters require executor=tool")
     requirements = _mapping(task.get("requirements", {}), "task.requirements")
     config = _mapping(requirements.get("domain_adapter"), "task.requirements.domain_adapter")
     name = str(config.get("name", "")).strip()

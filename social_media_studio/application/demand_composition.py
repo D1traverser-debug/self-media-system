@@ -18,6 +18,20 @@ def _unique_strings(value: Any, label: str) -> list[str]:
         raise ValueError(f"{label} must be a unique list of nonempty strings")
     return value
 
+def demand_applies(deliverable, demand_id, route):
+    """One typed applicability rule shared by proposal and durable admission."""
+    if deliverable["type"] not in route["deliverable_types"]:
+        return False
+    identity_mode = deliverable.get("constraints", {}).get("identity_mode")
+    if demand_id in _CANON_USE:
+        return identity_mode in {"APPROVED_CANON_USE", "IDENTITY_DERIVATIVE"}
+    if demand_id == "persistent_identity_design":
+        return identity_mode == "PERSISTENT_IDENTITY_DESIGN"
+    if demand_id == "temporary_character":
+        return identity_mode == "TEMPORARY_CHARACTER"
+    return True
+
+
 def compose_demand(demand, *, mode, selection, quality, ownership, identity, manifest, lookup):
     """Compose one read-only proposal per current deliverable, without implicit work."""
     if selection is None:
@@ -52,18 +66,8 @@ def compose_demand(demand, *, mode, selection, quality, ownership, identity, man
     result = []
     for item in items:
         identifier, kind = item["id"], item["type"]
-        identity_mode = identity_by_id[identifier]["identity_mode"]
-        def applicable(key, route):
-            if kind not in route["deliverable_types"]:
-                return False
-            if key in _CANON_USE:
-                return identity_mode in {"APPROVED_CANON_USE", "IDENTITY_DERIVATIVE"}
-            if key == "persistent_identity_design":
-                return identity_mode == "PERSISTENT_IDENTITY_DESIGN"
-            if key == "temporary_character":
-                return identity_mode == "TEMPORARY_CHARACTER"
-            return True
-        candidates = sorted(key for key, (_, route) in demand_index.items() if applicable(key, route))
+        candidates = sorted(key for key, (_, route) in demand_index.items()
+                            if demand_applies(item, key, route))
         demands = _unique_strings(selected.get(identifier, []), f"deliverable {identifier} demand selection")
         if not set(demands) <= set(candidates):
             raise ValueError(f"{identifier}: operation does not match current deliverable type or identity scope")

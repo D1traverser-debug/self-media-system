@@ -445,7 +445,13 @@
         "authority": "CURRENT_OWNER_DEMAND_AND_CORRECTIONS; SEPARATE_ASSISTANT_PROPOSAL_NOT_AUTHORIZATION",
         "scope": "PER_DELIVERABLE_BUSINESS_AXES_PROFESSIONAL_DEMANDS_VARIANTS_SOURCE_CLAUSES_IDENTITY_AND_QUALITY",
         "execution": "DIRECT_OR_EXISTING_DURABLE_STUDIO; NO_DEFAULT_GRAPH_OR_EXTERNAL_EFFECT",
-        "unknowns": "UNSELECTED_OR_UNSTRUCTURED_REMAIN_EXPLICIT; NO_FORCED_TYPED_DIRECT_TASK"
+        "unknowns": "UNSELECTED_OR_UNSTRUCTURED_REMAIN_EXPLICIT; NO_FORCED_TYPED_DIRECT_TASK",
+        "durable_admission": {
+          "requirements": "professional_demands per exact deliverable_ref; deliverable_outputs for explicit candidate output/variant",
+          "binding": "current decision snapshot includes selected route contract/resource record and actual local dispatcher",
+          "progress": "derived current digest-bound output candidates; never equate graph completion with owner outcome",
+          "compatibility": "unstructured requests remain explicitly untyped; existing typed tasks require explicit re-admission"
+        }
       }
     },
     "control_loops": {

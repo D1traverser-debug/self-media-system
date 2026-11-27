@@ -115,16 +115,101 @@ def bind_owner_brief(project_id: str, brief: dict[str, Any]) -> dict[str, Any]:
     return {**brief, "scope_epoch": EPOCH}
 
 
-def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> None:
+def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> dict[str, Any] | None:
+    """Use the current composition contract at every durable admission boundary.
+
+    Typed tasks explicitly propose professional demands for each referenced
+    deliverable. Actual local dispatch must match those exact support routes.
+    This is structural scope validation, not a CAOS decision or quality receipt.
+    """
     assert_scope_epoch()
     if brief.get("scope_epoch") != EPOCH:
-        return  # mechanical compatibility and isolated fixture path
-    refs = task.get("requirements", {}).get("deliverable_refs")
+        return None  # mechanical compatibility and isolated fixture path
+    requirements = task.get("requirements", {})
+    if not isinstance(requirements, dict):
+        raise ValueError("task requirements must be an object")
+    refs = requirements.get("deliverable_refs")
     deliverables = brief.get("deliverables", [])
-    if not isinstance(refs, list) or not refs or any(
-        not isinstance(ref, str) or ref not in deliverables for ref in refs
-    ):
+    if (not isinstance(refs, list) or not refs
+            or any(not isinstance(ref, str) or ref not in deliverables for ref in refs)
+            or len(refs) != len(set(refs))):
         raise ValueError("every governed task must reference exact current deliverables")
+    if "deliverable_specs" not in brief:
+        if "professional_demands" in requirements or "deliverable_outputs" in requirements:
+            raise ValueError("typed professional or output bindings require current deliverable_specs")
+        return None  # existing unstructured owner briefs are not silently reinterpreted
+    from .domain.demand import inspect_demand
+    from .application.demand_composition import demand_applies
+    from .production.executors import tool_executor_for_task
+
+    items = {item["id"]: item for item in inspect_demand(brief, durable=True)["typed_deliverables"]["deliverables"]}
+    selected = requirements.get("professional_demands")
+    if not isinstance(selected, dict) or set(selected) != set(refs):
+        raise ValueError("typed task needs exact professional_demands for every deliverable_ref")
+    executor = task.get("executor")
+    if executor not in {"agent", "tool", "human", "external"}:
+        raise ValueError("typed task requires a declared executor")
+    adapter_config = requirements.get("domain_adapter")
+    production_config = requirements.get("production")
+    if "domain_adapter" in requirements and "production" in requirements:
+        raise ValueError("typed task cannot combine competing local dispatcher configurations")
+    if executor != "tool" and ("domain_adapter" in requirements or "production" in requirements):
+        raise ValueError("local dispatcher configurations require executor=tool")
+    local_route = tool_executor_for_task(task) if executor == "tool" else None
+    # External high-assurance tool reviews have their own signed executor and
+    # are not production registry operations. No arbitrary missing tool route.
+    external_review = (executor == "tool" and task.get("kind") == "review"
+                       and "domain_adapter" not in requirements and "production" not in requirements)
+    if executor == "tool" and not local_route and not external_review:
+        raise ValueError("typed tool task requires an exact registered local route or separate review executor")
+    resolved = {}
+    for ref in refs:
+        demands = selected[ref]
+        if (not isinstance(demands, list) or not demands
+                or any(not isinstance(x, str) or not x.strip() for x in demands)
+                or len(demands) != len(set(demands))):
+            raise ValueError(f"{ref}: professional_demands must contain unique exact demand IDs")
+        records = []
+        allowed = set()
+        for key in demands:
+            group = capability_lookup(demand_id=key)["groups"][0]
+            route = group["selected_operation_contract"]
+            if not demand_applies(items[ref], key, route):
+                raise ValueError(f"{ref}: professional demand does not match current deliverable type or identity scope")
+            allowed.update("domain_adapter:" + name for name in route["local_support_adapters"])
+            allowed.update("production:" + name for name in route["local_support_operations"])
+            records.append({"demand_id": key, "operation_contract": route,
+                            "local_support": group["executor_routes"],
+                            "resource_resolution": group["demand_resolution"],
+                            "knowledge_resources": group["knowledge_resources"],
+                            "methods": group["methods"],
+                            "professional_roles": group["professional_roles"],
+                            "skill_sections": group["skill_sections"]})
+        if local_route and local_route not in allowed:
+            raise ValueError(f"{ref}: actual local route {local_route} is outside selected professional demand support")
+        if external_review and "independent_acceptance" not in demands:
+            raise ValueError(f"{ref}: separate review executor requires independent_acceptance demand")
+        resolved[ref] = records
+    # Outputs remain candidates until actual artifact and owner-outcome evidence.
+    # No inference from file names or task completion.
+    output_bindings = requirements.get("deliverable_outputs", {})
+    if not isinstance(output_bindings, dict) or set(output_bindings) - set(task.get("outputs", [])):
+        raise ValueError("deliverable_outputs must reference exact declared task outputs")
+    for name, binding in output_bindings.items():
+        if (not isinstance(binding, dict) or set(binding) != {"deliverable_id", "variant_id"}
+                or not isinstance(binding["deliverable_id"], str) or binding["deliverable_id"] not in refs):
+            raise ValueError(f"{name}: invalid deliverable output identity")
+        item = items[binding["deliverable_id"]]
+        variants = {v["id"] for v in item["variants"]} or {item["id"]}
+        if not isinstance(binding["variant_id"], str) or binding["variant_id"] not in variants:
+            raise ValueError(f"{name}: output references unknown current deliverable variant")
+    payload = {"professional_routes": resolved, "executor": executor,
+               "local_dispatch": local_route, "separate_review_executor": external_review,
+               "deliverable_outputs": output_bindings}
+    return {"sha256": hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True,
+                                                separators=(",", ":")).encode("utf-8")).hexdigest(),
+            "local_dispatch": local_route, "deliverable_outputs": output_bindings,
+            "assurance": "STRUCTURAL_SCOPE_ONLY_NOT_METHOD_OR_OUTCOME_VERIFIED"}
 
 
 def read_project_brief(root: str | Path, project_id: str) -> dict[str, Any]:

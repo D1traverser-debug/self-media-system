@@ -490,6 +490,7 @@ class StudioEngine:
     def _decision_action_snapshot(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> dict[str, Any]:
         """Bind a local action to actual current goal/task/input bytes, not a parent attestation."""
         brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+        route_binding = self._task_scope_binding(brief, task)
         fields = ("task_id", "title", "kind", "executor", "depends_on_json", "inputs_json",
                   "outputs_json", "acceptance_json", "requirements_json", "priority", "max_attempts")
         inputs = []
@@ -517,18 +518,27 @@ class StudioEngine:
                 "brief_event_no": brief_event, "task_event_no": task_event,
                 "brief_sha256": hashlib.sha256(_json(brief).encode("utf-8")).hexdigest(),
                 "task_sha256": hashlib.sha256(_json({key: task[key] for key in fields}).encode("utf-8")).hexdigest(),
-                "inputs": inputs, "assurance": "LOCAL_STRUCTURAL_BINDING_ONLY"}
+                "inputs": inputs, "assurance": "LOCAL_STRUCTURAL_BINDING_ONLY",
+                **({"professional_route_binding": route_binding} if route_binding is not None else {})}
+
+    @staticmethod
+    def _task_scope_binding(brief, task):
+        from .scope import validate_task_binding
+        try:
+            return validate_task_binding(brief, {
+                "requirements": _loads(task["requirements_json"], {}),
+                "kind": task["kind"], "executor": task["executor"],
+                "outputs": _loads(task["outputs_json"], []),
+            })
+        except ValueError as exc:
+            raise GateError(str(exc)) from exc
 
     def _require_task_decision(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> None:
-        from .scope import EPOCH, validate_task_binding
+        from .scope import EPOCH
         brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
         if brief.get("scope_epoch") != EPOCH:
             return  # isolated historical regression compatibility
         requirements = _loads(task["requirements_json"], {})
-        try:
-            validate_task_binding(brief, {"requirements": requirements})
-        except ValueError as exc:
-            raise GateError(str(exc)) from exc
         decision_id = requirements.get("decision_id")
         if not isinstance(decision_id, str) or not _ID.fullmatch(decision_id):
             raise GateError("current owner task requires an exact decision_id")
@@ -545,7 +555,7 @@ class StudioEngine:
             raise GateError("decision was superseded by owner-scope upgrade; record a new current decision")
         payload = _loads(row["payload_json"], {})
         if payload.get("action_binding") != self._decision_action_snapshot(connection, project_id, task):
-            raise GateError("decision no longer binds current goal, task and input bytes; re-decide")
+            raise GateError("decision no longer binds current goal, task and input bytes or professional route; re-decide")
 
     def claim_next(
         self, project_id: str, worker_id: str, lease_seconds: int = 900, *,
@@ -1962,6 +1972,16 @@ class StudioEngine:
 
             brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
             release_policy = brief.get("release_policy", {})
+            progress = self._deliverable_progress_in_tx(connection, project_id)
+            deliverable_binding = None
+            if progress["status"] == "CANDIDATE_COVERAGE_ONLY":
+                for variant in progress["variants"]:
+                    if any(c["artifact_id"] == artifact_id for c in variant["candidates"]):
+                        deliverable_binding = {"deliverable_id": variant["deliverable_id"],
+                                               "variant_id": variant["variant_id"]}
+                        break
+                if deliverable_binding is None:
+                    failures.append("artifact_not_bound_to_current_deliverable_variant")
             # CLI flags cannot weaken a hard requirement declared by the owner brief.
             effective_require_rights = bool(require_rights or release_policy.get("require_rights", True))
             allowed_rights = set(release_policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)))
@@ -2644,6 +2664,8 @@ class StudioEngine:
 
             receipt = {
                 "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
+                "deliverable_binding": deliverable_binding,
+                "owner_outcome_verified": False,
                 "required_rubrics": effective_rubrics, "review_summary": review_summary,
                 "required_artifacts": required_artifacts,
                 "required_assets": required_assets,
@@ -2799,6 +2821,63 @@ class StudioEngine:
         return {"learning_id": learning_id, "status": "RETIRED", "reason": reason,
                 "source_history_retained": True, "other_methods_changed": False}
 
+    def _deliverable_progress_in_tx(self, connection, project_id, rows=None):
+        """Derived candidate coverage, never a second ledger or an outcome approval."""
+        from .scope import EPOCH
+        from .domain.demand import inspect_demand
+        brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+        if brief.get("scope_epoch") != EPOCH or "deliverable_specs" not in brief:
+            return {"status": "UNTYPED_OR_HISTORICAL", "candidate_coverage_complete": None,
+                    "owner_outcome_verified": False}
+        items = inspect_demand(brief, durable=True)["typed_deliverables"]["deliverables"]
+        by_key = {(d["id"], v): {"deliverable_id": d["id"], "type": d["type"], "variant_id": v,
+                                  "candidates": []}
+                  for d in items for v in ([x["id"] for x in d["variants"]] or [d["id"]])}
+        rejected = []
+        if rows is None:
+            rows = connection.execute("SELECT * FROM tasks WHERE project_id=?", (project_id,)).fetchall()
+        for task in rows:
+            if task["status"] != "COMPLETED":
+                continue
+            requirements = _loads(task["requirements_json"], {})
+            bindings = requirements.get("deliverable_outputs", {})
+            if not bindings:
+                continue
+            try:
+                self._require_task_decision(connection, project_id, task)
+            except GateError as exc:
+                rejected.append({"task_id": task["task_id"], "reason": str(exc)})
+                continue
+            result = _loads(task["result_json"], {})
+            output_ids = result.get("outputs", {})
+            for name, binding in bindings.items():
+                key = (binding["deliverable_id"], binding["variant_id"])
+                artifact = connection.execute(
+                    "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, output_ids.get(name))).fetchone()
+                if (key not in by_key or artifact is None or artifact["name"] != name
+                        or artifact["produced_by_task"] != task["task_id"]
+                        or artifact["status"] not in {"CURRENT", "ACCEPTED"}):
+                    rejected.append({"task_id": task["task_id"], "output": name,
+                                     "reason": "CURRENT_BOUND_ARTIFACT_MISSING"})
+                    continue
+                path = self._project_dir(project_id) / artifact["relative_path"]
+                if not path.is_file() or _sha256(path) != artifact["sha256"]:
+                    rejected.append({"task_id": task["task_id"], "output": name,
+                                     "reason": "ARTIFACT_BYTES_MISSING_OR_CHANGED"})
+                    continue
+                by_key[key]["candidates"].append({
+                    "task_id": task["task_id"], "name": name, "artifact_id": artifact["artifact_id"],
+                    "version": artifact["version"], "sha256": artifact["sha256"],
+                    "media_type": artifact["media_type"], "artifact_status": artifact["status"],
+                    "format_and_quality_verified": False,
+                })
+        variants = list(by_key.values())
+        return {"status": "CANDIDATE_COVERAGE_ONLY",
+                "variants": variants, "rejected_bindings": rejected,
+                "candidate_coverage_complete": all(v["candidates"] for v in variants),
+                "owner_outcome_verified": False, "release_authorized": False}
+
     def status(self, project_id: str) -> dict[str, Any]:
         project = self.project(project_id)
         tasks = self.list_tasks(project_id)
@@ -2813,6 +2892,7 @@ class StudioEngine:
             retry_exhausted = {}
             explicit_waits = {}
             rows = connection.execute("SELECT * FROM tasks WHERE project_id=?", (project_id,)).fetchall()
+            deliverable_progress = self._deliverable_progress_in_tx(connection, project_id, rows)
             for task in rows:
                 detail = _loads(task["error_json"], {})
                 if (task["status"] == "WAITING_INPUT" and isinstance(detail, dict)
@@ -2834,7 +2914,8 @@ class StudioEngine:
                 "decision_blocked_tasks": decision_blocked,
                 "retry_exhausted_tasks": retry_exhausted,
                 "explicit_external_wait_tasks": explicit_waits,
-                "open_failures": open_failures, "event_count": events}
+                "open_failures": open_failures, "event_count": events,
+                "deliverable_progress": deliverable_progress}
 
     def resume(self, project_id: str, *, event_limit: int = 40) -> dict[str, Any]:
         """Reconstruct an actionable project handoff from durable Video state only."""
@@ -2884,12 +2965,15 @@ class StudioEngine:
             next_action = "Import or produce the missing declared inputs, then refresh the task graph."
         elif unfinished:
             next_action = "Inspect dependency blockers and task failures; revise only the affected descendants."
+        elif status["deliverable_progress"]["candidate_coverage_complete"] is False:
+            next_action = "Task graph complete but current deliverable variants lack bound candidates; reconcile the owner outcome and plan the missing work."
         else:
-            next_action = "All declared tasks are complete; run the exact-digest release check and verify the delivery package."
+            next_action = "Task graph complete; verify actual deliverable quality and owner outcome separately, and run release checks only where requested."
         return {
             "project": status["project"],
             "project_status": "TASK_GRAPH_COMPLETE" if not unfinished else "IN_PROGRESS",
             "task_counts": status["task_counts"],
+            "deliverable_progress": status["deliverable_progress"],
             "ready_by_executor": ready_by_executor,
             "decision_blocked_tasks": status["decision_blocked_tasks"],
             "retry_exhausted_tasks": status["retry_exhausted_tasks"],
