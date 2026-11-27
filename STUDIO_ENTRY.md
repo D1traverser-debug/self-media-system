@@ -13,6 +13,9 @@ For explicit SMS architecture construction, repair or interrupted construction c
 
 ## Mission
 
+**Current Draft integration branch architecture (2026-11-27):** the local production registry declares each operation's effect risk. Unsandboxed project Python frame scripts cannot execute from `trusted_code_execution:true` alone: a human operator must independently set `SMS_TRUSTED_PYTHON_RENDERER_SHA256` in the hosting process environment to the exact source SHA256. This does not sandbox Python, authorize publication or validate code safety. For typed durable projects, `sms-studio --root WORKSPACE inspect-outcome PROJECT` explicitly probes current output bytes, formats, dimensions and original owner requirement/variant mapping without writing approval. Structural MATCH is not editorial quality, owner acceptance, or permission to publish. Do not automatically invoke this potentially costly probe in every short conversational task.
+
+
 Turn the owner's actual content goal—including independent writing, still images, IP identity, media editing, platform packaging and original video—into an independently checked deliverable. The system is outcome-driven, not stage-driven. Direct tasks need no artificial project or graph. Durable projects use a task graph derived from the specific brief; independent tasks can run concurrently, and only declared dependencies block work.
 
 ## User-need classification: four orthogonal axes

@@ -6,6 +6,9 @@ The source package, command and product identity have been migrated; the GitHub 
 
 ## Durable work: one goal, one ledger, bounded cycles
 
+For typed projects, `sms-studio --root WORKSPACE inspect-outcome PROJECT` explicitly checks the real candidate output bytes (not filenames), requested pixel shapes and scoped owner clauses across all variants. Technical conformance, artifact release, independent creative review, owner acceptance and permission to publish remain separate. The local registered executor catalog now discloses operation risk; unsandboxed custom Python frame execution requires a separate operator-owned exact-source digest grant, never a task-supplied boolean. See `docs/standalone_social_media_studio.md` and the current 2026-11-27 architecture ADRs.
+
+
 Use `sms-studio intake REQUEST.json` to identify only the owner's current demand. For a persistent project, bind the exact brief/deliverables, register task dependencies and current CAOS-governed decisions, then inspect `sms-studio work-cycle PROJECT --plan-only`. This projects currently admitted parallel lanes (tool/agent/human/external), exact-input handoff packets and decision/input blockers without claiming external authorization. `sms-studio work-cycle PROJECT --max-workers 2` executes **only locally registered, admitted tool operations** in finite concurrent rounds and then reads actual outcomes back. Revisions invalidate dependent work; failures require cause and method challenge; registered artifacts and independent review precede release. Learned methods remain candidates until independently tested and accepted.
 
 Create a durable owner project only with the explicit scope selector: `sms-studio --root WORKSPACE init PROJECT --brief BRIEF.json --owner-task`. Offline regression uses `--offline-fixture` and a separate empty root; its first `init` writes a root-bound `.sms-offline-fixture.json` marker. Do not point fixture commands at an existing owner or historical workspace.

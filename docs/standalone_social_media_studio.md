@@ -8,6 +8,15 @@ Manifest: `social_media_studio/data/studio_manifest.json`
 
 ## 1. Product outcome
 
+### Current upper architecture boundaries on integration branch
+
+The **single** `StudioEngine` control plane is a modular monolith: application services carry release transactions and observed outcome inspection, pure domain modules carry release/effect/conformance/owner-trace policies, and the existing registered production executors are the only local effect dispatchers. External model/provider discovery is not an authorization or a claim of availability.
+
+A named local operation exposes `production_effect_risks` through `sms-studio capabilities --demand ID`. The `python_frame_render` operation is `TRUSTED_CODE_UNSANDBOXED`. Its task/spec `trusted_code_execution` declarations do not grant operating-system authority. For self-reviewed source only, the actual process operator must set `SMS_TRUSTED_PYTHON_RENDERER_SHA256` to the exact 64-character SHA256 of the Python renderer bytes. The effect gate rechecks the current source before entering the trusted-code renderer; missing/mismatched grants are denied. Never run unknown code in a privileged or shared workspace: Python remains **unsandboxed**, capable of host effects after execution.
+
+Use `sms-studio --root WORKSPACE inspect-outcome PROJECT` to run an **explicit, read-only** current typed outcome audit. It checks registered candidates against actual file format, text readability, media streams and declared pixel dimensions, then projects the current owner brief's global and local clauses, prohibitions, acceptance criteria and professional review criteria onto every variant with exact artifact IDs and SHA256. A mismatched JPEG named `.png`, altered pixels, missing cover variant or unproven source clause cannot be silently treated as compliant. This report is not a second release ledger, does not run on every `status`, and never claims creative quality, independent reviewer trust, final user approval or external publication permission. Existing video QA, rights lineage and independent review gates remain distinct.
+
+
 Social Media Studio turns the owner's specific content goal—including independent long/short text, visuals, platform packaging, media repair and original moving media—into the requested output and applicable release materials. Its primary success oracle is the delivered work, not the presence of roles, stages, prompts, diagrams, task counts or passing tests.
 
 Supported work may include cinematic explainers, technology/business documentaries, engineering demonstrations, news × fictional-video satire, meme and entertainment edits, product/brand films, animation, trailers, tutorials, shorts, long-form videos, platform-native derivatives and mixed-media work.

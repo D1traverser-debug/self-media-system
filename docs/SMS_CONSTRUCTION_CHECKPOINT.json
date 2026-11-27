@@ -16,12 +16,15 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "ab0cc0742d910eeea8dd58b0a0077b63a49183e3",
-    "observed_ci_run": 45927195071,
-    "observed_ci": "FAILURE",
-    "observed_failure": "531 passed, 1 failed: old scoped-resource regression found the applicable professional-aesthetics reference missing for short copy; old missing-profile assertion requires an explicit counterexample now that video_generation is covered.",
-    "new_changes": "Add scoped non-video business observations to the existing business outcome adapter; preserve exact source lineage, missing values, ratio semantics and old Episode compatibility. Previous resource regression fix remains in parent commit; exact integration-head CI required.; unify completed-graph continuation across resume, worker pool and work cycle, expose current deliverable coverage, distinguish requested from performed tool execution.",
-    "status": "DRAFT_NOT_MERGED"
+    "observed_head": "6cfc858565da643a011e055c33b23645dc3a4bef",
+    "observed_ci_run": 45958790902,
+    "observed_ci": "PASS_ON_PREVIOUS_EXACT_COMMIT_ONLY",
+    "observed_failure": null,
+    "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability.",
+    "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
+    "observed_head_semantics": "Most recently inspected parent prior to the checkpoint documentation commit; re-query actual GitHub branch head and exact-head CI. Never use this string as CI authority.",
+    "last_known_green_sha": "1bdfba4a522bc512c0542d089f83d481b7e8a690",
+    "last_known_green_pr_run": 45958790902
   },
   "decision": {
     "problem": "Repeated session drift despite product runtime recovery; no current construction-wide task map in inspected tree, historical audit head stale, previous local change missed cross-subsystem contract.",
@@ -58,13 +61,14 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "System audit, topology, full tests and all CLI smoke checks pass on actual integration head; failures investigated, not suppressed.",
-      "next_action": "Check new exact-head CI and actual audio artifact/receipt coverage tests; investigate any first causal failure; do not infer whole product acceptance.",
+      "next_action": "Read PR #56 current HEAD; require both exact-head CI jobs and all 590+ tests, system audit, topology and installed-smoke PASS. Do not mark the latest commit VERIFIED using a previous run.",
       "blocker": null,
       "evidence": [
         "Exact previous head 314bef109a92c15dc862ba8808379da16dc069fa CI 45925295903 and 45925301602 PASS; not evidence for new head.",
         "Exact head eaac02f08ac8af0c2167004e2ec815f40ec60fb7 CI 45926143876 / 45926138591: 528 passed, 2 failed; smoke skipped. Investigated original handlers and task/release interfaces. No source runtime guard removal.",
         "Exact previous head 8545f5343558fbf1ab13f6fa5ccb3b346edc765f CI 45926452418 and 45926458785 PASS; not proof for new head.",
-        "ab0cc07 run 45927195071: 531 passed, 1 failed, diagnosed and preserved scoped resource boundary."
+        "ab0cc07 run 45927195071: 531 passed, 1 failed, diagnosed and preserved scoped resource boundary.",
+        "Commit 1bdfba4 exact-head PR CI 45958790902 and push CI 45958783530 PASS, including observed-output conformance/owner trace tests. 6cfc858 and this checkpoint update require their own exact-head readback."
       ]
     },
     {
@@ -93,7 +97,8 @@
       "blocker": null,
       "evidence": [
         "Common integration-boundary defect traced through scope.resolve_intake, capability_lookup, domain contracts, subsystem and executor registries, quality planner and identity route. Architecture V2 section Y records comparison, implementation and falsifiers. No real independent product acceptance claimed.",
-        "Re-audit traced common gaps between composition and local task admission, and between task completion and deliverable variant coverage; implemented shared admission and derived evidence projection. Independent product acceptance remains open."
+        "Re-audit traced common gaps between composition and local task admission, and between task completion and deliverable variant coverage; implemented shared admission and derived evidence projection. Independent product acceptance remains open.",
+        "Read 2026-11-27 full-tree audit F01-F17 and code paths. Architecture ADRs now separate domain release/authority/conformance/trace from application service/registry. Architecture structure tests pass on prior exact commits; actual owner outcomes remain OPEN."
       ]
     },
     {
@@ -118,12 +123,13 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Owner revision, resume, independent tasks, explicit scope and retired-project negative cases work; direct conversational requests require no artificial project; no stale effect.",
-      "next_action": "Trace demand correction authenticity, decision bindings, invalidation, scope isolation and actual owner-task readback. Preserve single ledger.",
+      "next_action": "Continue negative replay for request revisions, current source authentication and typed/untyped isolation; real owner conversation must be retrieved from authorized source, not from project fixtures.",
       "blocker": null,
       "evidence": [
         "Typed professional demand and exact local dispatcher admission, decision-bound selected route records, and digest-bound output candidate projection implemented; actual exact-head CI and owner outcomes not yet verified.",
         "A real multi-output audio-copy operation exposed a catalog coverage omission. Existing composition supports one operation across multiple explicitly requested deliverables; scoped report types for actual render/assembly/audio/QA evidence without a parallel execution path.",
-        "Re-audit of engine.resume, worker_pool and operation_cycle found contradictory continuation after completed task graph with missing user deliverable. Reuse a single candidate-coverage continuation helper and regression across all three surfaces; no implicit release or actual tool-execution claim."
+        "Re-audit of engine.resume, worker_pool and operation_cycle found contradictory continuation after completed task graph with missing user deliverable. Reuse a single candidate-coverage continuation helper and regression across all three surfaces; no implicit release or actual tool-execution claim.",
+        "2026-11-27 current typed deliverable projection includes expected per-variant pixel shape and explicit read-only inspect-outcome, while ordinary status/resume stay lightweight; no second ledger."
       ]
     },
     {
@@ -260,11 +266,12 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Growth/commercial advice uses actual evidence; unavailable and unapproved provider/paid/posting routes fail closed; no performance claims without measurement.",
-      "next_action": "Verify real typed worker integration and invalid-source negative tests; then obtain current authorized account evidence and independent semantic review only when owner actually requests such operations. Continue portfolio, experiment and offer/rights case coverage.",
+      "next_action": "Test real operator trust boundary and provider-side cost/availability/rights effects; no arbitrary plugin auto-import, no untrusted Python in privileged environment. Live platform/commercial outcomes remain separately unverified.",
       "blocker": null,
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
-        "Re-audit actual legacy business metrics and domain adapter: video-only published_minutes constraint was unsuitable for account/content/commercial reporting. Implemented explicit subject/window + separately imported source JSON extraction and derived ratio receipts through existing adapter; no live external access or causal effect claimed."
+        "Re-audit actual legacy business metrics and domain adapter: video-only published_minutes constraint was unsuitable for account/content/commercial reporting. Implemented explicit subject/window + separately imported source JSON extraction and derived ratio receipts through existing adapter; no live external access or causal effect claimed.",
+        "Existing production registry now declares effect risk for all six operations. Unsandboxed Python source needs an external process-operator exact digest grant; absent/mismatched code digest blocks before process launch. No sandbox, publishing provider or owner effect permission inferred."
       ]
     },
     {
@@ -284,10 +291,11 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
-      "next_action": "Register no unverified reviewer; obtain applicable independent assessment and exact input/output receipts; reopen upstream failures. Blocked for required high-assurance executions until a trusted executor is evaluated.",
+      "next_action": "Introduce real independent source/content/craft reviews bound to current owner clause, artifact digest, exact variant and isolation evidence. Never promote structural MATCH to owner acceptance.",
       "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
       "evidence": [
-        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "2026-11-27 inspect-outcome observes actual candidate file type, pixel dimensions and source-scoped owner obligations per variant; entire user demand, semantic value, owner approval and publication remain explicitly UNVERIFIED. Empty trusted review registry remains fail-closed."
       ]
     },
     {
@@ -303,7 +311,7 @@
       "scenario_ids": [],
       "status": "OPEN",
       "acceptance": "All required obligations and acceptance scenarios independently satisfied or explicitly owner-approved scope change; exact-head CI; clean rollback, repeatable entry/resume and owner-facing handoff. No automatic merge or publish.",
-      "next_action": "Recheck latest head and all open obligations, compare against owner goal; request only actual missing permissions if needed. Keep PR draft until gates pass.",
+      "next_action": "Verify updated checkpoint and actual PR head, full CI and all open B01-B09. Keep Draft; do not merge or publish from architectural tests alone.",
       "blocker": null,
       "evidence": []
     }
