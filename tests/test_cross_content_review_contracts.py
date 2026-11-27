@@ -17,8 +17,8 @@ def _produce_and_review(
         "audience": "The intended platform audience.",
         "deliverables": [deliverable],
         "release_policy": {
-            "require_rights": False,
-            "require_rights_evidence": False,
+            "require_rights": True,
+            "require_rights_evidence": True,
             "no_auto_publish": True,
             "required_review_rubrics": [rubric_id],
             "review_contracts": {
@@ -36,6 +36,13 @@ def _produce_and_review(
         project_id, "review-context", evidence_path,
         kind="evidence", media_type="text/plain", rights_status="NOT_APPLICABLE",
     )
+    if kind == "image":
+        rights_path = tmp_path / f"{project_id}-ownership-evidence.txt"
+        rights_path.write_text("Owner-created image fixture; no external source material.", encoding="utf-8")
+        engine.import_asset(
+            project_id, "ownership-evidence", rights_path,
+            kind="evidence", media_type="text/plain", rights_status="NOT_APPLICABLE",
+        )
     engine.add_tasks(project_id, [{
         "task_id": "produce-deliverable",
         "title": f"Produce {deliverable}",
@@ -66,7 +73,9 @@ def _produce_and_review(
         packet["claim"]["claim_token"],
         {deliverable: {
             "path": str(output_path), "kind": kind, "media_type": media_type,
-            "rights_status": "NOT_APPLICABLE",
+            "rights_status": "OWNED",
+            "metadata": ({"rights_evidence_refs": ["ownership-evidence"]}
+                         if kind == "image" else {}),
         }},
     )
     artifact = result["artifacts"][deliverable]
@@ -103,7 +112,7 @@ def test_x_article_and_static_image_do_not_inherit_video_only_qa_or_media_graph(
         assert all(task["kind"] == "production" for task in tasks)
         release = engine.release_check(
             case["project_id"], artifact["artifact_id"],
-            required_rubrics=[], require_rights=False,
+            required_rubrics=[],
         )
         assert release["pass"] is True, release["failures"]
         assert release["technical_qa"] is None
@@ -145,8 +154,8 @@ def test_short_article_high_assurance_contract_blocks_without_a_verified_review(
         "audience": "Technology readers.",
         "deliverables": ["final-article"],
         "release_policy": {
-            "require_rights": False,
-            "require_rights_evidence": False,
+            "require_rights": True,
+            "require_rights_evidence": True,
             "required_review_rubrics": ["human-cold-read"],
             "review_contracts": {
                 "human-cold-read": {

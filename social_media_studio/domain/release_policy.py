@@ -39,7 +39,11 @@ def resolve_release_guards(
     violations: list[str] = []
     if policy.get("require_rights") is False or caller_require_rights is False:
         violations.append("release_rights_requirement_cannot_be_disabled")
-    if policy.get("require_rights_evidence") is False:
+    media = (video or str(media_type or "").lower().startswith(("image/", "audio/"))
+             or str(artifact_kind or "").lower() in {
+                 "image", "media", "audio", "visual_asset", "sound_asset", "font_asset",
+             })
+    if media and policy.get("require_rights_evidence") is False:
         violations.append("release_media_rights_evidence_cannot_be_disabled")
     if video and policy.get("require_technical_qa") is False:
         violations.append("release_video_technical_qa_cannot_be_disabled")

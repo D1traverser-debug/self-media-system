@@ -65,7 +65,7 @@ def _engine_and_asset(tmp_path, *, policy, kind, media_type, rights_status="OWNE
 
 def test_video_release_downgrade_cannot_accept_without_technical_qa(tmp_path):
     engine, asset = _engine_and_asset(
-        tmp_path, policy={"require_technical_qa": False, "required_review_rubrics": []},
+        tmp_path, policy={"require_technical_qa": False, "required_review_rubrics": ["technical"]},
         kind="video", media_type="video/mp4",
     )
     result = engine.release_check("demo", asset["artifact_id"], required_rubrics=[])
@@ -79,7 +79,7 @@ def test_video_release_downgrade_cannot_accept_without_technical_qa(tmp_path):
 
 def test_rights_bypass_cannot_accept_unknown_rights_from_brief_or_api(tmp_path):
     engine, asset = _engine_and_asset(
-        tmp_path, policy={"require_rights": False}, kind="document",
+        tmp_path, policy={"require_rights": False, "required_review_rubrics": ["editorial"]}, kind="document",
         media_type="text/plain", rights_status="UNKNOWN",
     )
     result = engine.release_check(
@@ -92,7 +92,7 @@ def test_rights_bypass_cannot_accept_unknown_rights_from_brief_or_api(tmp_path):
 
 def test_media_rights_evidence_cannot_be_disabled(tmp_path):
     engine, asset = _engine_and_asset(
-        tmp_path, policy={"require_rights_evidence": False}, kind="image",
+        tmp_path, policy={"require_rights_evidence": False, "required_review_rubrics": ["visual"]}, kind="image",
         media_type="image/png",
     )
     result = engine.release_check("demo", asset["artifact_id"], required_rubrics=[])
