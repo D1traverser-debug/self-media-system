@@ -496,6 +496,14 @@ def capability_lookup(
                 "domain_adapters": [item for item in public_domain_adapter_registry()
                                     if item["name"] in route_adapters],
                 "production_operations": list(route_operations),
+                "production_effect_risks": [
+                    {"operation": operation,
+                     "risk_class": PRODUCTION_EXECUTORS.effect_risk(operation),
+                     "independent_operator_grant_required": (
+                         PRODUCTION_EXECUTORS.effect_risk(operation) == "TRUSTED_CODE_UNSANDBOXED"),
+                     "current_operator_grant_verified": False}
+                    for operation in route_operations
+                ],
                 "route_scope": ("EXACT_DEMAND_SUPPORT_CANDIDATES__NOT_EXECUTOR_ADMISSION" if selected_route
                                 else "GROUP_LEVEL_CANDIDATE__VERIFY_EXACT_TASK_OPERATION_BEFORE_EXECUTION"),
                 "actual_executor_verified": False,

@@ -64,3 +64,18 @@ def test_exact_operator_digest_admits_only_original_bytes(tmp_path, monkeypatch)
 
 def test_local_registered_operations_do_not_need_arbitrary_code_grant():
     assert authorize_effect(LOCAL_DETERMINISTIC).admitted is True
+
+
+def test_discovery_discloses_unsafe_effect_without_claiming_operator_approval():
+    from social_media_studio.scope import capability_lookup
+    route = capability_lookup(demand_id="programmatic_motion_graphics")["groups"][0]["executor_routes"]
+    risks = route["production_effect_risks"]
+    assert risks == [{
+        "operation": "python_frame_render", "risk_class": TRUSTED_CODE_UNSANDBOXED,
+        "independent_operator_grant_required": True, "current_operator_grant_verified": False,
+    }]
+    safe = capability_lookup(demand_id="original_audio_preservation")["groups"][0]["executor_routes"]
+    assert safe["production_effect_risks"] == [{
+        "operation": "ffmpeg_video_audio_copy", "risk_class": LOCAL_DETERMINISTIC,
+        "independent_operator_grant_required": False, "current_operator_grant_verified": False,
+    }]
