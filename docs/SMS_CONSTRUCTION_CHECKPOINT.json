@@ -16,20 +16,21 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "3a6692446b496cf34a55dd929fdb1a7efdfd3c34",
-    "observed_ci_run": 45959228172,
-    "observed_ci": "BASELINE_GREEN_STATUS_TO_RECHECK_ON_NEW_HEAD",
+    "observed_head": "7fa1a0fcacb295890de8488084ed2092ab34421c",
+    "observed_ci_run": null,
+    "observed_ci": "EXACT_HEAD_OF_THIS_DOCUMENT_COMMIT_MUST_BE_RECHECKED",
     "observed_failure": null,
     "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability.",
     "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
     "observed_head_semantics": "Most recently inspected parent prior to the checkpoint documentation commit; re-query actual GitHub branch head and exact-head CI. Never use this string as CI authority.",
-    "last_known_green_sha": "b7db930f85ca59bdca9fe090cb2e36a5b3c1add9",
-    "last_known_green_pr_run": 45959228172,
+    "last_known_green_sha": "98cec7fd097baefc6ae2a309cf08b5b8cd6eb038",
+    "last_known_green_pr_run": 45977978152,
     "repository_full_name": "D1traverser-debug/self-media-system",
     "repository_url": "https://github.com/D1traverser-debug/self-media-system",
     "rename_checked_repository_id": "1411170938",
     "rename_verified_at": "2026-11-27",
-    "rename_previous_slug_historical_only": true
+    "rename_previous_slug_historical_only": true,
+    "last_known_green_push_run": 45977971048
   },
   "decision": {
     "problem": "Repeated session drift despite product runtime recovery; no current construction-wide task map in inspected tree, historical audit head stale, previous local change missed cross-subsystem contract.",
@@ -254,7 +255,8 @@
       "blocker": null,
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
-        "Explicit read-only source->result audio assurance now reuses immutable SQLite artifact_inputs edges and recomputes exact packet-hash equality of current source/video. Positive full identity requires both exact current file hashes, exactly one video source, and actual FFprobe packet equivalence; short-only prefix remains unverified for full-source promises. Existing runtime output test and negative unbound/tampered source tests added; new exact-head CI required."
+        "Explicit read-only source->result audio assurance now reuses immutable SQLite artifact_inputs edges and recomputes exact packet-hash equality of current source/video. Positive full identity requires both exact current file hashes, exactly one video source, and actual FFprobe packet equivalence; short-only prefix remains unverified for full-source promises. Existing runtime output test and negative unbound/tampered source tests added; new exact-head CI required.",
+        "Source-bound audio bytes actually recomputed independently during opt-in inspector; source missing/changed, multi-source ambiguity, prefix-only audio, absence of audio and exact full packet identity have differentiated statuses. Actual audio/video full play and edit quality remain not yet reviewed."
       ]
     },
     {
@@ -301,12 +303,13 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
-      "next_action": "Run full exact-head CI, then verify independent creative/owner evidence per final selected artifact+revision; test video PCM/bitstream/audio-sync through existing source-bound media QA rather than container metadata.",
+      "next_action": "Perform exact-head CI and real owner-selected output playback/semantic review. Technical source-bound audio checks are separately verified from independent craft and owner approval; unresolved external provider, model quality and native CAOS activation must not be marked complete.",
       "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
         "2026-11-27 inspect-outcome observes actual candidate file type, pixel dimensions and source-scoped owner obligations per variant; entire user demand, semantic value, owner approval and publication remain explicitly UNVERIFIED. Empty trusted review registry remains fail-closed.",
-        "Internal assurance 2026-11-27: explicit per-variant artifact selection now blocks multiple unselected candidates and multiple accepted artifacts, surfaces all candidates and rejected source bindings, and tests actual current PNG alternative conflict. MEDIA_TRANSFORM original_audio_promise with no audio stream is a mismatch; presence of a stream remains source-bound identity UNVERIFIED. No creative/owner outcome approval inferred; exact-head CI required."
+        "Internal assurance 2026-11-27: explicit per-variant artifact selection now blocks multiple unselected candidates and multiple accepted artifacts, surfaces all candidates and rejected source bindings, and tests actual current PNG alternative conflict. MEDIA_TRANSFORM original_audio_promise with no audio stream is a mismatch; presence of a stream remains source-bound identity UNVERIFIED. No creative/owner outcome approval inferred; exact-head CI required.",
+        "Output observer now independently rechecks exact source->result encoded packets for BITSTREAM_IDENTITY using current immutable artifact_inputs lineage, rejects ambiguous options and discards mixed-revision readbacks. Engineering proof is not creative/owner sign-off. Before this checkpoint doc commit, SHA 98cec7 had 602 passed and both GitHub CI green; new exact-head status pending."
       ]
     },
     {

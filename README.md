@@ -6,6 +6,9 @@ GitHub repository: **[D1traverser-debug/self-media-system](https://github.com/D1
 
 ## Durable work: one goal, one ledger, bounded cycles
 
+An explicit `inspect-outcome PROJECT` never treats **one valid draft among several candidates** as the final selected user deliverable. It reports unresolved alternatives. For MEDIA_TRANSFORM with a `BITSTREAM_IDENTITY` promise, a real full-source audio match can be proved only by independently recomputing encoded-packet hashes against one exact, current, ledger-linked source video. Retained prefixes and unbound sources do not pass full-audio identity; a concurrent brief/asset change discards the inspection snapshot. These are technical gates, **not** judgments of writing, visual quality, owner satisfaction or publication approval.
+
+
 For typed projects, `sms-studio --root WORKSPACE inspect-outcome PROJECT` explicitly checks the real candidate output bytes (not filenames), requested pixel shapes and scoped owner clauses across all variants. Technical conformance, artifact release, independent creative review, owner acceptance and permission to publish remain separate. The local registered executor catalog now discloses operation risk; unsandboxed custom Python frame execution requires a separate operator-owned exact-source digest grant, never a task-supplied boolean. See `docs/standalone_social_media_studio.md` and the current 2026-11-27 architecture ADRs.
 
 

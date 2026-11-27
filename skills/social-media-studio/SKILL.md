@@ -214,6 +214,9 @@ Import external inputs with `import-asset`. Do not write outputs over an existin
 
 ## 8. Independent review and release
 
+For actual multi-variant deliverables, use `sms-studio inspect-outcome PROJECT` when material: each variant needs its own unambiguous candidate or individual accepted artifact. One good candidate does not settle several unselected options. If the owner requests original audio, distinguish an audio stream's **presence**, a verified **retained prefix**, and an independently recomputed **full encoded packet identity** from one current source actually bound by `artifact_inputs`. This technical proof applies only to a declared `BITSTREAM_IDENTITY` promise and never substitutes for listening/semantic/owner review. If the brief or candidate set changes during inspection, retry the current revision rather than reuse older observations.
+
+
 Review the actual bytes, not a prompt, description, contact sheet alone, or task status. Use reviewers who did not produce the artifact. Where the platform supports it, keep review context blind to sibling verdicts and record the actual reviewer/context. A different reviewer ID alone is only a structural separation check, not cryptographic proof of independent cognition.
 
 Use separate rubrics appropriate to the project. Common dimensions:

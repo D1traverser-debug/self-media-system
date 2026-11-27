@@ -160,6 +160,15 @@ An upstream change invalidates only the affected task and dependency descendants
 
 ## 9. Independent quality review and release
 
+### Internal result-proof rules (2026-11-27)
+
+The opt-in `inspect-outcome` path first resolves the exact current variant. Several unfinished alternatives are **AMBIGUOUS**, not `MATCH` merely because any one passes a byte/shape test. Two individually accepted artifacts for the same variant are likewise unresolved. A sole current proposal and one individually accepted artifact have distinct, explicit selection reasons; **neither** is a signed owner's creative approval.
+
+For a `MEDIA_TRANSFORM` with `constraints.original_audio_promise=BITSTREAM_IDENTITY`, missing audio streams fail. An existing stream alone remains unverified. The inspector can prove the narrower technical claim independently by following a registered `artifact_inputs` source-video edge, verifying the exact source/output files and recomputing audio-packet SHA256 sequence equality. Exact single source, current digests and complete packets are required. A shorter retained audio prefix does not imply **full-source** preservation; `PCM_IDENTITY` and `PERCEPTUAL_SIMILARITY` still need other methods. The producer-generated receipt is not independent evidence. Real full playback, duration, picture restoration, natural copy and user intent remain unverified until independently reviewed.
+
+A read-only inspection checks brief revision and candidate projection again after probing. Changes yield `INSPECTION_SNAPSHOT_CHANGED_RETRY`, not mixed-revision PASS. The recheck is a best-effort consistency boundary, not a lock preventing future edits or granting automatic publication rights.
+
+
 A review is bound to the exact artifact ID and SHA-256, reviewer identity, producer identity, rubric, dimensions, evidence references, outcome and notes. A producer cannot review its own artifact. A review on stale bytes cannot authorize the current artifact.
 
 The runtime does not impose one global quality score. The brief selects relevant rubrics and may name every required final/package artifact and every source asset whose rights must be cleared. Conflicting PASS and FAIL reviews on the same exact artifact/rubric block release; a single PASS cannot erase a conflicting independent review. Typical rubrics include:
