@@ -129,7 +129,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
             "ReleaseAssuranceService(self).release_check(" in engine_source
             and "self._engine.review_trust_registry.verify(" in release_source
             and "review_execution_nonces" in release_source
-            and "REVIEW_PACKET_BOUND" in release_source
+            and "REVIEW_PACKET_BOUND" in engine_source
             and "_stage_review_inputs" in engine_source
             and "_verify_review_stage_inputs" in engine_source
         )
