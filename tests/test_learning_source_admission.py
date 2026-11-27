@@ -66,3 +66,24 @@ def test_process_quality_separates_owner_scope_changes_from_preventable_assistan
     skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
     assert "PROCESS_QUALITY_BASELINE.md" in skill_text
     assert "Do not turn every rejected draft into a global rule." in skill_text
+
+
+def test_candidate_methods_are_loaded_for_scoped_use_not_silently_skipped():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "Candidate status is not a reason to skip a relevant professional reference." in skill_text
+    assert "sms-studio knowledge --id ID --include-nonactive" in skill_text
+    assert "bounded method hypothesis" in skill_text
+    assert "Preserve its candidate status" in skill_text
+    for demand in ("short_form_copy", "platform_title", "cover_copy", "cover_design", "long_form_editorial"):
+        assert "`" + demand + "`" in skill_text
+
+
+def test_exact_demand_profiles_point_to_the_expected_editorial_and_packaging_sources():
+    import json
+    profile = json.loads((ROOT / "social_media_studio/legacy/data/capabilities.json").read_text(encoding="utf-8"))
+    groups = {g["id"]: g for g in profile["professional_capability_groups"]}
+    assert "short-form-social-copy" in groups["editorial_writing"]["demand_profiles"]["short_form_copy"]["knowledge_refs"]
+    assert "platform-packaging" in groups["platform_packaging"]["demand_profiles"]["platform_title"]["knowledge_refs"]
+    assert "platform-packaging" in groups["platform_packaging"]["demand_profiles"]["cover_copy"]["knowledge_refs"]
+    assert "visual-development" in groups["visual_design"]["knowledge_refs"]
+    assert "platform-packaging" in groups["visual_design"]["demand_profiles"]["cover_design"]["knowledge_refs"]

@@ -146,7 +146,14 @@ A broad capability group is an index, not a complete method selection. Resolve t
 - sms-studio capabilities --group platform_packaging --demand cover_copy
 - sms-studio capabilities --group editorial_writing --demand news_satire_packaging
 
-Use knowledge lookup with the exact returned IDs. Candidate references require explicit inclusion of nonactive methods and must remain candidates until independently validated. If lookup reports GROUP_LEVEL_FALLBACK, it has not resolved demand-specific resources; manually inspect applicability and report the routing gap rather than pretending an exact profile exists.
+Use knowledge lookup with the exact returned IDs. **Candidate status is not a reason to skip a relevant professional reference.** Retrieve the selected demand's exact candidate references with `sms-studio knowledge --id ID --include-nonactive --repo-root REPOSITORY`, read the original file, and use it as a bounded method hypothesis for the current task. Preserve its candidate status; do not call it validated, do not treat it as an effect permission and do not silently promote it. If lookup reports GROUP_LEVEL_FALLBACK, it has not resolved demand-specific resources; manually inspect applicability and report the routing gap rather than pretending an exact profile exists.
+
+For common self-media deliverables, the demand profiles should resolve these original references:
+- `short_form_copy` → `short-form-social-copy`;
+- `platform_title`, `platform_description`, `platform_tags`, `cover_copy` → `platform-packaging` (description may also require `short-form-social-copy`);
+- `cover_design` → `visual-development`, `platform-packaging` and the relevant visual/quality criteria;
+- `long_form_editorial` → `long-form-editorial`.
+Do not replace exact demand lookup with the whole capability-group index. Candidate methods are available for scoped use and challenge; only the evidence ladder controls promotion.
 
 The benchmark-policy reference is conditional visual/motion calibration, not a default writing method. EDITORIAL_PACKAGING is only for genuine news/current-affairs video satire; never apply it by default to gameplay, pets, fictional entertainment or ordinary captions. Group executor routes are discovery metadata, not proof that the exact operation is available for the current task.
 
