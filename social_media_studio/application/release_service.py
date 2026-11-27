@@ -16,7 +16,9 @@ from ..domain.release_policy import resolve_release_guards
 from ..engine_support import (
     ContractError, ProjectNotFound, RIGHTS_ALLOWED, _loads, _sha256,
 )
-from ..review_execution import ReviewExecutionError, digest_json, review_contract_digest
+from ..review_execution import (
+    ReviewExecutionError, build_review_packet, digest_json, review_contract_digest,
+)
 
 
 class ReleaseAssuranceService:
