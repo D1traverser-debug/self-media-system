@@ -13,6 +13,7 @@ from typing import Any, Mapping
 
 from .contracts import FrameRenderSpec, ProductionContractError
 from .ffmpeg_assembler import RenderExecutionError, sha256_file, _write_json_exclusive
+from .effect_gate import require_exact_code_grant
 
 
 class PythonFrameRenderer:
@@ -55,6 +56,8 @@ class PythonFrameRenderer:
         renderer_type = str(renderer_artifact.get("media_type", "")).lower()
         if renderer_artifact.get("kind") != "source_code" or renderer_type not in {"text/x-python", "text/plain", "text/x-python-script"}:
             raise ProductionContractError("renderer_input must be a registered Python source_code artifact")
+        if require_exact_code_grant(renderer_path) != renderer_meta["sha256"]:
+            raise ProductionContractError("renderer bytes changed after exact operator grant")
         asset_paths: dict[str, str] = {}
         input_meta = [renderer_meta]
         for name in spec.asset_inputs:

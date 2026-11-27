@@ -327,7 +327,7 @@ def test_local_tool_pool_claims_independent_render_tasks_in_the_same_round(tmp_p
 
 
 
-def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
+def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path, monkeypatch):
     from social_media_studio.production.contracts import FrameRenderSpec, ProductionContractError
 
     engine = StudioEngine(tmp_path / "motion-workspace")
@@ -346,6 +346,8 @@ def test_trusted_python_frame_renderer_produces_a_real_motion_shot(tmp_path):
         "    return image\n",
         encoding="utf-8",
     )
+    # An operator grants this exact fixture's bytes outside untrusted task JSON.
+    monkeypatch.setenv("SMS_TRUSTED_PYTHON_RENDERER_SHA256", hashlib.sha256(renderer.read_bytes()).hexdigest())
     frame_spec = tmp_path / "frame-render-spec.json"
     frame_spec.write_text(json.dumps({
         "schema_version": "1.0",
