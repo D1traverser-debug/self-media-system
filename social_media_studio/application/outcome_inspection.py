@@ -17,6 +17,7 @@ from PIL import Image, UnidentifiedImageError
 from ..domain.conformance import assess_observation, select_variant_candidate
 from ..domain.outcome_traceability import trace_owner_requirements
 from ..engine_support import _sha256
+from ..production.audio_preserve import AudioIdentityError, verify_audio_packet_identity
 
 
 _TEXT_TYPES = frozenset({
@@ -84,6 +85,81 @@ def _probe(path: Path, *, deliverable_type: str, declared_media_type: str) -> di
         return {"error": "FILE_FORMAT_OR_PROBE_FAILED"}
 
 
+def _verify_source_bound_encoded_audio(
+    db: Any, project_dir: Path, project_id: str, output_artifact_id: str,
+    output_path: Path, output_sha256: str,
+) -> dict[str, Any]:
+    """Re-read actual source and output packets via original immutable lineage.
+
+    Never trusts a produced JSON receipt or source_sha256 asserted by a task.
+    Does not claim PCM/perceptual identity, creative approval, or ownership.
+    """
+    rows = db.execute(
+        "SELECT ai.input_artifact_id, ai.input_sha256, a.sha256, a.relative_path, "
+        "a.kind, a.media_type, a.status FROM artifact_inputs ai "
+        "JOIN artifacts a ON a.project_id=ai.project_id AND a.artifact_id=ai.input_artifact_id "
+        "WHERE ai.project_id=? AND ai.output_artifact_id=?",
+        (project_id, output_artifact_id),
+    ).fetchall()
+    sources = [r for r in rows if r["kind"] in {"video", "media"}
+               and str(r["media_type"]).startswith("video/")]
+    if len(sources) != 1:
+        return {
+            "status": "UNVERIFIED",
+            "reason": "EXACT_SINGLE_REGISTERED_SOURCE_VIDEO_NOT_AVAILABLE",
+            "candidate_source_count": len(sources),
+        }
+    source = sources[0]
+    proof: dict[str, Any] = {
+        "source_artifact_id": source["input_artifact_id"],
+        "source_sha256": source["input_sha256"],
+        "output_artifact_id": output_artifact_id,
+        "output_sha256": output_sha256,
+    }
+    safe_root = project_dir.resolve()
+    source_path = (safe_root / source["relative_path"]).resolve()
+    if (source["status"] not in {"CURRENT", "ACCEPTED"}
+            or source["input_sha256"] != source["sha256"]
+            or safe_root not in source_path.parents
+            or not source_path.is_file()
+            or _sha256(source_path) != source["input_sha256"]):
+        return {**proof, "status": "MISMATCH",
+                "reason": "SOURCE_INPUT_ARTIFACT_NOT_CURRENT_OR_BYTES_CHANGED"}
+    if shutil.which("ffprobe") is None:
+        return {**proof, "status": "UNVERIFIED", "reason": "AUDIO_PACKET_PROBE_TOOL_UNAVAILABLE"}
+    try:
+        measured = verify_audio_packet_identity(source_path, output_path, prefix=False)
+    except AudioIdentityError as first_error:
+        # A legitimate trim may preserve only the audio packets for the kept
+        # duration. Prove that limited fact without promoting the full-promise
+        # conformance claim.
+        if "unavailable or timed out" in str(first_error):
+            return {**proof, "status": "UNVERIFIED", "reason": "AUDIO_PACKET_PROBE_INCONCLUSIVE"}
+        try:
+            prefix = verify_audio_packet_identity(source_path, output_path, prefix=True)
+        except AudioIdentityError as second_error:
+            if "unavailable or timed out" in str(second_error) or "ffprobe failed" in str(second_error):
+                return {**proof, "status": "UNVERIFIED", "reason": "AUDIO_PACKET_PROBE_INCONCLUSIVE"}
+            return {**proof, "status": "MISMATCH",
+                    "reason": "SOURCE_ENCODED_AUDIO_PACKETS_DIFFER_FROM_OUTPUT"}
+        if (_sha256(source_path) != source["input_sha256"]
+                or _sha256(output_path) != output_sha256):
+            return {**proof, "status": "MISMATCH", "reason": "AUDIO_SOURCE_OR_OUTPUT_CHANGED_DURING_PROBE"}
+        return {**proof, "status": "UNVERIFIED",
+                "reason": "ONLY_RETAINED_SOURCE_AUDIO_PREFIX_VERIFIED",
+                "retained_packet_count": prefix["packet_count_output"],
+                "full_source_packet_count": prefix["packet_count_source"]}
+    if (_sha256(source_path) != source["input_sha256"]
+            or _sha256(output_path) != output_sha256):
+        return {**proof, "status": "MISMATCH", "reason": "AUDIO_SOURCE_OR_OUTPUT_CHANGED_DURING_PROBE"}
+    return {**proof, "status": "MATCH", "assurance": "INDEPENDENTLY_RECOMPUTED_ENCODED_AUDIO_PACKET_SHA256_MATCH",
+            "packet_count_source": measured["packet_count_source"],
+            "packet_count_output": measured["packet_count_output"],
+            "packet_sequence_digest": measured["audio_packet_sequence_digest"],
+            "codec": measured["codec"],
+            "audio_render_quality_verified": False, "owner_outcome_verified": False}
+
+
 class OutcomeInspectionService:
     def __init__(self, engine: Any):
         self._engine = engine
@@ -128,6 +204,32 @@ class OutcomeInspectionService:
                                 expected_shape=variant.get("expected_shape"), observation=probe,
                                 constraints=variant.get("constraints"),
                             )
+                            # A real registered source + recorded artifact-input
+                            # edge lets us independently re-compute encoded audio
+                            # identity. A task/LLM-supplied receipt is never proof.
+                            constraints = variant.get("constraints") or {}
+                            if (variant["type"] == "MEDIA_TRANSFORM"
+                                    and constraints.get("original_audio_promise") == "BITSTREAM_IDENTITY"
+                                    and verdict["status"] == "UNVERIFIED"
+                                    and probe.get("kind") == "VIDEO"
+                                    and probe.get("has_audio_stream") is True):
+                                proof = _verify_source_bound_encoded_audio(
+                                    db, project_dir, project_id, candidate["artifact_id"],
+                                    path, row["sha256"],
+                                )
+                                verdict["source_bound_audio_identity"] = proof
+                                if proof["status"] == "MATCH":
+                                    verdict["status"] = "MATCH"
+                                    verdict["audio_preservation_verified"] = True
+                                    verdict["limitations"] = [
+                                        reason for reason in verdict["limitations"]
+                                        if reason != "ORIGINAL_AUDIO_PROMISE_NEEDS_SOURCE_BOUND_QA_PROOF"
+                                    ]
+                                elif proof["status"] == "MISMATCH":
+                                    verdict["status"] = "MISMATCH"
+                                    verdict["failures"].append(proof["reason"])
+                                else:
+                                    verdict["limitations"].append(proof["reason"])
                     observed.append({**sample, "conformance": verdict})
                 selection = select_variant_candidate(observed)
                 selected = next(

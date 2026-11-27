@@ -149,3 +149,66 @@ def test_real_owner_scoped_studio_claim_dispatch_complete_and_audio_receipt(tmp_
     assert candidates["audio-identity-report"][0]["media_type"]=="application/json"
     assert candidates["edited-video"][0]["artifact_id"] != candidates["audio-identity-report"][0]["artifact_id"]
 
+    # Recompute exact encoded-packet identity from recorded source->output
+    # artifact lineage, not from the operation's self-reported QA JSON.
+    inspected = engine.inspect_outcome(project)
+    by_deliverable = {row["deliverable_id"]: row for row in inspected["variants"]}
+    edited = by_deliverable["edited-video"]
+    assert edited["observable_conformance"] == "MATCH", edited
+    proof = edited["candidates"][0]["conformance"]["source_bound_audio_identity"]
+    assert proof["status"] == "MATCH"
+    assert proof["source_artifact_id"]
+    assert proof["source_sha256"] == sha256_file(video)
+    assert proof["packet_count_source"] == proof["packet_count_output"]
+    assert edited["candidates"][0]["conformance"]["audio_preservation_verified"] is True
+    assert inspected["observed_conformance_complete"] is True
+    assert inspected["owner_outcome_verified"] is False
+    assert inspected["whole_demand_accepted"] is False
+
+
+
+def test_direct_source_audio_proof_has_no_right_to_infer_source_for_unbound_output(tmp_path):
+    import sqlite3
+    from social_media_studio.application.outcome_inspection import _verify_source_bound_encoded_audio
+    source = source_clip(tmp_path)
+    db = sqlite3.connect(":memory:")
+    db.row_factory = sqlite3.Row
+    db.executescript("""
+      CREATE TABLE artifacts (project_id TEXT, artifact_id TEXT, relative_path TEXT,
+                              kind TEXT, media_type TEXT, sha256 TEXT, status TEXT);
+      CREATE TABLE artifact_inputs (project_id TEXT, output_artifact_id TEXT,
+                                   input_artifact_id TEXT, input_sha256 TEXT);
+    """)
+    no_proof = _verify_source_bound_encoded_audio(
+        db, tmp_path, "unbound", "not-an-actual-produced-artifact",
+        source, sha256_file(source),
+    )
+    assert no_proof["status"] == "UNVERIFIED"
+    assert no_proof["candidate_source_count"] == 0
+    assert no_proof["reason"] == "EXACT_SINGLE_REGISTERED_SOURCE_VIDEO_NOT_AVAILABLE"
+    db.close()
+
+
+def test_changed_lineage_source_does_not_validate_audio_using_stale_source_digest(tmp_path):
+    import sqlite3
+    from social_media_studio.application.outcome_inspection import _verify_source_bound_encoded_audio
+    source = source_clip(tmp_path)
+    original_digest = sha256_file(source)
+    db = sqlite3.connect(":memory:")
+    db.row_factory = sqlite3.Row
+    db.executescript("""
+      CREATE TABLE artifacts (project_id TEXT, artifact_id TEXT, relative_path TEXT,
+                              kind TEXT, media_type TEXT, sha256 TEXT, status TEXT);
+      CREATE TABLE artifact_inputs (project_id TEXT, output_artifact_id TEXT,
+                                   input_artifact_id TEXT, input_sha256 TEXT);
+    """)
+    db.execute("INSERT INTO artifacts VALUES(?,?,?,?,?,?,?)",
+               ("p", "source", source.name, "video", "video/mp4", original_digest, "CURRENT"))
+    db.execute("INSERT INTO artifact_inputs VALUES(?,?,?,?)",
+               ("p", "output", "source", original_digest))
+    source.write_bytes(b"changed source bytes")
+    proof = _verify_source_bound_encoded_audio(db, tmp_path, "p", "output",
+                                               source, sha256_file(source))
+    assert proof["status"] == "MISMATCH"
+    assert proof["reason"] == "SOURCE_INPUT_ARTIFACT_NOT_CURRENT_OR_BYTES_CHANGED"
+    db.close()

@@ -250,10 +250,11 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Actual original-video and transformation results with correct full-duration/audio preservation, requested scope, visual quality and media QA; real files, exact digests.",
-      "next_action": "Inspect transform limitations and provider contracts; test eligible packet-copy, edit, enhancement and original motion against separate oracles.",
+      "next_action": "Test independent source-bound audio QA against real crops, trims, re-encodes and stale inputs on exact-head CI; then address source-native content semantics and audio/video duration expectations separately.",
       "blocker": null,
       "evidence": [
-        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "Explicit read-only source->result audio assurance now reuses immutable SQLite artifact_inputs edges and recomputes exact packet-hash equality of current source/video. Positive full identity requires both exact current file hashes, exactly one video source, and actual FFprobe packet equivalence; short-only prefix remains unverified for full-source promises. Existing runtime output test and negative unbound/tampered source tests added; new exact-head CI required."
       ]
     },
     {
