@@ -117,7 +117,7 @@ def test_intermediate_output_not_a_deliverable_even_if_task_completed(tmp_path):
                                                 "media_type": "text/plain", "rights_status": "OWNED"}})
     progress = engine.status("fresh")["deliverable_progress"]
     assert not progress["candidate_coverage_complete"]
-    result = engine.release_check("fresh", completed["artifacts"]["notes"]["artifact_id"], required_rubrics=[])
+    result = engine.release_check("fresh", completed["artifacts"]["notes"]["artifact_id"], required_rubrics=["fixture-independent-review"])
     assert "artifact_not_bound_to_current_deliverable_variant" in result["failures"]
     assert result["owner_outcome_verified"] is False
 
@@ -131,3 +131,24 @@ def test_local_support_route_can_be_declared_without_claiming_semantic_execution
     binding = result["payload"]["action_binding"]["professional_route_binding"]
     assert binding["local_dispatch"] == "production:source_evidence_audit"
     assert binding["assurance"] == "STRUCTURAL_SCOPE_ONLY_NOT_METHOD_OR_OUTCOME_VERIFIED"
+
+
+def test_local_evidence_routes_support_their_own_requested_report_not_unrelated_outputs(tmp_path):
+    from social_media_studio.scope import capability_lookup
+    for key, operation in (
+        ("programmatic_motion_graphics", "python_frame_render"),
+        ("video_assembly", "ffmpeg_assemble"),
+        ("original_audio_preservation", "ffmpeg_video_audio_copy"),
+        ("technical_media_qa", "ffprobe_media_qa"),
+    ):
+        group = capability_lookup(demand_id=key)["groups"][0]
+        route = group["selected_operation_contract"]
+        assert "ANALYSIS_REPORT" in route["deliverable_types"]
+        assert operation in route["local_support_operations"]
+        assert "SHORT_COPY" not in route["deliverable_types"]
+        assert not group["executor_routes"]["actual_executor_verified"]
+        view = resolve_intake(tmp_path, {"mode": "NEW", "goal": "Inspect operation evidence",
+            "deliverable_specs": [{"id": "report", "type": "ANALYSIS_REPORT"}]},
+            selection={"deliverables": {"report": [key]}})["demand_composition"]
+        assert view["deliverables"][0]["proposed_professional_routes"][0]["demand_id"] == key
+        assert view["effect_authorized"] is False

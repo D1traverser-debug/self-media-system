@@ -1226,7 +1226,8 @@
         },
         "programmatic_motion_graphics": {
           "deliverable_types": [
-            "ORIGINAL_VIDEO"
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
           ],
           "local_support_adapters": [
             "programmatic_graphic_render"
@@ -1234,7 +1235,7 @@
           "local_support_operations": [
             "python_frame_render"
           ],
-          "scope": "Motion graphic MP4 candidate only, from a declared render spec, required assets and authorized code; not general image generation or final video acceptance.",
+          "scope": "Motion graphic MP4 candidate only, from a declared render spec, required assets and authorized code; not general image generation or final video acceptance. Also supports an explicitly requested analysis report of its own render receipt, not a generic creative analysis.",
           "requires_current_method_and_executor_check": true
         }
       }
@@ -1373,7 +1374,8 @@
         "video_assembly": {
           "deliverable_types": [
             "MEDIA_TRANSFORM",
-            "ORIGINAL_VIDEO"
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
           ],
           "local_support_adapters": [
             "timeline_validate",
@@ -1382,7 +1384,7 @@
           "local_support_operations": [
             "ffmpeg_assemble"
           ],
-          "scope": "Assembly only from existing inputs and timeline; does not promise original audio packet identity.",
+          "scope": "Assembly only from existing inputs and timeline; does not promise original audio packet identity. Also supports an explicitly requested analysis report of its own assembly or timeline/continuity evidence, not arbitrary research.",
           "requires_current_method_and_executor_check": true
         }
       }
@@ -1482,13 +1484,14 @@
         },
         "original_audio_preservation": {
           "deliverable_types": [
-            "MEDIA_TRANSFORM"
+            "MEDIA_TRANSFORM",
+            "ANALYSIS_REPORT"
           ],
           "local_support_adapters": [],
           "local_support_operations": [
             "ffmpeg_video_audio_copy"
           ],
-          "scope": "Eligible passthrough/geometry crop/end-trim with exact encoded audio packet proof; reject unsupported transformations.",
+          "scope": "Eligible passthrough/geometry crop/end-trim with exact encoded audio packet proof; reject unsupported transformations. Supports an explicitly requested analysis report of its own audio-identity receipt from the same edit operation, not unrelated analysis.",
           "requires_current_method_and_executor_check": true
         },
         "audio_enhancement": {
@@ -2079,7 +2082,8 @@
         "technical_media_qa": {
           "deliverable_types": [
             "MEDIA_TRANSFORM",
-            "ORIGINAL_VIDEO"
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
           ],
           "local_support_adapters": [
             "extended_media_qa"
@@ -2087,7 +2091,7 @@
           "local_support_operations": [
             "ffprobe_media_qa"
           ],
-          "scope": "Inspect exact media bytes; technical measurements not aesthetic PASS.",
+          "scope": "Inspect exact media bytes; technical measurements not aesthetic PASS. Supports explicitly requested technical measurement reports on exact media bytes, not general semantic or creative review.",
           "requires_current_method_and_executor_check": true
         },
         "editorial_quality_review": {

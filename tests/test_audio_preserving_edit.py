@@ -113,6 +113,10 @@ def test_real_owner_scoped_studio_claim_dispatch_complete_and_audio_receipt(tmp_
         "inputs":["source-clip","edit-spec"],
         "outputs":["edited-video","audio-identity-report"],
         "requirements":{"deliverable_refs":["edited-video","audio-identity-report"],
+            "professional_demands":{"edited-video":["video_reframe","original_audio_preservation"],
+                                    "audio-identity-report":["original_audio_preservation"]},
+            "deliverable_outputs":{"edited-video":{"deliverable_id":"edited-video","variant_id":"edited-video"},
+                                   "audio-identity-report":{"deliverable_id":"audio-identity-report","variant_id":"audio-identity-report"}},
             "decision_id":"crop-decision",
             "production":{"operation":"ffmpeg_video_audio_copy","edit_spec_input":"edit-spec"}},
         "acceptance":{"audio":"exact original encoded packet payloads","video":"crop to declared geometry"},
@@ -137,3 +141,11 @@ def test_real_owner_scoped_studio_claim_dispatch_complete_and_audio_receipt(tmp_
     assert finish["identity_receipt"]["audio_identity"]["promise"]=="BITSTREAM_IDENTITY"
     assert finish["identity_receipt"]["owner_outcome_verified"] is False
     assert finish["identity_receipt"]["candidate_only"] is True
+    progress=engine.status(project)["deliverable_progress"]
+    assert progress["candidate_coverage_complete"] is True
+    assert progress["owner_outcome_verified"] is False
+    candidates={v["deliverable_id"]:v["candidates"] for v in progress["variants"]}
+    assert candidates["edited-video"][0]["media_type"]=="video/mp4"
+    assert candidates["audio-identity-report"][0]["media_type"]=="application/json"
+    assert candidates["edited-video"][0]["artifact_id"] != candidates["audio-identity-report"][0]["artifact_id"]
+
