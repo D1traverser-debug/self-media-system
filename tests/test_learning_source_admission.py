@@ -44,6 +44,21 @@ def test_direct_session_learning_uses_private_episode_source_without_dummy_proje
     assert "rather than creating a dummy project" in text
 
 
+def test_direct_session_learning_is_read_before_decision_and_write_after_material_event():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "Direct-session continuity transaction — required for substantive owner-facing work:" in skill_text
+    for token in (
+        "Read before deciding.",
+        "Write after a material correction, selection, failure or outcome.",
+        "PROCESS_QUALITY_BASELINE.md",
+        "PERSISTED_READBACK_VERIFIED",
+        "NOT_PERSISTED",
+        "not a native runtime hook",
+        "Native Skill selection and automatic execution in a fresh ChatGPT chat remain unverified",
+    ):
+        assert token in skill_text
+
+
 def test_owner_preference_is_not_subject_to_method_promotion_threshold():
     text = POLICY.read_text(encoding="utf-8")
     assert "An explicit owner preference is authoritative within its scope" in text
