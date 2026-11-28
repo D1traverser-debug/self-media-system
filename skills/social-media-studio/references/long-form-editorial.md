@@ -6,6 +6,10 @@
 
 Long-form articles, essays, X Articles and other substantial editorial pieces. Do not apply this structure to a one-line caption or turn an article into a video-production pipeline.
 
+## Craft atlas and genre-specific methods
+
+Use `long-form-craft-atlas.md` as the domain-independent craft map when the task requires deeper narrative, argument, explanation, character/case, emotion, dialogue, prose, pacing or reader-cognition decisions. First route the actual reader job and genre; select only the dimensions that matter and mark others N/A. Its 16 dimensions are diagnostic lenses, not 16 mandatory stages. Novel-derived mechanisms are adapted learning evidence, not permission to invent scenes, quotations or interior thoughts in nonfiction. Financial-specific company/market rules remain in their source domain. The atlas is a candidate until real cross-genre article trials and independent outcome evidence support promotion.
+
 ## Reader contract before prose
 
 Define the target reader and their job; the article promise and central question; the author's actual thesis or point of view; a concrete opening anchor; the information gap that makes the piece worth entering; an early payoff that proves substance; and a later payoff that makes completion worthwhile.
