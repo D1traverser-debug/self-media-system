@@ -16,13 +16,13 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "61744ed17f658357aa131538f9c13741eeec5cf5",
-    "observed_ci_run": 46045524457,
-    "observed_ci": "EXACT_HEAD_PR_CI_PASS__616_TESTS__SYSTEM_AUDIT_TOPOLOGY_AND_ALL_SMOKE_STEPS_PASS",
+    "observed_head": "ca4bb814270b552cb240ba8234d4afde14b9b900",
+    "observed_ci_run": null,
+    "observed_ci": "PENDING_EXACT_HEAD_PR_CI",
     "observed_failure": null,
-    "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability. Internal evolution 2026-11-27: private owner preference profile, private cross-chat casebook and process-quality baseline; scoped owner-authorized retrospective cross-chat import; direct-session learning without dummy projects; separate preference/episode/method lifecycles; exact candidate skill references loaded as bounded methods. No raw private chats or owner profile committed to public repository.",
+    "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability. Internal evolution 2026-11-27: private owner preference profile, private cross-chat casebook and process-quality baseline; scoped owner-authorized retrospective cross-chat import; direct-session learning without dummy projects; separate preference/episode/method lifecycles; exact candidate skill references loaded as bounded methods. No raw private chats or owner profile committed to public repository. 2026-11-28 follow-up: discovered private method portfolio was stored but absent from the SMS Skill/STUDIO_ENTRY retrieval path. Added canonical CAOS source fallback and explicit distinction between source read and native Skill selection; added private method-index/project-card retrieval and a hard D-versus-M anti-template boundary; added regression tests and an ADR. Project cards remain candidate-only; fresh-chat native activation and owner-outcome validation remain open.",
     "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
-    "observed_head_semantics": "Exact PR head 61744ed was verified and its PR CI run 46045524457 completed successfully: 616 tests and all system/topology/smoke checks passed. This checkpoint commit advances the branch; re-query the actual head and exact-head CI after this update. Checkpoint is a resume record, not CI authority.",
+    "observed_head_semantics": "Pre-checkpoint code head ca4bb814270b552cb240ba8234d4afde14b9b900 contains the CAOS parent-source resolution and private method portfolio retrieval contract. Its exact-head CI is pending. This checkpoint update advances the branch again; re-query the new exact head and exact-head CI. Last known green remains 61744ed17f658357aa131538f9c13741eeec5cf5/run 46045524457. This checkpoint is a resume record, not CI authority.",
     "last_known_green_sha": "61744ed17f658357aa131538f9c13741eeec5cf5",
     "last_known_green_pr_run": 46045524457,
     "repository_full_name": "D1traverser-debug/self-media-system",
@@ -106,7 +106,7 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "Every current subsystem, contract, interface, scenario and forbidden effect traced to exact code/tests; conflicting architecture assumptions resolved; independent conceptual review recorded.",
-      "next_action": "Continue adversarial review of the current shared boundaries: test whether declared semantic_preconditions can be self-asserted against a contradictory source; map all 35 frozen scenarios to the four business domains; identify the minimum missing growth/commercial outcome coverage from confirmed owner scope. Do not add a controller or claim runtime validation.",
+      "next_action": "After exact-head CI, continue remaining whole-architecture obligations; do not confuse this targeted retrieval repair with completion of B02.",
       "blocker": null,
       "evidence": [
         "Common integration-boundary defect traced through scope.resolve_intake, capability_lookup, domain contracts, subsystem and executor registries, quality planner and identity route. Architecture V2 section Y records comparison, implementation and falsifiers. No real independent product acceptance claimed.",
@@ -116,7 +116,8 @@
         "Isolated legacy operator_view.py and its old dedicated tests are removed as unused duplicate of canonical status/resume; this is not permission to remove still-tested retired runtime/orchestrator/storage paths. Repository topology declares a permanent removal record; exact-head regression required.",
         "Second source retirement record for unused legacy program_orchestration.py plus test_program_orchestration.py. Original code remains in parent Git commit; historical projects/ and examples/ source data retained.",
         "2026-11-28 exact-head source review: release_policy.py now enforces non-downgradable rights, media-rights-evidence and video technical-QA floors; test_release_policy.py covers downgrade attempts and removal of the obsolete CLI bypass. outcome_inspection.py performs read-only per-variant byte/type/shape observation and source-bound encoded-audio packet checks, while explicitly keeping owner acceptance false. demand_composition.py checks declared semantic_preconditions and source-ref count but does not independently prove source classification; this only partially mitigates the prior semantic-routing risk. effect_gate.py requires an operator-owned exact renderer SHA256 but explicitly is not an OS/network sandbox. Acceptance V2 has 35 design-only scenarios and zero growth/commercial contexts although the manifest declares four business domains. PR #56 currently has no submitted reviews or inline review threads.",
-        "2026-11-28: expanded long-form editorial candidate with evidence-derived thesis, claim ledger, paragraph progression, counterexamples, ablation, X Article packaging and visual-anchor boundaries (commit e395d5e); direct-session continuity transaction specified in Skill (commit 6dc362f); regression test added (61744ed). Exact-head PR CI passed 616 tests. Candidate method remains unvalidated and no native Skill runtime hook is claimed."
+        "2026-11-28: expanded long-form editorial candidate with evidence-derived thesis, claim ledger, paragraph progression, counterexamples, ablation, X Article packaging and visual-anchor boundaries (commit e395d5e); direct-session continuity transaction specified in Skill (commit 6dc362f); regression test added (61744ed). Exact-head PR CI passed 616 tests. Candidate method remains unvalidated and no native Skill runtime hook is claimed.",
+        "2026-11-28 CAOS-governed root-cause review: private Library already held 16 project candidate cards and cross-project index/taxonomy, but neither SMS Skill nor STUDIO_ENTRY referenced the Methods index. Confirmed a retrieval-path integration gap; native CAOS Skill selection remains unverified. Selected the existing Library + Skill/entry path over a new controller/database or global prompt formula."
       ]
     },
     {
@@ -170,12 +171,13 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Source truth, semantic understanding, lineage, rights, scoped CRUD and independent method replays proven by actual evidence; stale claims cannot authorize effects.",
-      "next_action": "On future owner tasks, retrieve exact private owner profile and relevant episodes; append only material episodes with source/provenance confidence. Revalidate any reusable method through distinct real tasks and counterexamples.",
+      "next_action": "On every substantive owner task, read private Methods/Cross-Project/INDEX.md, retrieve only matching project card(s), apply CAOS to test applicability/counterexamples, record APPLIED/NOT_APPLICABLE/REJECTED/UNRESOLVED and reason, and persist only material episodes with exact Library readback. Fresh-chat behavior still needs independent validation.",
       "blocker": null,
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
         "2026-11-27: private owner preference, episodic cross-chat casebook and process-quality baseline now exist in Library; public Skill/manifest support exact private-source discovery and scoped owner-authorized retrospective self-media import. Historical case evidence remains summary-level and private.",
-        "2026-11-28: direct-session procedure now specifies read-before-decision, material-event capture, write-after-correction/selection/failure/outcome, Library version-conflict protection and exact readback. This is a Skill/Files operating procedure, not a native automatic bridge. Private casebook appended with this continuation episode, uploaded as version 5 and read back at /Social Media Studio/CROSS_CHAT_EXPERIENCE_CASEBOOK.md; preferences remain unchanged and no method promoted."
+        "2026-11-28: direct-session procedure now specifies read-before-decision, material-event capture, write-after-correction/selection/failure/outcome, Library version-conflict protection and exact readback. This is a Skill/Files operating procedure, not a native automatic bridge. Private casebook appended with this continuation episode, uploaded as version 5 and read back at /Social Media Studio/CROSS_CHAT_EXPERIENCE_CASEBOOK.md; preferences remain unchanged and no method promoted.",
+        "2026-11-28: read private owner profile v2, casebook v5, process baseline v1, method portfolio index, taxonomy and representative project cards. Verified 16 cards exist in /Social Media Studio/Methods/Projects/ but found no retrieval pointer in SMS Skill/STUDIO_ENTRY. Added CAOS parent source fallback and private method retrieval contract in Skill + STUDIO_ENTRY; regression tests and ADR added. No method promoted. Exact CAOS parent Skill source read at SHA 6a0928b0cc05f9efe3b37aff5fb574db74306cd0; this is not native Skill activation evidence."
       ]
     },
     {
@@ -200,11 +202,12 @@
       ],
       "status": "IN_PROGRESS",
       "acceptance": "Actual natural-language short and long copy, multilingual variants and nonrepeating packaging meet explicit audience/owner intent; no invented claims; professional review.",
-      "next_action": "Replay short_form_copy, platform_title/description/cover_copy and cover_design in fresh owner tasks using private preferences + exact candidate references; compare owner correction/rework burden and actual accepted output.",
+      "next_action": "Run a fresh owner-facing short-form/package/cover task and explicitly retrieve the private project method card(s) through the new Skill/entry route. Compare actual owner corrections, source/goal fidelity and craft quality; do not copy selected historical wording. Native fresh-chat Skill selection remains NOT_TESTED until client trace.",
       "blocker": null,
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
-        "2026-11-27: explicit owner profile captures recurring voice, no-news-narration, source fidelity, field separation, localization and visual/ratio preferences; exact demand routing now explicitly retrieves candidate short-form, platform-packaging and visual references as bounded hypotheses. This does not promote their craft status."
+        "2026-11-27: explicit owner profile captures recurring voice, no-news-narration, source fidelity, field separation, localization and visual/ratio preferences; exact demand routing now explicitly retrieves candidate short-form, platform-packaging and visual references as bounded hypotheses. This does not promote their craft status.",
+        "2026-11-28: added private project-card retrieval path to SMS Skill and STUDIO_ENTRY. No new creative replay or performance outcome has yet been claimed."
       ]
     },
     {
@@ -315,7 +318,7 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
-      "next_action": "Run independent fresh-chat self-media replay: confirm native CAOS/SMS Skill selection where trace is available, exact private profile retrieval, correct demand-to-skill routing, root-cause recovery, final artifact quality and lower preventable owner rework. Keep native selection NOT_TESTED if client trace is unavailable; no method promotion until the evidence ladder passes.",
+      "next_action": "In a genuinely independent fresh chat, capture native CAOS/SMS Skill selection trace if available; verify retrieval of profile, casebook, Methods index and only relevant card; observe correct method selection/non-fit, actual owner output, independent review and correction burden. If no first-party trace exists, keep native selection NOT_TESTED. No method promotion before full evidence ladder + CAOS acceptance.",
       "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
@@ -323,7 +326,8 @@
         "Internal assurance 2026-11-27: explicit per-variant artifact selection now blocks multiple unselected candidates and multiple accepted artifacts, surfaces all candidates and rejected source bindings, and tests actual current PNG alternative conflict. MEDIA_TRANSFORM original_audio_promise with no audio stream is a mismatch; presence of a stream remains source-bound identity UNVERIFIED. No creative/owner outcome approval inferred; exact-head CI required.",
         "Output observer now independently rechecks exact source->result encoded packets for BITSTREAM_IDENTITY using current immutable artifact_inputs lineage, rejects ambiguous options and discards mixed-revision readbacks. Engineering proof is not creative/owner sign-off. Before this checkpoint doc commit, SHA 98cec7 had 602 passed and both GitHub CI green; new exact-head status pending.",
         "2026-11-27 internal learning/evolution integration: owner-authorized scoped cross-chat retrospective import; private Library owner preference profile, episodic casebook and process-quality baseline; direct-session capture without dummy projects; preference/episode/method separation; candidate skill references must be retrieved for scoped use rather than skipped. Tests cover these contracts and exact demand references. Exact head 24b4d64 has 612 passed and both CI jobs green.",
-        "2026-11-28 exact PR readback: PR #56 has zero submitted review records and zero inline review threads. CI and static source audits are not independent human or owner-outcome acceptance. Trusted high-assurance executor registry remains empty; native CAOS/SMS Skill selection in a fresh ChatGPT chat remains NOT_TESTED."
+        "2026-11-28 exact PR readback: PR #56 has zero submitted review records and zero inline review threads. CI and static source audits are not independent human or owner-outcome acceptance. Trusted high-assurance executor registry remains empty; native CAOS/SMS Skill selection in a fresh ChatGPT chat remains NOT_TESTED.",
+        "2026-11-28: exact CAOS parent Skill source was read in this ChatGPT session and the SMS Skill now gives a canonical fallback; this proves source retrieval only, not native selection. New tests cover source pointer and private method-card discoverability, not model behavior in a fresh chat."
       ]
     },
     {
@@ -339,7 +343,7 @@
       "scenario_ids": [],
       "status": "OPEN",
       "acceptance": "All required obligations and acceptance scenarios independently satisfied or explicitly owner-approved scope change; exact-head CI; clean rollback, repeatable entry/resume and owner-facing handoff. No automatic merge or publish.",
-      "next_action": "Re-query live PR head and exact-head CI after this checkpoint commit. Keep PR #56 Draft and unmerged; reconcile B01-B09 against actual owner outcomes before any merge decision.",
+      "next_action": "Re-query exact branch head and PR CI after this checkpoint commit. Keep PR #56 Draft and unmerged; reconcile B01-B09 against actual owner outcomes before any merge decision.",
       "blocker": null,
       "evidence": []
     }
