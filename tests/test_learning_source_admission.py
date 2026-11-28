@@ -128,6 +128,36 @@ def test_private_project_method_cards_are_retrieved_before_method_selection():
     assert "matching keywords alone do not establish applicability" in skill_text
 
 
+def test_short_continuation_phrases_trigger_cold_start_recovery():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    for text in (skill_text, entry_text):
+        for phrase in ("继续SMS", "继续推特长文1", "继续视频制作3"):
+            assert phrase in text
+        assert "Continuation Receipt" in text
+        assert "do not ask the owner to restate" in text.lower() or "Do not ask the owner to repeat" in text
+        assert "numeric suffix" in text.lower()
+        assert "one narrow disambiguation" in text.lower()
+        assert "retired" in text.lower()
+
+
+def test_short_continuation_does_not_confuse_method_card_number_with_task_identity():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    for text in (skill_text, entry_text):
+        assert "project-card ID" in text
+        assert "owner-confirmed mapping" in text or "owner-authored history" in text
+        assert "method cards as learning locators, not active task state" in text or "summaries and method cards are locators only" in text
+
+
+def test_continuation_receipt_keeps_decision_production_verification_and_outcome_separate():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    for token in ("production state", "verification state", "publication/performance state",
+                  "selected", "implicitly locked", "rejected", "superseded",
+                  "exact source/artifact version", "authorization limits"):
+        assert token in skill_text
+
+
 def test_self_learning_protocol_has_unique_ordered_sections():
     import re
     text = POLICY.read_text(encoding="utf-8")
