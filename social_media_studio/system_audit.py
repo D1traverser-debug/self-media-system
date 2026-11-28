@@ -10,6 +10,7 @@ import tomllib
 from typing import Any
 
 from .engine import StudioEngine
+from .review_execution import ReviewExecutionTrustRegistry
 
 
 def _read_json(path: Path) -> Any:
@@ -79,8 +80,12 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         root / "pyproject.toml",
         root / "social_media_studio" / "data" / "studio_manifest.json",
         root / "social_media_studio" / "data" / "subsystem_catalog.json",
+        root / "social_media_studio" / "data" / "review_executors.json",
         root / "social_media_studio" / "scope.py",
         root / "social_media_studio" / "system_audit.py",
+        root / "social_media_studio" / "application" / "release_service.py",
+        root / "social_media_studio" / "domain" / "release_policy.py",
+        root / "social_media_studio" / "domain" / "outcome_assurance.py",
         root / "examples" / "technology-explainer.brief.json",
         root / "examples" / "technology-explainer.tasks.json",
         root / "examples" / "news-fictional-media.brief.json",
@@ -113,6 +118,49 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         entry = (root / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
         pyproject = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
         studio_manifest = _read_json(root / "social_media_studio" / "data" / "studio_manifest.json")
+        review_registry_config = _read_json(root / "social_media_studio" / "data" / "review_executors.json")
+        review_registry = ReviewExecutionTrustRegistry(config=review_registry_config)
+        review_gate = studio_manifest.get("capabilities", {}).get("release_gates", {}).get("high_assurance_review", {})
+        quality_contract = studio_manifest.get("architecture", {}).get("quality_contract", {})
+        engine_source = (root / "social_media_studio" / "engine.py").read_text(encoding="utf-8")
+        release_source = (root / "social_media_studio" / "application" / "release_service.py").read_text(encoding="utf-8")
+        review_execution_integrated = (
+            "ReleaseAssuranceService(self).release_check(" in engine_source
+            and "self._engine.review_trust_registry.verify(" in release_source
+            and "review_execution_nonces" in release_source
+            and "REVIEW_PACKET_BOUND" in engine_source
+            and "_stage_review_inputs" in engine_source
+            and "_verify_review_stage_inputs" in engine_source
+        )
+        review_contract_detection = StudioEngine._review_contract_requires_execution({
+            "reviewer_kind": "HUMAN", "execution_mode": "INDEPENDENT_COLD_READ", "blind_review": True,
+        })
+        review_receipt_semantics_correct = (
+            'high_assurance_status = "VERIFIED"' in release_source
+            and 'high_assurance_status = "BLOCKED"' in release_source
+            and "runtime cannot cryptographically prove a human" not in release_source
+        )
+        review_fail_closed = (
+            not review_registry.config["trusted_executors"]
+            and review_gate.get("default_trusted_executor_count") == 0
+            and review_gate.get("empty_registry_behavior") == "BLOCK_HIGH_ASSURANCE_RELEASE"
+            and review_gate.get("caller_supplied_attestation_is_proof") is False
+            and quality_contract.get("high_assurance_review_proven") is False
+            and quality_contract.get("production_executor_registered") is False
+            and review_execution_integrated and review_contract_detection and review_receipt_semantics_correct
+        )
+        _check(checks, "high_assurance_review_execution_default_fail_closed", review_fail_closed, {
+            "trusted_executor_count": len(review_registry.config["trusted_executors"]),
+            "empty_registry_behavior": review_gate.get("empty_registry_behavior"),
+            "execution_verifier_integrated": review_execution_integrated,
+            "high_assurance_contract_detected": review_contract_detection,
+            "release_receipt_semantics_correct": review_receipt_semantics_correct,
+            "production_executor_registered": quality_contract.get("production_executor_registered"),
+        })
+        if not review_registry.config["trusted_executors"]:
+            capability_gaps.append(
+                "No production high-assurance review executor is registered. Rubrics requiring signed independent execution remain blocked until an executor, identity mapping, signing key and isolation mechanism are independently assessed."
+            )
         program_brief = _read_json(root / "examples" / "ai-self-media-commercialization.brief.json")
         program_tasks = _read_json(root / "examples" / "ai-self-media-commercialization.tasks.json")
         episode_tasks = _read_json(root / "examples" / "program-linked-episode.tasks.json")
@@ -162,7 +210,10 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         studio_manifest.get("product_name") == "Social Media Studio"
         and studio_manifest.get("product_name_zh") == "自媒体系统"
         and studio_manifest.get("owner") == "SOCIAL_MEDIA_STUDIO"
-        and studio_manifest.get("repository_slug") == "social-media-studio"
+        and studio_manifest.get("repository_slug") == "self-media-system"
+        and studio_manifest.get("repository_full_name") == "D1traverser-debug/self-media-system"
+        and studio_manifest.get("repository_url") == "https://github.com/D1traverser-debug/self-media-system"
+        and studio_manifest.get("repository_identity_kind") == "GITHUB_REPOSITORY__DISTINCT_FROM_PYPI_DISTRIBUTION"
         and pyproject["project"]["name"] == "social-media-studio"
         and pyproject["project"]["scripts"] == {"sms-studio": "social_media_studio.cli:main"}
         and not brand_violations
@@ -309,6 +360,7 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         coverage = capability_lookup(profile=_read_json(root / "social_media_studio" / "legacy" / "data" / "capabilities.json"))
         _check(checks, "professional_capability_route_integrity", True, {
             "groups": len(coverage["groups"]),
+            "exact_operation_contracts": sum(len(group["demand_routes"]) for group in coverage["groups"]),
             "registry_alignment": coverage["registry_alignment"],
             "business_outcome_verified": False,
         })
@@ -394,16 +446,33 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
                 if module == "caos" or module.startswith("caos.") or module.startswith("cognition_agent_os"):
                     import_failures.append(f"{path.relative_to(root)} imports {module}")
                 if module == "social_media_studio.legacy" or module.startswith("social_media_studio.legacy."):
-                    if path.name != "adapters.py":
-                        import_failures.append(f"{path.relative_to(root)} imports legacy domain code outside the explicit adapter bridge: {module}")
+                    relative_parts = path.relative_to(root).parts
+                    is_explicit_adapter_layer = (
+                        path.name == "adapters.py"
+                        or relative_parts[:2] == ("social_media_studio", "domain_adapters")
+                    )
+                    if not is_explicit_adapter_layer:
+                        import_failures.append(f"{path.relative_to(root)} imports legacy domain code outside the explicit domain-adapter boundary: {module}")
     _check(checks, "runtime_dependency_boundary", not import_failures, import_failures)
 
-    adapter_source = (root / "social_media_studio" / "adapters.py").read_text(encoding="utf-8")
-    implemented_adapters = set(re.findall(r"""(?:if|elif) name == ["']([^"']+)["']""", adapter_source))
+    from .domain_adapters.registry import DOMAIN_ADAPTERS, SUPPORTED_DOMAIN_ADAPTERS, supports_domain_adapter
+    implemented_adapters = set(DOMAIN_ADAPTERS)
     declared_adapters = set(studio_manifest.get("capabilities", {}).get("domain_adapters", {}))
-    from .adapters import SUPPORTED_DOMAIN_ADAPTERS, supports_domain_adapter
     supported_adapters = set(SUPPORTED_DOMAIN_ADAPTERS)
-    adapter_registry_ok = declared_adapters == implemented_adapters == supported_adapters
+    manifest_adapter_refs = studio_manifest.get("capabilities", {}).get("domain_adapters", {})
+    handler_ref_mismatches = sorted(
+        name for name, spec in DOMAIN_ADAPTERS.items()
+        if manifest_adapter_refs.get(name) != spec.handler_ref
+    )
+    handler_integrity_failures = sorted(
+        name for name, spec in DOMAIN_ADAPTERS.items()
+        if not callable(spec.handler) or spec.name != name or not spec.handler_ref
+    )
+    adapter_registry_ok = (
+        declared_adapters == implemented_adapters == supported_adapters
+        and not handler_ref_mismatches
+        and not handler_integrity_failures
+    )
     _check(checks, "domain_adapter_registry_matches_manifest", adapter_registry_ok, {
         "declared_count": len(declared_adapters),
         "implemented_count": len(implemented_adapters),
@@ -411,6 +480,8 @@ def run_system_audit(repo_root: str | Path | None = None) -> dict[str, Any]:
         "undeclared_supported": sorted(supported_adapters - declared_adapters),
         "declared_without_implementation": sorted(declared_adapters - implemented_adapters),
         "implemented_without_support_registration": sorted(implemented_adapters - supported_adapters),
+        "handler_ref_mismatches": handler_ref_mismatches,
+        "handler_integrity_failures": handler_integrity_failures,
     })
 
     from .production.executors import tool_executor_for_task

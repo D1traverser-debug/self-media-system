@@ -271,28 +271,30 @@ def test_legacy_case_remains_readable_but_warns_against_blind_upload():
     assert report["release_authorized"] is False
 
 
-def test_case_is_discoverable_in_active_video_business_graph():
-    from social_media_studio.legacy.program_orchestration import ProgramGraph
+def test_retired_packaging_case_remains_readable_as_historical_evidence():
+    # The example graph is SUPERSEDED and does not create current StudioEngine tasks.
     graph_path = CASE.parent.parent / "SUBTASK_GRAPH.json"
-    graph = ProgramGraph.from_path(graph_path)
-    node = graph.by_id["topic_satire_editorial_packaging"]
-    assert graph.program_id == "ai-self-media-commercialization"
-    assert node.workstream == "MEDIA_GROWTH"
-    assert node.coordination == "INDEPENDENT_PARALLEL"
-    assert node.depends_on == ()
-    assert node.metadata["no_ipos_identity_dependency"] is True
-    assert "cases/jensen-alice-20261114.json" in node.metadata["authority_inputs"]
+    graph = json.loads(graph_path.read_text(encoding="utf-8"))
+    assert graph["graph_status"] == "SUPERSEDED_0_8_REFERENCE__NOT_CURRENT_PLANNING_AUTHORITY"
+    assert graph["program_id"] == "ai-self-media-commercialization"
+    node = next(item for item in graph["nodes"]
+                if item["id"] == "topic_satire_editorial_packaging")
+    assert node["workstream"] == "MEDIA_GROWTH"
+    assert node["coordination"] == "INDEPENDENT_PARALLEL"
+    assert node["depends_on"] == []
+    assert node["no_ipos_identity_dependency"] is True
+    assert "cases/jensen-alice-20261114.json" in node["authority_inputs"]
 
 
-def test_program_orchestrator_exposes_packaging_work_without_ipos_bundle():
-    from social_media_studio.legacy.program_orchestration import ProgramOrchestrator
-    graph_path = CASE.parent.parent / "SUBTASK_GRAPH.json"
-    scheduler = ProgramOrchestrator.from_paths(graph_path)
-    ready_ids = {node.node_id for node in scheduler.ready()}
-    assert "topic_satire_editorial_packaging" in ready_ids
-    packet = scheduler.packet("topic_satire_editorial_packaging")
-    assert packet["inputs"] == {}
-    assert packet["node"]["workstream"] == "MEDIA_GROWTH"
+def test_retired_graph_ready_hint_cannot_authorize_implicit_active_scheduling(tmp_path):
+    from social_media_studio.engine import StudioEngine, ProjectNotFound
+    import pytest
+    graph = json.loads((CASE.parent.parent / "SUBTASK_GRAPH.json").read_text(encoding="utf-8"))
+    assert "topic_satire_editorial_packaging" in graph["parallel_now"]
+    assert graph["graph_status"].startswith("SUPERSEDED_")
+    engine = StudioEngine(tmp_path / "empty-current-owner-workspace")
+    with pytest.raises(ProjectNotFound):
+        engine.list_tasks(graph["program_id"])
     assert audit_packaging(fixture())["release_authorized"] is False
 
 

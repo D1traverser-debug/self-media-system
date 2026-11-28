@@ -6,9 +6,10 @@
   "product": "Social Media Studio",
   "topology_contract": {
     "minimum_subsystems": 16,
-    "minimum_code_modules": 62,
+    "minimum_code_modules": 64,
     "minimum_domain_adapters": 17,
-    "minimum_production_operations": 6
+    "minimum_production_operations": 6,
+    "production_dispatcher_subsystem": "execution_and_owner_scope"
   },
   "separate_cognition_controller": false,
   "parent_governance": {
@@ -24,19 +25,29 @@
       "code_paths": [
         "social_media_studio/__init__.py",
         "social_media_studio/__main__.py",
-        "social_media_studio/cli.py",
-        "social_media_studio/scope.py",
-        "social_media_studio/engine.py",
         "social_media_studio/adapters.py",
+        "social_media_studio/application/__init__.py",
+        "social_media_studio/application/demand_composition.py",
+        "social_media_studio/application/project_tasks.py",
+        "social_media_studio/cli.py",
+        "social_media_studio/domain/demand.py",
+        "social_media_studio/domain_adapters/__init__.py",
+        "social_media_studio/domain_adapters/common.py",
+        "social_media_studio/domain_adapters/dispatch.py",
+        "social_media_studio/domain_adapters/registry.py",
+        "social_media_studio/engine.py",
+        "social_media_studio/engine_support.py",
+        "social_media_studio/operation_cycle.py",
         "social_media_studio/production/__init__.py",
         "social_media_studio/production/context.py",
+        "social_media_studio/production/effect_gate.py",
         "social_media_studio/production/executors.py",
         "social_media_studio/production/handlers.py",
         "social_media_studio/production/registry.py",
         "social_media_studio/production/worker_pool.py",
-        "social_media_studio/subsystems.py",
-        "social_media_studio/operation_cycle.py",
-        "social_media_studio/scope_migration.py"
+        "social_media_studio/scope.py",
+        "social_media_studio/scope_migration.py",
+        "social_media_studio/subsystems.py"
       ],
       "domain_adapters": [],
       "production_operations": [],
@@ -63,11 +74,20 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
+        "social_media_studio/application/outcome_inspection.py",
+        "social_media_studio/application/release_service.py",
         "social_media_studio/domain/__init__.py",
-        "social_media_studio/domain/contracts.py",
         "social_media_studio/domain/assurance.py",
+        "social_media_studio/domain/communication.py",
+        "social_media_studio/domain/conformance.py",
+        "social_media_studio/domain/contracts.py",
+        "social_media_studio/domain/effects.py",
+        "social_media_studio/domain/outcome_assurance.py",
+        "social_media_studio/domain/outcome_traceability.py",
+        "social_media_studio/domain/release_policy.py",
         "social_media_studio/legacy/execution_attestation.py",
-        "social_media_studio/legacy/reviewer_providers.py"
+        "social_media_studio/legacy/reviewer_providers.py",
+        "social_media_studio/review_execution.py"
       ],
       "domain_adapters": [],
       "production_operations": [],
@@ -97,8 +117,9 @@
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
         "social_media_studio/domain/editorial.py",
-        "social_media_studio/legacy/editorial_planning.py",
+        "social_media_studio/domain_adapters/editorial.py",
         "social_media_studio/legacy/editorial_packaging.py",
+        "social_media_studio/legacy/editorial_planning.py",
         "social_media_studio/legacy/plan_graph_bridge.py"
       ],
       "domain_adapters": [
@@ -115,6 +136,7 @@
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
         "social_media_studio/domain/creative.py",
+        "social_media_studio/domain_adapters/visual.py",
         "social_media_studio/legacy/programmatic_graphics.py",
         "social_media_studio/production/frame_worker.py",
         "social_media_studio/production/python_frame_renderer.py"
@@ -135,6 +157,7 @@
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
         "social_media_studio/domain/identity.py",
+        "social_media_studio/domain_adapters/identity.py",
         "social_media_studio/legacy/ip_identity.py"
       ],
       "domain_adapters": [
@@ -154,13 +177,14 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
-        "social_media_studio/legacy/production_os.py",
+        "social_media_studio/domain_adapters/motion.py",
         "social_media_studio/legacy/continuity.py",
-        "social_media_studio/legacy/timeline.py",
         "social_media_studio/legacy/editorial_interchange.py",
+        "social_media_studio/legacy/generation_guard.py",
+        "social_media_studio/legacy/production_os.py",
+        "social_media_studio/legacy/timeline.py",
         "social_media_studio/production/contracts.py",
-        "social_media_studio/production/ffmpeg_assembler.py",
-        "social_media_studio/legacy/generation_guard.py"
+        "social_media_studio/production/ffmpeg_assembler.py"
       ],
       "domain_adapters": [
         "shot_contract_materialize",
@@ -181,9 +205,10 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
+        "social_media_studio/domain_adapters/media_qa.py",
+        "social_media_studio/legacy/media_qa.py",
         "social_media_studio/media.py",
-        "social_media_studio/production/audio_preserve.py",
-        "social_media_studio/legacy/media_qa.py"
+        "social_media_studio/production/audio_preserve.py"
       ],
       "domain_adapters": [
         "extended_media_qa"
@@ -216,10 +241,10 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "OPTIONAL_BUSINESS_DOMAIN",
       "code_paths": [
+        "social_media_studio/domain_adapters/business.py",
         "social_media_studio/legacy/business_metrics.py",
         "social_media_studio/legacy/business_objects.py",
-        "social_media_studio/legacy/experiments.py",
-        "social_media_studio/legacy/program_orchestration.py"
+        "social_media_studio/legacy/experiments.py"
       ],
       "domain_adapters": [
         "business_outcome_metrics",
@@ -251,6 +276,7 @@
       "product_membership": "INTERNAL_SOCIAL_MEDIA_STUDIO",
       "role": "PROFESSIONAL_OR_CONTINUOUS_CAPABILITY",
       "code_paths": [
+        "social_media_studio/domain_adapters/lineage.py",
         "social_media_studio/legacy/media_graph.py"
       ],
       "domain_adapters": [
@@ -299,8 +325,7 @@
         "social_media_studio/legacy/orchestrator.py",
         "social_media_studio/legacy/runtime.py",
         "social_media_studio/legacy/storage.py",
-        "social_media_studio/legacy/studio_agents.py",
-        "social_media_studio/legacy/operator_view.py"
+        "social_media_studio/legacy/studio_agents.py"
       ],
       "domain_adapters": [],
       "production_operations": [],
@@ -478,5 +503,58 @@
       ]
     }
   },
-  "product_zh": "自媒体系统"
+  "product_zh": "自媒体系统",
+  "source_retirements": [
+    {
+      "path": "social_media_studio/legacy/operator_view.py",
+      "status": "DELETED_FROM_HEAD",
+      "original_baseline_commit": "b7db930f85ca59bdca9fe090cb2e36a5b3c1add9",
+      "successor": "social_media_studio.engine.StudioEngine.status / .resume",
+      "reason": "Legacy standalone operator snapshot is not imported by any current runtime entry or domain adapter; its only direct consumer was the retired self-test module. Current operator task readiness and resume are served by the canonical single ledger; no second status projection is needed.",
+      "deleted_test": "tests/test_operator_view.py",
+      "user_workspaces_touched": false,
+      "source_history_preserved_by_git": true
+    },
+    {
+      "path": "social_media_studio/legacy/program_orchestration.py",
+      "status": "DELETED_FROM_HEAD",
+      "original_baseline_commit": "3a6692446b496cf34a55dd929fdb1a7efdfd3c34",
+      "successor": "social_media_studio.application.project_tasks.ProjectTaskService._validate_graph + social_media_studio.engine.StudioEngine",
+      "reason": "Unused second ProgramOrchestrator maintained a separate JSON state_path and coordination graph; no active runtime/domain adapter imports it, and only obsolete test_program_orchestration imported the retired controller. Modern dynamic project task graph already handles parallel/serial/competitive/owner-adjudication and bounded critique through one SQLite ledger.",
+      "deleted_test": "tests/test_program_orchestration.py",
+      "user_workspaces_touched": false,
+      "source_history_preserved_by_git": true,
+      "retained_current_equivalent_regression": "tests/test_studio_engine.py::test_competitive_candidates_require_owner_adjudication_over_every_candidate"
+    }
+  ],
+  "cross_subsystem_adapter_bindings": [
+    {
+      "adapter": "episode_intent_validate",
+      "operation_owner_subsystem": "motion_and_production",
+      "implementation_owner_subsystem": "business_growth_commercial",
+      "boundary": "BUSINESS_PROGRAM_TO_EPISODE_HANDOFF",
+      "rationale": "The business adapter validates the Program-owned commercial, portfolio, production-strategy and source-artifact handoff; the motion subsystem owns downstream Episode production admission."
+    },
+    {
+      "adapter": "shot_contract_materialize",
+      "operation_owner_subsystem": "motion_and_production",
+      "implementation_owner_subsystem": "editorial_and_language",
+      "boundary": "EDITORIAL_PLAN_TO_MOTION_CONTRACT",
+      "rationale": "The adapter consumes the exact EditorialPlan and materializes a shot-level production contract; editorial owns the source plan schema while motion owns the resulting shot contract."
+    },
+    {
+      "adapter": "shot_contract_validate",
+      "operation_owner_subsystem": "motion_and_production",
+      "implementation_owner_subsystem": "editorial_and_language",
+      "boundary": "EDITORIAL_PLAN_TO_MOTION_CONTRACT",
+      "rationale": "The adapter validates the shot contract against the exact EditorialPlan; editorial owns the source plan semantics while motion owns shot execution constraints."
+    },
+    {
+      "adapter": "shot_route",
+      "operation_owner_subsystem": "provider_capability_routing",
+      "implementation_owner_subsystem": "motion_and_production",
+      "boundary": "MOTION_SHOT_TO_PROVIDER_ROUTING",
+      "rationale": "The motion adapter binds shot-specific requirements to the evidence-bound model router; motion owns the shot request while provider routing owns engine selection policy."
+    }
+  ]
 }

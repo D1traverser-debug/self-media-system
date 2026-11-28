@@ -1,0 +1,395 @@
+{
+  "schema_version": 1,
+  "kind": "SMS_REPOSITORY_CONSTRUCTION_CHECKPOINT",
+  "project": "SOCIAL_MEDIA_STUDIO",
+  "purpose": "Complete actual owner-demand outcomes across the whole SMS product, under read-only CAOS governance. Not a business runtime task or second scheduler.",
+  "authority": {
+    "entry": "STUDIO_ENTRY.md",
+    "architecture": "docs/SOCIAL_MEDIA_STUDIO_ARCHITECTURE_V2.md",
+    "acceptance": "docs/SOCIAL_MEDIA_STUDIO_ARCH_ACCEPTANCE_V2.json",
+    "catalog": "social_media_studio/data/subsystem_catalog.json",
+    "manifest": "social_media_studio/data/studio_manifest.json",
+    "owner_original_status": "NOT_FULLY_RECOVERED",
+    "private_owner_original_precedes_this_checkpoint": true
+  },
+  "integration": {
+    "branch": "refactor/sms-complete-professional-studio-20261126",
+    "pull_request": 56,
+    "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
+    "observed_head": "87004009bd7cef751947f06280b4832c3daba9bc",
+    "observed_ci_run": 46107027243,
+    "observed_ci": "PASS",
+    "observed_failure": null,
+    "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability. Internal evolution 2026-11-27: private owner preference profile, private cross-chat casebook and process-quality baseline; scoped owner-authorized retrospective cross-chat import; direct-session learning without dummy projects; separate preference/episode/method lifecycles; exact candidate skill references loaded as bounded methods. No raw private chats or owner profile committed to public repository. 2026-11-28 follow-up: discovered private method portfolio was stored but absent from the SMS Skill/STUDIO_ENTRY retrieval path. Added canonical CAOS source fallback and explicit distinction between source read and native Skill selection; added private method-index/project-card retrieval and a hard D-versus-M anti-template boundary; added regression tests and an ADR. Project cards remain candidate-only; fresh-chat native activation and owner-outcome validation remain open. 2026-11-28 cold-start continuation: added an explicit recovery protocol for terse new-chat requests such as 继续SMS / 继续推特长文1 / 继续视频制作3. It builds a Continuation Receipt, separates decision/production/verification/outcome state, treats numeric suffixes as ambiguous unless owner-mapped, avoids resurrecting retired workspaces, and asks only a narrow disambiguation when the next action changes. Added regression tests and a separate ADR. Three example simulations recover SMS PR #56, provisional QUANT X Article, and strongest candidate GTA6 Rain/Motorcycle; the suffix mappings and fresh-chat behavior remain partially unverified.",
+    "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
+    "observed_head_semantics": "Last verified pre-checkpoint PR head 87004009bd7cef751947f06280b4832c3daba9bc; exact-head PR workflow run 46107027243 completed success (628 pytest tests; system audit, topology audit and all smoke tests passed). This is not the live branch head after a new commit; re-query GitHub for exact-head CI on every resume.",
+    "last_known_green_sha": "87004009bd7cef751947f06280b4832c3daba9bc",
+    "last_known_green_pr_run": 46107027243,
+    "repository_full_name": "D1traverser-debug/self-media-system",
+    "repository_url": "https://github.com/D1traverser-debug/self-media-system",
+    "rename_checked_repository_id": "1411170938",
+    "rename_verified_at": "2026-11-27",
+    "rename_previous_slug_historical_only": true,
+    "last_known_green_push_run": 45994357761,
+    "observed_push_run": null,
+    "push_ci_for_observed_head": "NOT_VERIFIED"
+  },
+  "decision": {
+    "problem": "Repeated session drift despite product runtime recovery; no current construction-wide task map in inspected tree, historical audit head stale, previous local change missed cross-subsystem contract.",
+    "alternatives": [
+      {
+        "route": "Rewrite engine or duplicate CAOS/runtime ledger",
+        "disposition": "REJECT: wrong layer, risks duplicate state and loss of valid functionality."
+      },
+      {
+        "route": "Continue independent subsystem patches or create more PRs",
+        "disposition": "REJECT: dependencies, current goal and verification drift."
+      },
+      {
+        "route": "Single Git-versioned construction checkpoint in existing integration PR, existing canonical product entry locates it, structural tests verify coverage",
+        "disposition": "SELECT conditionally; no runtime controller or new authority. Actual owner outcomes remain the oracle."
+      }
+    ],
+    "falsifier": "If a new session cannot recover exact task/branch/evidence from the checkpoint, or a mapped scenario/owner outcome fails, reopen the relevant ancestor; do not add another parallel plan.",
+    "rollback": "Revert this commit on integration branch if necessary; main untouched. Never erase earlier evidence."
+  },
+  "protocol": {
+    "resume": "Read the live PR head from GitHub first, then read this checkpoint at that head and query exact-head CI for the live SHA. integration.observed_head is only the last verified pre-checkpoint head, not the current branch head. The live PR API and exact-head workflow run are authoritative for current state; owner correction outranks checkpoint. If branch diverges or another task owner changed it, reconcile before writing. Do not use most recent timestamp alone.",
+    "selection": "Execute all lawful ready obligations by causal priority, first recover goal and restore broken baseline; parallelize independent evidence where useful. Do not narrow whole goal to last changed subsystem. Revisit upstream decisions when contradicted.",
+    "checkpoint": "Record the last exact head and CI run actually verified, with matching B00 evidence. A checkpoint commit itself advances the branch, so the file must not claim to contain its own live HEAD or CI result. After any checkpoint update, re-query the new live PR head and exact-head CI from GitHub. Keep the checkpoint a resume record, not CI authority. Update affected obligations, evidence, blocker and next action in the same logical change. Never store raw private goals or secrets in repository. Never claim external actions occurred without readback.",
+    "acceptance": "A task may be VERIFIED only with explicit exact-version evidence of its own acceptance and all dependencies VERIFIED; CI proves code checks only. External permissions, independently reviewed actual outputs and native client selection stay unknown until proven.",
+    "stop": "All obligations VERIFIED with actual owner outcome; otherwise retain open/blocked tasks and concrete next action. No background work claim."
+  },
+  "tasks": [
+    {
+      "id": "B00",
+      "goal": "Restore exact-head regression baseline",
+      "depends_on": [],
+      "subsystems": [],
+      "scenario_ids": [],
+      "status": "VERIFIED",
+      "acceptance": "System audit, topology, full tests and all CLI smoke checks pass on actual integration head; failures investigated, not suppressed.",
+      "next_action": "At the next resume, query GitHub for the actual live PR head and its exact-head PR workflow. Reuse a completed successful run only when it is bound to that exact live SHA; otherwise wait for or run the full required checks before further code mutation. This checkpoint commit advances the branch. Push-event CI for the last verified head was not verified.",
+      "blocker": null,
+      "evidence": [
+        "Exact previous head 314bef109a92c15dc862ba8808379da16dc069fa CI 45925295903 and 45925301602 PASS; not evidence for new head.",
+        "Exact head eaac02f08ac8af0c2167004e2ec815f40ec60fb7 CI 45926143876 / 45926138591: 528 passed, 2 failed; smoke skipped. Investigated original handlers and task/release interfaces. No source runtime guard removal.",
+        "Exact previous head 8545f5343558fbf1ab13f6fa5ccb3b346edc765f CI 45926452418 and 45926458785 PASS; not proof for new head.",
+        "ab0cc07 run 45927195071: 531 passed, 1 failed, diagnosed and preserved scoped resource boundary.",
+        "Commit 1bdfba4 exact-head PR CI 45958790902 and push CI 45958783530 PASS, including observed-output conformance/owner trace tests. 6cfc858 and this checkpoint update require their own exact-head readback.",
+        "Commit 24b4d64 exact-head PR CI run 45994365924 and push CI run 45994357761 both PASS: 612 tests; standalone system audit, source-topology audit, smoke, historical-program regression and installed-outside-repo checks all PASS.",
+        "2026-11-28 continuation readback: actual PR #56 head 92bf80174d0ee97da214e55dfb6b94ebb8fe7f6d; exact-head PR workflow run 46032368297 completed success. Job test passed; pytest reported 615 passed in 44.95s; standalone system audit, subsystem topology, standalone smoke, historical-program smoke and installed-outside-repository smoke all passed. This proves structural regression on that head only; production readiness remains PARTIAL. Push-event CI for this exact head was not verified.",
+        "2026-11-28: exact head 61744ed17f658357aa131538f9c13741eeec5cf5 passed PR workflow run 46045524457. pytest: 616 passed in 40.51s; system audit, topology audit, standalone smoke, historical Program fixture and installed-outside-repository smoke passed. Push-event CI for this head not verified.",
+        "2026-11-28: exact PR head f0271ff644a58bc4fd3ca9fa9ffccc5be0cfd0f1 passed workflow run 46093306124; 618 tests in 27.90s, system audit PASS, complete source topology audit PASS, standalone smoke PASS, historical-program regression PASS. Push CI not verified.",
+        "2026-11-28 exact-head run 46096697648 on 24a70dca3d3e84e2664a1ef96cc8a54e9f3dff8e: system audit PASS; complete subsystem topology audit PASS; pytest 620 passed, 1 failed; smoke checks skipped. Failure: test_short_continuation_does_not_confuse_method_card_number_with_task_identity because STUDIO_ENTRY did not explicitly require owner-authored continuation history or an owner-confirmed mapping. The canonical entry was repaired in f7ac2f44a30b01dd83cb9fca5ec8d8290a004bbd; this repair still requires exact-head CI.",
+        "2026-11-28 exact-head verification: PR head c1dc24d4e4be6015e76552ec66cee69c29444a69, workflow run 46097612204, completed success. pytest: 621 passed; system audit PASS; complete subsystem topology audit PASS; standalone smoke PASS; historical-program regression PASS; installed-outside-repository smoke PASS. This verifies the engineering regression baseline only; production readiness remains PARTIAL and no real owner outcome is inferred. The checkpoint commit advances the branch, so the next live head and exact-head CI must be re-read. Push-event CI for this head is NOT_VERIFIED.",
+        "2026-11-28 post-reconciliation exact-head verification: PR head 08d181414899c06dfbfcd60808d3a4d6b8276555, workflow run 46101769454, completed success; pytest 622 passed. The system audit, complete subsystem topology audit, standalone Studio smoke, historical-program regression and installed-outside-repository smoke all passed. This is engineering regression evidence only; product/creative/owner outcomes remain open.",
+        "2026-11-28 latest exact-head verification before this checkpoint: PR head 099d10ec8bd9386e3c54ca5a0e272a7b725d15a8, PR workflow run 46102884699, completed success. pytest 622 passed; system audit PASS; full subsystem topology audit PASS; standalone Studio smoke PASS; historical-program regression PASS; installed-outside-repository smoke PASS. An earlier exact-head run 46102708842 failed one new checkpoint test because the assertion still expected the superseded wording \"re-run\"; the test was updated to assert the actual exact-head workflow contract in commit 099d10ec8bd9386e3c54ca5a0e272a7b725d15a8, and this exact-head run passed. No test was deleted or weakened. This proves engineering regression only, not production readiness.",
+        "2026-11-28: 87004009bd7cef751947f06280b4832c3daba9bc exact-head PR workflow 46107027243 success; 628 tests and all audit/smoke steps passed. No product acceptance inferred."
+      ]
+    },
+    {
+      "id": "B01",
+      "goal": "Recover and reconcile full owner demand, corrections and final outcome",
+      "depends_on": [],
+      "subsystems": [],
+      "scenario_ids": [],
+      "status": "OPEN",
+      "acceptance": "Private original/corrections mapped to stable obligations; distinguish unknowns and user preferences; no historical work order reactivation.",
+      "next_action": "Keep OPEN. Private-source and history retrieval found no exact initial SMS product brief or full original requirement transcript. The available owner profile/casebook are explicitly retrospective summaries; the 2026-11-25 pasted text contains an architecture question followed by an assistant explanation, not the missing initial product brief. Use only current explicit owner corrections as confirmed scope; do not reconstruct missing original wording from assistant-generated documents.",
+      "blocker": null,
+      "evidence": [
+        "2026-11-28 source recovery attempt: searched the Social Media Studio Library, broader Library, prior-conversation context and Gmail. Exact initial product brief/full raw revision chain not located. Available files distinguish themselves as summary-level retrospective sources; one pasted text preserves the user question about architecture dimensions but not the original product-definition prompt. Original initial wording and full revision chronology remain UNKNOWN.",
+        "2026-11-28 targeted original-requirement recovery: searched prior-conversation context for the first SMS construction request and original owner corrections; retrieval returned only later user constraints and assistant-generated audit summaries, not the original initial prompt. Gmail search returned only GitHub CI notifications. `docs/product_requirements.md` is a historical `CANDIDATE_0_8_0` baseline dated 2026-10-15 and explicitly a retired execution reference; `docs/standalone_social_media_studio.md` is the current active candidate product/runtime contract, not the original owner message. B01 remains OPEN; do not reconstruct original wording from either document."
+      ]
+    },
+    {
+      "id": "B02",
+      "goal": "Whole-architecture source mapping and adversarial review",
+      "depends_on": [
+        "B01"
+      ],
+      "subsystems": [],
+      "scenario_ids": [],
+      "status": "IN_PROGRESS",
+      "acceptance": "Every current subsystem, contract, interface, scenario and forbidden effect traced to exact code/tests; conflicting architecture assumptions resolved; independent conceptual review recorded.",
+      "next_action": "Verify exact-head CI for support-versus-candidate admission; then probe exact multi-output artifact roles, actual current-session tool operations and independent outcome evidence. Keep B02 IN_PROGRESS.",
+      "blocker": null,
+      "evidence": [
+        "Common integration-boundary defect traced through scope.resolve_intake, capability_lookup, domain contracts, subsystem and executor registries, quality planner and identity route. Architecture V2 section Y records comparison, implementation and falsifiers. No real independent product acceptance claimed.",
+        "Re-audit traced common gaps between composition and local task admission, and between task completion and deliverable variant coverage; implemented shared admission and derived evidence projection. Independent product acceptance remains open.",
+        "Read 2026-11-27 full-tree audit F01-F17 and code paths. Architecture ADRs now separate domain release/authority/conformance/trace from application service/registry. Architecture structure tests pass on prior exact commits; actual owner outcomes remain OPEN.",
+        "GitHub repository rename verified by metadata: canonical D1traverser-debug/self-media-system, repository id 1411170938, existing PR #56 and original integration branch unchanged. Python product/distribution names remain independent.",
+        "Isolated legacy operator_view.py and its old dedicated tests are removed as unused duplicate of canonical status/resume; this is not permission to remove still-tested retired runtime/orchestrator/storage paths. Repository topology declares a permanent removal record; exact-head regression required.",
+        "Second source retirement record for unused legacy program_orchestration.py plus test_program_orchestration.py. Original code remains in parent Git commit; historical projects/ and examples/ source data retained.",
+        "2026-11-28 exact-head source review: release_policy.py now enforces non-downgradable rights, media-rights-evidence and video technical-QA floors; test_release_policy.py covers downgrade attempts and removal of the obsolete CLI bypass. outcome_inspection.py performs read-only per-variant byte/type/shape observation and source-bound encoded-audio packet checks, while explicitly keeping owner acceptance false. demand_composition.py checks declared semantic_preconditions and source-ref count but does not independently prove source classification; this only partially mitigates the prior semantic-routing risk. effect_gate.py requires an operator-owned exact renderer SHA256 but explicitly is not an OS/network sandbox. Acceptance V2 has 35 design-only scenarios and zero growth/commercial contexts although the manifest declares four business domains. PR #56 currently has no submitted reviews or inline review threads.",
+        "2026-11-28: expanded long-form editorial candidate with evidence-derived thesis, claim ledger, paragraph progression, counterexamples, ablation, X Article packaging and visual-anchor boundaries (commit e395d5e); direct-session continuity transaction specified in Skill (commit 6dc362f); regression test added (61744ed). Exact-head PR CI passed 616 tests. Candidate method remains unvalidated and no native Skill runtime hook is claimed.",
+        "2026-11-28 CAOS-governed root-cause review: private Library already held 16 project candidate cards and cross-project index/taxonomy, but neither SMS Skill nor STUDIO_ENTRY referenced the Methods index. Confirmed a retrieval-path integration gap; native CAOS Skill selection remains unverified. Selected the existing Library + Skill/entry path over a new controller/database or global prompt formula.",
+        "2026-11-28 current-head source review at c1dc24d4e4be6015e76552ec66cee69c29444a69: read STUDIO_ENTRY.md, SMS Skill, Manifest, subsystem catalog, capability catalog, 35-scenario acceptance matrix, system/topology tests, demand_composition.py, outcome_inspection.py, release_policy.py, effect_gate.py and business.py. The source catalogs declare 16 subsystems, 9 professional groups, 54 demand profiles, 17 adapters and 6 local operations. All 35 acceptance scenarios remain runtime_verified=false. research_and_understanding explicitly remains SOURCE_BYTES_AUDIT_REGISTERED__SEMANTIC_RESEARCH_NOT_CONNECTED. The business adapter extracts values from declared imported JSON and marks platform authenticity, metric semantics, causal effect and owner outcome unverified. Static topology/CI passes do not close semantic or real-provider acceptance. This is a targeted current-source map, not completion of B02.",
+        "2026-11-28 execution-surface boundary review at 08d181414899c06dfbfcd60808d3a4d6b8276555: STUDIO_ENTRY.md explicitly permits bounded conversational text, image-planning, critique and simple edits using actual current-session tools, while StudioEngine is selected when persistence, artifact lineage, parallel dispatch or repeatable tooling is materially required. The local Python adapter/production registries are not a registry of all ChatGPT tools. Therefore SOURCE_BYTES_AUDIT_REGISTERED__SEMANTIC_RESEARCH_NOT_CONNECTED is a standalone-runtime gap, not proof that this ChatGPT session cannot perform research; web/image/media tool availability must be checked per task and must not be inferred from the catalog. This supports the dual-surface architecture; it does not prove native Skill activation or provider availability in another session.",
+        "2026-11-28 exact-head architecture mapping at 099d10ec8bd9386e3c54ca5a0e272a7b725d15a8: the 9 professional capability groups contain 54 demand profiles: understanding_research 4; editorial_writing 5; visual_design 9; motion_production 7; media_transform 9; platform_packaging 6; identity_collaboration 5; growth_commercial 4; verification_delivery 5. The 17 registered domain adapters are local structural validators/materializers/metadata/metrics handlers, not 17 general creative executors. Examples: editorial_plan_validate validates plans but is not a writer; shot_route is decision support and does not invoke a generator; IPOS adapters bind identity metadata but do not prove rendered fidelity; business_outcome_metrics derives from declared imported evidence but does not prove live platform authenticity, causal lift or commercial success; programmatic_graphic_render emits a local candidate and does not promote or release it. The six local production operations are python_frame_render, ffmpeg_assemble, delivery_package, ffprobe_media_qa, ffmpeg_video_audio_copy and source_evidence_audit. Provider-backed generation is explicitly NOT_CONNECTED in the Manifest and requires a current-session capability handshake. Thus the 54 profiles are a demand taxonomy, not an execution inventory. This is architecture mapping, not product acceptance.",
+        "2026-11-28: prior topology ownership/implementation symbols verified at 87004009; new candidate separates local support from candidate deliverable-type ceilings in existing executor registries and typed task admission. All 54 exact routes expose bounded candidate types; routing and validation receipts cannot substitute for authored/generated artifacts. This does not yet verify exact output roles, semantic quality, native tools or independent acceptance. New CI required."
+      ]
+    },
+    {
+      "id": "B03",
+      "goal": "Demand admission, direct/durable continuity and execution invariants",
+      "depends_on": [
+        "B00",
+        "B02"
+      ],
+      "subsystems": [
+        "execution_and_owner_scope",
+        "cognition_and_audit",
+        "compatibility_data_models",
+        "legacy_agent_control_plane"
+      ],
+      "scenario_ids": [
+        "S18",
+        "S19",
+        "S22",
+        "S25",
+        "S28"
+      ],
+      "status": "IN_PROGRESS",
+      "acceptance": "Owner revision, resume, independent tasks, explicit scope and retired-project negative cases work; direct conversational requests require no artificial project; no stale effect.",
+      "next_action": "Validate current status/resume outcome needs and static reachability. Clean only proven unused legacy controls while preserving historical behavioral regression and direct owner effect boundaries.",
+      "blocker": null,
+      "evidence": [
+        "Typed professional demand and exact local dispatcher admission, decision-bound selected route records, and digest-bound output candidate projection implemented; actual exact-head CI and owner outcomes not yet verified.",
+        "A real multi-output audio-copy operation exposed a catalog coverage omission. Existing composition supports one operation across multiple explicitly requested deliverables; scoped report types for actual render/assembly/audio/QA evidence without a parallel execution path.",
+        "Re-audit of engine.resume, worker_pool and operation_cycle found contradictory continuation after completed task graph with missing user deliverable. Reuse a single candidate-coverage continuation helper and regression across all three surfaces; no implicit release or actual tool-execution claim.",
+        "2026-11-27 current typed deliverable projection includes expected per-variant pixel shape and explicit read-only inspect-outcome, while ordinary status/resume stay lightweight; no second ledger."
+      ]
+    },
+    {
+      "id": "B04",
+      "goal": "Source understanding, evidence, knowledge and rights",
+      "depends_on": [
+        "B00",
+        "B02"
+      ],
+      "subsystems": [
+        "research_and_understanding",
+        "source_and_asset_lineage",
+        "knowledge_roles_and_methods"
+      ],
+      "scenario_ids": [
+        "S16",
+        "S21",
+        "S26",
+        "S27"
+      ],
+      "status": "IN_PROGRESS",
+      "acceptance": "Source truth, semantic understanding, lineage, rights, scoped CRUD and independent method replays proven by actual evidence; stale claims cannot authorize effects.",
+      "next_action": "On every substantive owner task, read private Methods/Cross-Project/INDEX.md, retrieve only matching project card(s), apply CAOS to test applicability/counterexamples, record APPLIED/NOT_APPLICABLE/REJECTED/UNRESOLVED and reason, and persist only material episodes with exact Library readback. Fresh-chat behavior still needs independent validation.",
+      "blocker": null,
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "2026-11-27: private owner preference, episodic cross-chat casebook and process-quality baseline now exist in Library; public Skill/manifest support exact private-source discovery and scoped owner-authorized retrospective self-media import. Historical case evidence remains summary-level and private.",
+        "2026-11-28: direct-session procedure now specifies read-before-decision, material-event capture, write-after-correction/selection/failure/outcome, Library version-conflict protection and exact readback. This is a Skill/Files operating procedure, not a native automatic bridge. Private casebook appended with this continuation episode, uploaded as version 5 and read back at /Social Media Studio/CROSS_CHAT_EXPERIENCE_CASEBOOK.md; preferences remain unchanged and no method promoted.",
+        "2026-11-28: read private owner profile v2, casebook v5, process baseline v1, method portfolio index, taxonomy and representative project cards. Verified 16 cards exist in /Social Media Studio/Methods/Projects/ but found no retrieval pointer in SMS Skill/STUDIO_ENTRY. Added CAOS parent source fallback and private method retrieval contract in Skill + STUDIO_ENTRY; regression tests and ADR added. No method promoted. Exact CAOS parent Skill source read at SHA 6a0928b0cc05f9efe3b37aff5fb574db74306cd0; this is not native Skill activation evidence.",
+        "2026-11-28: added cold-start short-phrase recovery contract. Methods index is only a learning locator, not active task state; exact project artifacts/audits and current PR/checkpoint must establish task identity and state.",
+        "2026-11-28 continuation retrieval receipt: read current private owner profile, casebook, process-quality baseline, Methods/Cross-Project/INDEX.md and cross-project taxonomy. The index lists 16 project-scoped cards; none is an SMS whole-architecture card, so no unrelated project card was forced onto this architecture task. Cross-project families remain candidate knowledge, not promoted methods. No preference change or method promotion.",
+        "2026-11-28 central learning-source review: read `CROSS_CHAT_METHOD_SYNTHESIS_2026-11-27.md`, which consolidates 14 private historical audit reports and two separate X Article projects. It explicitly labels these as audit artifacts rather than raw transcripts and keeps all craft findings as candidates pending independent replay/counterexample/regression. QUANT and Meme long-form projects remain distinct. No method was promoted by reading the synthesis."
+      ]
+    },
+    {
+      "id": "B05",
+      "goal": "Editorial, language and platform variants",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "subsystems": [
+        "editorial_and_language",
+        "platform_packaging_delivery"
+      ],
+      "scenario_ids": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S12"
+      ],
+      "status": "IN_PROGRESS",
+      "acceptance": "Actual natural-language short and long copy, multilingual variants and nonrepeating packaging meet explicit audience/owner intent; no invented claims; professional review.",
+      "next_action": "Run a fresh owner-facing short-form/package/cover task and explicitly retrieve the private project method card(s) through the new Skill/entry route. Compare actual owner corrections, source/goal fidelity and craft quality; do not copy selected historical wording. Native fresh-chat Skill selection remains NOT_TESTED until client trace.",
+      "blocker": null,
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "2026-11-27: explicit owner profile captures recurring voice, no-news-narration, source fidelity, field separation, localization and visual/ratio preferences; exact demand routing now explicitly retrieves candidate short-form, platform-packaging and visual references as bounded hypotheses. This does not promote their craft status.",
+        "2026-11-28: added private project-card retrieval path to SMS Skill and STUDIO_ENTRY. No new creative replay or performance outcome has yet been claimed."
+      ]
+    },
+    {
+      "id": "B06",
+      "goal": "Visual craft and original identity",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "subsystems": [
+        "visual_and_static_design",
+        "original_identity_ipos"
+      ],
+      "scenario_ids": [
+        "S06",
+        "S07",
+        "S08",
+        "S14",
+        "S15",
+        "S17",
+        "S29",
+        "S30",
+        "S31",
+        "S32",
+        "S33",
+        "S34",
+        "S35"
+      ],
+      "status": "IN_PROGRESS",
+      "acceptance": "Actual visual briefs and outputs satisfy intent, hierarchy, licensed fonts, aspect and preparation-only scope; only current approved IPOS canon is consumed; dependency-specific revocation verified.",
+      "next_action": "Compare actual available visual tool operations and approved IPOS bundles; review multi-aspect and no-generation contracts; run independent artifact review.",
+      "blocker": null,
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers."
+      ]
+    },
+    {
+      "id": "B07",
+      "goal": "Motion, sound and media transform",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "subsystems": [
+        "motion_and_production",
+        "media_understanding_and_transform"
+      ],
+      "scenario_ids": [
+        "S09",
+        "S10",
+        "S11",
+        "S13",
+        "S23"
+      ],
+      "status": "IN_PROGRESS",
+      "acceptance": "Actual original-video and transformation results with correct full-duration/audio preservation, requested scope, visual quality and media QA; real files, exact digests.",
+      "next_action": "Test independent source-bound audio QA against real crops, trims, re-encodes and stale inputs on exact-head CI; then address source-native content semantics and audio/video duration expectations separately.",
+      "blocker": null,
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "Explicit read-only source->result audio assurance now reuses immutable SQLite artifact_inputs edges and recomputes exact packet-hash equality of current source/video. Positive full identity requires both exact current file hashes, exactly one video source, and actual FFprobe packet equivalence; short-only prefix remains unverified for full-source promises. Existing runtime output test and negative unbound/tampered source tests added; new exact-head CI required.",
+        "Source-bound audio bytes actually recomputed independently during opt-in inspector; source missing/changed, multi-source ambiguity, prefix-only audio, absence of audio and exact full packet identity have differentiated statuses. Actual audio/video full play and edit quality remain not yet reviewed."
+      ]
+    },
+    {
+      "id": "B08",
+      "goal": "Growth, commerce, capability and effect boundaries",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "subsystems": [
+        "business_growth_commercial",
+        "provider_capability_routing"
+      ],
+      "scenario_ids": [
+        "S20",
+        "S24"
+      ],
+      "status": "IN_PROGRESS",
+      "acceptance": "Growth/commercial advice uses actual evidence; unavailable and unapproved provider/paid/posting routes fail closed; no performance claims without measurement.",
+      "next_action": "Test real operator trust boundary and provider-side cost/availability/rights effects; no arbitrary plugin auto-import, no untrusted Python in privileged environment. Live platform/commercial outcomes remain separately unverified.",
+      "blocker": null,
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "Re-audit actual legacy business metrics and domain adapter: video-only published_minutes constraint was unsuitable for account/content/commercial reporting. Implemented explicit subject/window + separately imported source JSON extraction and derived ratio receipts through existing adapter; no live external access or causal effect claimed.",
+        "Existing production registry now declares effect risk for all six operations. Unsandboxed Python source needs an external process-operator exact digest grant; absent/mismatched code digest blocks before process launch. No sandbox, publishing provider or owner effect permission inferred.",
+        "Actual current ProjectTaskService graph already validates dependencies, competitive candidates, owner adjudication, advice, bounded critique and alternative coordination patterns under one durable SQLite ledger. Removed redundant legacy ProgramOrchestrator and obsolete duplicate tests; current engine regression retained; new SHA CI required.",
+        "2026-11-28 exact-head provider/effect boundary review at 099d10ec8bd9386e3c54ca5a0e272a7b725d15a8: the review executor trust registry social_media_studio/data/review_executors.json has zero trusted executors; high-assurance review remains fail-closed. The 17 adapter specs all declare external_effects=false, promotes_candidate=false and publishes=false. The production registry has six bounded local operations; python_frame_render is TRUSTED_CODE_UNSANDBOXED and requires its separate exact-digest operator grant, while FFmpeg/FFprobe/delivery/source audit are local deterministic effects. No live platform connector, publication authority, provider-backed generation or commercial outcome evidence is established by these registries."
+      ]
+    },
+    {
+      "id": "B09",
+      "goal": "Independent typed assurance and architecture acceptance",
+      "depends_on": [
+        "B03",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B08"
+      ],
+      "subsystems": [
+        "quality_and_assurance"
+      ],
+      "scenario_ids": [],
+      "status": "IN_PROGRESS",
+      "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
+      "next_action": "After domain work, complete independent typed assurance on actual owner outputs; verify native CAOS/SMS selection trace, exact private-source retrieval, independent output review and owner correction burden. Keep native selection NOT_TESTED without first-party trace.",
+      "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
+      "evidence": [
+        "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
+        "2026-11-27 inspect-outcome observes actual candidate file type, pixel dimensions and source-scoped owner obligations per variant; entire user demand, semantic value, owner approval and publication remain explicitly UNVERIFIED. Empty trusted review registry remains fail-closed.",
+        "Internal assurance 2026-11-27: explicit per-variant artifact selection now blocks multiple unselected candidates and multiple accepted artifacts, surfaces all candidates and rejected source bindings, and tests actual current PNG alternative conflict. MEDIA_TRANSFORM original_audio_promise with no audio stream is a mismatch; presence of a stream remains source-bound identity UNVERIFIED. No creative/owner outcome approval inferred; exact-head CI required.",
+        "Output observer now independently rechecks exact source->result encoded packets for BITSTREAM_IDENTITY using current immutable artifact_inputs lineage, rejects ambiguous options and discards mixed-revision readbacks. Engineering proof is not creative/owner sign-off. Before this checkpoint doc commit, SHA 98cec7 had 602 passed and both GitHub CI green; new exact-head status pending.",
+        "2026-11-27 internal learning/evolution integration: owner-authorized scoped cross-chat retrospective import; private Library owner preference profile, episodic casebook and process-quality baseline; direct-session capture without dummy projects; preference/episode/method separation; candidate skill references must be retrieved for scoped use rather than skipped. Tests cover these contracts and exact demand references. Exact head 24b4d64 has 612 passed and both CI jobs green.",
+        "2026-11-28 exact PR readback: PR #56 has zero submitted review records and zero inline review threads. CI and static source audits are not independent human or owner-outcome acceptance. Trusted high-assurance executor registry remains empty; native CAOS/SMS Skill selection in a fresh ChatGPT chat remains NOT_TESTED.",
+        "2026-11-28: exact CAOS parent Skill source was read in this ChatGPT session and the SMS Skill now gives a canonical fallback; this proves source retrieval only, not native selection. New tests cover source pointer and private method-card discoverability, not model behavior in a fresh chat.",
+        "2026-11-28 simulated three terse continuation requests using private context, exact Library sources and live GitHub state. This is not a genuinely independent fresh-chat run or native Skill-selection trace.",
+        "2026-11-28 exact-head review registry readback at 099d10ec8bd9386e3c54ca5a0e272a7b725d15a8: social_media_studio/data/review_executors.json reports trusted_executors={} (count 0). This is an explicit fail-closed blocker for high-assurance release, not a reason to substitute self-review or CI."
+      ]
+    },
+    {
+      "id": "B10",
+      "goal": "Integration and final handoff",
+      "depends_on": [
+        "B00",
+        "B01",
+        "B02",
+        "B09",
+        "B11"
+      ],
+      "subsystems": [],
+      "scenario_ids": [],
+      "status": "OPEN",
+      "acceptance": "All required obligations and acceptance scenarios independently satisfied or explicitly owner-approved scope change; exact-head CI; clean rollback, repeatable entry/resume and owner-facing handoff. No automatic merge or publish.",
+      "next_action": "Re-query live PR head and exact-head CI after this checkpoint update. Keep PR #56 Draft/unmerged; B01-B11 remain subject to actual owner outcomes and independent acceptance.",
+      "blocker": null,
+      "evidence": []
+    },
+    {
+      "id": "B11",
+      "status": "IN_PROGRESS",
+      "next_action": "The last verified pre-checkpoint PR head 099d10ec8bd9386e3c54ca5a0e272a7b725d15a8 has a passing exact-head PR workflow run 46102884699; this checkpoint update advances the branch, so re-query the new live head and its exact-head CI. Then run the three phrases in a genuinely independent fresh ChatGPT chat using only the bare phrase, not a pasted state summary. Verify target, exact source/version, decision locks, separate production/verification/outcome states and next action. This current chat included a detailed prior-state summary, so it is continuation-recovery evidence but NOT the bare-phrase-only test. Require owner-authored evidence or explicit owner confirmation for numeric aliases; keep 推特长文1 and 视频制作3 provisional. Reconcile QUANT's c4cc... versus R11 441e... hashes and exact current media assets before any production effect. Native Skill activation remains NOT_TESTED without first-party client trace.",
+      "evidence": [
+        "2026-11-28 cold-start simulation: 继续SMS uniquely resolved to live SMS architecture PR #56; at simulation head b761c85, exact-head PR CI run 46093986946 passed 618 tests, system audit, topology audit and smoke checks.",
+        "2026-11-28 cold-start simulation: 继续推特长文1 provisionally resolves to QUANT X Article The Rug Became the Ad based on the earlier exact phrase 继续推特长文 and first X Article index entry; exact suffix alias is not directly proven. Separate Meme X Article exists. R11 workbench reports final author review/unpublished; article SHA differs from the c4cc... hash in the deep-dive record and requires reconciliation.",
+        "2026-11-28 cold-start simulation: 继续视频制作3 strongly resolves to GTA6 Rain/Motorcycle based on historical user-scoped continuation context and project card 03. Raw suffix semantics remain unproven. The prior Street Fighter mapping was an assistant conflation of project card number with its internal C03 cover stage. Chinese copy selected; cover candidates generated but final asset acceptance remains open.",
+        "Implemented cold-start continuation rules in SMS Skill and STUDIO_ENTRY; tests added for three phrases, Continuation Receipt, numeric suffix ambiguity, method-card/task identity separation, state axes and no retired workspace resurrection. ADR: docs/decisions/ADR-2026-11-28-short-phrase-continuation-recovery.md.",
+        "2026-11-28 current-session CAOS-guided read-only re-simulation: `继续SMS` uniquely resolves to the live architecture PR #56/checkpoint. `继续推特长文1` has QUANT as the strongest provisional target because the earlier exact unsuffixed owner request `继续推特长文` resolved to The Rug Became the Ad; the suffix `1` itself remains unproven, and the separate Meme X Article remains distinct. The R11 publishing workbench reports SHA prefix 441e7ee5d550 / suffix 0c071737f00c while the deep-dive, visual manifest and R5 workflow lock bind c4cc97053119bf9cb47dd54ebe7eb85b0c100cb1eaf2906d32e0be679d0f0430; published=false. No article edit or publication performed.",
+        "2026-11-28 current-session CAOS-guided read-only re-simulation: `继续视频制作3` provisionally points to GTA6 Rain/Motorcycle based on summary-level owner-scoped continuation context and its historical audit, not because the private learning card is numbered 03. The audit records Chinese copy direction and cover text selected, 3:4/4:3/16:9 candidates generated, but final image acceptance and publication remain open; original video audio-content review is UNKNOWN. Exact raw owner definition of suffix `3` was not recovered. The prior Street Fighter association is rejected as a project-card/internal-stage conflation. No media edit or image generation performed.",
+        "2026-11-28 adversarial negative simulation: a suffix matching a project-card number (for example, video 9 / Street Fighter card 09 or article 2 / Meme card 16) is not sufficient to resolve task identity. Numeric suffixes remain unresolved unless owner-authored continuation history or explicit owner confirmation supports the mapping. No alias registry or second task database was created.",
+        "2026-11-28 current continuation chat: the owner supplied a detailed previous-state snapshot; assistant then independently re-read the live PR #56 metadata/head, exact-head CI, checkpoint, CAOS parent Skill source and private SMS sources. The active target SMS PR #56 was recovered correctly. This validates snapshot-plus-live-source continuation, not a bare-phrase-only fresh-chat run or native Skill activation.",
+        "2026-11-28 post-checkpoint exact-head CI: 08d181414899c06dfbfcd60808d3a4d6b8276555, PR workflow run 46101769454, success with 622 tests and all listed audit/smoke steps. This validates the repository contract at this exact head only; it does not validate native fresh-chat selection or the three bare-phrase cases.",
+        "2026-11-28 latest exact-head PR workflow 46102884699 on 099d10ec8bd9386e3c54ca5a0e272a7b725d15a8 passed 622 tests and all audit/smoke steps. This is repository regression evidence only; it does not prove fresh-chat bare-phrase recovery or native Skill activation."
+      ],
+      "goal": "Validate cold-start continuation and numeric-alias resolution across independent sessions",
+      "depends_on": [
+        "B00",
+        "B04"
+      ],
+      "subsystems": [],
+      "scenario_ids": [],
+      "acceptance": "Three independent fresh-chat continuation cases recover the correct active target, exact source/version, scoped decision locks, separate production/verification/outcome states and next action; numeric aliases are confirmed only by owner-authored evidence, and unresolved mappings remain explicitly provisional.",
+      "blocker": null
+    }
+  ]
+}

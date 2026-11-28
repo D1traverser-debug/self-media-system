@@ -35,6 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("capabilities", help="inspect professional capability coverage and actual registered routes")
     p.add_argument("--group", help="exact professional capability group ID")
+    p.add_argument("--demand", help="exact professional demand ID; may identify its group")
 
     p = sub.add_parser("quality-plan", help="derive deliverable-specific quality criteria, no PASS assertion")
     p.add_argument("source", type=Path)
@@ -44,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("inspect-editorial", help="read-only structural check for a cross-platform package or long article")
     p.add_argument("source", type=Path)
-    p.add_argument("--kind", choices=["package", "article"], required=True)
+    p.add_argument("--kind", choices=["package", "article", "short-copy"], required=True)
 
     p = sub.add_parser("knowledge", help="locate reusable methods without activating task history")
     p.add_argument("--id", help="exact knowledge method ID")
@@ -53,6 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("intake", help="resolve only the current owner demand or exact current workspace identity")
     p.add_argument("request", type=Path)
+    p.add_argument("--selection", type=Path, help="optional separate assistant route proposal; never owner authority")
 
     p = sub.add_parser("init", help="create a project from an outcome brief")
     p.add_argument("project_id")
@@ -109,6 +111,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--repo-root", type=Path, help="repository root to audit (default: inferred from the installed source package)")
 
     p = sub.add_parser("status", help="show project and task readiness")
+    p.add_argument("project_id")
+
+    p = sub.add_parser("inspect-outcome", help="read-only actual file format and dimension checks for current typed deliverables")
     p.add_argument("project_id")
 
     p = sub.add_parser("resume", help="reconstruct the project handoff from durable Social Media Studio state")
@@ -188,7 +193,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--rubric", required=True)
     p.add_argument("--outcome", choices=["PASS", "REVISE", "FAIL", "BLOCKED", "NOT_TESTED"], required=True)
     p.add_argument("--dimensions", type=Path, required=True, help="JSON scorecard/findings object")
-    p.add_argument("--attestation", type=Path, help="JSON reviewer attestation: reviewer_kind, execution_mode, blind_review, inspected_artifact_digest, context_id")
+    p.add_argument("--attestation", type=Path, help="Deprecated caller declaration; rejected as execution proof")
+    p.add_argument("--review-task", help="Completed kind=review task ID for a high-assurance review")
+    p.add_argument("--review-result", help="Registered review_report artifact ID produced by --review-task")
+    p.add_argument("--execution-receipt", type=Path, help="Signed DSSE/in-toto execution receipt JSON from a trusted reviewer executor")
     p.add_argument("--evidence", action="append", required=True)
     p.add_argument("--notes", default="")
 
@@ -197,7 +205,6 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("artifact_id")
     p.add_argument("--rubric", action="append", default=[])
     p.add_argument("--evidence", action="append", default=[])
-    p.add_argument("--allow-unknown-rights", action="store_true")
 
     p = sub.add_parser("invalidate", help="invalidate a task and only its dependency descendants")
     p.add_argument("project_id")
@@ -267,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if report["pass"] else 2
         if command == "capabilities":
             from .scope import capability_lookup
-            _emit(capability_lookup(args.group))
+            _emit(capability_lookup(args.group, demand_id=args.demand))
             return 0
         if command == "quality-plan":
             from .domain.assurance import build_quality_plan
@@ -286,9 +293,14 @@ def main(argv: list[str] | None = None) -> int:
             _emit(result)
             return 0
         if command == "inspect-editorial":
-            from .domain.editorial import inspect_long_article, inspect_platform_package
+            from .domain.editorial import inspect_long_article, inspect_platform_package, inspect_short_copy
             try:
-                result = (inspect_platform_package if args.kind == "package" else inspect_long_article)(_read_json(args.source))
+                inspectors = {
+                    "package": inspect_platform_package,
+                    "article": inspect_long_article,
+                    "short-copy": inspect_short_copy,
+                }
+                result = inspectors[args.kind](_read_json(args.source))
             except ValueError as exc:
                 raise StudioError(str(exc)) from exc
             _emit(result)
@@ -301,7 +313,8 @@ def main(argv: list[str] | None = None) -> int:
             import os
             from .scope import resolve_intake
             root = args.root or Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
-            _emit(resolve_intake(root, _read_json(args.request)))
+            _emit(resolve_intake(root, _read_json(args.request),
+                                 selection=_read_json(args.selection) if args.selection else None))
             return 0
         from .scope import EPOCH, bind_owner_brief, resolve_intake, validate_workspace_mode
         if args.offline_fixture and args.root is None:
@@ -439,6 +452,8 @@ def main(argv: list[str] | None = None) -> int:
             ))
         elif command == "status":
             _emit(engine.status(args.project_id))
+        elif command == "inspect-outcome":
+            _emit(engine.inspect_outcome(args.project_id))
         elif command == "resume":
             _emit(engine.resume(args.project_id, event_limit=args.event_limit))
         elif command == "tasks":
@@ -495,11 +510,13 @@ def main(argv: list[str] | None = None) -> int:
                                       reviewer_id=args.reviewer, rubric_id=args.rubric,
                                       outcome=args.outcome, dimensions=_read_json(args.dimensions),
                                       evidence_refs=args.evidence, notes=args.notes,
-                                      attestation=_read_json(args.attestation) if args.attestation else None))
+                                       attestation=_read_json(args.attestation) if args.attestation else None,
+                                       review_task_id=args.review_task,
+                                       review_result_artifact_id=args.review_result,
+                                       execution_receipt=_read_json(args.execution_receipt) if args.execution_receipt else None))
         elif command == "release-check":
             _emit(engine.release_check(args.project_id, args.artifact_id,
-                                       required_rubrics=args.rubric, evidence_refs=args.evidence,
-                                       require_rights=not args.allow_unknown_rights))
+                                       required_rubrics=args.rubric, evidence_refs=args.evidence))
         elif command == "invalidate":
             _emit(engine.invalidate(args.project_id, args.task_id, args.reason))
         elif command == "reopen":

@@ -15,91 +15,18 @@ import tempfile
 import uuid
 from typing import Any, Iterable
 
+from .review_execution import (
+    ReviewExecutionError, ReviewExecutionTrustRegistry, build_review_packet,
+    digest_json, review_contract_digest, review_contract_requires_execution,
+)
 
-SCHEMA_VERSION = 1
-TASK_STATES = {
-    "PENDING", "READY", "RUNNING", "WAITING_INPUT", "BLOCKED",
-    "FAILED", "COMPLETED", "STALE", "CANCELLED",
-}
-RIGHTS_ALLOWED = {"OWNED", "AUTHORIZED", "LICENSED", "PUBLIC_DOMAIN"}
-_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
-
-
-class StudioError(RuntimeError):
-    """Base error for the standalone Social Media Studio runtime."""
-
-
-class ProjectNotFound(StudioError):
-    pass
-
-
-class ContractError(StudioError):
-    pass
-
-
-class ClaimError(StudioError):
-    pass
-
-
-class GateError(StudioError):
-    pass
-
-
-def _now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def _iso(value: datetime | None = None) -> str:
-    return (value or _now()).isoformat(timespec="seconds").replace("+00:00", "Z")
-
-
-def _parse_time(value: str) -> datetime:
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
-
-
-def _json(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-
-
-def _loads(value: str | None, default: Any = None) -> Any:
-    return json.loads(value) if value is not None else default
-
-
-def _safe_id(value: str, label: str) -> str:
-    if not isinstance(value, str) or not _ID.fullmatch(value):
-        raise ContractError(f"{label} must match {_ID.pattern}")
-    return value
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def _inside(root: Path, candidate: str | Path) -> Path:
-    path = Path(candidate)
-    if not path.is_absolute():
-        path = root / path
-    resolved = path.resolve(strict=True)
-    base = root.resolve(strict=True)
-    if resolved != base and base not in resolved.parents:
-        raise ContractError(f"artifact path escapes project workspace: {candidate}")
-    if not resolved.is_file():
-        raise ContractError(f"artifact must be a regular file: {candidate}")
-    return resolved
-
-
-@dataclass(frozen=True)
-class TaskClaim:
-    project_id: str
-    task_id: str
-    worker_id: str
-    claim_token: str
-    lease_until: str
-    attempt: int
+from .engine_support import (
+    SCHEMA_VERSION, TASK_STATES, RIGHTS_ALLOWED, _ID,
+    StudioError, ProjectNotFound, ContractError, ClaimError, GateError,
+    _now, _iso, _parse_time, _json, _loads, _safe_id, _sha256, _inside,
+    TaskClaim, validate_brief, completion_guidance,
+)
+from .application.project_tasks import ProjectTaskService
 
 
 class StudioEngine:
@@ -113,8 +40,10 @@ class StudioEngine:
     def __init__(self, root: str | Path | None = None):
         default = Path(os.environ.get("SMS_STUDIO_HOME", Path.home() / ".sms-studio"))
         self.root = Path(root or default).expanduser().resolve()
+        self.review_trust_registry = ReviewExecutionTrustRegistry()
         self.root.mkdir(parents=True, exist_ok=True)
         (self.root / "projects").mkdir(exist_ok=True)
+        self._project_task_service = ProjectTaskService(self)
 
     def _project_dir(self, project_id: str) -> Path:
         project_id = _safe_id(project_id, "project_id")
@@ -137,6 +66,22 @@ class StudioEngine:
         """Idempotent migrations for projects created by earlier standalone releases."""
         connection.executescript(
             """
+            CREATE TABLE IF NOT EXISTS review_execution_nonces (
+                project_id TEXT NOT NULL,
+                nonce TEXT NOT NULL,
+                review_id TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                PRIMARY KEY(project_id, nonce),
+                UNIQUE(project_id, review_id),
+                FOREIGN KEY(project_id, review_id)
+                    REFERENCES reviews(project_id, review_id)
+            );
+            CREATE TRIGGER IF NOT EXISTS review_execution_nonces_no_update
+                BEFORE UPDATE ON review_execution_nonces
+                BEGIN SELECT RAISE(ABORT, 'review execution nonce records are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS review_execution_nonces_no_delete
+                BEFORE DELETE ON review_execution_nonces
+                BEGIN SELECT RAISE(ABORT, 'review execution nonce records are immutable'); END;
             CREATE TABLE IF NOT EXISTS artifact_inputs (
                 project_id TEXT NOT NULL,
                 output_artifact_id TEXT NOT NULL,
@@ -329,663 +274,47 @@ class StudioEngine:
             (project_id, entity_type, entity_id, event_type, _json(payload), _iso()),
         )
 
-    @staticmethod
-    def _project_row(connection: sqlite3.Connection, project_id: str) -> sqlite3.Row:
-        row = connection.execute("SELECT * FROM projects WHERE project_id=?", (project_id,)).fetchone()
-        if row is None:
-            raise ProjectNotFound(project_id)
-        return row
+    def _project_row(self, connection: sqlite3.Connection, project_id: str) -> sqlite3.Row:
+        return self._project_task_service._project_row(connection, project_id)
 
     @staticmethod
     def _validate_brief(brief: dict[str, Any]) -> None:
-        if not isinstance(brief, dict):
-            raise ContractError("brief must be a JSON object")
-        required = ["goal", "audience", "deliverables"]
-        missing = [key for key in required if not brief.get(key)]
-        if missing:
-            raise ContractError(f"brief is missing required outcome fields: {missing}")
-        if not isinstance(brief["goal"], str) or not isinstance(brief["audience"], str):
-            raise ContractError("brief.goal and brief.audience must be strings")
-        if not isinstance(brief["deliverables"], list) or not all(isinstance(item, str) and item.strip() for item in brief["deliverables"]):
-            raise ContractError("brief.deliverables must be a non-empty array of strings")
-        policy = brief.get("release_policy", {})
-        if not isinstance(policy, dict):
-            raise ContractError("brief.release_policy must be an object")
-        for field in (
-            "required_evidence_refs", "required_evidence_artifact_names",
-            "required_review_rubrics", "required_artifact_names",
-            "required_asset_names", "required_rights_statuses",
-            "technical_qa_required_check_ids",
-        ):
-            value = policy.get(field, [])
-            if not isinstance(value, list) or not all(isinstance(item, str) and item.strip() for item in value):
-                raise ContractError(f"release_policy.{field} must be an array of non-empty strings")
-        allowed_rights = set(policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)))
-        if not allowed_rights.issubset(RIGHTS_ALLOWED):
-            raise ContractError("release_policy.required_rights_statuses contains a non-cleared rights status")
-        contracts = policy.get("review_contracts", {})
-        if not isinstance(contracts, dict) or not all(isinstance(value, dict) for value in contracts.values()):
-            raise ContractError("release_policy.review_contracts must map rubric IDs to objects")
-        for rubric, contract in contracts.items():
-            _safe_id(rubric, "review rubric")
-            for count_field in ("min_reviewers", "min_findings"):
-                if count_field in contract and int(contract[count_field]) < 0:
-                    raise ContractError(f"review_contracts.{rubric}.{count_field} cannot be negative")
-            for mapping_field in ("dimension_floors",):
-                if mapping_field in contract and not isinstance(contract[mapping_field], dict):
-                    raise ContractError(f"review_contracts.{rubric}.{mapping_field} must be an object")
-            for boolean_field in (
-                "reviewer_kind", "execution_mode", "blind_review", "require_digest_attestation",
-                "require_context_id", "require_evidence_per_finding", "require_disposition_per_finding",
-                "require_resolvable_evidence_refs", "distinct_contexts",
-            ):
-                if boolean_field in contract and boolean_field not in {"reviewer_kind", "execution_mode"} and not isinstance(contract[boolean_field], bool):
-                    raise ContractError(f"review_contracts.{rubric}.{boolean_field} must be boolean")
-            if "score_dimensions" in contract and not isinstance(contract["score_dimensions"], list):
-                raise ContractError(f"review_contracts.{rubric}.score_dimensions must be an array")
-        if policy.get("require_technical_qa") and not isinstance(
-            policy.get("technical_qa_artifact_name", "technical-qa-receipt"), str
-        ):
-            raise ContractError("release_policy.technical_qa_artifact_name must be a string")
+        return validate_brief(brief)
+
 
     def create_project(self, project_id: str, title: str, brief: dict[str, Any]) -> dict[str, Any]:
-        project_id = _safe_id(project_id, "project_id")
-        self._validate_brief(brief)
-        if "scope_epoch" in brief:
-            from .scope import bind_owner_brief
-            bind_owner_brief(project_id, brief)
-        directory = self._project_dir(project_id)
-        directory.mkdir(parents=True, exist_ok=False)
-        (directory / "assets").mkdir()
-        (directory / "artifacts").mkdir()
-        db_path = directory / "studio.sqlite3"
-        connection = sqlite3.connect(db_path, timeout=30, isolation_level=None)
-        connection.row_factory = sqlite3.Row
-        try:
-            self._schema(connection)
-            connection.execute("BEGIN IMMEDIATE")
-            now = _iso()
-            connection.execute(
-                "INSERT INTO projects(project_id,title,brief_json,created_at,updated_at) VALUES(?,?,?,?,?)",
-                (project_id, title or project_id, _json(brief), now, now),
-            )
-            self._event(connection, project_id, "PROJECT", project_id, "PROJECT_CREATED", {"title": title, "brief": brief})
-            connection.commit()
-        except Exception:
-            connection.rollback()
-            shutil.rmtree(directory, ignore_errors=True)
-            raise
-        finally:
-            connection.close()
-        return self.project(project_id)
-
+        return self._project_task_service.create_project(project_id, title, brief)
     def project(self, project_id: str) -> dict[str, Any]:
-        with closing(self._connect(project_id)) as connection:
-            row = self._project_row(connection, project_id)
-            return {
-                "project_id": row["project_id"], "title": row["title"],
-                "brief": _loads(row["brief_json"], {}), "revision": row["revision"],
-                "created_at": row["created_at"], "updated_at": row["updated_at"],
-                "workspace": str(self._project_dir(project_id)),
-            }
-
+        return self._project_task_service.project(project_id)
     @staticmethod
     def _descendant_closure(tasks: dict[str, dict[str, Any]], roots: Iterable[str]) -> set[str]:
-        closure = set(roots)
-        changed = True
-        while changed:
-            changed = False
-            for candidate, row in tasks.items():
-                deps = _loads(row["depends_on_json"], []) if "depends_on_json" in row else row.get("depends_on", [])
-                if candidate not in closure and any(dep in closure for dep in deps):
-                    closure.add(candidate)
-                    changed = True
-        return closure
+        return ProjectTaskService._descendant_closure(tasks, roots)
 
     def brief_history(self, project_id: str) -> list[dict[str, Any]]:
-        with closing(self._connect(project_id)) as connection:
-            rows = connection.execute(
-                "SELECT * FROM events WHERE project_id=? AND entity_type='PROJECT' AND event_type IN ('PROJECT_CREATED','PROJECT_BRIEF_REVISED') ORDER BY event_no",
-                (project_id,),
-            ).fetchall()
-            return [{**dict(row), "payload": _loads(row["payload_json"], {})} for row in rows]
-
+        return self._project_task_service.brief_history(project_id)
     def revise_brief(
         self, project_id: str, brief: dict[str, Any], *, reason: str,
         affected_task_ids: list[str] | None = None,
     ) -> dict[str, Any]:
-        self._validate_brief(brief)
-        if not isinstance(reason, str) or not reason.strip():
-            raise ContractError("brief revision requires a reason")
-        with closing(self._connect(project_id)) as connection:
-            connection.execute("BEGIN IMMEDIATE")
-            try:
-                project = self._project_row(connection, project_id)
-                tasks = self._task_map(connection, project_id)
-                roots = list(tasks) if affected_task_ids is None else list(affected_task_ids)
-                unknown = sorted(set(roots) - set(tasks))
-                if unknown:
-                    raise ContractError(f"unknown affected_task_ids: {unknown}")
-                invalidated = self._descendant_closure(tasks, roots) if roots else set()
-                old_brief = _loads(project["brief_json"], {})
-                if "scope_epoch" in old_brief:
-                    if brief.get("scope_epoch") != old_brief["scope_epoch"]:
-                        raise ContractError("owner task scope epoch cannot change")
-                    if brief != old_brief:
-                        # Until a task-level semantic dependency oracle proves a narrower
-                        # change set, the whole owner brief is the governing upstream input.
-                        invalidated = set(tasks)
-                elif "scope_epoch" in brief:
-                    raise ContractError("retired instance cannot be converted into a current owner task")
-                old_digest = hashlib.sha256(_json(old_brief).encode("utf-8")).hexdigest()
-                new_digest = hashlib.sha256(_json(brief).encode("utf-8")).hexdigest()
-                now = _iso()
-                connection.execute(
-                    "UPDATE projects SET brief_json=?,revision=revision+1,updated_at=? WHERE project_id=?",
-                    (_json(brief), now, project_id),
-                )
-                for task_id in invalidated:
-                    connection.execute(
-                        "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
-                        (_json({"reason": reason, "brief_revision": int(project["revision"]) + 1}), now, project_id, task_id),
-                    )
-                    connection.execute(
-                        "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
-                        (project_id, task_id),
-                    )
-                    self._event(connection, project_id, "TASK", task_id, "TASK_INVALIDATED_BY_BRIEF_REVISION", {
-                        "reason": reason, "project_revision": int(project["revision"]) + 1,
-                    })
-                self._event(connection, project_id, "PROJECT", project_id, "PROJECT_BRIEF_REVISED", {
-                    "previous_brief": old_brief, "brief": brief,
-                    "previous_sha256": old_digest, "sha256": new_digest,
-                    "reason": reason, "invalidated_tasks": sorted(invalidated),
-                })
-                self._refresh_in_tx(connection, project_id)
-                connection.commit()
-            except Exception:
-                connection.rollback()
-                raise
-        return {"project": self.project(project_id), "invalidated_tasks": sorted(invalidated), "brief_history": self.brief_history(project_id)}
-
+        return self._project_task_service.revise_brief(project_id, brief, reason=reason, affected_task_ids=affected_task_ids)
     def _validate_graph(self, all_tasks: dict[str, dict[str, Any]]) -> None:
-        for task_id, task in all_tasks.items():
-            deps = task.get("depends_on", [])
-            if len(deps) != len(set(deps)):
-                raise ContractError(f"{task_id}: duplicate dependencies")
-            missing = [dep for dep in deps if dep not in all_tasks]
-            if missing:
-                raise ContractError(f"{task_id}: unknown dependencies {missing}")
-            if task_id in deps:
-                raise ContractError(f"{task_id}: task cannot depend on itself")
-        visiting: set[str] = set()
-        visited: set[str] = set()
-
-        def visit(task_id: str) -> None:
-            if task_id in visiting:
-                raise ContractError(f"dependency cycle detected at {task_id}")
-            if task_id in visited:
-                return
-            visiting.add(task_id)
-            for dependency in all_tasks[task_id].get("depends_on", []):
-                visit(dependency)
-            visiting.remove(task_id)
-            visited.add(task_id)
-
-        for task_id in all_tasks:
-            visit(task_id)
-        output_owners: dict[str, str] = {}
-        candidate_groups: dict[str, set[str]] = {}
-        adjudications: list[tuple[str, dict[str, Any]]] = []
-        for task_id, task in all_tasks.items():
-            for output in task.get("outputs", []):
-                previous = output_owners.get(output)
-                if previous is not None and previous != task_id:
-                    raise ContractError(f"artifact output {output!r} has multiple producers: {previous}, {task_id}")
-                output_owners[output] = task_id
-            requirements = task.get("requirements", {})
-            coordination = requirements.get("coordination", {}) if isinstance(requirements, dict) else {}
-            if not coordination:
-                continue
-            if not isinstance(coordination, dict):
-                raise ContractError(f"{task_id}: requirements.coordination must be an object")
-            pattern = coordination.get("pattern")
-            if pattern == "COMPETITIVE_CANDIDATES":
-                group = coordination.get("decision_group")
-                criteria = coordination.get("candidate_criteria")
-                if not isinstance(group, str) or not group.strip():
-                    raise ContractError(f"{task_id}: competitive candidate task requires decision_group")
-                if not isinstance(criteria, list) or not criteria:
-                    raise ContractError(f"{task_id}: competitive candidate task requires declared candidate_criteria")
-                candidate_groups.setdefault(group, set()).add(task_id)
-            elif pattern == "OWNER_ADJUDICATION":
-                group = coordination.get("consumes_group")
-                adjudicator = coordination.get("adjudicator")
-                if not isinstance(group, str) or not group.strip() or not isinstance(adjudicator, str) or not adjudicator.strip():
-                    raise ContractError(f"{task_id}: owner adjudication requires consumes_group and adjudicator")
-                if task.get("executor") != "human":
-                    raise ContractError(f"{task_id}: owner adjudication must use the human executor")
-                if coordination.get("decision_receipt_required") is not True:
-                    raise ContractError(f"{task_id}: owner adjudication requires a durable decision receipt")
-                adjudications.append((task_id, coordination))
-            elif pattern == "CONSULTATIVE_ADVICE":
-                if coordination.get("advisory_only") is not True or not coordination.get("decision_owner"):
-                    raise ContractError(f"{task_id}: consultative advice must be advisory_only and name decision_owner")
-            elif pattern == "STRUCTURED_CRITIQUE_AND_REVISION":
-                rounds = int(coordination.get("max_rounds", 0))
-                if rounds < 1 or rounds > 3:
-                    raise ContractError(f"{task_id}: critique/revision must declare bounded max_rounds in 1..3")
-            elif pattern in {"INDEPENDENT_PARALLEL", "SERIAL_DEPENDENCY", "FAN_OUT_FAN_IN", "QUORUM_OR_PANEL_REVIEW"}:
-                pass
-            else:
-                raise ContractError(f"{task_id}: unknown coordination pattern {pattern!r}")
-        ancestor_cache: dict[str, set[str]] = {}
-
-        def ancestors(task_id: str) -> set[str]:
-            cached = ancestor_cache.get(task_id)
-            if cached is not None:
-                return cached
-            result: set[str] = set()
-            for dependency in all_tasks[task_id].get("depends_on", []):
-                result.add(dependency)
-                result.update(ancestors(dependency))
-            ancestor_cache[task_id] = result
-            return result
-
-        for task_id, task in all_tasks.items():
-            for input_name in task.get("inputs", []):
-                producer = output_owners.get(input_name)
-                if producer is not None and producer not in ancestors(task_id):
-                    raise ContractError(f"{task_id}: input artifact {input_name!r} is produced by {producer!r} but its producer is not a declared dependency")
-
-        for group, candidates in candidate_groups.items():
-            if len(candidates) < 2:
-                raise ContractError(f"decision group {group!r} requires at least two independent candidates")
-        for task_id, coordination in adjudications:
-            group = coordination["consumes_group"]
-            candidates = candidate_groups.get(group)
-            if not candidates:
-                raise ContractError(f"{task_id}: unknown decision group {group!r}")
-            missing_candidates = sorted(candidates - set(all_tasks[task_id].get("depends_on", [])))
-            if missing_candidates:
-                raise ContractError(f"{task_id}: owner adjudication must depend on every candidate in {group!r}: {missing_candidates}")
-
+        return self._project_task_service._validate_graph(all_tasks)
     def add_tasks(self, project_id: str, tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        if not isinstance(tasks, list) or not tasks:
-            raise ContractError("tasks must be a non-empty array")
-        with closing(self._connect(project_id)) as connection:
-            connection.execute("BEGIN IMMEDIATE")
-            try:
-                project = self._project_row(connection, project_id)
-                from .scope import validate_task_binding
-                brief = _loads(project["brief_json"], {})
-                existing_rows = connection.execute(
-                    "SELECT task_id,title,kind,executor,depends_on_json,inputs_json,outputs_json,acceptance_json,requirements_json,priority,max_attempts FROM tasks WHERE project_id=?",
-                    (project_id,),
-                ).fetchall()
-                existing_artifact_names = {
-                    row["name"] for row in connection.execute(
-                        "SELECT name FROM artifacts WHERE project_id=? AND status IN ('CURRENT','ACCEPTED')",
-                        (project_id,),
-                    ).fetchall()
-                }
-                graph: dict[str, dict[str, Any]] = {
-                    row["task_id"]: {
-                        "depends_on": _loads(row["depends_on_json"], []),
-                        "inputs": _loads(row["inputs_json"], []),
-                        "outputs": _loads(row["outputs_json"], []),
-                        "requirements": _loads(row["requirements_json"], {}),
-                        "executor": row["executor"],
-                    } for row in existing_rows
-                }
-                prepared: list[dict[str, Any]] = []
-                new_ids: set[str] = set()
-                declared_outputs = {
-                    output for task in graph.values() for output in task.get("outputs", [])
-                }
-                for raw in tasks:
-                    if not isinstance(raw, dict):
-                        raise ContractError("each task must be an object")
-                    task_id = _safe_id(raw.get("task_id", ""), "task_id")
-                    if task_id in graph or task_id in new_ids:
-                        raise ContractError(f"duplicate task_id: {task_id}")
-                    title = str(raw.get("title") or task_id).strip()
-                    kind = str(raw.get("kind") or "production").strip()
-                    executor = str(raw.get("executor") or "agent").strip()
-                    if executor not in {"agent", "tool", "human", "external"}:
-                        raise ContractError(f"{task_id}: unsupported executor {executor}")
-                    deps_raw = raw.get("depends_on", [])
-                    inputs_raw = raw.get("inputs", [])
-                    outputs_raw = raw.get("outputs", [])
-                    if not all(isinstance(value, list) for value in (deps_raw, inputs_raw, outputs_raw)):
-                        raise ContractError(f"{task_id}: depends_on, inputs and outputs must be arrays")
-                    deps = list(deps_raw)
-                    inputs = list(inputs_raw)
-                    outputs = list(outputs_raw)
-                    if not all(isinstance(value, str) for value in deps + inputs + outputs):
-                        raise ContractError(f"{task_id}: dependency, input and output names must be strings")
-                    if len(inputs) != len(set(inputs)):
-                        raise ContractError(f"{task_id}: duplicate inputs")
-                    if len(outputs) != len(set(outputs)) or not outputs:
-                        raise ContractError(f"{task_id}: outputs must be a non-empty unique list")
-                    for output in outputs:
-                        _safe_id(output, "artifact output name")
-                    duplicate_outputs = declared_outputs.intersection(outputs)
-                    if duplicate_outputs:
-                        raise ContractError(f"output names must have one producer: {sorted(duplicate_outputs)}")
-                    imported_name_conflicts = existing_artifact_names.intersection(outputs)
-                    if imported_name_conflicts:
-                        raise ContractError(f"task outputs cannot reuse existing artifact names: {sorted(imported_name_conflicts)}")
-                    declared_outputs.update(outputs)
-                    acceptance = raw.get("acceptance", {})
-                    requirements = raw.get("requirements", {})
-                    if not isinstance(acceptance, dict) or not acceptance:
-                        raise ContractError(f"{task_id}: acceptance must be a non-empty object")
-                    if not isinstance(requirements, dict):
-                        raise ContractError(f"{task_id}: requirements must be an object")
-                    max_attempts = int(raw.get("max_attempts", 3))
-                    if max_attempts < 1 or max_attempts > 20:
-                        raise ContractError(f"{task_id}: max_attempts must be 1..20")
-                    task = {
-                        "task_id": task_id, "title": title, "kind": kind,
-                        "executor": executor, "depends_on": deps, "inputs": inputs,
-                        "outputs": outputs, "acceptance": acceptance, "requirements": requirements,
-                        "priority": int(raw.get("priority", 0)),
-                        "max_attempts": max_attempts,
-                    }
-                    validate_task_binding(brief, task)
-                    prepared.append(task)
-                    graph[task_id] = task
-                    new_ids.add(task_id)
-                self._validate_graph(graph)
-                now = _iso()
-                for task in prepared:
-                    connection.execute(
-                        """INSERT INTO tasks(project_id,task_id,title,kind,executor,depends_on_json,inputs_json,
-                           outputs_json,acceptance_json,requirements_json,priority,max_attempts,status,created_at,updated_at)
-                           VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'PENDING',?,?)""",
-                        (project_id, task["task_id"], task["title"], task["kind"], task["executor"],
-                         _json(task["depends_on"]), _json(task["inputs"]), _json(task["outputs"]),
-                         _json(task["acceptance"]), _json(task["requirements"]), task["priority"], task["max_attempts"], now, now),
-                    )
-                    self._event(connection, project_id, "TASK", task["task_id"], "TASK_ADDED", task)
-                connection.execute(
-                    "UPDATE projects SET revision=revision+1,updated_at=? WHERE project_id=?",
-                    (now, project_id),
-                )
-                connection.commit()
-            except Exception:
-                connection.rollback()
-                raise
-        self.refresh(project_id)
-        return self.list_tasks(project_id)
-
+        return self._project_task_service.add_tasks(project_id, tasks)
     def revise_task(self, project_id: str, task_id: str, patch: dict[str, Any], *, reason: str) -> dict[str, Any]:
-        """Revise one task contract, stale only its descendants, and revoke any old lease."""
-        if not isinstance(patch, dict) or not patch:
-            raise ContractError("task revision patch must be a non-empty object")
-        if not isinstance(reason, str) or not reason.strip():
-            raise ContractError("task revision requires a reason")
-        allowed = {"title", "kind", "executor", "depends_on", "inputs", "outputs", "acceptance", "requirements", "priority", "max_attempts"}
-        unknown_fields = sorted(set(patch) - allowed)
-        if unknown_fields:
-            raise ContractError(f"unsupported task revision fields: {unknown_fields}")
-        with closing(self._connect(project_id)) as connection:
-            connection.execute("BEGIN IMMEDIATE")
-            try:
-                rows = self._task_map(connection, project_id)
-                if task_id not in rows:
-                    raise ProjectNotFound(task_id)
-                old = rows[task_id]
-                current = {
-                    "task_id": task_id, "title": old["title"], "kind": old["kind"],
-                    "executor": old["executor"], "depends_on": _loads(old["depends_on_json"], []),
-                    "inputs": _loads(old["inputs_json"], []), "outputs": _loads(old["outputs_json"], []),
-                    "acceptance": _loads(old["acceptance_json"], {}), "requirements": _loads(old["requirements_json"], {}),
-                    "priority": old["priority"], "max_attempts": old["max_attempts"],
-                }
-                revised = {**current, **patch}
-                from .scope import validate_task_binding
-                validate_task_binding(_loads(self._project_row(connection, project_id)["brief_json"], {}), revised)
-                if revised["executor"] not in {"agent", "tool", "human", "external"}:
-                    raise ContractError(f"unsupported executor: {revised['executor']}")
-                for field in ("depends_on", "inputs", "outputs"):
-                    if not isinstance(revised[field], list) or not all(isinstance(item, str) for item in revised[field]):
-                        raise ContractError(f"{field} must be an array of strings")
-                if len(revised["depends_on"]) != len(set(revised["depends_on"])) or len(revised["inputs"]) != len(set(revised["inputs"])):
-                    raise ContractError("task dependencies and inputs must be unique")
-                if not revised["outputs"] or len(revised["outputs"]) != len(set(revised["outputs"])):
-                    raise ContractError("task outputs must be a non-empty unique list")
-                for output in revised["outputs"]:
-                    _safe_id(output, "artifact output name")
-                if not isinstance(revised["acceptance"], dict) or not revised["acceptance"]:
-                    raise ContractError("acceptance must be a non-empty object")
-                if not isinstance(revised["requirements"], dict):
-                    raise ContractError("requirements must be an object")
-                revised["max_attempts"] = int(revised["max_attempts"])
-                revised["priority"] = int(revised["priority"])
-                if revised["max_attempts"] < 1 or revised["max_attempts"] > 20:
-                    raise ContractError("max_attempts must be 1..20")
-                graph = {
-                    key: {
-                        "depends_on": _loads(value["depends_on_json"], []),
-                        "inputs": _loads(value["inputs_json"], []),
-                        "outputs": _loads(value["outputs_json"], []),
-                        "requirements": _loads(value["requirements_json"], {}),
-                        "executor": value["executor"],
-                    }
-                    for key, value in rows.items()
-                }
-                graph[task_id] = {
-                    "depends_on": revised["depends_on"], "inputs": revised["inputs"], "outputs": revised["outputs"],
-                    "requirements": revised["requirements"], "executor": revised["executor"],
-                }
-                existing_artifact_names = {
-                    row["name"] for row in connection.execute(
-                        "SELECT name FROM artifacts WHERE project_id=? AND status IN ('CURRENT','ACCEPTED') AND produced_by_task IS NULL",
-                        (project_id,),
-                    ).fetchall()
-                }
-                if existing_artifact_names.intersection(revised["outputs"]):
-                    raise ContractError(f"task outputs cannot reuse imported asset names: {sorted(existing_artifact_names.intersection(revised['outputs']))}")
-                self._validate_graph(graph)
-                descendants = self._descendant_closure(rows, [task_id]) - {task_id}
-                now = _iso()
-                connection.execute(
-                    """UPDATE tasks SET title=?,kind=?,executor=?,depends_on_json=?,inputs_json=?,outputs_json=?,
-                       acceptance_json=?,requirements_json=?,priority=?,max_attempts=?,status='PENDING',
-                       attempts=0,worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,result_json=NULL,error_json=?,updated_at=?
-                       WHERE project_id=? AND task_id=?""",
-                    (revised["title"], revised["kind"], revised["executor"], _json(revised["depends_on"]),
-                     _json(revised["inputs"]), _json(revised["outputs"]), _json(revised["acceptance"]),
-                     _json(revised["requirements"]), revised["priority"], revised["max_attempts"],
-                     _json({"reason": reason}), now, project_id, task_id),
-                )
-                for descendant in descendants:
-                    connection.execute(
-                        "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
-                        (_json({"reason": f"upstream task {task_id} contract changed"}), now, project_id, descendant),
-                    )
-                    connection.execute(
-                        "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
-                        (project_id, descendant),
-                    )
-                    self._event(connection, project_id, "TASK", descendant, "TASK_INVALIDATED_BY_UPSTREAM_CONTRACT", {"upstream_task": task_id, "reason": reason})
-                connection.execute(
-                    "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
-                    (project_id, task_id),
-                )
-                connection.execute("UPDATE projects SET revision=revision+1,updated_at=? WHERE project_id=?", (now, project_id))
-                self._event(connection, project_id, "TASK", task_id, "TASK_CONTRACT_REVISED", {"previous": current, "revised": revised, "reason": reason, "invalidated_descendants": sorted(descendants)})
-                self._refresh_in_tx(connection, project_id)
-                connection.commit()
-            except Exception:
-                connection.rollback()
-                raise
-        return {"task": next(item for item in self.list_tasks(project_id) if item["task_id"] == task_id), "invalidated_descendants": sorted(descendants)}
-
+        return self._project_task_service.revise_task(project_id, task_id, patch, reason=reason)
     def _task_map(self, connection: sqlite3.Connection, project_id: str) -> dict[str, dict[str, Any]]:
-        rows = connection.execute("SELECT * FROM tasks WHERE project_id=?", (project_id,)).fetchall()
-        return {row["task_id"]: dict(row) for row in rows}
-
+        return self._project_task_service._task_map(connection, project_id)
     def _refresh_in_tx(self, connection: sqlite3.Connection, project_id: str) -> None:
-        tasks = self._task_map(connection, project_id)
-        now = _iso()
-        for task_id, row in tasks.items():
-            status = row["status"]
-            if status not in {"PENDING", "READY", "BLOCKED", "WAITING_INPUT"}:
-                continue
-            deps = _loads(row["depends_on_json"], [])
-            dep_states = [tasks[dep]["status"] for dep in deps]
-            if any(state in {"FAILED", "BLOCKED", "STALE", "CANCELLED"} for state in dep_states):
-                new_status = "BLOCKED"
-            elif not all(state == "COMPLETED" for state in dep_states):
-                # Do not label an expected upstream output as an external missing input.
-                new_status = "PENDING"
-            elif not all(self._artifact_by_name(connection, project_id, name) is not None for name in _loads(row["inputs_json"], [])):
-                new_status = "WAITING_INPUT"
-            else:
-                new_status = "READY"
-            # External waiting is an intentional owner/worker dependency, not
-            # the same as waiting for a declared file. Only an explicit reopen
-            # releases it, even if all declared artifact inputs already exist.
-            wait_reason = _loads(row["error_json"], {})
-            if new_status == "READY" and isinstance(wait_reason, dict) and wait_reason.get("explicit_external_wait") is True:
-                new_status = "WAITING_INPUT"
-            if new_status != status:
-                connection.execute(
-                    "UPDATE tasks SET status=?,updated_at=? WHERE project_id=? AND task_id=?",
-                    (new_status, now, project_id, task_id),
-                )
-                self._event(connection, project_id, "TASK", task_id, "TASK_READINESS_CHANGED", {"from": status, "to": new_status})
-
+        return self._project_task_service._refresh_in_tx(connection, project_id)
     def _refresh_cross_project_transfers_in_tx(self, connection: sqlite3.Connection, project_id: str) -> None:
-        """Invalidate imported snapshots when their exact source artifact is no longer current."""
-        rows = connection.execute(
-            "SELECT * FROM artifacts WHERE project_id=? AND status IN ('CURRENT','ACCEPTED')",
-            (project_id,),
-        ).fetchall()
-        for row in rows:
-            metadata = _loads(row["metadata_json"], {})
-            transfer = metadata.get("cross_project_transfer") if isinstance(metadata, dict) else None
-            if not isinstance(transfer, dict):
-                continue
-            source_project_id = str(transfer.get("source_project_id") or "").strip()
-            source_artifact_id = str(transfer.get("source_artifact_id") or "").strip()
-            source_name = str(transfer.get("source_artifact_name") or "").strip()
-            source_version = transfer.get("source_artifact_version")
-            source_digest = str(transfer.get("source_sha256") or "").strip().lower()
-            valid = (
-                transfer.get("schema_version") == "1.0"
-                and transfer.get("transfer_mode") == "IMMUTABLE_COPY"
-                and transfer.get("target_project_id") == project_id
-                and transfer.get("target_artifact_name") == row["name"]
-                and bool(source_project_id) and bool(source_artifact_id) and bool(source_name)
-                and isinstance(source_version, int) and source_version >= 1
-                and bool(re.fullmatch(r"[0-9a-f]{64}", source_digest))
-                and row["sha256"].lower() == source_digest
-            )
-            if valid:
-                try:
-                    with closing(self._connect(source_project_id)) as source_connection:
-                        source = source_connection.execute(
-                            "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
-                            (source_project_id, source_artifact_id),
-                        ).fetchone()
-                        valid = bool(
-                            source is not None
-                            and source["name"] == source_name
-                            and int(source["version"]) == source_version
-                            and source["sha256"].lower() == source_digest
-                            and source["status"] in {"CURRENT", "ACCEPTED"}
-                        )
-                        if valid:
-                            source_root = self._project_dir(source_project_id).resolve()
-                            source_path = (source_root / source["relative_path"]).resolve(strict=True)
-                            valid = source_path.is_relative_to(source_root) and source_path.is_file() and _sha256(source_path) == source_digest
-                except (ProjectNotFound, OSError, sqlite3.Error):
-                    valid = False
-            if valid:
-                continue
-
-            connection.execute(
-                "UPDATE artifacts SET status='STALE' WHERE project_id=? AND artifact_id=?",
-                (project_id, row["artifact_id"]),
-            )
-            task_rows = connection.execute(
-                "SELECT task_id,depends_on_json,inputs_json FROM tasks WHERE project_id=?",
-                (project_id,),
-            ).fetchall()
-            task_map = {item["task_id"]: item for item in task_rows}
-            affected = {
-                item["task_id"] for item in task_rows
-                if row["name"] in _loads(item["inputs_json"], [])
-            }
-            changed = True
-            while changed:
-                changed = False
-                for candidate, task in task_map.items():
-                    if candidate not in affected and any(
-                        dependency in affected for dependency in _loads(task["depends_on_json"], [])
-                    ):
-                        affected.add(candidate)
-                        changed = True
-            now = _iso()
-            for task_id in sorted(affected):
-                connection.execute(
-                    """UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,
-                       claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=?
-                       WHERE project_id=? AND task_id=?""",
-                    (_json({
-                        "reason": "cross-project source artifact is missing, superseded, or digest-invalid",
-                        "source_project_id": source_project_id,
-                        "source_artifact_id": source_artifact_id,
-                        "source_sha256": source_digest,
-                    }), now, project_id, task_id),
-                )
-                connection.execute(
-                    "UPDATE artifacts SET status='STALE' WHERE project_id=? AND produced_by_task=? AND status IN ('CURRENT','ACCEPTED')",
-                    (project_id, task_id),
-                )
-                self._event(connection, project_id, "TASK", task_id, "TASK_INVALIDATED_BY_CROSS_PROJECT_SOURCE", {
-                    "source_project_id": source_project_id,
-                    "source_artifact_id": source_artifact_id,
-                    "transferred_artifact_id": row["artifact_id"],
-                })
-            self._event(connection, project_id, "ARTIFACT", row["artifact_id"], "CROSS_PROJECT_SOURCE_STALE", {
-                "source_project_id": source_project_id,
-                "source_artifact_id": source_artifact_id,
-                "source_artifact_version": source_version,
-                "source_sha256": source_digest,
-                "invalidated_tasks": sorted(affected),
-            })
-
+        return self._project_task_service._refresh_cross_project_transfers_in_tx(connection, project_id)
     def refresh(self, project_id: str) -> None:
-        with closing(self._connect(project_id)) as connection:
-            connection.execute("BEGIN IMMEDIATE")
-            self._refresh_cross_project_transfers_in_tx(connection, project_id)
-            self._refresh_in_tx(connection, project_id)
-            connection.commit()
-
+        return self._project_task_service.refresh(project_id)
     def list_tasks(self, project_id: str) -> list[dict[str, Any]]:
-        with closing(self._connect(project_id)) as connection:
-            rows = connection.execute(
-                "SELECT * FROM tasks WHERE project_id=? ORDER BY priority DESC,created_at,task_id",
-                (project_id,),
-            ).fetchall()
-            result = []
-            for row in rows:
-                item = dict(row)
-                for key in ("depends_on_json", "inputs_json", "outputs_json", "acceptance_json", "requirements_json", "result_json", "error_json"):
-                    item[key.removesuffix("_json")] = _loads(item.pop(key), {} if key in {"acceptance_json", "requirements_json", "result_json", "error_json"} else [])
-                result.append(item)
-            return result
-
+        return self._project_task_service.list_tasks(project_id)
     def _artifact_by_name(self, connection: sqlite3.Connection, project_id: str, name: str) -> sqlite3.Row | None:
-        return connection.execute(
-            "SELECT * FROM artifacts WHERE project_id=? AND name=? AND status IN ('CURRENT','ACCEPTED') ORDER BY version DESC LIMIT 1",
-            (project_id, name),
-        ).fetchone()
+        return self._project_task_service._artifact_by_name(connection, project_id, name)
 
     def _work_packet(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> dict[str, Any]:
         input_names = _loads(task["inputs_json"], [])
@@ -1019,6 +348,105 @@ class StudioEngine:
             "instructions": "Produce only the declared outputs. Preserve source truth, provenance and rights. If the task cannot meet its acceptance contract, return a structured failure instead of claiming completion.",
         }
 
+    def _review_stage_dir(self, project_id: str, task_id: str, attempt: int) -> Path:
+        return (
+            self.root / "review_sessions" / _safe_id(project_id, "project_id")
+            / _safe_id(task_id, "task_id") / str(int(attempt))
+        )
+
+    def _stage_review_inputs(
+        self, project_id: str, task: sqlite3.Row, packet: dict[str, Any], *,
+        reuse_existing: bool = False,
+    ) -> None:
+        """Give a review executor only staged, digest-verified declared inputs."""
+        stage_root = self._review_stage_dir(project_id, task["task_id"], task["attempts"])
+        review_root = self.root / "review_sessions"
+        project_stage_root = review_root / _safe_id(project_id, "project_id")
+        task_stage_root = project_stage_root / _safe_id(task["task_id"], "task_id")
+        if any(path.is_symlink() for path in (review_root, project_stage_root, task_stage_root, stage_root)):
+            raise GateError("review staging path cannot contain symlinks")
+        if stage_root.exists() and not reuse_existing:
+            shutil.rmtree(stage_root)
+        try:
+            inputs_root = stage_root / "inputs"
+            if inputs_root.is_symlink():
+                raise GateError("review input staging path cannot be a symlink")
+            inputs_root.mkdir(parents=True, exist_ok=True)
+            staged_inputs: dict[str, dict[str, Any]] = {}
+            expected_names: set[str] = set()
+            for name, item in packet.get("input_artifacts", {}).items():
+                source = Path(item["path"])
+                expected_digest = item["sha256"]
+                if not source.is_file() or _sha256(source) != expected_digest:
+                    raise GateError(f"review input changed before isolation staging: {name}")
+                destination = inputs_root / f"{_safe_id(name, 'review_input')}{source.suffix.lower()}"
+                expected_names.add(destination.name)
+                if destination.is_symlink():
+                    destination.unlink()
+                if not destination.is_file() or _sha256(destination) != expected_digest:
+                    shutil.copyfile(source, destination)
+                if _sha256(destination) != expected_digest:
+                    raise GateError(f"review input staging digest mismatch: {name}")
+                staged_item = dict(item)
+                staged_item["path"] = str(destination)
+                staged_item["staged_sha256"] = expected_digest
+                staged_inputs[name] = staged_item
+            for child in inputs_root.iterdir():
+                if child.is_file() and child.name not in expected_names:
+                    child.unlink()
+                elif child.is_dir():
+                    shutil.rmtree(child)
+            packet["input_artifacts"] = staged_inputs
+            project = packet.get("project")
+            if isinstance(project, dict):
+                packet["project"] = {
+                    key: value for key, value in project.items() if key != "workspace"
+                }
+            packet["review_isolation"] = {
+                "mode": "DECLARED_INPUTS_ONLY",
+                "staged_input_root": str(inputs_root),
+                "shared_workspace_path_exposed": False,
+                "sibling_verdicts_included": False,
+                "input_digests_verified": True,
+            }
+        except Exception:
+            shutil.rmtree(stage_root, ignore_errors=True)
+            raise
+
+    def _verify_review_stage_inputs(
+        self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row,
+        input_bindings: list[dict[str, Any]],
+    ) -> None:
+        stage_root = self._review_stage_dir(project_id, task["task_id"], task["attempts"])
+        review_root = self.root / "review_sessions"
+        project_stage_root = review_root / _safe_id(project_id, "project_id")
+        task_stage_root = project_stage_root / _safe_id(task["task_id"], "task_id")
+        inputs_root = stage_root / "inputs"
+        if any(path.is_symlink() for path in (review_root, project_stage_root, task_stage_root, stage_root, inputs_root)) or not inputs_root.is_dir():
+            raise GateError("review isolated input staging directory is missing or unsafe")
+        expected_files: set[str] = set()
+        for binding in input_bindings:
+            source = connection.execute(
+                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                (project_id, binding["artifact_id"]),
+            ).fetchone()
+            if source is None or source["name"] != binding["name"]:
+                raise GateError("review staged input no longer maps to its registered artifact")
+            suffix = Path(source["relative_path"]).suffix.lower()
+            filename = f"{_safe_id(source['name'], 'review_input')}{suffix}"
+            expected_files.add(filename)
+            staged = inputs_root / filename
+            if staged.is_symlink() or not staged.is_file() or _sha256(staged) != binding["sha256"]:
+                raise GateError(f"review staged input bytes changed before completion: {source['name']}")
+        actual_files = {item.name for item in inputs_root.iterdir() if item.is_file()}
+        if actual_files != expected_files or any(item.is_dir() for item in inputs_root.iterdir()):
+            raise GateError("review staging contains undeclared or missing input files")
+
+    def _cleanup_review_stage(self, project_id: str, task_id: str, attempt: int) -> None:
+        stage_root = self._review_stage_dir(project_id, task_id, attempt)
+        if stage_root.exists():
+            shutil.rmtree(stage_root)
+
     def _reclaim_expired_claims_in_tx(
         self, connection: sqlite3.Connection, project_id: str, now: datetime,
     ) -> list[dict[str, Any]]:
@@ -1036,6 +464,8 @@ class StudioEngine:
             self._event(connection, project_id, "TASK", row["task_id"], "TASK_LEASE_EXPIRED", {
                 "worker_id": row["worker_id"], "attempt": row["attempts"], "next_status": next_status,
             })
+            if row["kind"] == "review":
+                self._cleanup_review_stage(project_id, row["task_id"], row["attempts"])
             reclaimed.append({
                 "task_id": row["task_id"], "worker_id": row["worker_id"],
                 "attempt": row["attempts"], "next_status": next_status,
@@ -1060,6 +490,7 @@ class StudioEngine:
     def _decision_action_snapshot(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> dict[str, Any]:
         """Bind a local action to actual current goal/task/input bytes, not a parent attestation."""
         brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+        route_binding = self._task_scope_binding(brief, task)
         fields = ("task_id", "title", "kind", "executor", "depends_on_json", "inputs_json",
                   "outputs_json", "acceptance_json", "requirements_json", "priority", "max_attempts")
         inputs = []
@@ -1087,18 +518,27 @@ class StudioEngine:
                 "brief_event_no": brief_event, "task_event_no": task_event,
                 "brief_sha256": hashlib.sha256(_json(brief).encode("utf-8")).hexdigest(),
                 "task_sha256": hashlib.sha256(_json({key: task[key] for key in fields}).encode("utf-8")).hexdigest(),
-                "inputs": inputs, "assurance": "LOCAL_STRUCTURAL_BINDING_ONLY"}
+                "inputs": inputs, "assurance": "LOCAL_STRUCTURAL_BINDING_ONLY",
+                **({"professional_route_binding": route_binding} if route_binding is not None else {})}
+
+    @staticmethod
+    def _task_scope_binding(brief, task):
+        from .scope import validate_task_binding
+        try:
+            return validate_task_binding(brief, {
+                "requirements": _loads(task["requirements_json"], {}),
+                "kind": task["kind"], "executor": task["executor"],
+                "outputs": _loads(task["outputs_json"], []),
+            })
+        except ValueError as exc:
+            raise GateError(str(exc)) from exc
 
     def _require_task_decision(self, connection: sqlite3.Connection, project_id: str, task: sqlite3.Row) -> None:
-        from .scope import EPOCH, validate_task_binding
+        from .scope import EPOCH
         brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
         if brief.get("scope_epoch") != EPOCH:
             return  # isolated historical regression compatibility
         requirements = _loads(task["requirements_json"], {})
-        try:
-            validate_task_binding(brief, {"requirements": requirements})
-        except ValueError as exc:
-            raise GateError(str(exc)) from exc
         decision_id = requirements.get("decision_id")
         if not isinstance(decision_id, str) or not _ID.fullmatch(decision_id):
             raise GateError("current owner task requires an exact decision_id")
@@ -1115,7 +555,7 @@ class StudioEngine:
             raise GateError("decision was superseded by owner-scope upgrade; record a new current decision")
         payload = _loads(row["payload_json"], {})
         if payload.get("action_binding") != self._decision_action_snapshot(connection, project_id, task):
-            raise GateError("decision no longer binds current goal, task and input bytes; re-decide")
+            raise GateError("decision no longer binds current goal, task and input bytes or professional route; re-decide")
 
     def claim_next(
         self, project_id: str, worker_id: str, lease_seconds: int = 900, *,
@@ -1126,6 +566,8 @@ class StudioEngine:
             raise ContractError("lease_seconds must be 30..86400")
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            row = None
+            claimed = None
             try:
                 self._project_row(connection, project_id)
                 now = _now()
@@ -1144,7 +586,6 @@ class StudioEngine:
                     query += " AND task_id=?"
                     query_params.append(task_id)
                 query += " ORDER BY priority DESC,created_at,task_id"
-                row = None
                 for candidate in connection.execute(query, query_params).fetchall():
                     try:
                         if candidate["attempts"] >= candidate["max_attempts"]:
@@ -1187,11 +628,52 @@ class StudioEngine:
                 self._event(connection, project_id, "TASK", row["task_id"], "TASK_INPUTS_BOUND", {
                     "worker_id": worker_id, "input_bindings": input_bindings,
                 })
+                if claimed["kind"] == "review":
+                    requirements = _loads(claimed["requirements_json"], {})
+                    task_contract = requirements.get("review_contract") if isinstance(requirements, dict) else None
+                    if not isinstance(task_contract, dict):
+                        raise ContractError("review tasks require an immutable requirements.review_contract")
+                    brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+                    release_policy = brief.get("release_policy", {})
+                    rubric_contracts = release_policy.get("review_contracts", {})
+                    rubric_id = task_contract.get("rubric_id")
+                    rubric_contract = rubric_contracts.get(rubric_id) if isinstance(rubric_contracts, dict) else None
+                    if not isinstance(rubric_contract, dict):
+                        raise ContractError("review task rubric is not declared in the current owner release contract")
+                    for binding in input_bindings:
+                        source_artifact = connection.execute(
+                            "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                            (project_id, binding["artifact_id"]),
+                        ).fetchone()
+                        if source_artifact is not None and source_artifact["produced_by_task"]:
+                            source_task = connection.execute(
+                                "SELECT kind FROM tasks WHERE project_id=? AND task_id=?",
+                                (project_id, source_artifact["produced_by_task"]),
+                            ).fetchone()
+                            if source_task is not None and source_task["kind"] == "review":
+                                raise ContractError("blind review tasks cannot consume outputs from sibling review tasks")
+                    review_packet = build_review_packet(
+                        project_id=project_id, task_id=row["task_id"],
+                        task_contract=task_contract, rubric_contract=rubric_contract,
+                        input_bindings=input_bindings,
+                    )
+                    packet_digest = digest_json(review_packet)
+                    contract_digest = review_contract_digest(task_contract, rubric_contract)
+                    packet["review_packet"] = review_packet
+                    packet["review_packet_digest"] = packet_digest
+                    self._stage_review_inputs(project_id, claimed, packet)
+                    self._event(connection, project_id, "TASK", row["task_id"], "REVIEW_PACKET_BOUND", {
+                        "review_packet": review_packet,
+                        "review_packet_digest": packet_digest,
+                        "review_contract_digest": contract_digest,
+                    })
                 connection.commit()
                 packet["claim"] = asdict(TaskClaim(project_id, row["task_id"], worker_id, token, lease_until, claimed["attempts"]))
                 return packet
             except Exception:
                 connection.rollback()
+                if claimed is not None and claimed["kind"] == "review":
+                    self._cleanup_review_stage(project_id, claimed["task_id"], claimed["attempts"])
                 raise
 
     def _verify_claimed_inputs(
@@ -1249,7 +731,23 @@ class StudioEngine:
                 }
                 for row in rows
             }
-            packet["missing_inputs"] = []
+            if task["kind"] == "review":
+                event_row = connection.execute(
+                    """SELECT payload_json FROM events
+                       WHERE project_id=? AND entity_type='TASK' AND entity_id=?
+                         AND event_type='REVIEW_PACKET_BOUND'
+                       ORDER BY event_no DESC LIMIT 1""",
+                    (project_id, task_id),
+                ).fetchone()
+                event_payload = _loads(event_row["payload_json"], {}) if event_row else {}
+                review_packet = event_payload.get("review_packet") if isinstance(event_payload, dict) else None
+                if not isinstance(review_packet, dict) or event_payload.get("review_packet_digest") != digest_json(review_packet):
+                    raise GateError("claimed review task has no intact immutable review packet")
+                packet["review_packet"] = review_packet
+                packet["review_packet_digest"] = event_payload["review_packet_digest"]
+                self._stage_review_inputs(project_id, task, packet, reuse_existing=True)
+            else:
+                packet["missing_inputs"] = []
             return packet
 
     def heartbeat(self, project_id: str, task_id: str, worker_id: str, claim_token: str, lease_seconds: int = 900) -> str:
@@ -1520,6 +1018,8 @@ class StudioEngine:
                                 affected.add(candidate)
                                 changed = True
                     for affected_task in sorted(affected):
+                        if task_map[affected_task]["kind"] == "review":
+                            self._cleanup_review_stage(project_id, affected_task, task_map[affected_task]["attempts"])
                         connection.execute(
                             """UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,
                                lease_until=NULL,error_json=?,updated_at=?
@@ -1743,6 +1243,8 @@ class StudioEngine:
                 if set(outputs) != expected:
                     raise ContractError(f"expected outputs {sorted(expected)}, got {sorted(outputs)}")
                 input_bindings, input_rows = self._verify_claimed_inputs(connection, project_id, task)
+                if task["kind"] == "review":
+                    self._verify_review_stage_inputs(connection, project_id, task, input_bindings)
                 registered: dict[str, Any] = {}
                 for name, payload in outputs.items():
                     if not isinstance(payload, dict) or not payload.get("path"):
@@ -1780,6 +1282,8 @@ class StudioEngine:
                 })
                 self._refresh_in_tx(connection, project_id)
                 connection.commit()
+                if task["kind"] == "review":
+                    self._cleanup_review_stage(project_id, task_id, task["attempts"])
                 return {"task_id": task_id, "status": "COMPLETED", "artifacts": registered, "result": result_payload}
             except ClaimError:
                 # Persist any upstream-transfer invalidation before reporting the revoked claim.
@@ -1808,12 +1312,14 @@ class StudioEngine:
                 "SELECT status FROM tasks WHERE project_id=? AND task_id=?", (project_id, task_id)
             ).fetchone()["status"]
             connection.commit()
+            if task["kind"] == "review":
+                self._cleanup_review_stage(project_id, task_id, task["attempts"])
             return {"task_id": task_id, "status": actual, "retry_scheduled": retry}
 
     def wait_for_input(self, project_id: str, task_id: str, worker_id: str, claim_token: str, reason: str) -> None:
         with closing(self._connect(project_id)) as connection:
             connection.execute("BEGIN IMMEDIATE")
-            self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
+            task = self._assert_claim(connection, project_id, task_id, worker_id, claim_token)
             connection.execute(
                 "UPDATE tasks SET status='WAITING_INPUT',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                 (_json({"reason": reason, "explicit_external_wait": True}), _iso(), project_id, task_id),
@@ -1821,6 +1327,8 @@ class StudioEngine:
             self._event(connection, project_id, "TASK", task_id, "TASK_WAITING_INPUT",
                         {"reason": reason, "explicit_external_wait": True})
             connection.commit()
+            if task["kind"] == "review":
+                self._cleanup_review_stage(project_id, task_id, task["attempts"])
 
     def record_decision(self, project_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         required = ["question", "scope", "source_refs", "hypotheses", "alternatives", "selected_option", "falsifier", "rollback"]
@@ -2140,23 +1648,32 @@ class StudioEngine:
                 connection.rollback()
                 raise
 
+    @staticmethod
+    def _review_contract_requires_execution(contract: dict[str, Any]) -> bool:
+        return review_contract_requires_execution(contract)
+
     def record_review(
         self, project_id: str, artifact_id: str, *, reviewer_id: str, rubric_id: str,
         outcome: str, dimensions: dict[str, Any], evidence_refs: list[str], notes: str = "",
-        attestation: dict[str, Any] | None = None,
+        attestation: dict[str, Any] | None = None, review_task_id: str | None = None,
+        review_result_artifact_id: str | None = None,
+        execution_receipt: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         if not isinstance(dimensions, dict):
             raise ContractError("review dimensions must be a JSON object")
-        if "_attestation" in dimensions:
-            raise ContractError("_attestation is reserved; pass reviewer attestation separately")
+        if "_attestation" in dimensions or "_execution_receipt" in dimensions:
+            raise ContractError("review execution proof is reserved and cannot be supplied inside dimensions")
         if attestation is not None:
-            if not isinstance(attestation, dict):
-                raise ContractError("review attestation must be a JSON object")
-            dimensions = {**dimensions, "_attestation": attestation}
+            raise ContractError("caller-supplied attestation fields are not execution proof; use a signed DSSE execution receipt")
         if outcome not in {"PASS", "REVISE", "FAIL", "BLOCKED", "NOT_TESTED"}:
             raise ContractError("invalid review outcome")
-        if not reviewer_id or not rubric_id or not evidence_refs:
-            raise ContractError("review requires reviewer, rubric and evidence_refs")
+        if not reviewer_id or not rubric_id:
+            raise ContractError("review requires reviewer and rubric")
+        if (
+            not isinstance(evidence_refs, list) or not evidence_refs
+            or not all(isinstance(reference, str) and reference.strip() for reference in evidence_refs)
+        ):
+            raise ContractError("review evidence_refs must be a non-empty array of artifact IDs or names")
         _safe_id(reviewer_id, "reviewer_id")
         _safe_id(rubric_id, "rubric_id")
         self.refresh(project_id)
@@ -2176,6 +1693,141 @@ class StudioEngine:
                 raise ContractError("artifact bytes changed; review must target a verified current digest")
             if reviewer_id == artifact["producer_id"]:
                 raise ContractError("producer cannot independently review its own artifact")
+
+            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+            release_policy = brief.get("release_policy", {})
+            rubric_contracts = release_policy.get("review_contracts", {})
+            rubric_contract = rubric_contracts.get(rubric_id, {}) if isinstance(rubric_contracts, dict) else {}
+            if not isinstance(rubric_contract, dict):
+                raise ContractError("review rubric contract must be an object")
+            requires_execution = self._review_contract_requires_execution(rubric_contract)
+            verified_execution: dict[str, Any] | None = None
+            execution_expected: dict[str, Any] | None = None
+            execution_nonce: str | None = None
+
+            if requires_execution:
+                if not review_task_id or not review_result_artifact_id or not isinstance(execution_receipt, dict):
+                    raise ContractError(
+                        "high-assurance review requires a completed review task, registered review-report artifact, and signed execution receipt"
+                    )
+                _safe_id(review_task_id, "review_task_id")
+                _safe_id(review_result_artifact_id, "review_result_artifact_id")
+                task = connection.execute(
+                    "SELECT * FROM tasks WHERE project_id=? AND task_id=?",
+                    (project_id, review_task_id),
+                ).fetchone()
+                if task is None or task["kind"] != "review" or task["status"] != "COMPLETED":
+                    raise ContractError("high-assurance review must be produced by a completed kind='review' task")
+                task_requirements = _loads(task["requirements_json"], {})
+                task_contract = task_requirements.get("review_contract") if isinstance(task_requirements, dict) else None
+                if not isinstance(task_contract, dict):
+                    raise ContractError("completed review task has no immutable review contract")
+                if task_contract.get("rubric_id") != rubric_id or task_contract.get("reviewer_id") != reviewer_id:
+                    raise ContractError("review task identity does not match the submitted review")
+                if task_contract.get("subject_artifact") != artifact["name"]:
+                    raise ContractError("review task subject does not match the reviewed artifact")
+                task_result = _loads(task["result_json"], {})
+                output_ids = task_result.get("outputs", {}) if isinstance(task_result, dict) else {}
+                if review_result_artifact_id not in set(output_ids.values()):
+                    raise ContractError("review result artifact is not an output of the completed review task")
+                result_artifact = connection.execute(
+                    "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, review_result_artifact_id),
+                ).fetchone()
+                if (
+                    result_artifact is None or result_artifact["status"] not in {"CURRENT", "ACCEPTED"}
+                    or result_artifact["produced_by_task"] != review_task_id
+                    or result_artifact["kind"] != "review_report"
+                    or result_artifact["media_type"] != "application/json"
+                    or result_artifact["producer_id"] == artifact["producer_id"]
+                ):
+                    raise ContractError("review result must be a current JSON review_report artifact from an executor independent of the original producer")
+                result_path = self._project_dir(project_id) / result_artifact["relative_path"]
+                if not result_path.is_file() or _sha256(result_path) != result_artifact["sha256"]:
+                    raise ContractError("review report bytes are missing or have changed")
+                try:
+                    report_payload = json.loads(result_path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError) as exc:
+                    raise ContractError("review report artifact is not valid JSON") from exc
+                if not isinstance(report_payload, dict):
+                    raise ContractError("review report artifact must contain a JSON object")
+                expected_report = {
+                    "schema_version": 1, "outcome": outcome, "dimensions": dimensions,
+                    "evidence_refs": evidence_refs, "notes": notes,
+                }
+                if rubric_contract.get("required_media_inspection"):
+                    expected_report["media_inspection"] = report_payload.get("media_inspection")
+                if report_payload != expected_report:
+                    raise ContractError("review arguments do not exactly match the registered review report artifact")
+
+                input_bindings = task_result.get("input_bindings", [])
+                if not isinstance(input_bindings, list):
+                    raise ContractError("completed review task has malformed input bindings")
+                subject_binding = next(
+                    (item for item in input_bindings if isinstance(item, dict) and item.get("name") == artifact["name"]),
+                    None,
+                )
+                if (
+                    not isinstance(subject_binding, dict)
+                    or subject_binding.get("artifact_id") != artifact_id
+                    or subject_binding.get("sha256") != artifact["sha256"]
+                ):
+                    raise ContractError("review task did not inspect the current exact subject artifact")
+                packet_event_row = connection.execute(
+                    """SELECT payload_json FROM events
+                       WHERE project_id=? AND entity_type='TASK' AND entity_id=?
+                         AND event_type='REVIEW_PACKET_BOUND'
+                       ORDER BY event_no DESC LIMIT 1""",
+                    (project_id, review_task_id),
+                ).fetchone()
+                packet_event = _loads(packet_event_row["payload_json"], {}) if packet_event_row else {}
+                packet = packet_event.get("review_packet") if isinstance(packet_event, dict) else None
+                if not isinstance(packet, dict) or packet_event.get("review_packet_digest") != digest_json(packet):
+                    raise ContractError("review task has no intact immutable review packet")
+                expected_packet = build_review_packet(
+                    project_id=project_id, task_id=review_task_id,
+                    task_contract=task_contract, rubric_contract=rubric_contract,
+                    input_bindings=input_bindings,
+                )
+                if packet != expected_packet:
+                    raise ContractError("review packet no longer matches the task contract and exact inputs")
+                packet_digest = digest_json(packet)
+                contract_digest = review_contract_digest(task_contract, rubric_contract)
+                input_digests = {
+                    item["name"]: item["sha256"] for item in input_bindings
+                    if isinstance(item, dict) and isinstance(item.get("name"), str)
+                    and isinstance(item.get("sha256"), str)
+                }
+                execution_expected = {
+                    "review_task_id": review_task_id,
+                    "review_contract_digest": contract_digest,
+                    "reviewer_id": reviewer_id,
+                    "reviewer_kind": rubric_contract.get("reviewer_kind"),
+                    "execution_mode": rubric_contract.get("execution_mode"),
+                    "packet_digest": packet_digest,
+                    "result_digest": result_artifact["sha256"],
+                    "input_digests": input_digests,
+                    "blind_review": bool(rubric_contract.get("blind_review", False)),
+                    "required_media_inspection": rubric_contract.get("required_media_inspection"),
+                    "media_inspection": report_payload.get("media_inspection") if rubric_contract.get("required_media_inspection") else None,
+                    "reviewed_artifact_sha256": artifact["sha256"],
+                    "review_result_sha256": result_artifact["sha256"],
+                    "executor_id": result_artifact["producer_id"],
+                }
+                try:
+                    verified_execution = self.review_trust_registry.verify(
+                        execution_receipt, expected=execution_expected,
+                    )
+                except ReviewExecutionError as exc:
+                    raise ContractError(f"review execution proof rejected: {exc}") from exc
+                execution_nonce = str(verified_execution["nonce"])
+                if connection.execute(
+                    "SELECT 1 FROM review_execution_nonces WHERE project_id=? AND nonce=?",
+                    (project_id, execution_nonce),
+                ).fetchone():
+                    raise ContractError("review execution receipt nonce has already been used")
+            elif any(value is not None for value in (review_task_id, review_result_artifact_id, execution_receipt)):
+                raise ContractError("review execution task/receipt is accepted only when the owner rubric requires high assurance")
 
             def snapshot_evidence_reference(reference: Any) -> dict[str, Any]:
                 if (
@@ -2233,14 +1885,25 @@ class StudioEngine:
                 "producer_id": artifact["producer_id"], "outcome": outcome,
                 "dimensions": dimensions, "evidence_refs": evidence_refs,
                 "evidence_bindings": evidence_bindings, "notes": notes,
+                "review_task_id": review_task_id,
+                "review_result_artifact_id": review_result_artifact_id,
+                "execution_receipt": execution_receipt,
+                "execution_expected": execution_expected,
+                "verified_execution": verified_execution,
             }
             connection.execute(
                 """INSERT INTO reviews(project_id,review_id,artifact_id,artifact_digest,rubric_id,reviewer_id,
                    producer_id,outcome,dimensions_json,evidence_refs_json,notes,created_at)
                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (project_id, review_id, artifact_id, artifact["sha256"], rubric_id, reviewer_id,
-                 artifact["producer_id"], outcome, _json(dimensions), _json(evidence_refs), notes, _iso()),
+                (project_id, review_id, artifact_id, artifact["sha256"],
+                 rubric_id, reviewer_id, artifact["producer_id"], outcome,
+                 _json(dimensions), _json(evidence_refs), notes, _iso()),
             )
+            if execution_nonce is not None:
+                connection.execute(
+                    "INSERT INTO review_execution_nonces(project_id,nonce,review_id,created_at) VALUES(?,?,?,?)",
+                    (project_id, execution_nonce, review_id, _iso()),
+                )
             self._event(connection, project_id, "REVIEW", review_id, "REVIEW_RECORDED", payload)
             connection.commit()
         return {"review_id": review_id, **payload}
@@ -2291,530 +1954,12 @@ class StudioEngine:
         self, project_id: str, artifact_id: str, *, required_rubrics: list[str],
         evidence_refs: list[str] | None = None, require_rights: bool = True,
     ) -> dict[str, Any]:
-        with closing(self._connect(project_id)) as connection:
-            connection.execute("BEGIN IMMEDIATE")
-            self._refresh_cross_project_transfers_in_tx(connection, project_id)
-            self._refresh_in_tx(connection, project_id)
-            artifact = connection.execute(
-                "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?", (project_id, artifact_id)
-            ).fetchone()
-            if artifact is None:
-                raise ProjectNotFound(artifact_id)
-            failures: list[str] = []
-            artifact_path = self._project_dir(project_id) / artifact["relative_path"]
-            if not artifact_path.is_file() or _sha256(artifact_path) != artifact["sha256"]:
-                failures.append("artifact_bytes_missing_or_digest_changed")
-            if artifact["status"] not in {"CURRENT", "ACCEPTED"}:
-                failures.append(f"artifact_not_current:{artifact['status']}")
-
-            brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
-            release_policy = brief.get("release_policy", {})
-            # CLI flags cannot weaken a hard requirement declared by the owner brief.
-            effective_require_rights = bool(require_rights or release_policy.get("require_rights", True))
-            allowed_rights = set(release_policy.get("required_rights_statuses", sorted(RIGHTS_ALLOWED)))
-            require_rights_evidence = bool(release_policy.get("require_rights_evidence", True))
-            if effective_require_rights and artifact["rights_status"] not in allowed_rights:
-                failures.append(f"rights_not_cleared:{artifact['rights_status']}")
-
-            lineage, lineage_failures = self._artifact_lineage_rows(connection, project_id, artifact_id)
-            failures.extend(lineage_failures)
-            checked_lineage: list[dict[str, Any]] = []
-            rights_evidence_verified_asset_ids: set[str] = set()
-
-            def verify_rights_evidence_bindings(
-                source: sqlite3.Row, *, failure_prefix: str,
-            ) -> list[dict[str, Any]]:
-                metadata = _loads(source["metadata_json"], {})
-                refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
-                if not isinstance(refs, list) or not refs:
-                    return []
-                source_label = f"{source['name']}:{source['artifact_id']}"
-                event_row = connection.execute(
-                    """SELECT payload_json FROM events
-                       WHERE project_id=? AND entity_type='ARTIFACT' AND entity_id=?
-                         AND event_type IN ('ASSET_IMPORTED','ARTIFACT_CREATED')
-                       ORDER BY event_no DESC LIMIT 1""",
-                    (project_id, source["artifact_id"]),
-                ).fetchone()
-                event_payload = _loads(event_row["payload_json"], {}) if event_row else {}
-                event_metadata = event_payload.get("metadata", {}) if isinstance(event_payload, dict) else {}
-                if (
-                    not isinstance(event_metadata, dict)
-                    or event_payload.get("artifact_id") != source["artifact_id"]
-                    or event_payload.get("version") != source["version"]
-                    or event_payload.get("sha256") != source["sha256"]
-                    or event_metadata.get("rights_evidence_refs") != refs
-                ):
-                    failures.append(f"{failure_prefix}_metadata_event_mismatch:{source_label}")
-                    return []
-                stored_bindings = metadata.get("rights_evidence_bindings")
-                event_bindings = event_metadata.get("rights_evidence_bindings")
-                if stored_bindings != event_bindings:
-                    failures.append(f"{failure_prefix}_digest_binding_metadata_mismatch:{source_label}")
-                    return []
-                # Legacy compatibility is limited to event-recorded external URLs.
-                # They are references, not authenticated copies of remote content.
-                if event_bindings is None:
-                    if all(
-                        isinstance(ref, str) and ref.startswith(("https://", "http://"))
-                        for ref in refs
-                    ):
-                        return [{
-                            "reference": ref,
-                            "verification": "EXTERNAL_REFERENCE_NOT_FETCHED",
-                        } for ref in refs]
-                    failures.append(f"{failure_prefix}_digest_bindings_missing:{source_label}")
-                    return []
-                if (
-                    not isinstance(event_bindings, dict)
-                    or event_bindings.get("schema_version") != 1
-                    or event_bindings.get("binding_mode") != "ARTIFACT_CREATION_EVENT_ID_VERSION_SHA256_SNAPSHOT"
-                ):
-                    failures.append(f"{failure_prefix}_digest_bindings_invalid:{source_label}")
-                    return []
-                items = event_bindings.get("items")
-                if not isinstance(items, list) or len(items) != len(refs):
-                    failures.append(f"{failure_prefix}_digest_bindings_incomplete:{source_label}")
-                    return []
-
-                receipts: list[dict[str, Any]] = []
-                for index, reference in enumerate(refs):
-                    binding = items[index]
-                    if not isinstance(binding, dict) or binding.get("reference") != reference:
-                        failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
-                        continue
-                    if isinstance(reference, str) and reference.startswith(("https://", "http://")):
-                        if binding.get("reference_type") != "EXTERNAL_URI" or binding.get("resolved") is not True:
-                            failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
-                            continue
-                        receipts.append({
-                            "reference": reference,
-                            "verification": "EXTERNAL_REFERENCE_NOT_FETCHED",
-                        })
-                        continue
-                    if binding.get("reference_type") != "ARTIFACT" or binding.get("resolved") is not True:
-                        reason = binding.get("reason")
-                        if reason == "BYTES_MISSING_OR_DIGEST_CHANGED":
-                            failures.append(f"{failure_prefix}_bytes_missing_or_digest_changed:{source['name']}:{reference}")
-                        else:
-                            failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
-                        continue
-                    evidence_id = binding.get("artifact_id")
-                    if not isinstance(evidence_id, str) or not evidence_id or evidence_id == source["artifact_id"]:
-                        failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
-                        continue
-                    evidence_row = connection.execute(
-                        "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
-                        (project_id, evidence_id),
-                    ).fetchone()
-                    if evidence_row is None or evidence_row["status"] not in {"CURRENT", "ACCEPTED"}:
-                        failures.append(f"{failure_prefix}_ref_unresolved:{source['name']}:{reference}")
-                        continue
-                    if (
-                        int(evidence_row["version"]) != binding.get("version")
-                        or evidence_row["sha256"] != binding.get("sha256")
-                        or evidence_row["producer_id"] != binding.get("producer_id")
-                    ):
-                        failures.append(f"{failure_prefix}_bytes_missing_or_digest_changed:{source['name']}:{reference}")
-                        continue
-                    evidence_path = self._project_dir(project_id) / evidence_row["relative_path"]
-                    if not evidence_path.is_file() or _sha256(evidence_path) != evidence_row["sha256"]:
-                        failures.append(f"{failure_prefix}_bytes_missing_or_digest_changed:{source['name']}:{reference}")
-                        continue
-                    receipts.append({
-                        "reference": reference,
-                        "artifact_id": evidence_id,
-                        "name": evidence_row["name"],
-                        "version": int(evidence_row["version"]),
-                        "sha256": evidence_row["sha256"],
-                        "kind": evidence_row["kind"],
-                        "media_type": evidence_row["media_type"],
-                        "producer_id": evidence_row["producer_id"],
-                        "verification": "LOCAL_ARTIFACT_ID_VERSION_SHA256_RECHECKED",
-                    })
-                return receipts
-
-            for source in lineage:
-                rights_evidence_bindings: list[dict[str, Any]] = []
-                source_path = self._project_dir(project_id) / source["relative_path"]
-                if not source_path.is_file() or _sha256(source_path) != source["sha256"]:
-                    failures.append(f"lineage_bytes_missing_or_changed:{source['artifact_id']}")
-                if effective_require_rights and self._is_media_artifact(source):
-                    if source["rights_status"] not in allowed_rights:
-                        failures.append(f"lineage_rights_not_cleared:{source['name']}:{source['artifact_id']}:{source['rights_status']}")
-                    if require_rights_evidence:
-                        metadata = _loads(source["metadata_json"], {})
-                        refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
-                        if not isinstance(refs, list) or not refs:
-                            failures.append(f"lineage_rights_evidence_missing:{source['name']}:{source['artifact_id']}")
-                        else:
-                            rights_evidence_bindings = verify_rights_evidence_bindings(
-                                source, failure_prefix="lineage_rights_evidence",
-                            )
-                            rights_evidence_verified_asset_ids.add(source["artifact_id"])
-                    else:
-                        rights_evidence_bindings = []
-                else:
-                    rights_evidence_bindings = []
-                checked_lineage.append({
-                    "artifact_id": source["artifact_id"], "name": source["name"],
-                    "sha256": source["sha256"], "rights_status": source["rights_status"],
-                    "rights_evidence": rights_evidence_bindings,
-                })
-
-            review_rows = connection.execute(
-                "SELECT * FROM reviews WHERE project_id=? AND artifact_id=? AND artifact_digest=?",
-                (project_id, artifact_id, artifact["sha256"]),
-            ).fetchall()
-            by_rubric: dict[str, list[sqlite3.Row]] = {}
-            for review in review_rows:
-                by_rubric.setdefault(review["rubric_id"], []).append(review)
-            effective_rubrics = sorted(set(required_rubrics or []) | set(release_policy.get("required_review_rubrics", [])))
-            if not effective_rubrics:
-                raise ContractError("release_check requires at least one review rubric in the brief or command")
-
-            review_contracts = release_policy.get("review_contracts", {})
-            review_summary: dict[str, Any] = {}
-            for rubric in effective_rubrics:
-                rows = by_rubric.get(rubric, [])
-                outcomes = [row["outcome"] for row in rows]
-                if not outcomes or any(outcome != "PASS" for outcome in outcomes):
-                    failures.append(f"required_review_missing_or_conflicting:{rubric}:{outcomes}")
-                contract = review_contracts.get(rubric, {}) if isinstance(review_contracts, dict) else {}
-                attestations: list[dict[str, Any]] = []
-                reviewer_ids: set[str] = set()
-                context_ids: set[str] = set()
-                evidence_receipts: list[dict[str, Any]] = []
-                def verify_review_evidence_binding(
-                    binding: Any, reference: Any, *, rubric: str, review_id: str,
-                    unresolved_code: str, digest_code: str,
-                    failure_detail: str | None = None,
-                ) -> dict[str, Any] | None:
-                    detail = failure_detail or f"{rubric}:{review_id}:{reference}"
-                    if (
-                        not isinstance(binding, dict)
-                        or binding.get("reference") != reference
-                        or binding.get("resolved") is not True
-                    ):
-                        reason = binding.get("reason") if isinstance(binding, dict) else None
-                        if reason == "BYTES_MISSING_OR_DIGEST_CHANGED":
-                            failures.append(f"{digest_code}:{detail}")
-                        else:
-                            failures.append(f"{unresolved_code}:{detail}")
-                        return None
-                    evidence_id = binding.get("artifact_id")
-                    if not isinstance(evidence_id, str) or not evidence_id:
-                        failures.append(f"{unresolved_code}:{detail}")
-                        return None
-                    evidence_artifact = connection.execute(
-                        "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
-                        (project_id, evidence_id),
-                    ).fetchone()
-                    if evidence_artifact is None or evidence_artifact["status"] not in {"CURRENT", "ACCEPTED"}:
-                        failures.append(f"{unresolved_code}:{detail}")
-                        return None
-                    if (
-                        evidence_artifact["version"] != binding.get("version")
-                        or evidence_artifact["sha256"] != binding.get("sha256")
-                        or evidence_artifact["producer_id"] != binding.get("producer_id")
-                    ):
-                        failures.append(f"{digest_code}:{detail}")
-                        return None
-                    evidence_path = self._project_dir(project_id) / evidence_artifact["relative_path"]
-                    if not evidence_path.is_file() or _sha256(evidence_path) != evidence_artifact["sha256"]:
-                        failures.append(f"{digest_code}:{detail}")
-                        return None
-                    return {
-                        "reference": reference,
-                        "artifact_id": evidence_id,
-                        "name": evidence_artifact["name"],
-                        "version": int(evidence_artifact["version"]),
-                        "sha256": evidence_artifact["sha256"],
-                        "kind": evidence_artifact["kind"],
-                        "media_type": evidence_artifact["media_type"],
-                        "producer_id": evidence_artifact["producer_id"],
-                        "verified_at_release": True,
-                    }
-
-                def review_event_evidence_bindings(review_id: str) -> dict[str, Any]:
-                    event_row = connection.execute(
-                        """SELECT payload_json FROM events
-                           WHERE project_id=? AND entity_type='REVIEW' AND entity_id=?
-                             AND event_type='REVIEW_RECORDED'
-                           ORDER BY event_no DESC LIMIT 1""",
-                        (project_id, review_id),
-                    ).fetchone()
-                    event_payload = _loads(event_row["payload_json"], {}) if event_row else {}
-                    bindings = event_payload.get("evidence_bindings", {})
-                    return bindings if isinstance(bindings, dict) else {}
-
-                for review in rows:
-                    reviewer_ids.add(review["reviewer_id"])
-                    dimensions = _loads(review["dimensions_json"], {})
-                    review_evidence_receipts: list[dict[str, Any]] = []
-                    finding_evidence_receipts: list[dict[str, Any]] = []
-                    event_bindings = review_event_evidence_bindings(review["review_id"])
-                    if contract.get("require_resolvable_evidence_refs"):
-                        review_evidence = _loads(review["evidence_refs_json"], [])
-                        review_snapshots = event_bindings.get("review_evidence", [])
-                        if not isinstance(review_evidence, list) or not review_evidence:
-                            failures.append(f"review_evidence_missing:{rubric}:{review['review_id']}")
-                        elif not isinstance(review_snapshots, list) or len(review_snapshots) != len(review_evidence):
-                            failures.append(f"review_evidence_digest_bindings_missing:{rubric}:{review['review_id']}")
-                        else:
-                            for index, reference in enumerate(review_evidence):
-                                verified_binding = verify_review_evidence_binding(
-                                    review_snapshots[index], reference, rubric=rubric,
-                                    review_id=review["review_id"],
-                                    unresolved_code="review_evidence_unresolved",
-                                    digest_code="review_evidence_bytes_missing_or_digest_changed",
-                                )
-                                if verified_binding is not None:
-                                    review_evidence_receipts.append(verified_binding)
-                    attestation = dimensions.get("_attestation", {}) if isinstance(dimensions, dict) else {}
-                    if not isinstance(attestation, dict):
-                        attestation = {}
-                    attestations.append(attestation)
-                    required_kind = contract.get("reviewer_kind")
-                    if required_kind and attestation.get("reviewer_kind") != required_kind:
-                        failures.append(f"reviewer_kind_mismatch:{rubric}:{review['review_id']}:{attestation.get('reviewer_kind')}")
-                    required_mode = contract.get("execution_mode")
-                    if required_mode and attestation.get("execution_mode") != required_mode:
-                        failures.append(f"review_execution_mode_mismatch:{rubric}:{review['review_id']}:{attestation.get('execution_mode')}")
-                    if contract.get("blind_review") and attestation.get("blind_review") is not True:
-                        failures.append(f"blind_review_attestation_missing:{rubric}:{review['review_id']}")
-                    if contract.get("require_digest_attestation") and attestation.get("inspected_artifact_digest") != artifact["sha256"]:
-                        failures.append(f"review_inspected_digest_mismatch:{rubric}:{review['review_id']}")
-                    if contract.get("require_context_id"):
-                        context_id = attestation.get("context_id")
-                        if not isinstance(context_id, str) or not context_id.strip():
-                            failures.append(f"review_context_id_missing:{rubric}:{review['review_id']}")
-                        else:
-                            context_ids.add(context_id)
-                    scorecard = dimensions.get("scorecard", dimensions.get("scores", {})) if isinstance(dimensions, dict) else {}
-                    if not isinstance(scorecard, dict):
-                        scorecard = {}
-                    for dimension, floor in contract.get("dimension_floors", {}).items():
-                        try:
-                            score = float(scorecard[dimension])
-                        except (KeyError, TypeError, ValueError):
-                            failures.append(f"review_score_missing:{rubric}:{dimension}:{review['review_id']}")
-                            continue
-                        if not math.isfinite(score):
-                            failures.append(f"review_score_not_finite:{rubric}:{dimension}:{review['review_id']}")
-                            continue
-                        try:
-                            floor_value = float(floor)
-                        except (TypeError, ValueError):
-                            failures.append(f"review_floor_invalid:{rubric}:{dimension}")
-                            continue
-                        if not math.isfinite(floor_value):
-                            failures.append(f"review_floor_not_finite:{rubric}:{dimension}")
-                            continue
-                        if score < floor_value:
-                            failures.append(f"review_score_below_floor:{rubric}:{dimension}:{score:g}<{floor_value:g}")
-                    score_dimensions = contract.get("score_dimensions", [])
-                    if score_dimensions:
-                        try:
-                            values = [float(scorecard[name]) for name in score_dimensions]
-                            if not all(math.isfinite(value) for value in values):
-                                failures.append(f"review_scorecard_not_finite:{rubric}:{review['review_id']}")
-                            else:
-                                average = sum(values) / len(values)
-                                minimum_average = float(contract.get("min_average", 0))
-                                if not math.isfinite(minimum_average):
-                                    failures.append(f"review_minimum_average_not_finite:{rubric}:{review['review_id']}")
-                                elif average < minimum_average:
-                                    failures.append(f"review_average_below_floor:{rubric}:{average:.2f}<{minimum_average:g}")
-                        except (KeyError, TypeError, ValueError, ZeroDivisionError):
-                            failures.append(f"review_scorecard_incomplete:{rubric}:{review['review_id']}")
-                    min_findings = int(contract.get("min_findings", 0))
-                    findings = dimensions.get("findings", []) if isinstance(dimensions, dict) else []
-                    if min_findings and (not isinstance(findings, list) or len(findings) < min_findings):
-                        failures.append(f"review_findings_below_minimum:{rubric}:{len(findings) if isinstance(findings, list) else 0}<{min_findings}")
-                    # Validate every supplied finding even when the minimum count is not met.
-                    # A short Red Team report must not hide unresolved or untraceable evidence.
-                    if isinstance(findings, list):
-                        for index, finding in enumerate(findings):
-                            if not isinstance(finding, dict) or not finding.get("finding"):
-                                failures.append(f"review_finding_incomplete:{rubric}:{index}")
-                                continue
-                            if contract.get("require_evidence_per_finding") and not finding.get("evidence_ref"):
-                                failures.append(f"review_finding_evidence_missing:{rubric}:{index}")
-                            if contract.get("require_resolvable_evidence_refs") and finding.get("evidence_ref"):
-                                finding_snapshots = event_bindings.get("finding_evidence", [])
-                                snapshot = next(
-                                    (item for item in finding_snapshots
-                                     if isinstance(item, dict) and item.get("finding_index") == index),
-                                    None,
-                                ) if isinstance(finding_snapshots, list) else None
-                                verified_binding = verify_review_evidence_binding(
-                                    snapshot, finding["evidence_ref"], rubric=rubric,
-                                    review_id=review["review_id"],
-                                    unresolved_code="review_finding_evidence_unresolved",
-                                    digest_code="review_finding_evidence_bytes_missing_or_digest_changed",
-                                    failure_detail=f"{rubric}:{index}:{finding['evidence_ref']}",
-                                )
-                                if verified_binding is not None:
-                                    finding_evidence_receipts.append({
-                                        "finding_index": index,
-                                        **verified_binding,
-                                    })
-                            if contract.get("require_disposition_per_finding") and finding.get("disposition") not in {
-                                "UNRESOLVED", "MITIGATED", "ACCEPTED", "NOT_APPLICABLE",
-                            }:
-                                failures.append(f"review_finding_disposition_missing:{rubric}:{index}")
-                            severity = str(finding.get("severity", "MEDIUM")).upper()
-                            disposition = finding.get("disposition")
-                            if disposition == "UNRESOLVED" and severity in {"CRITICAL", "HIGH"} and review["outcome"] == "PASS":
-                                failures.append(f"red_team_unresolved_high_risk:{rubric}:{index}")
-                    evidence_receipts.append({
-                        "review_id": review["review_id"],
-                        "review_evidence": review_evidence_receipts,
-                        "finding_evidence": finding_evidence_receipts,
-                    })
-                if contract.get("min_reviewers", 0) and len(reviewer_ids) < int(contract["min_reviewers"]):
-                    failures.append(f"reviewer_quorum_missing:{rubric}:{len(reviewer_ids)}<{int(contract['min_reviewers'])}")
-                if contract.get("distinct_contexts") and len(context_ids) < len(rows):
-                    failures.append(f"review_contexts_not_independent:{rubric}")
-                review_summary[rubric] = {
-                    "review_ids": [row["review_id"] for row in rows],
-                    "reviewer_ids": sorted(reviewer_ids),
-                    "outcomes": outcomes,
-                    "attestations": attestations,
-                    "evidence_receipts": evidence_receipts,
-                }
-
-            supplied_evidence = set(evidence_refs or [])
-            required_evidence = set(release_policy.get("required_evidence_refs", []))
-            missing_evidence = sorted(required_evidence - supplied_evidence)
-            if missing_evidence:
-                failures.append(f"release_evidence_missing:{missing_evidence}")
-
-            for evidence_name in release_policy.get("required_evidence_artifact_names", []):
-                evidence_artifact = self._artifact_by_name(connection, project_id, evidence_name)
-                if evidence_artifact is None:
-                    failures.append(f"required_evidence_artifact_missing:{evidence_name}")
-                    continue
-                evidence_path = self._project_dir(project_id) / evidence_artifact["relative_path"]
-                if not evidence_path.is_file() or _sha256(evidence_path) != evidence_artifact["sha256"]:
-                    failures.append(f"required_evidence_artifact_bytes_changed:{evidence_name}")
-                if evidence_artifact["kind"] not in {"evidence", "document", "rights_record", "qa_report", "review_report", "decision", "timeline", "domain_state"}:
-                    failures.append(f"required_evidence_artifact_wrong_kind:{evidence_name}:{evidence_artifact['kind']}")
-
-            required_artifacts = list(release_policy.get("required_artifact_names", []))
-            for required_name in required_artifacts:
-                required_artifact = self._artifact_by_name(connection, project_id, required_name)
-                if required_artifact is None:
-                    failures.append(f"required_deliverable_missing:{required_name}")
-                else:
-                    required_path = self._project_dir(project_id) / required_artifact["relative_path"]
-                    if not required_path.is_file() or _sha256(required_path) != required_artifact["sha256"]:
-                        failures.append(f"required_deliverable_bytes_changed:{required_name}")
-                    if (
-                        effective_require_rights
-                        and required_artifact["rights_status"] != "NOT_APPLICABLE"
-                        and required_artifact["rights_status"] not in allowed_rights
-                    ):
-                        failures.append(f"required_deliverable_rights_not_cleared:{required_name}:{required_artifact['rights_status']}")
-
-            required_assets = list(release_policy.get("required_asset_names", []))
-            for asset_name in required_assets:
-                source_asset = self._artifact_by_name(connection, project_id, asset_name)
-                if source_asset is None:
-                    failures.append(f"required_source_asset_missing:{asset_name}")
-                else:
-                    source_path = self._project_dir(project_id) / source_asset["relative_path"]
-                    if not source_path.is_file() or _sha256(source_path) != source_asset["sha256"]:
-                        failures.append(f"required_source_asset_bytes_changed:{asset_name}")
-                    if effective_require_rights and source_asset["rights_status"] not in allowed_rights:
-                        failures.append(f"required_source_asset_rights_not_cleared:{asset_name}:{source_asset['rights_status']}")
-                    if source_asset["artifact_id"] not in {row["artifact_id"] for row in lineage}:
-                        failures.append(f"required_source_asset_not_in_final_lineage:{asset_name}")
-                    if require_rights_evidence:
-                        metadata = _loads(source_asset["metadata_json"], {})
-                        refs = metadata.get("rights_evidence_refs", []) if isinstance(metadata, dict) else []
-                        if not isinstance(refs, list) or not refs:
-                            failures.append(f"required_source_asset_rights_evidence_missing:{asset_name}")
-                        elif source_asset["artifact_id"] not in rights_evidence_verified_asset_ids:
-                            verify_rights_evidence_bindings(
-                                source_asset, failure_prefix="required_source_asset_rights_evidence",
-                            )
-                            rights_evidence_verified_asset_ids.add(source_asset["artifact_id"])
-
-            qa_receipt: dict[str, Any] | None = None
-            requires_technical_qa = bool(release_policy.get("require_technical_qa", artifact["kind"] == "video" or str(artifact["media_type"]).startswith("video/")))
-            if requires_technical_qa:
-                qa_name = release_policy.get("technical_qa_artifact_name", "technical-qa-receipt")
-                qa_artifact = self._artifact_by_name(connection, project_id, qa_name)
-                if qa_artifact is None:
-                    failures.append(f"technical_qa_receipt_missing:{qa_name}")
-                else:
-                    qa_path = self._project_dir(project_id) / qa_artifact["relative_path"]
-                    try:
-                        qa_payload = json.loads(qa_path.read_text(encoding="utf-8")) if qa_path.is_file() else {}
-                    except (OSError, json.JSONDecodeError):
-                        qa_payload = {}
-                    if not qa_path.is_file() or _sha256(qa_path) != qa_artifact["sha256"]:
-                        failures.append("technical_qa_receipt_bytes_missing_or_changed")
-                    if not isinstance(qa_payload, dict):
-                        qa_payload = {}
-                    if qa_artifact["kind"] != "qa_report":
-                        failures.append(f"technical_qa_artifact_wrong_kind:{qa_artifact['kind']}")
-                    qa_metadata = qa_payload.get("metadata", {})
-                    if not isinstance(qa_metadata, dict):
-                        qa_metadata = {}
-                    if qa_metadata.get("checker") != "ffmpeg-ffprobe-v1.0":
-                        failures.append("technical_qa_checker_unrecognized")
-                    if qa_payload.get("hard_pass") is not True or qa_payload.get("hard_failures"):
-                        failures.append("technical_qa_hard_pass_missing")
-                    if qa_payload.get("media_sha256") != artifact["sha256"]:
-                        failures.append("technical_qa_target_digest_mismatch")
-                    if qa_payload.get("input_artifact_id") != artifact_id:
-                        failures.append("technical_qa_target_artifact_id_mismatch")
-                    checks = qa_payload.get("checks", [])
-                    if not isinstance(checks, list):
-                        checks = []
-                    check_statuses = {item.get("check_id"): item.get("status") for item in checks if isinstance(item, dict)}
-                    required_check_ids = {
-                        "video_stream", "stream_duration_match", "true_peak", "black_frames", "full_decode",
-                    } | set(release_policy.get("technical_qa_required_check_ids", []))
-                    missing_checks = sorted(required_check_ids - set(check_statuses))
-                    failed_checks = sorted(key for key, status in check_statuses.items() if status != "PASS")
-                    if missing_checks:
-                        failures.append(f"technical_qa_checks_missing:{missing_checks}")
-                    if failed_checks:
-                        failures.append(f"technical_qa_checks_failed:{failed_checks}")
-                    metadata = _loads(qa_artifact["metadata_json"], {})
-                    if metadata.get("hard_pass") is not True or metadata.get("media_sha256") != artifact["sha256"]:
-                        failures.append("technical_qa_artifact_metadata_mismatch")
-                    qa_receipt = {
-                        "artifact_id": qa_artifact["artifact_id"], "sha256": qa_artifact["sha256"],
-                        "media_sha256": qa_payload.get("media_sha256"), "hard_pass": qa_payload.get("hard_pass"),
-                        "checks": check_statuses,
-                    }
-
-            receipt = {
-                "artifact_id": artifact_id, "artifact_digest": artifact["sha256"],
-                "required_rubrics": effective_rubrics, "review_summary": review_summary,
-                "required_artifacts": required_artifacts,
-                "required_assets": required_assets,
-                "required_evidence_artifacts": list(release_policy.get("required_evidence_artifact_names", [])),
-                "evidence_refs": sorted(supplied_evidence),
-                "rights_status": artifact["rights_status"],
-                "artifact_lineage": checked_lineage,
-                "technical_qa": qa_receipt,
-                "rights_evidence_required": require_rights_evidence,
-                "failures": failures, "pass": not failures,
-                "review_attestation_limit": "Reviewer kind, execution mode, blind review and context are self-attested metadata; the runtime cannot cryptographically prove a human actually performed an independent cold read.",
-            }
-            if not failures:
-                connection.execute("UPDATE artifacts SET status='ACCEPTED' WHERE project_id=? AND artifact_id=?", (project_id, artifact_id))
-                self._event(connection, project_id, "ARTIFACT", artifact_id, "ARTIFACT_RELEASE_ACCEPTED", receipt)
-            else:
-                self._event(connection, project_id, "ARTIFACT", artifact_id, "ARTIFACT_RELEASE_BLOCKED", receipt)
-            connection.commit()
-            return receipt
+        """Delegate artifact-only release to the shared assurance service."""
+        from .application.release_service import ReleaseAssuranceService
+        return ReleaseAssuranceService(self).release_check(
+            project_id, artifact_id, required_rubrics=required_rubrics,
+            evidence_refs=evidence_refs, require_rights=require_rights,
+        )
 
     def invalidate(self, project_id: str, task_id: str, reason: str) -> dict[str, Any]:
         with closing(self._connect(project_id)) as connection:
@@ -2834,6 +1979,8 @@ class StudioEngine:
                             changed = True
             now = _iso()
             for affected in descendants:
+                if tasks[affected]["kind"] == "review":
+                    self._cleanup_review_stage(project_id, affected, tasks[affected]["attempts"])
                 connection.execute(
                     "UPDATE tasks SET status='STALE',worker_id=NULL,claim_token=NULL,claim_inputs_json='[]',lease_until=NULL,error_json=?,updated_at=? WHERE project_id=? AND task_id=?",
                     (_json({"reason": reason}), now, project_id, affected),
@@ -2942,6 +2089,76 @@ class StudioEngine:
         return {"learning_id": learning_id, "status": "RETIRED", "reason": reason,
                 "source_history_retained": True, "other_methods_changed": False}
 
+    def _deliverable_progress_in_tx(self, connection, project_id, rows=None):
+        """Derived candidate coverage, never a second ledger or an outcome approval."""
+        from .scope import EPOCH
+        from .domain.demand import inspect_demand
+        brief = _loads(self._project_row(connection, project_id)["brief_json"], {})
+        if brief.get("scope_epoch") != EPOCH or "deliverable_specs" not in brief:
+            return {"status": "UNTYPED_OR_HISTORICAL", "candidate_coverage_complete": None,
+                    "owner_outcome_verified": False}
+        items = inspect_demand(brief, durable=True)["typed_deliverables"]["deliverables"]
+        by_key = {
+            (d["id"], v["id"]): {
+                "deliverable_id": d["id"], "type": d["type"], "variant_id": v["id"],
+                "expected_shape": v.get("shape") or d.get("shape"),
+                "constraints": dict(d.get("constraints") or {}), "candidates": [],
+            }
+            for d in items
+            for v in (d["variants"] or [{"id": d["id"], "shape": d.get("shape")}])
+        }
+        rejected = []
+        if rows is None:
+            rows = connection.execute("SELECT * FROM tasks WHERE project_id=?", (project_id,)).fetchall()
+        for task in rows:
+            if task["status"] != "COMPLETED":
+                continue
+            requirements = _loads(task["requirements_json"], {})
+            bindings = requirements.get("deliverable_outputs", {})
+            if not bindings:
+                continue
+            try:
+                self._require_task_decision(connection, project_id, task)
+            except GateError as exc:
+                rejected.append({"task_id": task["task_id"], "reason": str(exc)})
+                continue
+            result = _loads(task["result_json"], {})
+            output_ids = result.get("outputs", {})
+            for name, binding in bindings.items():
+                key = (binding["deliverable_id"], binding["variant_id"])
+                artifact = connection.execute(
+                    "SELECT * FROM artifacts WHERE project_id=? AND artifact_id=?",
+                    (project_id, output_ids.get(name))).fetchone()
+                if (key not in by_key or artifact is None or artifact["name"] != name
+                        or artifact["produced_by_task"] != task["task_id"]
+                        or artifact["status"] not in {"CURRENT", "ACCEPTED"}):
+                    rejected.append({"task_id": task["task_id"], "output": name,
+                                     "reason": "CURRENT_BOUND_ARTIFACT_MISSING"})
+                    continue
+                path = self._project_dir(project_id) / artifact["relative_path"]
+                if not path.is_file() or _sha256(path) != artifact["sha256"]:
+                    rejected.append({"task_id": task["task_id"], "output": name,
+                                     "reason": "ARTIFACT_BYTES_MISSING_OR_CHANGED"})
+                    continue
+                by_key[key]["candidates"].append({
+                    "task_id": task["task_id"], "name": name, "artifact_id": artifact["artifact_id"],
+                    "version": artifact["version"], "sha256": artifact["sha256"],
+                    "media_type": artifact["media_type"], "artifact_status": artifact["status"],
+                    "format_and_quality_verified": False,
+                })
+        from .domain.outcome_assurance import variant_release_coverage
+        variants = list(by_key.values())
+        coverage = variant_release_coverage(variants)
+        return {"status": "CANDIDATE_COVERAGE_ONLY",
+                "variants": variants, "rejected_bindings": rejected,
+                "candidate_coverage_complete": all(v["candidates"] for v in variants),
+                "release_authorized": False, **coverage}
+
+    def inspect_outcome(self, project_id: str) -> dict[str, Any]:
+        """Explicit read-only observation of current typed deliverable file bytes."""
+        from .application.outcome_inspection import OutcomeInspectionService
+        return OutcomeInspectionService(self).inspect(project_id)
+
     def status(self, project_id: str) -> dict[str, Any]:
         project = self.project(project_id)
         tasks = self.list_tasks(project_id)
@@ -2956,6 +2173,7 @@ class StudioEngine:
             retry_exhausted = {}
             explicit_waits = {}
             rows = connection.execute("SELECT * FROM tasks WHERE project_id=?", (project_id,)).fetchall()
+            deliverable_progress = self._deliverable_progress_in_tx(connection, project_id, rows)
             for task in rows:
                 detail = _loads(task["error_json"], {})
                 if (task["status"] == "WAITING_INPUT" and isinstance(detail, dict)
@@ -2977,7 +2195,8 @@ class StudioEngine:
                 "decision_blocked_tasks": decision_blocked,
                 "retry_exhausted_tasks": retry_exhausted,
                 "explicit_external_wait_tasks": explicit_waits,
-                "open_failures": open_failures, "event_count": events}
+                "open_failures": open_failures, "event_count": events,
+                "deliverable_progress": deliverable_progress}
 
     def resume(self, project_id: str, *, event_limit: int = 40) -> dict[str, Any]:
         """Reconstruct an actionable project handoff from durable Video state only."""
@@ -3028,11 +2247,12 @@ class StudioEngine:
         elif unfinished:
             next_action = "Inspect dependency blockers and task failures; revise only the affected descendants."
         else:
-            next_action = "All declared tasks are complete; run the exact-digest release check and verify the delivery package."
+            next_action = completion_guidance(status["deliverable_progress"])["next_action"]
         return {
             "project": status["project"],
             "project_status": "TASK_GRAPH_COMPLETE" if not unfinished else "IN_PROGRESS",
             "task_counts": status["task_counts"],
+            "deliverable_progress": status["deliverable_progress"],
             "ready_by_executor": ready_by_executor,
             "decision_blocked_tasks": status["decision_blocked_tasks"],
             "retry_exhausted_tasks": status["retry_exhausted_tasks"],

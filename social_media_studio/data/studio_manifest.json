@@ -72,7 +72,16 @@
     "requires_independent_readback": true,
     "requires_caos_owner_acceptance": true,
     "project_candidate_promotion_authorized": false,
-    "global_knowledge_promotion": "VERSIONED_REPOSITORY_CHANGE_AFTER_EVIDENCE_INDEPENDENT_REPLAY_AND_CAOS_ACCEPTANCE"
+    "global_knowledge_promotion": "VERSIONED_REPOSITORY_CHANGE_AFTER_EVIDENCE_INDEPENDENT_REPLAY_AND_CAOS_ACCEPTANCE",
+    "retrospective_cross_chat_import": "EXPLICIT_OWNER_AUTHORIZATION__SCOPED_SELF_MEDIA_HISTORY_ONLY",
+    "direct_session_learning": "PRIVATE_EPISODIC_CASEBOOK__NO_DUMMY_PROJECT",
+    "owner_preferences": "PRIVATE_SOURCE__IMMEDIATE_WITHIN_SCOPE__CURRENT_INSTRUCTION_OVERRIDES",
+    "preference_episode_method_separation": true,
+    "public_repository_must_not_contain": [
+      "RAW_PRIVATE_CONVERSATIONS",
+      "OWNER_SPECIFIC_PREFERENCE_PROFILE",
+      "PRIVATE_CROSS_CHAT_CASE_HISTORY"
+    ]
   },
   "ip_authority": {
     "original_identity_canon": "IPOS",
@@ -102,28 +111,40 @@
       "artifact_lineage": "IMMUTABLE_INPUT_ARTIFACT_ID_AND_SHA256",
       "source_replacement": "INVALIDATE_CONSUMERS_AND_DEPENDENT_DESCENDANTS",
       "rights": "FINAL_AND_USED_MEDIA_ASSETS_REQUIRE_ALLOWED_STATUS_AND_RESOLVABLE_EVIDENCE",
-      "human_review": "WHEN_REQUIRED_BY_BRIEF_EXACT_DIGEST_ATTESTED_HUMAN_COLD_READ",
+      "human_review": "WHEN_REQUIRED_BY_BRIEF_SIGNED_DSSE_EXECUTION_RECEIPT_BOUND_TO_EXACT_ARTIFACT_AND_REVIEW_REPORT",
       "red_team": "WHEN_REQUIRED_BY_BRIEF_MINIMUM_THREE_EVIDENCE_BACKED_FINDINGS",
-      "no_auto_publish": true
+      "no_auto_publish": true,
+      "high_assurance_review": {
+        "execution_receipt": "DSSE_IN_TOTO_ED25519",
+        "trusted_executor_registry": "social_media_studio/data/review_executors.json",
+        "default_trusted_executor_count": 0,
+        "empty_registry_behavior": "BLOCK_HIGH_ASSURANCE_RELEASE",
+        "review_task": "DEDICATED_KIND_REVIEW_TASK",
+        "review_report": "CURRENT_JSON_ARTIFACT_SHA256_BOUND_TO_TASK_AND_RECEIPT",
+        "blind_review": "DECLARED_INPUTS_ONLY_STAGED_WORKSPACE_HIDDEN_NO_SIBLING_REVIEW_OUTPUTS",
+        "full_video_review": "SIGNED_TIMESTAMPED_COVERAGE_TRACE_MUST_SPAN_COMPLETE_SOURCE_DURATION",
+        "release_reverification": true,
+        "caller_supplied_attestation_is_proof": false
+      }
     },
     "domain_adapters": {
-      "editorial_plan_validate": "social_media_studio.legacy.editorial_planning.EditorialPlan",
-      "shot_contract_materialize": "social_media_studio.legacy.editorial_planning.materialize_shot_contract",
-      "shot_contract_validate": "social_media_studio.legacy.production_os.ShotContract",
-      "ipos_bundle_inspect": "social_media_studio.legacy.ip_identity.inspect_ipos_bundle",
-      "ipos_bundle_import": "social_media_studio.legacy.ip_identity.import_ipos_bundle",
-      "timeline_validate": "social_media_studio.legacy.timeline.TimelineSpec",
-      "continuity_assess": "social_media_studio.legacy.continuity.assess_continuity",
-      "shot_route": "social_media_studio.legacy.model_registry.EvidenceBoundModelRouter",
-      "business_outcome_metrics": "social_media_studio.legacy.business_metrics.EpisodeOutcomeReceipt",
-      "extended_media_qa": "social_media_studio.legacy.media_qa.MediaQAChecker",
-      "programmatic_graphic_render": "social_media_studio.legacy.programmatic_graphics.render_programmatic_graphic",
-      "media_graph_initialize": "social_media_studio.legacy.media_graph.MediaGraph",
-      "ipos_shot_bind": "social_media_studio.legacy.ip_identity.bind_ipos_identity_to_shot",
-      "ipos_continuity_snapshot": "social_media_studio.legacy.ip_identity.build_ipos_continuity_snapshot",
-      "ipos_continuity_link": "social_media_studio.legacy.ip_identity.build_ipos_continuity_link",
-      "business_object_validate": "social_media_studio.adapters.business_object_from_dict",
-      "episode_intent_validate": "social_media_studio.adapters.program_episode_handoff_to_intent"
+      "editorial_plan_validate": "social_media_studio.domain_adapters.editorial.handle_editorial_plan_validate",
+      "shot_contract_materialize": "social_media_studio.domain_adapters.editorial.handle_shot_contract_materialize",
+      "shot_contract_validate": "social_media_studio.domain_adapters.editorial.handle_shot_contract_validate",
+      "ipos_bundle_inspect": "social_media_studio.domain_adapters.identity.handle_ipos_bundle_inspect",
+      "ipos_bundle_import": "social_media_studio.domain_adapters.identity.handle_ipos_bundle_import",
+      "timeline_validate": "social_media_studio.domain_adapters.motion.handle_timeline_validate",
+      "continuity_assess": "social_media_studio.domain_adapters.motion.handle_continuity_assess",
+      "shot_route": "social_media_studio.domain_adapters.motion.handle_shot_route",
+      "business_outcome_metrics": "social_media_studio.domain_adapters.business.handle_business_outcome_metrics",
+      "extended_media_qa": "social_media_studio.domain_adapters.media_qa.handle_extended_media_qa",
+      "programmatic_graphic_render": "social_media_studio.domain_adapters.visual.handle_programmatic_graphic_render",
+      "media_graph_initialize": "social_media_studio.domain_adapters.lineage.handle_media_graph_initialize",
+      "ipos_shot_bind": "social_media_studio.domain_adapters.identity.handle_ipos_shot_bind",
+      "ipos_continuity_snapshot": "social_media_studio.domain_adapters.identity.handle_ipos_continuity_snapshot",
+      "ipos_continuity_link": "social_media_studio.domain_adapters.identity.handle_ipos_continuity_link",
+      "business_object_validate": "social_media_studio.domain_adapters.business.handle_business_object_validate",
+      "episode_intent_validate": "social_media_studio.domain_adapters.business.handle_episode_intent_validate"
     },
     "domain_adapter_execution": {
       "entrypoint": "sms-studio run-adapter",
@@ -139,6 +160,7 @@
         "runtime_dependency_boundary",
         "domain_adapter_registry_matches_manifest",
         "program_authority_refs_are_digest_bound_inputs",
+        "high_assurance_review_execution_default_fail_closed",
         "isolated_regression_graphs_and_local_execution",
         "isolated_historical_video_fixture_release_policy",
         "task_neutral_intake_and_retirement",
@@ -271,7 +293,9 @@
       "cognition_dependency": "CAOS read-only parent governance at every material decision/effect, recursively reopen contradicted ancestors; no duplicate cognition controller",
       "knowledge": "social_media_studio/data/knowledge_catalog.json; exact source, scope, lifecycle, not execution authority",
       "execution_resources": "actual domain adapter and production registry; current session external capabilities checked separately",
-      "acceptance": "task-specific domain outcome and independent overall owner outcome, neither CI nor technical QA substitutes"
+      "acceptance": "task-specific domain outcome and independent overall owner outcome, neither CI nor technical QA substitutes",
+      "deliverables": "social_media_studio.domain.contracts.DELIVERABLE_TYPES + social_media_studio/data/subsystem_catalog.json#deliverable_ownership",
+      "platform_adaptation": "DeliverableVariant(locale, platform, shape.width, shape.height, shape.orientation, shape.aspect_ratio); platform-specific package contracts are independently versioned"
     },
     "continuous_responsibilities": {
       "owner_goal_fidelity": "ALL_DECISIONS_AND_ACTIONS",
@@ -359,7 +383,11 @@
       "cli": "sms-studio quality-plan DELIVERABLES.json",
       "policy": "DELIVERABLE_SPECIFIC_NO_FIXED_VIDEO_STAGES",
       "quality_observed": false,
-      "independent_review_proven": false
+      "independent_review_proven": false,
+      "execution_verification_source": "social_media_studio/review_execution.py",
+      "trusted_executor_registry": "social_media_studio/data/review_executors.json",
+      "high_assurance_review_proven": false,
+      "production_executor_registered": false
     },
     "internal_subsystem_catalog": {
       "source": "social_media_studio/data/subsystem_catalog.json",
@@ -369,6 +397,117 @@
       "product_ipos": "INTERNAL_SOURCE_AND_SPECIFIC_CANON_CUSTODY",
       "cognition_caos": "EXTERNAL_READ_ONLY_PARENT_AUTHORITY_NOT_PEER_PRODUCT",
       "assurance": "STRUCTURE_NOT_SEMANTIC_OUTCOME"
+    },
+    "user_need_model": {
+      "business_domains": {
+        "CONTENT_CREATION_AND_PRODUCTION": "PRODUCTION_SYSTEM",
+        "ACCOUNT_OPERATIONS_AND_GROWTH": "MEDIA_GROWTH",
+        "ORIGINAL_IP_AND_BRAND": "ORIGINAL_DIGITAL_IP",
+        "COMMERCIALIZATION": "COMMERCIALIZATION"
+      },
+      "professional_capabilities": {
+        "groups": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups",
+        "knowledge": "social_media_studio/data/knowledge_catalog.json",
+        "methods": "social_media_studio/legacy/data/techniques.json",
+        "skills": "skills/social-media-studio/SKILL.md",
+        "roles": "social_media_studio/legacy/data/roles.json",
+        "local_executors": [
+          "social_media_studio/domain_adapters/registry.py",
+          "social_media_studio/production/registry.py"
+        ],
+        "nonlocal_execution": "CURRENT_SESSION_CAPABILITY_HANDSHAKE__AGENT_HUMAN_EXTERNAL_HANDOFF",
+        "selection": "DEMAND_SELECTED_ONLY__CURRENT_AVAILABILITY_AND_GAPS_MUST_BE_CHECKED",
+        "semantics": "A capability group locates common resources; an exact demand profile scopes knowledge, methods, Skill sections and professional lenses. Actual applicability, current sources and executor availability require verification. No catalog reference promotes a method or proves execution.",
+        "group_resource_binding": "Group resources are overview/fallback references only. An exact demand profile selects a scoped resource set without inheriting unrelated group methods or roles. Current catalog has exact profiles for every declared demand; existence is not method validation. Future missing profiles remain explicit GROUP_LEVEL_FALLBACK.",
+        "executor_availability": "REGISTERED_LOCAL_ROUTE_OR_CURRENT_SESSION_HANDSHAKE__NEVER_INFER_AVAILABILITY_FROM_CATALOG",
+        "demand_profiles": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups[].demand_profiles",
+        "operation_contract": "social_media_studio/legacy/data/capabilities.json#professional_capability_groups[].demand_routes"
+      },
+      "deliverables": {
+        "types": "social_media_studio.domain.contracts.DELIVERABLE_TYPES",
+        "ownership": "social_media_studio/data/subsystem_catalog.json#deliverable_ownership",
+        "semantics": "EACH_REQUESTED_OUTCOME_HAS_ITS_OWN_TYPED_CONTRACT_AND_ACCEPTANCE__NO_DEFAULT_VIDEO_FINAL__OPTIONAL_PUBLIC_FACING_COMMUNICATION_INTENT"
+      },
+      "platform_adaptation": {
+        "variant_schema": "social_media_studio.domain.contracts.DeliverableVariant",
+        "platform_registry": "social_media_studio.domain.editorial.PLATFORMS",
+        "dimensions": [
+          "locale",
+          "platform",
+          "shape.width",
+          "shape.height",
+          "shape.orientation",
+          "shape.aspect_ratio"
+        ],
+        "semantics": "ADAPT_ONLY_REQUESTED_VARIANTS__VERIFY_CURRENT_PLATFORM_RULES__NO_HARDCODED_LIMITS"
+      },
+      "implementation_subsystems": "social_media_studio/data/subsystem_catalog.json#subsystems; internal code ownership only, not user-need categories or permanent agents",
+      "composition": "DYNAMIC_CROSS_AXIS_COMPOSITION__NO_FIXED_PIPELINE",
+      "communication_intent": {
+        "schema": "social_media_studio.domain.communication.CommunicationIntent",
+        "scope": "OPTIONAL_PUBLIC_FACING_DELIVERABLE_AUDIENCE_VALUE_AND_RESPONSE_HYPOTHESIS",
+        "assurance": "HYPOTHESIS_UNMEASURED__NOT_A_PERFORMANCE_PREDICTION_OR_VIRALITY_PROMISE"
+      },
+      "demand_composition": {
+        "entry": "sms-studio intake REQUEST.json [--selection ROUTE_PROPOSAL.json]",
+        "service": "social_media_studio.application.demand_composition.compose_demand",
+        "authority": "CURRENT_OWNER_DEMAND_AND_CORRECTIONS; SEPARATE_ASSISTANT_PROPOSAL_NOT_AUTHORIZATION",
+        "scope": "PER_DELIVERABLE_BUSINESS_AXES_PROFESSIONAL_DEMANDS_VARIANTS_SOURCE_CLAUSES_IDENTITY_AND_QUALITY",
+        "execution": "DIRECT_OR_EXISTING_DURABLE_STUDIO; NO_DEFAULT_GRAPH_OR_EXTERNAL_EFFECT",
+        "unknowns": "UNSELECTED_OR_UNSTRUCTURED_REMAIN_EXPLICIT; NO_FORCED_TYPED_DIRECT_TASK",
+        "durable_admission": {
+          "requirements": "professional_demands per exact deliverable_ref; deliverable_outputs for explicit candidate output/variant",
+          "binding": "current decision snapshot includes selected route contract/resource record and actual local dispatcher",
+          "progress": "derived current digest-bound output candidates; never equate graph completion with owner outcome",
+          "compatibility": "unstructured requests remain explicitly untyped; existing typed tasks require explicit re-admission"
+        }
+      }
+    },
+    "control_loops": {
+      "coordination": "EVENT_OR_CONDITION_TRIGGERED__NOT_SERIAL_STAGES",
+      "decision": "UNKNOWN_OR_CONTRADICTED_PREMISE__COMPETING_HYPOTHESES__RESEARCH__COMPARISON__COUNTEREVIDENCE__FALSIFIER__REVERSIBLE_SELECTION",
+      "execution": "ADMITTED_ACTION__PRECHECK__EXECUTE__READ_BACK_REAL_EFFECT__INDEPENDENT_CHECK__REPAIR_OR_REDECIDE",
+      "requirement_feedback": "OWNER_CORRECTION__TRACE_TO_SOURCE_AND_REVISION__INVALIDATE_ONLY_AFFECTED_DEPENDENTS_WHEN_PROVEN_SAFE__REDECIDE__REEXECUTE__REACCEPT",
+      "failure_root_cause": "OBSERVED_SYMPTOM__COMPETING_ROOT_CAUSES__METHOD_CHALLENGE__ISOLATED_REPAIR__INDEPENDENT_VERIFICATION__REGRESSION",
+      "learning": "SOURCE_AND_SCOPE__CANDIDATE__POSITIVE_AND_NEGATIVE_TRIALS__INDEPENDENT_REPLAY__CAOS_OWNER_ACCEPTANCE__VERSIONED_PROMOTION",
+      "owner": "CAOS_PARENT_SESSION_GOVERNS_ALL_MATERIAL_DECISIONS_AND_EFFECTS; Studio runtime does not claim native CAOS activation"
+    },
+    "data_lifecycle": {
+      "store": "SQLite_WAL_PER_PROJECT",
+      "mutable_current_state": [
+        "projects",
+        "tasks",
+        "artifact_currentness",
+        "failure_resolution",
+        "learning_candidate_status"
+      ],
+      "append_only_evidence": [
+        "events",
+        "decisions",
+        "reviews",
+        "execution_receipts"
+      ],
+      "artifact_identity": "IMMUTABLE_VERSIONED_BYTES_WITH_SHA256_AND_LINEAGE",
+      "revision": "NEW_REVISION__REVALIDATE__INVALIDATE_AFFECTED_DEPENDENTS__PRESERVE_PRIOR_HISTORY",
+      "deletion": "NO_GENERIC_PHYSICAL_DELETE_FOR_AUDITABLE_DECISIONS_REVIEWS_EVENTS_OR_SOURCE_ARTIFACTS"
+    },
+    "harness_contract": {
+      "scope": "OWNER_SCOPED_WORKSPACE_AND_EXPLICIT_EXECUTION_SURFACE",
+      "validation": "BRIEF_TASK_DELIVERABLE_AND_INPUT_CONTRACTS",
+      "admission": "CURRENT_DECISION_AND_AUTHORIZATION_REQUIRED_WHERE_APPLICABLE",
+      "dependency": "EXACT_CURRENT_INPUTS_AND_DECLARED_DEPENDENCIES",
+      "concurrency": "ATOMIC_CLAIM_AND_LEASE_RECOVERY",
+      "retries": "BOUNDED_RETRY_BUDGET_WITH_DIAGNOSIS_BEFORE_REENTRY",
+      "integrity": "SHA256_AND_ARTIFACT_LINEAGE",
+      "rights": "RIGHTS_EVIDENCE_REQUIRED_WHERE_APPLICABLE",
+      "observability": "APPEND_ONLY_EVENT_HISTORY_AND_EFFECT_READBACK",
+      "release": "QUALITY_ACCEPTANCE_DOES_NOT_AUTHORIZE_PUBLICATION"
+    },
+    "acceptance_model": {
+      "professional": "SOCIAL_MEDIA_STUDIO_CHECKS_DOMAIN_CRAFT_AND_DELIVERABLE_SPECIFIC_QUALITY",
+      "independent": "INDEPENDENT_REVIEW_CHECKS_THE_EXACT_CURRENT_ARTIFACT_AND_EVIDENCE",
+      "owner_outcome": "CAOS_CHECKS_THE_FINAL_RESULT_AGAINST_THE_OWNER'S_ORIGINAL_GOAL_AND_ALL_CORRECTIONS",
+      "separation": "DOMAIN_QUALITY__INDEPENDENT_REVIEW__OWNER_OUTCOME__RELEASE__PUBLICATION_ARE_DISTINCT_STATES"
     }
   },
   "knowledge_lifecycle": {
@@ -412,5 +551,20 @@
     "OPTIONAL_GROWTH_AND_COMMERCIAL"
   ],
   "product_name_zh": "自媒体系统",
-  "repository_slug": "social-media-studio"
+  "repository_slug": "self-media-system",
+  "repository_full_name": "D1traverser-debug/self-media-system",
+  "repository_url": "https://github.com/D1traverser-debug/self-media-system",
+  "repository_identity_kind": "GITHUB_REPOSITORY__DISTINCT_FROM_PYPI_DISTRIBUTION",
+  "private_owner_continuity": {
+    "discovery": "EXACT_FILENAME_SEARCH_IN_PRIVATE_LIBRARY_WHEN_AVAILABLE",
+    "sources": {
+      "owner_preferences": "OWNER_PREFERENCE_PROFILE.md",
+      "episodic_learning": "CROSS_CHAT_EXPERIENCE_CASEBOOK.md",
+      "process_quality": "PROCESS_QUALITY_BASELINE.md"
+    },
+    "scope": "OWNER_AUTHORIZED_SELF_MEDIA_ONLY",
+    "precedence": "CURRENT_OWNER_INSTRUCTION__CURRENT_BRIEF__PRIVATE_PROFILE__INFERRED_PATTERN",
+    "public_repo_storage": false,
+    "unavailable_behavior": "DO_NOT_CLAIM_LOADED_OR_INVENT_CONTENT"
+  }
 }

@@ -746,7 +746,237 @@
         "Deterministic source-byte and quote-grounding checks are registered; no live search, external fact oracle or semantic video/audio/image understanding provider is registered."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "benchmark-policy",
+        "provider-benchmark",
+        "self-learning"
+      ],
+      "method_ids": [],
+      "role_ids": [
+        "researcher",
+        "fact_checker",
+        "showrunner"
+      ],
+      "skill_sections": [
+        "3. Research and evidence",
+        "4. Decision loop"
+      ],
+      "demand_routes": {
+        "source_media_understanding": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Interpret complete relevant source media; evidence audit is not semantic perception.",
+          "requires_current_method_and_executor_check": true
+        },
+        "source_audio_transcription": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual transcription provider or session tool; distinguish transcript from audio quality.",
+          "requires_current_method_and_executor_check": true
+        },
+        "source_image_understanding": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual image inspection; not generation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "research_and_fact_check": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "source_evidence_audit"
+          ],
+          "scope": "Current original-source research and semantic fact check; local audit verifies supplied bytes/quotes only.",
+          "requires_current_method_and_executor_check": true
+        }
+      },
+      "demand_profiles": {
+        "source_media_understanding": {
+          "knowledge_refs": [
+            "quality-gates",
+            "production-intelligence"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "researcher",
+            "editor"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "FILENAME_AS_CONTENT",
+            "CONTACT_SHEET_AS_PLAYBACK",
+            "UNHEARD_AUDIO_AS_TRANSCRIPT"
+          ],
+          "selection_notes": "Inspect actual relevant time spans, scene/action changes, subject relations, sound and speech; separate observed content from interpretation and locate contradictions by timestamp. Reopen angles derived from mistaken subjects."
+        },
+        "source_audio_transcription": {
+          "knowledge_refs": [
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "researcher",
+            "sound_director",
+            "fact_checker"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "INVENTED_WORDS",
+            "UNHEARD_AUDIO",
+            "ASSUMED_SPEAKER_IDENTITY"
+          ],
+          "selection_notes": "Use actual audio or a verified transcript tool, identify language and timestamp boundaries, replay unclear segments and mark uncertainty. Translation and summary are separate operations."
+        },
+        "source_image_understanding": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "researcher",
+            "art_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "INFER_PRIVATE_IDENTITY",
+            "GENERATE_INSTEAD_OF_INSPECT",
+            "UNSEEN_PIXEL_DETAIL"
+          ],
+          "selection_notes": "Inspect original visible content, text, framing, spatial relations and resolution at relevant scale; distinguish observation from inference and report inaccessible portions."
+        },
+        "research_and_fact_check": {
+          "knowledge_refs": [
+            "quality-gates",
+            "production-intelligence",
+            "self-learning"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "researcher",
+            "fact_checker"
+          ],
+          "skill_sections": [
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "SNIPPET_AS_PROOF",
+            "QUOTE_MATCH_AS_TRUTH",
+            "STALE_CLAIM"
+          ],
+          "selection_notes": "Map material claims to primary source, date, exact statement, authority and counterevidence. Distinguish fact, estimate, opinion, attribution and fiction; literal quote auditing is not truth or live search."
+        }
+      }
     },
     {
       "id": "editorial_writing",
@@ -755,7 +985,8 @@
         "long_form_editorial",
         "short_form_copy",
         "narrative_and_script",
-        "multilingual_localization"
+        "multilingual_localization",
+        "news_satire_packaging"
       ],
       "adapters": [
         "editorial_plan_validate"
@@ -765,7 +996,249 @@
         "EditorialPlan validation is not long-form writing or native-language creative quality."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "quality-gates",
+        "professional-aesthetics"
+      ],
+      "method_ids": [],
+      "role_ids": [
+        "writer",
+        "story_editor",
+        "retention_editor",
+        "creative_director"
+      ],
+      "skill_sections": [
+        "2. Outcome contract",
+        "2B. Audience and communication intent",
+        "2C. Demand-specific skill routing",
+        "3. Research and evidence",
+        "4. Decision loop",
+        "8. Independent review and release"
+      ],
+      "demand_profiles": {
+        "short_form_copy": {
+          "knowledge_refs": [
+            "short-form-social-copy",
+            "audience-response",
+            "quality-gates",
+            "professional-aesthetics"
+          ],
+          "method_ids": [
+            "T-002"
+          ],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "SHORT_COPY"
+          ],
+          "avoid_when": [
+            "NEWS_SATIRE_METHOD_NOT_APPLICABLE_TO_NON_NEWS_CONTENT",
+            "NO_UNSUPPORTED_VIEWER_OR_CREATOR_LIFE_STORY",
+            "NO_GENERIC_NEWS_NARRATION"
+          ],
+          "selection_notes": "Use for standalone short posts and captions. Ground the angle in the actual source; T-002 is optional and applies only when a question or contrast is immediately legible."
+        },
+        "long_form_editorial": {
+          "knowledge_refs": [
+            "long-form-editorial",
+            "audience-response",
+            "quality-gates",
+            "professional-aesthetics"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor",
+            "creative_director"
+          ],
+          "applies_to": [
+            "LONG_ARTICLE"
+          ],
+          "avoid_when": [
+            "STANDALONE_ONE_LINE_COPY",
+            "VIDEO_SCRIPT_ONLY"
+          ],
+          "selection_notes": "Build a reader journey around the material and reader job. Select structure from the argument; do not force a universal article template."
+        },
+        "narrative_and_script": {
+          "knowledge_refs": [
+            "technique-library",
+            "quality-gates",
+            "short-form-social-copy",
+            "long-form-editorial",
+            "professional-aesthetics"
+          ],
+          "method_ids": [
+            "T-002",
+            "T-005",
+            "T-007"
+          ],
+          "skill_sections": [
+            "3. Research and evidence",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "ORIGINAL_VIDEO",
+            "LONG_ARTICLE",
+            "SHORT_COPY"
+          ],
+          "avoid_when": [
+            "UNREQUESTED_SCRIPT",
+            "VIDEO_STAGES_FOR_TEXT_ONLY",
+            "FORCED_EXPLAINER"
+          ],
+          "selection_notes": "Use when requested narrative/script benefits the outcome. For text select writing craft without video stages; EditorialPlan validation only for declared video plans."
+        },
+        "multilingual_localization": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "audience-response",
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "WORD_FOR_WORD_TRANSLATION",
+            "UNREQUESTED_SEPARATE_CHANNEL_POSITIONING"
+          ],
+          "selection_notes": "Preserve the underlying content promise while localizing idiom, rhythm and cultural references for each requested language."
+        },
+        "news_satire_packaging": {
+          "knowledge_refs": [
+            "EDITORIAL_PACKAGING",
+            "audience-response",
+            "quality-gates"
+          ],
+          "method_ids": [
+            "T-002"
+          ],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "researcher",
+            "fact_checker",
+            "writer",
+            "story_editor",
+            "red_team"
+          ],
+          "applies_to": [
+            "NEWS_OR_CURRENT_AFFAIRS_VIDEO_SATIRE"
+          ],
+          "avoid_when": [
+            "GAMEPLAY_OR_FICTIONAL_ENTERTAINMENT",
+            "PET_OR_GENERAL_ENTERTAINMENT",
+            "NON_NEWS_SOURCE",
+            "ORDINARY_CREATOR_CAPTION"
+          ],
+          "selection_notes": "Candidate only. Select only when the source is genuinely news/current affairs and the requested treatment is satire; preserve factual and fiction boundaries."
+        }
+      },
+      "demand_routes": {
+        "long_form_editorial": {
+          "deliverable_types": [
+            "LONG_ARTICLE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual authoring and independent editorial judgment; video-plan validator is not article writing.",
+          "requires_current_method_and_executor_check": true
+        },
+        "short_form_copy": {
+          "deliverable_types": [
+            "SHORT_COPY"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual concise copy; no video-plan validation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "narrative_and_script": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "LONG_ARTICLE",
+            "SHORT_COPY"
+          ],
+          "local_support_adapters": [
+            "editorial_plan_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Narrative writing; plan validator applies only to explicitly supplied video EditorialPlan.",
+          "requires_current_method_and_executor_check": true
+        },
+        "multilingual_localization": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Native-language adaptation, preserve meaning and platform voice.",
+          "requires_current_method_and_executor_check": true
+        },
+        "news_satire_packaging": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE",
+            "SHORT_COPY",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Only factual current-affairs satire with source evidence, not generic game footage.",
+          "semantic_preconditions": {
+            "required_constraints": {
+              "source_content_class": "NEWS_CURRENT_AFFAIRS",
+              "editorial_treatment": "SATIRE"
+            },
+            "min_source_refs": 1
+          },
+          "requires_current_method_and_executor_check": true
+        }
+      }
     },
     {
       "id": "visual_design",
@@ -778,7 +1251,8 @@
         "image_generation",
         "image_editing",
         "image_aspect_adaptation",
-        "image_enhancement"
+        "image_enhancement",
+        "programmatic_motion_graphics"
       ],
       "adapters": [
         "programmatic_graphic_render"
@@ -790,7 +1264,422 @@
         "Local render routes are limited graphics/rendering mechanisms; no registered general image generation, editing or enhancement executor."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "visual-development",
+        "generation-governance",
+        "quality-gates",
+        "professional-aesthetics",
+        "GPT_IMAGE_PROMPTING_METHOD_V2",
+        "GPT_IMAGE_POSITIVE_MORPH_LANGUAGE_RULE_V1"
+      ],
+      "method_ids": [
+        "T-002",
+        "T-003",
+        "T-004",
+        "T-007",
+        "T-008",
+        "T-014"
+      ],
+      "role_ids": [
+        "art_director",
+        "asset_director",
+        "creative_director",
+        "storyboard_artist"
+      ],
+      "skill_sections": [
+        "6. Production method and tool choice",
+        "8. Independent review and release"
+      ],
+      "demand_routes": {
+        "visual_concept": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Art direction/concept, not actual rendered image; no generation effect.",
+          "requires_current_method_and_executor_check": true
+        },
+        "cover_design": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual cover composition and typography; prepare-only scope does not authorize rendering.",
+          "requires_current_method_and_executor_check": true
+        },
+        "avatar_design": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Temporary avatar design; permanent identity has separate explicit IPOS scope.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_prompt_design": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Prompt specification, not image generation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_generation": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Current image-generation operation required; registered MP4 renderers are not image generators.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_editing": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Current image-edit operation and source reference required.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_aspect_adaptation": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Per-variant composition; do not substitute unrequested crop.",
+          "requires_current_method_and_executor_check": true
+        },
+        "image_enhancement": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual enhancement operation and pixel review.",
+          "requires_current_method_and_executor_check": true
+        },
+        "programmatic_motion_graphics": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [
+            "programmatic_graphic_render"
+          ],
+          "local_support_operations": [
+            "python_frame_render"
+          ],
+          "scope": "Motion graphic MP4 candidate only, from a declared render spec, required assets and authorized code; not general image generation or final video acceptance. Also supports an explicitly requested analysis report of its own render receipt, not a generic creative analysis.",
+          "requires_current_method_and_executor_check": true
+        }
+      },
+      "demand_profiles": {
+        "visual_concept": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "DESIGN_RESEARCH_METHOD_V2"
+          ],
+          "method_ids": [
+            "T-014"
+          ],
+          "role_ids": [
+            "art_director",
+            "creative_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO"
+          ],
+          "avoid_when": [
+            "PREMATURE_GENERATION",
+            "HISTORICAL_DESIGN_AS_BRIEF",
+            "UNNECESSARY_VIDEO_PROBE"
+          ],
+          "selection_notes": "Define message, emotion and subject; compare compositions and reference transfer boundaries against intended use. Concept-only work ends at a usable plan; research method remains candidate."
+        },
+        "cover_design": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "platform-packaging",
+            "audience-response",
+            "DESIGN_RESEARCH_METHOD_V2"
+          ],
+          "method_ids": [
+            "T-014"
+          ],
+          "role_ids": [
+            "art_director",
+            "creative_director",
+            "writer"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "2B. Audience and communication intent",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "avoid_when": [
+            "TITLE_REPETITION",
+            "UNSUPPORTED_CLICK_PROMISE",
+            "PREPARE_ONLY_GENERATION",
+            "MOBILE_ILLEGIBILITY"
+          ],
+          "selection_notes": "Define click reason grounded in content, focal subject, hierarchy, contrast, safe area, typography and licensed font; compare at thumbnail scale. Preserve exact ratio and preparation-only boundary."
+        },
+        "avatar_design": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "art_director",
+            "asset_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "avoid_when": [
+            "PERMANENT_CANON_BY_DEFAULT",
+            "UNREQUESTED_IPOS",
+            "UNVERIFIED_LIKENESS_RIGHTS"
+          ],
+          "selection_notes": "Design for current temporary avatar use and display size; check silhouette, recognizability, contrast, crop tolerance and rights. No canon mutation without separate explicit scope."
+        },
+        "image_prompt_design": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "generation-governance",
+            "GPT_IMAGE_PROMPTING_METHOD_V2",
+            "GPT_IMAGE_POSITIVE_MORPH_LANGUAGE_RULE_V1"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "art_director",
+            "asset_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "avoid_when": [
+            "PROMPT_ONLY_GENERATION",
+            "STALE_MODEL_SYNTAX",
+            "UNRELATED_REFERENCE_ATTRIBUTES"
+          ],
+          "selection_notes": "Specify scene, subject, framing, lighting/material, text, reference roles, allowed changes and dimensions for current model. Revalidate historical model-specific guidance; no render for prompt-only requests."
+        },
+        "image_generation": {
+          "knowledge_refs": [
+            "quality-gates",
+            "generation-governance",
+            "professional-aesthetics",
+            "provider-benchmark"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "art_director",
+            "asset_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "avoid_when": [
+            "UNAUTHORIZED_GENERATION",
+            "MP4_RENDERER_AS_IMAGE_MODEL",
+            "UNINSPECTED_PROMOTION"
+          ],
+          "selection_notes": "Verify exact image-generation operation and reference roles; produce only authorized candidates. Inspect actual pixels, text, object relations, dimensions and rights against approved direction."
+        },
+        "image_editing": {
+          "knowledge_refs": [
+            "quality-gates",
+            "generation-governance",
+            "professional-aesthetics"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "art_director",
+            "asset_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "avoid_when": [
+            "UNREQUESTED_STYLE_CHANGE",
+            "UNNECESSARY_RECREATION",
+            "UNVERIFIED_PRESERVATION"
+          ],
+          "selection_notes": "Identify exact source and editable attributes/regions; preserve other required elements. Verify edit operation and compare before/after at relevant scale for unwanted drift."
+        },
+        "image_aspect_adaptation": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "platform-packaging"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "art_director",
+            "asset_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "avoid_when": [
+            "STRETCHING",
+            "AUTO_CROP_WHEN_RECOMPOSITION_NEEDED",
+            "WRONG_RATIO_AXIS"
+          ],
+          "selection_notes": "Normalize width and height; preserve shared concept while separately adapting subject scale, placement, typography, negative space and safe zones. Inspect each actual variant."
+        },
+        "image_enhancement": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "provider-benchmark"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "asset_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET"
+          ],
+          "avoid_when": [
+            "INVENT_DETAIL_AS_RECOVERY",
+            "UNREQUESTED_CROP_OR_RECOLOR",
+            "DIMENSIONS_AS_QUALITY_PROOF"
+          ],
+          "selection_notes": "Distinguish resolution enlargement from detail restoration; compare texture, edges, noise, text and subject fidelity at source/output scale. Check dimensions and artifacts."
+        },
+        "programmatic_motion_graphics": {
+          "knowledge_refs": [
+            "quality-gates",
+            "production-intelligence",
+            "generation-governance",
+            "technique-library"
+          ],
+          "method_ids": [
+            "T-001",
+            "T-006",
+            "T-007"
+          ],
+          "role_ids": [
+            "motion_director",
+            "art_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "UNSUPPORTED_NUMBERS",
+            "RENDER_AS_GENERATIVE_FOOTAGE",
+            "SILENT_CANDIDATE_AS_FINAL"
+          ],
+          "selection_notes": "Use deterministic graphics for precise layout, typography or data timing. Bind claims, approved spec and assets; inspect text fit, movement and data truth. Separate receipt, candidate and final."
+        }
+      }
     },
     {
       "id": "motion_production",
@@ -819,7 +1708,356 @@
         "Shot routing and validation do not generate a video; generative providers require current-session handshake."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "production-intelligence",
+        "generation-governance",
+        "quality-gates",
+        "benchmark-policy",
+        "visual-development",
+        "reviewer-execution-attestation",
+        "PRODUCTION_AND_COST_STRATEGY"
+      ],
+      "method_ids": [
+        "T-008",
+        "T-009",
+        "T-010",
+        "T-011",
+        "T-012",
+        "T-013",
+        "T-014"
+      ],
+      "role_ids": [
+        "director",
+        "storyboard_artist",
+        "motion_director",
+        "editor",
+        "sound_director",
+        "technical_director",
+        "creative_director",
+        "retention_editor"
+      ],
+      "skill_sections": [
+        "6. Production method and tool choice",
+        "7. Worker execution and artifact custody",
+        "8. Independent review and release"
+      ],
+      "demand_routes": {
+        "video_concept": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "local_support_adapters": [
+            "media_graph_initialize"
+          ],
+          "local_support_operations": [],
+          "scope": "Concept only; local graph initialization is optional metadata, not video production.",
+          "requires_current_method_and_executor_check": true
+        },
+        "storyboard_and_direction": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "local_support_adapters": [
+            "shot_contract_materialize",
+            "shot_contract_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Storyboard and direction; supplied shot contracts only.",
+          "requires_current_method_and_executor_check": true
+        },
+        "shot_design": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "local_support_adapters": [
+            "shot_contract_materialize",
+            "shot_contract_validate",
+            "shot_route"
+          ],
+          "local_support_operations": [],
+          "scope": "Declared shot design and evidence-bound route support, not generation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_generation": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [
+            "shot_route"
+          ],
+          "local_support_operations": [],
+          "scope": "Current actual generation operation required; no registered generative video executor.",
+          "requires_current_method_and_executor_check": true
+        },
+        "animation_and_motion": {
+          "deliverable_types": [
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual animation; local programmable motion render only with approved spec, code and inputs.",
+          "requires_current_method_and_executor_check": true
+        },
+        "sound_design": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual sound design; no local audio creation claim.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_assembly": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [
+            "timeline_validate",
+            "continuity_assess"
+          ],
+          "local_support_operations": [
+            "ffmpeg_assemble"
+          ],
+          "scope": "Assembly only from existing inputs and timeline; does not promise original audio packet identity. Also supports an explicitly requested analysis report of its own assembly or timeline/continuity evidence, not arbitrary research.",
+          "requires_current_method_and_executor_check": true
+        }
+      },
+      "demand_profiles": {
+        "video_concept": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "audience-response"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "director",
+            "creative_director",
+            "story_editor"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "2B. Audience and communication intent",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "avoid_when": [
+            "CONCEPT_ONLY_GENERATION",
+            "FORCED_EXPLAINER",
+            "EXPOSITION_WITHOUT_VALUE"
+          ],
+          "selection_notes": "Compare story/experience promises, arc, format and feasibility; define distinctive payoff, scope, truth mode and audience where relevant. Graph initialization is not a finished video."
+        },
+        "storyboard_and_direction": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "visual-development"
+          ],
+          "method_ids": [
+            "T-011",
+            "T-014"
+          ],
+          "role_ids": [
+            "director",
+            "storyboard_artist",
+            "art_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "avoid_when": [
+            "MANDATORY_STORYBOARD_FOR_ROUTINE_EDIT",
+            "DECORATIVE_SHOT",
+            "PROTOTYPE_AS_FINAL"
+          ],
+          "selection_notes": "Map each beat to shot job, composition, action, camera, transition and relevant sound; compare high-risk alternatives and check readability/continuity before expensive generation."
+        },
+        "shot_design": {
+          "knowledge_refs": [
+            "quality-gates",
+            "visual-development",
+            "production-intelligence",
+            "generation-governance"
+          ],
+          "method_ids": [
+            "T-008",
+            "T-009",
+            "T-010",
+            "T-011"
+          ],
+          "role_ids": [
+            "director",
+            "storyboard_artist",
+            "motion_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "ORIGINAL_VIDEO",
+            "PROMPT_SPEC"
+          ],
+          "avoid_when": [
+            "KEYFRAMES_WITHOUT_ENDPOINT_NEED",
+            "UNVERIFIED_ENGINE_FEATURE",
+            "ROUTE_AS_GENERATION"
+          ],
+          "selection_notes": "Specify observable endpoints, action, camera, duration, reference roles, sound and falsifiers. Select controls for actual difficulty and verify current capability."
+        },
+        "video_generation": {
+          "knowledge_refs": [
+            "quality-gates",
+            "generation-governance",
+            "production-intelligence",
+            "provider-benchmark",
+            "visual-development"
+          ],
+          "method_ids": [
+            "T-008",
+            "T-009",
+            "T-010",
+            "T-011",
+            "T-012"
+          ],
+          "role_ids": [
+            "director",
+            "motion_director",
+            "asset_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "ORIGINAL_VIDEO"
+          ],
+          "avoid_when": [
+            "MARKETING_AS_AVAILABILITY",
+            "PAID_EFFECT_WITHOUT_GRANT",
+            "STILL_OR_ROUTE_AS_VIDEO"
+          ],
+          "selection_notes": "Verify exact mode, controls, rights, cost and output requirements. For high-risk work probe weakest shot; bind approved references and inspect full motion and sound. Bound retries and reopen failed direction."
+        },
+        "animation_and_motion": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "production-intelligence",
+            "visual-development"
+          ],
+          "method_ids": [
+            "T-009",
+            "T-011"
+          ],
+          "role_ids": [
+            "motion_director",
+            "director",
+            "editor"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "ORIGINAL_VIDEO"
+          ],
+          "avoid_when": [
+            "MOTION_WITHOUT_PURPOSE",
+            "LINEAR_BY_DEFAULT",
+            "STILL_AS_MOTION_PROOF"
+          ],
+          "selection_notes": "Select staging, anticipation, timing, spacing and easing for the action/story. Test playback for legible movement, coherent physics/style, rhythm and endpoints."
+        },
+        "sound_design": {
+          "knowledge_refs": [
+            "quality-gates",
+            "production-intelligence"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "sound_director",
+            "editor"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "avoid_when": [
+            "UNREQUESTED_REPLACEMENT",
+            "UNCLEARED_AUDIO",
+            "LOUDNESS_AS_CRAFT"
+          ],
+          "selection_notes": "Map dialogue, ambience, music, effects and silence to actual beats; protect intelligibility and rights. Check sync, balance, clipping and listening experience; preserve original audio when required."
+        },
+        "video_assembly": {
+          "knowledge_refs": [
+            "quality-gates",
+            "production-intelligence",
+            "generation-governance"
+          ],
+          "method_ids": [
+            "T-013"
+          ],
+          "role_ids": [
+            "editor",
+            "sound_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release",
+            "8A. Non-negotiable media release gates"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "ASSEMBLY_AS_BITSTREAM_IDENTITY",
+            "UNAPPROVED_ASSETS",
+            "UNRELATED_SHOT_REPAIR"
+          ],
+          "selection_notes": "Bind current sources, timeline and tracks; assemble authorized content. Inspect transitions, pace, A/V sync, final encode and rights; reencoding is not original audio identity."
+        }
+      }
     },
     {
       "id": "media_transform",
@@ -844,7 +2082,359 @@
         "Only video passthrough, geometry crop, and end-trim can prove copied encoded-audio payloads; advanced content restoration, AI enhancement and multitrack transformations remain unavailable."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "production-intelligence",
+        "quality-gates",
+        "reviewer-execution-attestation",
+        "benchmark-policy"
+      ],
+      "method_ids": [
+        "T-013"
+      ],
+      "role_ids": [
+        "editor",
+        "sound_director",
+        "technical_director"
+      ],
+      "skill_sections": [
+        "6. Production method and tool choice",
+        "8A. Non-negotiable media release gates",
+        "9. Failure, repair and recovery loop"
+      ],
+      "demand_routes": {
+        "video_trim": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "ffmpeg_video_audio_copy"
+          ],
+          "scope": "Eligible end-trim only for local packet-copy route; other trims need separate executor.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_merge": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual merge; local packet-copy editor does not merge.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_reframe": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "ffmpeg_video_audio_copy"
+          ],
+          "scope": "Eligible geometry crop only for local packet-copy route; other reframing separate.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_enhancement": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual enhancement; packet-copy operation is not AI enhancement.",
+          "requires_current_method_and_executor_check": true
+        },
+        "video_restoration": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual restoration and source-preservation check.",
+          "requires_current_method_and_executor_check": true
+        },
+        "original_audio_preservation": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "ffmpeg_video_audio_copy"
+          ],
+          "scope": "Eligible passthrough/geometry crop/end-trim with exact encoded audio packet proof; reject unsupported transformations. Supports an explicitly requested analysis report of its own audio-identity receipt from the same edit operation, not unrelated analysis.",
+          "requires_current_method_and_executor_check": true
+        },
+        "audio_enhancement": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual audio enhancement, not video packet copy.",
+          "requires_current_method_and_executor_check": true
+        },
+        "audio_restoration": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual audio restoration; scope and audio promise must be compatible.",
+          "requires_current_method_and_executor_check": true
+        },
+        "subtitles": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual transcript, timing and subtitle rendering/sidecar as requested.",
+          "requires_current_method_and_executor_check": true
+        }
+      },
+      "demand_profiles": {
+        "video_trim": {
+          "knowledge_refs": [
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "editor",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM"
+          ],
+          "avoid_when": [
+            "WRONG_TIME_RANGE",
+            "REENCODE_PROTECTED_AUDIO",
+            "UNSUPPORTED_PACKET_COPY"
+          ],
+          "selection_notes": "Establish retained interval and frame/packet boundaries; local packet-copy supports eligible end trim only. Verify duration, first/last frames, sync and unchanged streams."
+        },
+        "video_merge": {
+          "knowledge_refs": [
+            "quality-gates",
+            "production-intelligence"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "editor",
+            "sound_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM"
+          ],
+          "avoid_when": [
+            "PACKET_COPY_EDITOR_AS_MERGER",
+            "UNREQUESTED_REORDER",
+            "UNDECLARED_AUDIO_REPLACEMENT"
+          ],
+          "selection_notes": "Define clip order, transitions, canvas, track handling and allowed normalization. Compare formats to select concat/remux or explicit reencode; inspect joins and full playback."
+        },
+        "video_reframe": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "editor",
+            "art_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM"
+          ],
+          "avoid_when": [
+            "WRONG_ACTIVE_IMAGE",
+            "CHANGE_ORIGINAL_AUDIO",
+            "WRONG_ASPECT"
+          ],
+          "selection_notes": "Identify actual active image and authorized crop/recomposition, explicit pixel geometry and orientation; inspect subjects/captions across playback, dimensions, duration and audio promise."
+        },
+        "video_enhancement": {
+          "knowledge_refs": [
+            "quality-gates",
+            "provider-benchmark"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "editor",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM"
+          ],
+          "avoid_when": [
+            "RESOLUTION_TAG_AS_QUALITY",
+            "UNREQUESTED_INTERPOLATION",
+            "LOSS_OF_AUDIO"
+          ],
+          "selection_notes": "Diagnose source defects and target; compare enhancement against source detail, temporal artifacts, haloing and stability. Inspect representative motion and final decode, preserve unrelated streams."
+        },
+        "video_restoration": {
+          "knowledge_refs": [
+            "quality-gates",
+            "provider-benchmark"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "editor",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM"
+          ],
+          "avoid_when": [
+            "FABRICATED_MISSING_CONTENT",
+            "UNREQUESTED_CHANGES",
+            "REPAIR_AS_FULL_ACCEPTANCE"
+          ],
+          "selection_notes": "Locate damage/time ranges; distinguish recoverable source information from synthetic reconstruction. Inspect seams, motion, timing and unaffected regions, disclose unavoidable loss."
+        },
+        "original_audio_preservation": {
+          "knowledge_refs": [
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "sound_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "REENCODE_AS_BITSTREAM_IDENTITY",
+            "UNSUPPORTED_PACKET_COPY",
+            "DURATION_ONLY_AS_PROOF"
+          ],
+          "selection_notes": "Resolve exact bitstream/PCM/perceptual promise and permitted range. Verify actual source/output packet or decoded sample evidence accordingly; never silently downgrade. Return separate receipt if requested."
+        },
+        "audio_enhancement": {
+          "knowledge_refs": [
+            "quality-gates",
+            "provider-benchmark"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "sound_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM"
+          ],
+          "avoid_when": [
+            "UNREQUESTED_AUDIO_CHANGE",
+            "LOUDNESS_AS_FIDELITY",
+            "UNAUTHORIZED_VOICE_STYLE"
+          ],
+          "selection_notes": "Identify noise/intelligibility/dynamics/tonal defect; use authorized processing and compare audible A/B, clipping and timing. Preserve content; modifying samples cannot prove bitstream identity."
+        },
+        "audio_restoration": {
+          "knowledge_refs": [
+            "quality-gates",
+            "provider-benchmark"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "sound_director",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM"
+          ],
+          "avoid_when": [
+            "INVENT_MISSING_SPEECH",
+            "UNVERIFIED_REPLACEMENT_MUSIC",
+            "SIMILAR_AS_EXACT_ORIGINAL"
+          ],
+          "selection_notes": "Diagnose missing/damaged audio, compare recovery and permitted reconstruction; verify source version, transitions, pitch, duration and sync. Disclose substitution vs original."
+        },
+        "subtitles": {
+          "knowledge_refs": [
+            "quality-gates",
+            "platform-packaging"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "researcher",
+            "writer",
+            "editor",
+            "technical_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "avoid_when": [
+            "INVENTED_TRANSCRIPT",
+            "UNREQUESTED_LANGUAGE",
+            "OVERLAP_SOURCE_CAPTIONS"
+          ],
+          "selection_notes": "Obtain actual transcript and timing, translate only if requested, preserve meaning and readability. Choose sidecar/burn-in from request; inspect safe zones, timing and original audio."
+        }
+      }
     },
     {
       "id": "platform_packaging",
@@ -865,7 +2455,279 @@
         "Legacy editorial_packaging.py is a narrow case validator, not a registered generic packaging executor. Delivery packaging does not write promotional copy."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "quality-gates",
+        "professional-aesthetics"
+      ],
+      "method_ids": [],
+      "role_ids": [
+        "growth_strategist",
+        "writer",
+        "story_editor",
+        "retention_editor",
+        "art_director",
+        "compliance_editor"
+      ],
+      "skill_sections": [
+        "2. Outcome contract",
+        "2B. Audience and communication intent",
+        "2C. Demand-specific skill routing",
+        "3. Research and evidence",
+        "4. Decision loop",
+        "8. Independent review and release"
+      ],
+      "demand_profiles": {
+        "platform_title": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "audience-response",
+            "quality-gates"
+          ],
+          "method_ids": [
+            "T-002"
+          ],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "growth_strategist",
+            "writer",
+            "story_editor"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "PROMISE_EXCEEDS_SOURCE",
+            "GENERIC_HOOK_WITHOUT_A_CONTENT_REASON"
+          ],
+          "selection_notes": "The title earns entry with a truthful promise or point of tension; it is not a plot summary or a guaranteed CTR device."
+        },
+        "platform_description": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "short-form-social-copy",
+            "audience-response",
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "PLOT_RECAP_WHEN_NOT_REQUESTED",
+            "NEWS_NARRATION_FOR_NON_NEWS_CONTENT",
+            "GENERIC_FILLER"
+          ],
+          "selection_notes": "The description supplies context, voice or meaning that the title does not already perform."
+        },
+        "platform_tags": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence"
+          ],
+          "role_ids": [
+            "growth_strategist",
+            "writer"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "HASHTAG_STUFFING",
+            "IRRELEVANT_TAGS",
+            "UNSUPPORTED_TREND_CLAIMS"
+          ],
+          "selection_notes": "Use relevant discovery context only. No fixed hashtag count unless the owner or current platform specification requires one."
+        },
+        "cover_copy": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "audience-response",
+            "quality-gates",
+            "professional-aesthetics"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "writer",
+            "story_editor",
+            "art_director"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "TITLE_DUPLICATION",
+            "UNSUPPORTED_COVER_PROMISE",
+            "VISUAL_SUBJECT_DOES_NOT_DELIVER_THE_PROMISE"
+          ],
+          "selection_notes": "Cover text has its own visual click job. The image concept may be art-directed beyond a literal video frame, but must remain grounded in the content."
+        },
+        "platform_native_variant": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "short-form-social-copy",
+            "long-form-editorial",
+            "audience-response",
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2B. Audience and communication intent",
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "role_ids": [
+            "growth_strategist",
+            "writer",
+            "story_editor",
+            "retention_editor"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "avoid_when": [
+            "WORD_FOR_WORD_TRANSLATION",
+            "PLATFORM_CARICATURE",
+            "UNVERIFIED_PLATFORM_RULE"
+          ],
+          "selection_notes": "Adapt the same underlying content promise to the requested platform and locale; do not invent separate channel strategies unless requested. Media variants preserve requested shape/source; packaging is not creative production."
+        },
+        "platform_spec_research": {
+          "knowledge_refs": [
+            "platform-packaging",
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "skill_sections": [
+            "2C. Demand-specific skill routing",
+            "3. Research and evidence",
+            "4. Decision loop"
+          ],
+          "role_ids": [
+            "researcher",
+            "growth_strategist"
+          ],
+          "applies_to": [
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "ALGORITHM_GUESSING",
+            "STALE_FORMAT_CLAIM",
+            "UNSOURCED_LENGTH_LIMIT"
+          ],
+          "selection_notes": "Research current official platform specifications only when they materially affect the requested output."
+        }
+      },
+      "demand_routes": {
+        "platform_title": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual title writing; archive packaging is not writing.",
+          "requires_current_method_and_executor_check": true
+        },
+        "platform_description": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Actual description writing.",
+          "requires_current_method_and_executor_check": true
+        },
+        "platform_tags": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Current relevant tags; no invented trends.",
+          "requires_current_method_and_executor_check": true
+        },
+        "cover_copy": {
+          "deliverable_types": [
+            "PLATFORM_PACKAGE",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Distinct cover-copy function; no auto-generation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "platform_native_variant": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [
+            "delivery_package"
+          ],
+          "scope": "Requested locale/platform/shape only; archive packaging is optional support for already produced assets.",
+          "requires_current_method_and_executor_check": true
+        },
+        "platform_spec_research": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Current platform rules require primary-source verification.",
+          "requires_current_method_and_executor_check": true
+        }
+      }
     },
     {
       "id": "identity_collaboration",
@@ -890,7 +2752,284 @@
         "IPOS is an internal product subsystem, but its current Skill/private canonical state is not copied or stored as Video owner data. Only verified approved bundles enter downstream media effects."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "visual-development",
+        "generation-governance",
+        "professional-aesthetics",
+        "HUMAN_CORE_CONSTRUCTION_STACK_V2"
+      ],
+      "method_ids": [
+        "T-008"
+      ],
+      "role_ids": [
+        "asset_director",
+        "art_director",
+        "creative_director",
+        "director"
+      ],
+      "skill_sections": [
+        "2. Outcome contract",
+        "6. Production method and tool choice",
+        "8. Independent review and release"
+      ],
+      "demand_routes": {
+        "temporary_character": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Temporary design only; no IPOS bundle, state or canon access.",
+          "requires_current_method_and_executor_check": true
+        },
+        "approved_identity_use": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "local_support_adapters": [
+            "ipos_bundle_inspect",
+            "ipos_bundle_import",
+            "ipos_shot_bind"
+          ],
+          "local_support_operations": [],
+          "scope": "Exact current approved bundle and rights; read-only canon consumption.",
+          "requires_current_method_and_executor_check": true
+        },
+        "identity_continuity": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "local_support_adapters": [
+            "ipos_continuity_snapshot",
+            "ipos_continuity_link"
+          ],
+          "local_support_operations": [],
+          "scope": "Only current canon-dependent scope; declared metadata does not prove achieved fidelity.",
+          "requires_current_method_and_executor_check": true
+        },
+        "persistent_identity_design": {
+          "deliverable_types": [
+            "IDENTITY_ASSET",
+            "PROMPT_SPEC",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Existing IPOS specialist workflow, separately custodied owner canon; no automatic mutation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "identity_derivative_production": {
+          "deliverable_types": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "local_support_adapters": [
+            "ipos_bundle_inspect",
+            "ipos_bundle_import",
+            "ipos_shot_bind"
+          ],
+          "local_support_operations": [],
+          "scope": "Approved identity derivative only; exact bundle and rights.",
+          "requires_current_method_and_executor_check": true
+        }
+      },
+      "demand_profiles": {
+        "temporary_character": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "art_director",
+            "asset_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO"
+          ],
+          "avoid_when": [
+            "PERSISTENT_CANON_BY_DEFAULT",
+            "INFERRED_IPOS_APPROVAL",
+            "UNRELATED_IDENTITY_STATE"
+          ],
+          "selection_notes": "Scope character to present content; specify visible intent and allowed consistency, rights and output. Do not read/mutate approved identity state by default."
+        },
+        "approved_identity_use": {
+          "knowledge_refs": [
+            "quality-gates",
+            "generation-governance"
+          ],
+          "method_ids": [
+            "T-008"
+          ],
+          "role_ids": [
+            "asset_director",
+            "art_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "avoid_when": [
+            "UNVERIFIED_BUNDLE",
+            "SELF_ATTESTED_CANON",
+            "TEMPORARY_AS_APPROVED"
+          ],
+          "selection_notes": "Read exact current approved bundle and rights via existing IPOS consumer; bind reference versions and permitted changes. Compare actual output stable traits; receipt is not achieved fidelity."
+        },
+        "identity_continuity": {
+          "knowledge_refs": [
+            "quality-gates",
+            "generation-governance",
+            "visual-development"
+          ],
+          "method_ids": [
+            "T-008"
+          ],
+          "role_ids": [
+            "asset_director",
+            "director",
+            "art_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "avoid_when": [
+            "METADATA_AS_VISUAL_FIDELITY",
+            "STALE_CANON",
+            "UNRELATED_PERMANENT_IDENTITY"
+          ],
+          "selection_notes": "Identify invariant traits and allowed changes, bind exact approved snapshots and lineage; inspect actual variants/playback for continuity and reopen dependents after canon drift."
+        },
+        "persistent_identity_design": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "generation-governance",
+            "HUMAN_CORE_CONSTRUCTION_STACK_V2"
+          ],
+          "method_ids": [
+            "T-014"
+          ],
+          "role_ids": [
+            "asset_director",
+            "art_director",
+            "creative_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "6. Production method and tool choice",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "IDENTITY_ASSET",
+            "PROMPT_SPEC",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "AUTOMATIC_CANON_MUTATION",
+            "HISTORICAL_IDENTITY_AS_CURRENT",
+            "CANDIDATE_AS_APPROVED"
+          ],
+          "selection_notes": "Use current IPOS specialist and owner-custodied scope; compare alternatives, separate exploration from approved canon, verify stable traits, usage rights and approval. Historical method remains candidate."
+        },
+        "identity_derivative_production": {
+          "knowledge_refs": [
+            "quality-gates",
+            "generation-governance"
+          ],
+          "method_ids": [
+            "T-008"
+          ],
+          "role_ids": [
+            "asset_director",
+            "art_director",
+            "director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "6. Production method and tool choice",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM",
+            "PLATFORM_PACKAGE",
+            "LONG_ARTICLE"
+          ],
+          "avoid_when": [
+            "DERIVATIVE_OUTSIDE_RIGHTS",
+            "UNAPPROVED_CORE_TRAIT_CHANGE",
+            "CANDIDATE_AS_CANON"
+          ],
+          "selection_notes": "Bind approved original and permitted derivative intent, reference functions and invariant traits; inspect actual derivative. No inferred canon replacement or publication."
+        }
+      }
     },
     {
       "id": "growth_commercial",
@@ -908,10 +3047,210 @@
       ],
       "operations": [],
       "gaps": [
-        "Outcome measurement is not live audience validation or commercial success."
+        "Imported source metrics and legacy Episode calculations are supported, but live platform access, semantic comparability, causal inference, audience response and commercial outcomes still require independent current evidence."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "commercial",
+        "provider-benchmark",
+        "benchmark-policy",
+        "self-learning",
+        "coordination-policy",
+        "audience-response"
+      ],
+      "method_ids": [
+        "T-006",
+        "T-014"
+      ],
+      "role_ids": [
+        "growth_strategist",
+        "commercial_director",
+        "researcher",
+        "showrunner"
+      ],
+      "skill_sections": [
+        "2B. Audience and communication intent",
+        "2A. Optional historical media-business workstreams",
+        "3. Research and evidence",
+        "4. Decision loop",
+        "10. Learning and method evolution"
+      ],
+      "demand_routes": {
+        "audience_strategy": {
+          "deliverable_types": [
+            "ANALYSIS_REPORT",
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [
+            "business_object_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Actual audience evidence and strategy; business object validation only.",
+          "requires_current_method_and_executor_check": true
+        },
+        "commercial_design": {
+          "deliverable_types": [
+            "ANALYSIS_REPORT",
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [
+            "business_object_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Commercial fit, truth and authorized constraints; schema validation only.",
+          "requires_current_method_and_executor_check": true
+        },
+        "experiment_design": {
+          "deliverable_types": [
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [
+            "episode_intent_validate",
+            "business_object_validate"
+          ],
+          "local_support_operations": [],
+          "scope": "Hypothesis and experiment design; optional declared episode handoff only.",
+          "requires_current_method_and_executor_check": true
+        },
+        "business_measurement": {
+          "deliverable_types": [
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [
+            "business_outcome_metrics"
+          ],
+          "local_support_operations": [],
+          "scope": "Actual account, content, campaign, offer or portfolio observations from declared imported numeric JSON sources; exact byte-bound extraction and explicit ratios. Historical Episode receipts remain a separate supported input. Neither proves platform authenticity, metric semantics, causation or commercial success.",
+          "requires_current_method_and_executor_check": true
+        }
+      },
+      "demand_profiles": {
+        "audience_strategy": {
+          "knowledge_refs": [
+            "quality-gates",
+            "audience-response",
+            "commercial"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "growth_strategist",
+            "researcher"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "2B. Audience and communication intent",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "ANALYSIS_REPORT",
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "INVENTED_SEGMENTS",
+            "VIRALITY_GUARANTEE",
+            "HISTORICAL_POSITIONING_AS_CURRENT"
+          ],
+          "selection_notes": "Define current account goal and audience need from evidence; compare segment, positioning, content promise and distribution. Distinguish observation, hypothesis and measured effect."
+        },
+        "commercial_design": {
+          "knowledge_refs": [
+            "quality-gates",
+            "commercial",
+            "audience-response"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "commercial_director",
+            "growth_strategist",
+            "compliance_editor"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "2B. Audience and communication intent",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "ANALYSIS_REPORT",
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "FORCED_SPONSOR",
+            "UNVERIFIED_PRODUCT_CLAIM",
+            "INFERRED_CONTRACT_OR_PAYMENT"
+          ],
+          "selection_notes": "Evaluate advertiser/product fit, audience value, truth, disclosure, feasibility, rights and economics; compare functional integration alternatives. Proposal, agreement and actual effect are separate."
+        },
+        "experiment_design": {
+          "knowledge_refs": [
+            "quality-gates",
+            "audience-response",
+            "self-learning"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "growth_strategist",
+            "researcher"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "4. Decision loop",
+            "10. Learning and method evolution"
+          ],
+          "applies_to": [
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "CORRELATION_AS_CAUSATION",
+            "UNCONTROLLED_CHANGES",
+            "POSTING_WITHOUT_GRANT"
+          ],
+          "selection_notes": "Define hypothesis and rivals, comparable units, intervention, metrics, window, confounds, decision/stop criteria. Separate organic observation from execution; never fabricate outcome."
+        },
+        "business_measurement": {
+          "knowledge_refs": [
+            "quality-gates",
+            "commercial",
+            "self-learning"
+          ],
+          "method_ids": [
+            "T-006"
+          ],
+          "role_ids": [
+            "growth_strategist",
+            "researcher",
+            "commercial_director"
+          ],
+          "skill_sections": [
+            "3. Research and evidence",
+            "4. Decision loop",
+            "8. Independent review and release",
+            "10. Learning and method evolution"
+          ],
+          "applies_to": [
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "MISSING_DENOMINATOR",
+            "FORECAST_AS_ACTUAL",
+            "METRIC_AS_CAUSAL_PROOF"
+          ],
+          "selection_notes": "Use dated account evidence, explicit numerator/denominator, cohort, period and baseline; reconcile anomalies and uncertainty. Separate observed conversion/revenue from attribution and estimates. The registered business_outcome_metrics adapter accepts explicit SMS_BUSINESS_OBSERVATION_V1 with separate source inputs and declared metric JSON paths; missing data and undefined ratios remain null, without requiring video minutes. Legacy Episode economics are only for actual video scope."
+        }
+      }
     },
     {
       "id": "verification_delivery",
@@ -933,7 +3272,265 @@
         "Technical measurement is not aesthetic or editorial acceptance; independent reviewer availability must be verified."
       ],
       "activation": "DEMAND_SELECTED_ONLY",
-      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED"
+      "assurance": "CLASSIFICATION_NOT_OUTCOME_VERIFIED",
+      "knowledge_refs": [
+        "quality-gates",
+        "reviewer-execution-attestation",
+        "benchmark-policy",
+        "self-learning",
+        "professional-aesthetics"
+      ],
+      "method_ids": [
+        "T-012",
+        "T-013"
+      ],
+      "role_ids": [
+        "technical_director",
+        "compliance_editor",
+        "red_team",
+        "creative_director",
+        "art_director"
+      ],
+      "skill_sections": [
+        "8. Independent review and release",
+        "9. Failure, repair and recovery loop",
+        "11. Continuation and completion"
+      ],
+      "demand_routes": {
+        "technical_media_qa": {
+          "deliverable_types": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [
+            "extended_media_qa"
+          ],
+          "local_support_operations": [
+            "ffprobe_media_qa"
+          ],
+          "scope": "Inspect exact media bytes; technical measurements not aesthetic PASS. Supports explicitly requested technical measurement reports on exact media bytes, not general semantic or creative review.",
+          "requires_current_method_and_executor_check": true
+        },
+        "editorial_quality_review": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Inspect actual text and independent evidence where required.",
+          "requires_current_method_and_executor_check": true
+        },
+        "visual_quality_review": {
+          "deliverable_types": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Inspect actual pixels/full playback as applicable; no self-rating substitutes.",
+          "requires_current_method_and_executor_check": true
+        },
+        "independent_acceptance": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Independent reviewer provenance and actual owner result; no self-attestation.",
+          "requires_current_method_and_executor_check": true
+        },
+        "delivery": {
+          "deliverable_types": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "local_support_adapters": [],
+          "local_support_operations": [],
+          "scope": "Return the requested artifact, not a plan; no posting authorization.",
+          "requires_current_method_and_executor_check": true
+        }
+      },
+      "demand_profiles": {
+        "technical_media_qa": {
+          "knowledge_refs": [
+            "quality-gates",
+            "reviewer-execution-attestation"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "technical_director",
+            "sound_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release",
+            "8A. Non-negotiable media release gates"
+          ],
+          "applies_to": [
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "TECHNICAL_PASS_AS_CRAFT_PASS",
+            "STALE_DIGEST",
+            "MEASUREMENT_NOT_RUN"
+          ],
+          "selection_notes": "Check exact final bytes and applicable stream/duration/resolution/sync/peak/decode requirements; bind artifact ID/digest and observed findings. Reject missing hard checks; QA report is not artistic acceptance."
+        },
+        "editorial_quality_review": {
+          "knowledge_refs": [
+            "quality-gates",
+            "short-form-social-copy",
+            "long-form-editorial",
+            "audience-response"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "story_editor",
+            "fact_checker",
+            "compliance_editor"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "3. Research and evidence",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE"
+          ],
+          "avoid_when": [
+            "SELF_REVIEW_AS_INDEPENDENT",
+            "UNRELATED_VIDEO_RUBRIC",
+            "SCORE_WITHOUT_TEXT_EVIDENCE"
+          ],
+          "selection_notes": "Read exact final text and owner constraints; inspect claims, natural voice, structure, reader value, tone and format. Choose text criteria and cite concrete positive/negative findings."
+        },
+        "visual_quality_review": {
+          "knowledge_refs": [
+            "quality-gates",
+            "professional-aesthetics",
+            "reviewer-execution-attestation"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "art_director",
+            "creative_director"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "8. Independent review and release"
+          ],
+          "applies_to": [
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "IDENTITY_ASSET",
+            "ORIGINAL_VIDEO",
+            "MEDIA_TRANSFORM"
+          ],
+          "avoid_when": [
+            "PROMPT_AS_IMAGE_REVIEW",
+            "CONTACT_SHEET_AS_PLAYBACK",
+            "AVERAGE_AWAY_HARD_FAIL"
+          ],
+          "selection_notes": "Inspect actual static pixels or full playback, subject readability, composition, typography, light/material and reference fidelity; review each requested variant. Motion/audio checks only when applicable."
+        },
+        "independent_acceptance": {
+          "knowledge_refs": [
+            "quality-gates",
+            "reviewer-execution-attestation",
+            "self-learning"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "red_team",
+            "compliance_editor"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "8. Independent review and release",
+            "9. Failure, repair and recovery loop"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "ROLE_LABEL_AS_INDEPENDENCE",
+            "SELF_ATTESTED_PROVIDER_TRACE",
+            "CI_AS_OWNER_OUTCOME"
+          ],
+          "selection_notes": "Map original owner requirements to actual output findings; verify reviewer identity, modality and independence at applicable tier. Preserve contradictions and unavailable evidence, never simulate trusted execution."
+        },
+        "delivery": {
+          "knowledge_refs": [
+            "quality-gates"
+          ],
+          "method_ids": [],
+          "role_ids": [
+            "showrunner",
+            "compliance_editor"
+          ],
+          "skill_sections": [
+            "2. Outcome contract",
+            "7. Worker execution and artifact custody",
+            "8. Independent review and release",
+            "11. Continuation and completion"
+          ],
+          "applies_to": [
+            "SHORT_COPY",
+            "LONG_ARTICLE",
+            "PLATFORM_PACKAGE",
+            "PROMPT_SPEC",
+            "STATIC_IMAGE",
+            "MULTI_ASPECT_IMAGE_SET",
+            "MEDIA_TRANSFORM",
+            "ORIGINAL_VIDEO",
+            "IDENTITY_ASSET",
+            "ANALYSIS_REPORT"
+          ],
+          "avoid_when": [
+            "PLAN_AS_ARTIFACT",
+            "WRONG_LANGUAGE_OR_VARIANT",
+            "UPLOAD_WITHOUT_GRANT"
+          ],
+          "selection_notes": "Return exact requested readable/copyable outputs; verify current bytes, format, variant identity and applicable checks. Distinguish candidate, accepted artifact and publication authority."
+        }
+      }
     }
   ],
   "current_route_policy": "Current route is authoritative only for locating actual registered mechanisms; historical fields never confer execution authority; no automatic task selection."

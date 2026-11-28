@@ -15,6 +15,10 @@ def test_single_social_media_studio_identity():
     assert build_parser().prog == "sms-studio"
     manifest = json.loads((ROOT / "social_media_studio/data/studio_manifest.json").read_text(encoding="utf-8"))
     assert manifest["product_name_zh"] == "自媒体系统"
+    assert manifest["repository_slug"] == "self-media-system"
+    assert manifest["repository_full_name"] == "D1traverser-debug/self-media-system"
+    assert manifest["repository_url"] == "https://github.com/D1traverser-debug/self-media-system"
+    assert manifest["repository_slug"] != config["project"]["name"]
     assert manifest["owner"] == "SOCIAL_MEDIA_STUDIO"
     assert manifest["governance"]["system"] == "CAOS"
     assert manifest["domain_adapter_policy"]["specialist_domain_modules"].startswith("SOCIAL_MEDIA_")

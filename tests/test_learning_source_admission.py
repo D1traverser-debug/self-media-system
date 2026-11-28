@@ -25,3 +25,141 @@ def test_no_learn_exclusion_must_not_be_implemented_as_a_content_denylist():
     assert "exclude it before durable serialization" in text
     assert "Do not create a topic/title/URL/fingerprint denylist" in text
     assert "that would itself persist a trace" in text
+
+
+
+def test_explicit_owner_authorized_cross_chat_import_is_a_scoped_exception():
+    text = POLICY.read_text(encoding="utf-8")
+    assert "scoped retrospective cross-chat source explicitly authorized by the owner" in text
+    assert "relevant self-media history only" in text
+    assert "Ambient conversation, unrelated chats" in text
+    assert "summary-level retrieval" in text
+    assert "Never commit raw private conversation" in text
+
+
+def test_direct_session_learning_uses_private_episode_source_without_dummy_project():
+    text = POLICY.read_text(encoding="utf-8")
+    assert "Direct-session work may not have a Studio project." in text
+    assert "private Library experience casebook" in text
+    assert "rather than creating a dummy project" in text
+
+
+def test_direct_session_learning_is_read_before_decision_and_write_after_material_event():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "Direct-session continuity transaction — required for substantive owner-facing work:" in skill_text
+    for token in (
+        "Read before deciding.",
+        "Write after a material correction, selection, failure or outcome.",
+        "PROCESS_QUALITY_BASELINE.md",
+        "PERSISTED_READBACK_VERIFIED",
+        "NOT_PERSISTED",
+        "not a native runtime hook",
+        "Native Skill selection and automatic execution in a fresh ChatGPT chat remain unverified",
+    ):
+        assert token in skill_text
+
+
+def test_owner_preference_is_not_subject_to_method_promotion_threshold():
+    text = POLICY.read_text(encoding="utf-8")
+    assert "An explicit owner preference is authoritative within its scope" in text
+    assert "does not need two replays" in text
+    assert "A direct owner correction is not the same thing as a method validation." in text
+
+
+def test_private_owner_profile_and_casebook_are_discovered_from_skill_entry():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    for token in ("OWNER_PREFERENCE_PROFILE.md", "CROSS_CHAT_EXPERIENCE_CASEBOOK.md",
+                  "PROCESS_QUALITY_BASELINE.md"):
+        assert token in skill_text
+        assert token in entry_text
+    assert "current owner instructions" in skill_text.lower()
+    assert "do not import unrelated conversations" in skill_text.lower()
+
+
+def test_process_quality_separates_owner_scope_changes_from_preventable_assistant_failures():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "PROCESS_QUALITY_BASELINE.md" in skill_text
+    assert "Do not turn every rejected draft into a global rule." in skill_text
+
+
+def test_candidate_methods_are_loaded_for_scoped_use_not_silently_skipped():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "Candidate status is not a reason to skip a relevant professional reference." in skill_text
+    assert "sms-studio knowledge --id ID --include-nonactive" in skill_text
+    assert "bounded method hypothesis" in skill_text
+    assert "Preserve its candidate status" in skill_text
+    for demand in ("short_form_copy", "platform_title", "cover_copy", "cover_design", "long_form_editorial"):
+        assert "`" + demand + "`" in skill_text
+
+
+def test_exact_demand_profiles_point_to_the_expected_editorial_and_packaging_sources():
+    import json
+    profile = json.loads((ROOT / "social_media_studio/legacy/data/capabilities.json").read_text(encoding="utf-8"))
+    groups = {g["id"]: g for g in profile["professional_capability_groups"]}
+    assert "short-form-social-copy" in groups["editorial_writing"]["demand_profiles"]["short_form_copy"]["knowledge_refs"]
+    assert "platform-packaging" in groups["platform_packaging"]["demand_profiles"]["platform_title"]["knowledge_refs"]
+    assert "platform-packaging" in groups["platform_packaging"]["demand_profiles"]["cover_copy"]["knowledge_refs"]
+    assert "visual-development" in groups["visual_design"]["knowledge_refs"]
+    assert "platform-packaging" in groups["visual_design"]["demand_profiles"]["cover_design"]["knowledge_refs"]
+
+
+def test_caos_parent_source_is_resolved_before_substantive_sms_decisions():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    canonical = "D1traverser-debug/cognition-agent-os/.agents/skills/goal-grounded-semantic-review/SKILL.md"
+    for text in (skill_text, entry_text):
+        assert canonical in text
+        assert "CAOS_SOURCE_READ_FOR_SESSION" in text
+        assert "NATIVE_SKILL_SELECTION_VERIFIED" in text
+        assert "native Skill selection" in text
+
+
+def test_private_project_method_cards_are_retrieved_before_method_selection():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    for text in (skill_text, entry_text):
+        assert "/Social Media Studio/Methods/Cross-Project/INDEX.md" in text
+        assert "/Social Media Studio/Methods/Projects/" in text
+        assert "one-off owner-selected line" in text or "one-off selected phrase" in text
+        assert "project decision" in text.lower()
+        assert "counterexample" in text.lower()
+    assert "do not bulk-load every card" in skill_text
+    assert "matching keywords alone do not establish applicability" in skill_text
+
+
+def test_short_continuation_phrases_trigger_cold_start_recovery():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    for text in (skill_text, entry_text):
+        for phrase in ("继续SMS", "继续推特长文1", "继续视频制作3"):
+            assert phrase in text
+        assert "Continuation Receipt" in text
+        assert "do not ask the owner to restate" in text.lower() or "Do not ask the owner to repeat" in text
+        assert "numeric suffix" in text.lower()
+        assert "one narrow disambiguation" in text.lower()
+        assert "retired" in text.lower()
+
+
+def test_short_continuation_does_not_confuse_method_card_number_with_task_identity():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    for text in (skill_text, entry_text):
+        assert "project-card ID" in text
+        assert "owner-confirmed mapping" in text or "owner-authored history" in text
+        assert "method cards as learning locators, not active task state" in text or "summaries and method cards are locators only" in text
+
+
+def test_continuation_receipt_keeps_decision_production_verification_and_outcome_separate():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    for token in ("production state", "verification state", "publication/performance state",
+                  "selected", "implicitly locked", "rejected", "superseded",
+                  "exact source/artifact version", "authorization limits"):
+        assert token in skill_text
+
+
+def test_self_learning_protocol_has_unique_ordered_sections():
+    import re
+    text = POLICY.read_text(encoding="utf-8")
+    numbers = [int(x) for x in re.findall(r"^## (\d+)\.", text, flags=re.MULTILINE)]
+    assert numbers == list(range(1, len(numbers) + 1))

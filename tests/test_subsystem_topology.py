@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-from social_media_studio.subsystems import audit_subsystems, _imports, _module
+from social_media_studio.subsystems import audit_subsystems, _imports, _module, _symbol_exists
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -169,3 +169,190 @@ def test_current_domain_authority_is_internal_ipos_and_old_external_wording_is_h
     assert identity["studio_mutation_of_canon"] is False
     assert identity["owner_approval_required"] is True
     assert audit_subsystems(ROOT)["pass"]
+
+
+def test_verified_retired_operator_view_cannot_be_reintroduced(tmp_path):
+    """A Git deletion is a reviewed lifecycle change, not a reversible alias."""
+    cat = _isolated_source_checkout(tmp_path)
+    retired = next(item for item in cat["source_retirements"]
+                   if item["path"] == "social_media_studio/legacy/operator_view.py")
+    assert retired["status"] == "DELETED_FROM_HEAD"
+    assert retired["source_history_preserved_by_git"] is True
+    assert retired["user_workspaces_touched"] is False
+    assert not (ROOT / retired["path"]).exists()
+    assert not (ROOT / retired["deleted_test"]).exists()
+    assert not (tmp_path / retired["path"]).exists()
+    obsolete = tmp_path / retired["path"]
+    obsolete.parent.mkdir(parents=True, exist_ok=True)
+    obsolete.write_text("class OperatorSnapshot: pass\n", encoding="utf-8")
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("retired source path was reintroduced" in issue
+               for issue in report["violations"])
+
+
+def test_legacy_source_lifecycle_distinguishes_live_domain_code_from_old_controller():
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    life = report["legacy_module_lifecycle"]
+    assert life["social_media_studio/legacy/model_registry.py"] == (
+        "ACTIVE_SPECIALIST_IMPORT_DEPENDENCY_NOT_NEW_CONTROLLER"
+    )
+    assert life["social_media_studio/legacy/runtime.py"] == (
+        "RETIRED_FIXTURE_COMPATIBILITY_NOT_CURRENT_RUNTIME"
+    )
+    assert "social_media_studio/legacy/operator_view.py" not in life
+    assert report["legacy_lifecycle_evidence_scope"] == "CURRENT_PYTHON_STATIC_IMPORT_GRAPH_ONLY"
+    assert report["semantic_line_by_line_complete"] is False
+
+
+def test_deleted_legacy_source_import_cannot_be_resurrected_through_active_adapter(tmp_path):
+    _isolated_source_checkout(tmp_path)
+    active = tmp_path / "social_media_studio/domain/editorial.py"
+    active.write_text(
+        active.read_text(encoding="utf-8")
+        + "\nfrom social_media_studio.legacy.operator_view import OperatorSnapshot\n",
+        encoding="utf-8",
+    )
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("source imports a permanently retired module" in item
+               for item in report["violations"])
+
+
+def test_retired_second_program_orchestrator_is_absent_but_owner_adjudication_remains_current():
+    catalog = json.loads((ROOT / "social_media_studio/data/subsystem_catalog.json").read_text())
+    record = next(item for item in catalog["source_retirements"]
+                  if item["path"] == "social_media_studio/legacy/program_orchestration.py")
+    assert record["status"] == "DELETED_FROM_HEAD"
+    assert not (ROOT / record["path"]).exists()
+    assert not (ROOT / record["deleted_test"]).exists()
+    assert record["retained_current_equivalent_regression"].startswith("tests/test_studio_engine.py")
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    assert record["path"] not in report["legacy_module_lifecycle"]
+    assert any("social_media_studio/legacy/model_registry.py" == p
+               for p in report["legacy_module_lifecycle"])
+
+
+def test_current_structured_config_source_refs_have_real_nonretired_files():
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    refs = report["active_config_source_references"]
+    assert len(refs) >= 20
+    assert report["config_source_reference_scope"] == (
+        "CURRENT_STRUCTURED_MANIFESTS_ONLY_NOT_HISTORICAL_DOCS"
+    )
+    assert all((ROOT / item["path"]).is_file() for item in refs)
+    assert not any(item["path"] == "social_media_studio/legacy/operator_view.py" for item in refs)
+
+
+def test_dangling_deleted_source_in_current_manifest_is_rejected(tmp_path):
+    _isolated_source_checkout(tmp_path)
+    domain_path = tmp_path / "social_media_studio/legacy/data/domain_manifest.json"
+    domain_path.parent.mkdir(parents=True, exist_ok=True)
+    domain_path.write_text(
+        json.dumps({"runtime": {"operator_view": "social_media_studio/legacy/operator_view.py"}}),
+        encoding="utf-8",
+    )
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("current config points to missing source" in issue
+               and "legacy/operator_view.py" in issue for issue in report["violations"])
+
+
+def test_domain_adapter_implementation_owner_is_same_or_explicit_cross_subsystem_bridge():
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    rows = {item["adapter"]: item for item in report["adapter_implementation_bindings"]}
+    assert len(rows) == 17
+    assert set(rows) == {
+        "business_object_validate", "episode_intent_validate", "editorial_plan_validate",
+        "shot_contract_materialize", "shot_contract_validate", "ipos_bundle_inspect",
+        "media_graph_initialize", "ipos_bundle_import", "ipos_shot_bind",
+        "ipos_continuity_snapshot", "ipos_continuity_link", "timeline_validate",
+        "shot_route", "extended_media_qa", "continuity_assess",
+        "business_outcome_metrics", "programmatic_graphic_render",
+    }
+    assert all(item["handler_symbol_resolved"] for item in rows.values())
+    bridges = {name for name, item in rows.items() if item["cross_subsystem_bridge"]}
+    assert bridges == {
+        "episode_intent_validate", "shot_contract_materialize",
+        "shot_contract_validate", "shot_route",
+    }
+
+
+def test_missing_cross_subsystem_adapter_binding_is_rejected(tmp_path):
+    cat = _isolated_source_checkout(tmp_path)
+    cat["cross_subsystem_adapter_bindings"] = [
+        item for item in cat["cross_subsystem_adapter_bindings"]
+        if item["adapter"] != "shot_route"
+    ]
+    (tmp_path / "social_media_studio/data/subsystem_catalog.json").write_text(
+        json.dumps(cat, ensure_ascii=False, indent=2), encoding="utf-8",
+    )
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("missing cross-subsystem adapter binding: shot_route" in item
+               for item in report["violations"])
+
+
+def test_production_implementation_must_belong_to_declared_operation_subsystem(tmp_path):
+    cat = _isolated_source_checkout(tmp_path)
+    motion = next(item for item in cat["subsystems"] if item["id"] == "motion_and_production")
+    visual = next(item for item in cat["subsystems"] if item["id"] == "visual_and_static_design")
+    motion["production_operations"].remove("ffmpeg_assemble")
+    visual["production_operations"].append("ffmpeg_assemble")
+    (tmp_path / "social_media_studio/data/subsystem_catalog.json").write_text(
+        json.dumps(cat, ensure_ascii=False, indent=2), encoding="utf-8",
+    )
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("production implementation owner mismatch: ffmpeg_assemble" in item
+               for item in report["violations"])
+
+
+def test_production_dispatcher_and_implementation_bindings_are_complete():
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    rows = {item["operation"]: item for item in report["production_implementation_bindings"]}
+    assert set(rows) == {
+        "python_frame_render", "ffmpeg_assemble", "delivery_package",
+        "ffprobe_media_qa", "ffmpeg_video_audio_copy", "source_evidence_audit",
+    }
+    assert all(item["dispatcher_owner_subsystem"] == "execution_and_owner_scope"
+               for item in rows.values())
+    assert all(item["implementation_symbol_resolved"] for item in rows.values())
+    assert {name: item["implementation_owner_subsystem"] for name, item in rows.items()} == {
+        "python_frame_render": "visual_and_static_design",
+        "ffmpeg_assemble": "motion_and_production",
+        "delivery_package": "platform_packaging_delivery",
+        "ffprobe_media_qa": "media_understanding_and_transform",
+        "ffmpeg_video_audio_copy": "media_understanding_and_transform",
+        "source_evidence_audit": "research_and_understanding",
+    }
+
+
+def test_internal_symbol_resolver_checks_top_level_functions_and_class_methods(tmp_path):
+    source = tmp_path / "implementation.py"
+    source.write_text(
+        "def inspect():\n    pass\n\nclass Renderer:\n    def render(self):\n        pass\n",
+        encoding="utf-8",
+    )
+    assert _symbol_exists(source, "inspect")
+    assert _symbol_exists(source, "Renderer.render")
+    assert not _symbol_exists(source, "Renderer.missing")
+
+
+def test_unresolved_production_implementation_symbol_fails_topology_audit(monkeypatch):
+    from social_media_studio.production.registry import PRODUCTION_EXECUTORS
+    records = list(PRODUCTION_EXECUTORS.public_records())
+    target = next(item for item in records if item["name"] == "python_frame_render")
+    target["implementation_ref"] = (
+        "social_media_studio.production.python_frame_renderer:PythonFrameRenderer.missing"
+    )
+    monkeypatch.setattr(PRODUCTION_EXECUTORS, "public_records", lambda: tuple(records))
+    report = audit_subsystems(ROOT)
+    assert report["pass"] is False
+    assert any("production implementation symbol is unresolved: python_frame_render" in item
+               for item in report["violations"])

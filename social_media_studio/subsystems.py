@@ -10,8 +10,11 @@ from collections import deque
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 from typing import Any
+
+from .domain_adapters.registry import DOMAIN_ADAPTERS
 
 
 def _source_files(root: Path) -> list[str]:
@@ -33,6 +36,28 @@ def _source_files(root: Path) -> list[str]:
 def _module(path: str) -> str:
     parts = Path(path).with_suffix("").parts
     return ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
+
+
+def _symbol_exists(path: Path, symbol_path: str) -> bool:
+    """Resolve a module-level function or a class method against tracked source AST."""
+    if not symbol_path or not path.is_file():
+        return False
+    try:
+        nodes = ast.parse(path.read_text(encoding="utf-8"), filename=str(path)).body
+    except (OSError, UnicodeError, SyntaxError):
+        return False
+    parts = symbol_path.split(".")
+    for index, part in enumerate(parts):
+        found = next((node for node in nodes
+                      if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
+                      and node.name == part), None)
+        if found is None:
+            return False
+        if index < len(parts) - 1:
+            if not isinstance(found, ast.ClassDef):
+                return False
+            nodes = found.body
+    return True
 
 
 def _imports(path: Path, module: str) -> set[str]:
@@ -123,6 +148,38 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
                 parsed_json_count += 1
         except (OSError, UnicodeError, ValueError) as exc:
             errors.append(f"unreadable or malformed tracked source: {tracked}: {exc}")
+    # Current structured source references must point to real current bytes.
+    # Historical docs and the retirement tombstone itself intentionally keep
+    # older path strings as source history, not live import/authority claims.
+    active_config_source_refs: list[dict[str, str]] = []
+    def walk_reference_values(value: Any, location: str):
+        if isinstance(value, dict):
+            for field, item in value.items():
+                walk_reference_values(item, f"{location}.{field}")
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                walk_reference_values(item, f"{location}[{index}]")
+        elif isinstance(value, str) and value.startswith("social_media_studio/"):
+            match = re.match(r"^(social_media_studio/[A-Za-z0-9_./-]+\.py)(?:$|[: ]|[+])", value)
+            if match:
+                path = match.group(1)
+                active_config_source_refs.append({"location": location, "path": path})
+                if path not in files or not (root / path).is_file():
+                    errors.append(f"current config points to missing source: {location} -> {path}")
+
+    for configuration in (
+        "social_media_studio/data/studio_manifest.json",
+        "social_media_studio/legacy/data/domain_manifest.json",
+    ):
+        config_path = root / configuration
+        if config_path.is_file():
+            try:
+                walk_reference_values(
+                    json.loads(config_path.read_text(encoding="utf-8")), configuration,
+                )
+            except (OSError, UnicodeError, ValueError) as exc:
+                errors.append(f"current config source reference check failed: {configuration}: {exc}")
+
     python_files = [x for x in files if x.endswith(".py") and
                     x.startswith(("social_media_studio/", "social_media_studio/legacy/"))]
     topology_minima = {
@@ -149,9 +206,32 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
     unclassified = [path for path in files if _classification(path, owners) is None]
     errors.extend(f"unclassified repository path: {path}" for path in unclassified)
 
+    # Repository source lifecycle is separate from current runtime ownership.
+    # A removed implementation remains auditable through Git, but must not
+    # silently reappear as another authority or invisible compatibility module.
+    retired_records = cat.get("source_retirements", [])
+    retired_paths: set[str] = set()
+    for item in retired_records:
+        path = item.get("path") if isinstance(item, dict) else None
+        if (not isinstance(path, str) or not path.startswith("social_media_studio/legacy/")
+                or not path.endswith(".py") or path in retired_paths):
+            errors.append(f"invalid or duplicate source retirement record: {path}")
+            continue
+        retired_paths.add(path)
+        if item.get("status") != "DELETED_FROM_HEAD" or item.get("source_history_preserved_by_git") is not True:
+            errors.append(f"source retirement is not a versioned permanent removal: {path}")
+        if path in files or (root / path).exists():
+            errors.append(f"retired source path was reintroduced: {path}")
+        if path in owners:
+            errors.append(f"retired source path is still owned by active topology: {path}")
+        old_test = item.get("deleted_test")
+        if isinstance(old_test, str) and (old_test in files or (root / old_test).exists()):
+            errors.append(f"retired source dedicated test was reintroduced: {old_test}")
+
     module_files = {_module(path): path for path in python_files}
     imports: dict[str, set[str]] = {}
     cross: set[tuple[str, str, str, str]] = set()
+    retired_module_names = {_module(path) for path in retired_paths}
     digests: dict[str, str] = {}
     for path in python_files:
         name = _module(path)
@@ -159,6 +239,9 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             digests[path] = hashlib.sha256((root / path).read_bytes()).hexdigest()
             found = set()
             for candidate in _imports(root / path, name):
+                if candidate in retired_module_names or any(
+                        candidate.startswith(retired + ".") for retired in retired_module_names):
+                    errors.append(f"source imports a permanently retired module: {path} -> {candidate}")
                 while candidate not in module_files and "." in candidate:
                     candidate = candidate.rsplit(".", 1)[0]
                 if candidate in module_files:
@@ -174,7 +257,12 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
     if old is None or old.get("activation") != "ISOLATED_HISTORICAL_FIXTURE_ONLY":
         errors.append("legacy controller not explicitly retired")
     retired = {_module(path) for path in old["code_paths"]} if old else set()
-    for start in sorted(n for n in module_files if (n == "social_media_studio" or n.startswith("social_media_studio.")) and not (n == "social_media_studio.legacy" or n.startswith("social_media_studio.legacy."))):
+    active_modules = sorted(n for n in module_files
+                            if (n == "social_media_studio" or n.startswith("social_media_studio."))
+                            and not (n == "social_media_studio.legacy"
+                                     or n.startswith("social_media_studio.legacy.")))
+    live_legacy_reachable: set[str] = set()
+    for start in active_modules:
         seen: set[str] = set()
         to_visit = deque([start])
         while to_visit:
@@ -185,7 +273,23 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             if current in retired:
                 errors.append(f"current module {start} reaches old controller {current}")
                 break
+            if current.startswith("social_media_studio.legacy."):
+                live_legacy_reachable.add(current)
             to_visit.extend(imports.get(current, set()) - seen)
+
+    # These are static source findings, NOT dynamic import/provider execution
+    # evidence or a reason to erase historical fixtures still under regression.
+    legacy_lifecycle: dict[str, str] = {}
+    for name, path in sorted(module_files.items()):
+        if not name.startswith("social_media_studio.legacy.") or name == "social_media_studio.legacy":
+            continue
+        if name in retired:
+            state = "RETIRED_FIXTURE_COMPATIBILITY_NOT_CURRENT_RUNTIME"
+        elif name in live_legacy_reachable:
+            state = "ACTIVE_SPECIALIST_IMPORT_DEPENDENCY_NOT_NEW_CONTROLLER"
+        else:
+            state = "DORMANT_LEGACY_SOURCE_REQUIRES_CONSUMER_REVIEW"
+        legacy_lifecycle[path] = state
 
     from .domain.contracts import DELIVERABLE_TYPES
     routes = cat.get("deliverable_ownership", {})
@@ -243,11 +347,110 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         errors.append("catalog adapter ownership differs from real registered adapters")
     if set(operation_map) != set(PRODUCTION_EXECUTORS.operations()):
         errors.append("catalog executor ownership differs from actual registered tool operations")
+
+    # A domain adapter's registered handler is its implementation. Its semantic
+    # operation owner may differ only through an explicit, source-bound bridge.
+    raw_bridges = cat.get("cross_subsystem_adapter_bindings", [])
+    if not isinstance(raw_bridges, list):
+        errors.append("cross-subsystem adapter bindings must be an array")
+        raw_bridges = []
+    bridge_map: dict[str, dict[str, Any]] = {}
+    for item in raw_bridges:
+        if not isinstance(item, dict):
+            errors.append("cross-subsystem adapter binding is malformed")
+            continue
+        name = item.get("adapter")
+        if not isinstance(name, str) or not name or name in bridge_map:
+            errors.append(f"invalid or duplicate cross-subsystem adapter binding: {name!r}")
+            continue
+        bridge_map[name] = item
+    adapter_implementation_bindings: list[dict[str, Any]] = []
+    for name, spec in DOMAIN_ADAPTERS.items():
+        handler = spec.handler
+        module = str(getattr(handler, "__module__", ""))
+        module_path = module.replace(".", "/") + ".py"
+        implementation_owner = owners.get(module_path)
+        handler_symbol = str(getattr(handler, "__name__", ""))
+        handler_symbol_resolved = bool(implementation_owner is not None and
+                                       _symbol_exists(root / module_path, handler_symbol))
+        operation_owner = adapter_map.get(name)
+        if implementation_owner is None:
+            errors.append(f"domain adapter handler module has no subsystem owner: {name} -> {module_path}")
+        if operation_owner is None:
+            errors.append(f"domain adapter has no semantic operation owner: {name}")
+        if not handler_symbol_resolved:
+            errors.append(f"domain adapter handler symbol is unresolved: {name} -> {module_path}:{handler_symbol}")
+        is_bridge = implementation_owner != operation_owner
+        bridge = bridge_map.get(name)
+        if is_bridge:
+            if bridge is None:
+                errors.append(f"missing cross-subsystem adapter binding: {name}")
+            else:
+                if bridge.get("operation_owner_subsystem") != operation_owner:
+                    errors.append(f"cross-subsystem adapter operation owner mismatch: {name}")
+                if bridge.get("implementation_owner_subsystem") != implementation_owner:
+                    errors.append(f"cross-subsystem adapter implementation owner mismatch: {name}")
+                if not str(bridge.get("boundary") or "").strip() or not str(bridge.get("rationale") or "").strip():
+                    errors.append(f"cross-subsystem adapter binding lacks boundary rationale: {name}")
+        elif bridge is not None:
+            errors.append(f"stale cross-subsystem adapter binding for same-owner adapter: {name}")
+        adapter_implementation_bindings.append({
+            "adapter": name, "handler_ref": spec.handler_ref,
+            "operation_owner_subsystem": operation_owner,
+            "implementation_owner_subsystem": implementation_owner,
+            "handler_symbol_resolved": handler_symbol_resolved,
+            "cross_subsystem_bridge": is_bridge,
+        })
+    for name in bridge_map:
+        if name not in DOMAIN_ADAPTERS:
+            errors.append(f"cross-subsystem adapter binding references unknown adapter: {name}")
+
+    # Production handlers are centralized in the execution control plane;
+    # their declared implementation refs must resolve to the owning domain subsystem.
+    dispatcher_owner_expected = topology_contract.get("production_dispatcher_subsystem")
+    if dispatcher_owner_expected not in ids:
+        errors.append("production dispatcher subsystem is missing from the topology contract")
+    production_implementation_bindings: list[dict[str, Any]] = []
+    production_records = PRODUCTION_EXECUTORS.public_records()
+    if {item.get("name") for item in production_records} != set(operation_map):
+        errors.append("production implementation records differ from subsystem operation ownership")
+    for item in production_records:
+        name = str(item.get("name") or "")
+        dispatcher_ref = str(item.get("dispatcher_ref") or "")
+        dispatcher_module = dispatcher_ref.rsplit(".", 1)[0] if "." in dispatcher_ref else ""
+        dispatcher_path = dispatcher_module.replace(".", "/") + ".py"
+        dispatcher_owner = owners.get(dispatcher_path)
+        implementation_ref = str(item.get("implementation_ref") or "")
+        implementation_module, separator, implementation_symbol = implementation_ref.partition(":")
+        implementation_path = implementation_module.replace(".", "/") + ".py" if implementation_module else ""
+        implementation_owner = owners.get(implementation_path)
+        operation_owner = operation_map.get(name)
+        if dispatcher_owner != dispatcher_owner_expected:
+            errors.append(f"production dispatcher owner mismatch: {name} -> {dispatcher_path}")
+        implementation_symbol_resolved = bool(separator and implementation_symbol.strip()
+                                              and implementation_owner is not None
+                                              and _symbol_exists(root / implementation_path, implementation_symbol))
+        if not separator or not implementation_symbol.strip() or implementation_owner is None:
+            errors.append(f"production implementation reference is unresolved: {name} -> {implementation_ref}")
+        elif not implementation_symbol_resolved:
+            errors.append(f"production implementation symbol is unresolved: {name} -> {implementation_ref}")
+        elif implementation_owner != operation_owner:
+            errors.append(f"production implementation owner mismatch: {name} -> {implementation_path}")
+        production_implementation_bindings.append({
+            "operation": name, "dispatcher_ref": dispatcher_ref,
+            "dispatcher_owner_subsystem": dispatcher_owner,
+            "implementation_ref": implementation_ref,
+            "implementation_owner_subsystem": implementation_owner,
+            "implementation_symbol_resolved": implementation_symbol_resolved,
+            "operation_owner_subsystem": operation_owner,
+        })
     return {
         "pass": not errors, "assurance": "REPOSITORY_STRUCTURE_AND_STATIC_AST_ONLY",
         "tracked_files": len(files), "code_modules": len(python_files),
         "owned_modules": len(owners), "subsystems": len(ids),
         "domain_adapters": len(adapter_map), "production_operations": len(operation_map),
+        "adapter_implementation_bindings": adapter_implementation_bindings,
+        "production_implementation_bindings": production_implementation_bindings,
         "topology_contract": topology_contract,
         "unclassified_paths": unclassified, "violations": sorted(set(errors)),
         "all_tracked_file_sha256": all_file_sha256,
@@ -256,6 +459,11 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         "dependency_edges": [{"from": a, "to": b, "source": s, "target": t}
                              for a,b,s,t in sorted(cross)],
         "module_sha256": digests,
+        "source_retirements": retired_records,
+        "legacy_module_lifecycle": legacy_lifecycle,
+        "legacy_lifecycle_evidence_scope": "CURRENT_PYTHON_STATIC_IMPORT_GRAPH_ONLY",
+        "active_config_source_references": active_config_source_refs,
+        "config_source_reference_scope": "CURRENT_STRUCTURED_MANIFESTS_ONLY_NOT_HISTORICAL_DOCS",
         "semantic_line_by_line_complete": False,
         "real_creative_quality_verified": False,
         "native_caos_selection_verified": False,

@@ -8,11 +8,26 @@ Manifest: `social_media_studio/data/studio_manifest.json`
 
 ## 1. Product outcome
 
+**Repository identity:** `D1traverser-debug/self-media-system` (https://github.com/D1traverser-debug/self-media-system). `social-media-studio` is the installable Python distribution and product identity, not the GitHub repository slug. Source deletion decisions are recorded in `social_media_studio/data/subsystem_catalog.json.source_retirements` and validated by `sms-studio subsystems`. The previous isolated operator snapshot is retired; the authoritative operator/task view is current `StudioEngine.status/resume`. Static lifecycle classification distinguishes current specialist imports, dormant historical code and retired fixture controllers without falsely claiming dynamic provider use or deleting still-tested compatibility assets.
+
+### Current upper architecture boundaries on integration branch
+
+The **single** `StudioEngine` control plane is a modular monolith: application services carry release transactions and observed outcome inspection, pure domain modules carry release/effect/conformance/owner-trace policies, and the existing registered production executors are the only local effect dispatchers. External model/provider discovery is not an authorization or a claim of availability.
+
+A named local operation exposes `production_effect_risks` through `sms-studio capabilities --demand ID`. The `python_frame_render` operation is `TRUSTED_CODE_UNSANDBOXED`. Its task/spec `trusted_code_execution` declarations do not grant operating-system authority. For self-reviewed source only, the actual process operator must set `SMS_TRUSTED_PYTHON_RENDERER_SHA256` to the exact 64-character SHA256 of the Python renderer bytes. The effect gate rechecks the current source before entering the trusted-code renderer; missing/mismatched grants are denied. Never run unknown code in a privileged or shared workspace: Python remains **unsandboxed**, capable of host effects after execution.
+
+Use `sms-studio --root WORKSPACE inspect-outcome PROJECT` to run an **explicit, read-only** current typed outcome audit. It checks registered candidates against actual file format, text readability, media streams and declared pixel dimensions, then projects the current owner brief's global and local clauses, prohibitions, acceptance criteria and professional review criteria onto every variant with exact artifact IDs and SHA256. A mismatched JPEG named `.png`, altered pixels, missing cover variant or unproven source clause cannot be silently treated as compliant. This report is not a second release ledger, does not run on every `status`, and never claims creative quality, independent reviewer trust, final user approval or external publication permission. Existing video QA, rights lineage and independent review gates remain distinct.
+
+
 Social Media Studio turns the owner's specific content goal—including independent long/short text, visuals, platform packaging, media repair and original moving media—into the requested output and applicable release materials. Its primary success oracle is the delivered work, not the presence of roles, stages, prompts, diagrams, task counts or passing tests.
 
 Supported work may include cinematic explainers, technology/business documentaries, engineering demonstrations, news × fictional-video satire, meme and entertainment edits, product/brand films, animation, trailers, tutorials, shorts, long-form videos, platform-native derivatives and mixed-media work.
 
 No single visual style, runtime, aspect ratio, duration, model, editor or production method is universal.
+
+For typed requests, `sms-studio intake REQUEST.json [--selection ROUTE_PROPOSAL.json]` returns one composition per current deliverable: owner clauses, ownership, identity scope, variants, candidate professional demands, explicitly proposed demand routes, exact local support candidates, and applicable quality criteria. The optional selection is the assistant's reversible method proposal, not an owner requirement, effect grant or stored project state. Its business domains, execution surface and per-deliverable demand IDs are independent. An unselected route is not work; unstructured simple requests stay direct without a mandatory project or artificial schema. Discover exact demands with `sms-studio capabilities --demand DEMAND`. Every registered demand has an operation-specific support contract; group resource fallback remains explicit. Neither a local validation operation nor a catalog entry proves authoring, generation, provider availability, craft quality or release.
+
+For a typed durable owner brief, every task must declare `requirements.professional_demands` as a mapping from each exact `deliverable_ref` to selected professional demand IDs. Admission and current decision verification use the same applicability rule as intake; a local tool dispatcher must match a selected demand support route. This is not semantic or external capability proof. Final candidate outputs must be explicitly mapped through `requirements.deliverable_outputs`, for example `{"cover-file":{"deliverable_id":"cover","variant_id":"portrait"}}` (use the deliverable ID as variant ID when no variants are declared). Other outputs remain intermediate. `status` and `resume` derive candidate coverage from the existing task, decision and immutable artifact records; a completed graph or digest is not owner acceptance. Typed release checks reject artifacts without current deliverable binding. Existing typed tasks lacking this binding need explicit task-contract revision, re-investigation and a current decision before new execution; no automatic migration or historical task resurrection. Unstructured work stays explicitly untyped.
 
 ## 1.1 Optional business-domain scope
 
@@ -36,7 +51,7 @@ For a durable owner task, give `requirements.decision_id` an exact unique ID whe
 
 ## 1.2 Architecture: independent views
 
-The canonical manifest defines authority, optional business domains, professional capabilities, roles, optional media containment, cognition dependency, knowledge, execution resources, acceptance and per-demand execution DAG. Professional capability classification is distinct from business workstreams, media object containment, roles, reusable knowledge, cognition dependencies and task execution. Discover exact groups with `sms-studio capabilities [--group GROUP]`; the output binds the catalog to registered adapters and local operations, discloses missing effects and does not select a task, authorize execution or certify quality. For current owner work, CAOS recursively governs every material choice at every organizational level, including the choice of professional method, reviewer, tool and verification. No group is a compulsory stage or permanent worker. Apply independent domain and overall owner acceptance separately. New evidence may reopen the earliest contradicted premise without invalidating unrelated branches. The existing engine is the only scheduler; use direct session capability for nonpersistent simple work where appropriate. None is a mandatory stage sequence. CAOS owns parent cognition, Social Media Studio owns domain execution; SQLite is the only self-media task ledger. Business groups are reusable responsibilities, not permanently running task instances. Group feedback is an evidence-triggered new decision/revision, not a cycle inside one DAG. The generic feedback relations are in `social_media_studio/data/business_feedback.json`.
+The canonical manifest defines authority, optional business domains, professional capabilities, roles, optional media containment, cognition dependency, knowledge, execution resources, acceptance and per-demand execution DAG. Professional capability classification is distinct from business workstreams, media object containment, roles, reusable knowledge, cognition dependencies and task execution. Discover exact groups with `sms-studio capabilities [--group GROUP] [--demand DEMAND]`; the output binds the catalog to registered adapters and local operations, discloses missing effects and does not select a task, authorize execution or certify quality. For current owner work, CAOS recursively governs every material choice at every organizational level, including the choice of professional method, reviewer, tool and verification. No group is a compulsory stage or permanent worker. Apply independent domain and overall owner acceptance separately. New evidence may reopen the earliest contradicted premise without invalidating unrelated branches. The existing engine is the only scheduler; use direct session capability for nonpersistent simple work where appropriate. None is a mandatory stage sequence. CAOS owns parent cognition, Social Media Studio owns domain execution; SQLite is the only self-media task ledger. Business groups are reusable responsibilities, not permanently running task instances. Group feedback is an evidence-triggered new decision/revision, not a cycle inside one DAG. The generic feedback relations are in `social_media_studio/data/business_feedback.json`.
 
 Continuous responsibilities are evaluated at each applicable decision/effect: complete owner goal and corrections, CAOS recursive governance, aesthetic and narrative coherence, audience/communication value, rights/truth, exact context and version, independently observed quality, and learning/re-entry. Aesthetic direction remains in scope from concept to final review and upstream revisions; it is not a standalone gate or a task to mark done. Unknowns reopen the earliest affected decision and only invalidate dependent work. There is no default project or default task plan. Old instances are retired; fixtures are for tests only.
 
@@ -143,7 +158,22 @@ Each asset has a stable ID, logical name, version, relative path, SHA-256, byte 
 
 An upstream change invalidates only the affected task and dependency descendants. Their prior files and event history remain for audit; unaffected work remains current.
 
+## 8A. Private owner preferences and cross-chat process learning
+
+For owner-facing work, retrieve the owner's private preference profile and episodic casebook by exact filename from the private Library when available. Current instructions override historical preferences. A scoped, explicit owner request may authorize retrospective retrieval from relevant prior self-media chats; do not ingest unrelated chats or treat summaries as full transcript evidence. Keep private owner preferences, episodic records and reusable professional methods separate. Direct-session episodes are preserved privately without creating dummy Studio projects; durable projects retain their existing project-local records. Public repository changes may contain generalized methods and tests, never raw private chats or user-specific preference/case files.
+
+A material task episode should record observable facts only: task scope, source evidence, actual selected skills/tools, rejected approach, owner corrections, root cause, final selected artifact, explicit approval/review state, rework burden, reusable lesson and unresolved proof. Do not serialize hidden chain-of-thought or routine action transcripts. Distinguish owner scope changes from preventable assistant failures.
+
 ## 9. Independent quality review and release
+
+### Internal result-proof rules (2026-11-27)
+
+The opt-in `inspect-outcome` path first resolves the exact current variant. Several unfinished alternatives are **AMBIGUOUS**, not `MATCH` merely because any one passes a byte/shape test. Two individually accepted artifacts for the same variant are likewise unresolved. A sole current proposal and one individually accepted artifact have distinct, explicit selection reasons; **neither** is a signed owner's creative approval.
+
+For a `MEDIA_TRANSFORM` with `constraints.original_audio_promise=BITSTREAM_IDENTITY`, missing audio streams fail. An existing stream alone remains unverified. The inspector can prove the narrower technical claim independently by following a registered `artifact_inputs` source-video edge, verifying the exact source/output files and recomputing audio-packet SHA256 sequence equality. Exact single source, current digests and complete packets are required. A shorter retained audio prefix does not imply **full-source** preservation; `PCM_IDENTITY` and `PERCEPTUAL_SIMILARITY` still need other methods. The producer-generated receipt is not independent evidence. Real full playback, duration, picture restoration, natural copy and user intent remain unverified until independently reviewed.
+
+A read-only inspection checks brief revision and candidate projection again after probing. Changes yield `INSPECTION_SNAPSHOT_CHANGED_RETRY`, not mixed-revision PASS. The recheck is a best-effort consistency boundary, not a lock preventing future edits or granting automatic publication rights.
+
 
 A review is bound to the exact artifact ID and SHA-256, reviewer identity, producer identity, rubric, dimensions, evidence references, outcome and notes. A producer cannot review its own artifact. A review on stale bytes cannot authorize the current artifact.
 
@@ -347,6 +377,74 @@ sms-studio --offline-fixture --root ./studio-work import-asset adapter-demo font
 
 The example is an adapter integration proof, not a claim that a title card alone is a finished film or that external generative-video providers are connected.
 
+### 13.3 High-assurance review execution
+
+Ordinary reviews can still be recorded directly when the owner contract does not require trusted independent execution. A high-assurance rubric is different: caller-supplied `attestation` JSON is rejected and cannot satisfy the release gate.
+
+Declare a dedicated review task in the project DAG. Its `requirements.review_contract` must bind the exact rubric, reviewer and subject artifact, and its declared inputs must include the subject:
+
+```json
+{
+  "task_id": "human-cold-read",
+  "title": "Independent full-video cold read",
+  "kind": "review",
+  "executor": "human",
+  "depends_on": ["technical-qa"],
+  "inputs": ["final-video", "cold-read-evidence"],
+  "outputs": ["cold-read-report"],
+  "acceptance": {
+    "observable": "A signed review report is produced against the exact full video digest."
+  },
+  "requirements": {
+    "review_contract": {
+      "rubric_id": "human-cold-read",
+      "reviewer_id": "human-reviewer-01",
+      "subject_artifact": "final-video",
+      "reviewer_kind": "HUMAN",
+      "execution_mode": "INDEPENDENT_COLD_READ",
+      "blind_review": true,
+      "required_media_inspection": "FULL_VIDEO"
+    }
+  }
+}
+```
+
+The matching `release_policy.review_contracts.human-cold-read` is the owner authority. Task admission rejects mismatches. When claimed, the review worker receives only digest-verified copies of declared inputs in an isolated staging directory; the shared project workspace path is omitted. A blind review cannot consume outputs from another review task. The staging directory is cleaned after completion, failure, wait-input or lease expiry. The executor must run in the isolation mechanism pinned in the trusted executor registry; a sanitized packet alone is not proof of OS-level isolation.
+
+Complete the task with a JSON artifact whose kind is `review_report` and media type is `application/json`. Its base schema is:
+
+```json
+{
+  "schema_version": 1,
+  "outcome": "PASS",
+  "dimensions": {},
+  "evidence_refs": ["EXACT_EVIDENCE_ARTIFACT_ID"],
+  "notes": ""
+}
+```
+
+For a `FULL_VIDEO` contract, the report must additionally contain `media_inspection`: the exact source `artifact_sha256`, `mode: "FULL_VIDEO"`, an executor-authorized inspection `method`, source and inspected durations, `coverage_fraction: 1`, timestamped `coverage_intervals`, and a `trace_sha256`. The trace digest is SHA-256 over compact, key-sorted UTF-8 JSON containing exactly `artifact_sha256`, `mode`, `method`, `source_duration_seconds` and `coverage_intervals`. Intervals must cover the complete source duration without gaps beyond the verifier tolerance. A screenshot set or partial clip cannot satisfy full-video review.
+
+The trusted executor signs a DSSE envelope containing an in-toto statement with Ed25519. The receipt binds the subject artifact digest, review-report digest, review task, contract digest, immutable packet digest, every input digest, reviewer and executor identities, execution mode, isolated context, one-time nonce and media inspection trace. The engine verifies it when recording the review and verifies it again during release, recomputing the current task, rubric, report and input lineage.
+
+The registry is `social_media_studio/data/review_executors.json`. It is intentionally empty in the repository. Until an executor, public key, reviewer mapping, provider/model permissions, isolation mechanism and media inspection methods are independently assessed and explicitly registered, high-assurance review remains BLOCKED. Do not register test keys or treat a self-declared provider run ID as trusted identity.
+
+Record the completed review only after its report artifact and signed receipt exist:
+
+```bash
+sms-studio review PROJECT_ID FINAL_ARTIFACT_ID \
+  --reviewer human-reviewer-01 \
+  --rubric human-cold-read \
+  --outcome PASS \
+  --dimensions review-dimensions.json \
+  --evidence EXACT_EVIDENCE_ARTIFACT_ID \
+  --review-task human-cold-read \
+  --review-result REVIEW_REPORT_ARTIFACT_ID \
+  --execution-receipt review-execution.dsse.json
+```
+
+This mechanism is activated only by a rubric that explicitly requires high assurance. It does not impose a human reviewer or third-party service on ordinary short copy, simple images or routine media edits. The empty production trust registry is an intentional fail-closed state, not a missing default key to be filled with a placeholder.
+
 ## 14. Single runtime and governance boundary
 
 `STUDIO_ENTRY.md` is the only self-media startup entry. `sms-studio` is the only installed CLI and `social_media_studio.engine.StudioEngine` is the only active project runtime. CAOS parent governance is applied at the ChatGPT session level; the Social Media Studio runtime does not create a second parent controller or make runtime/API calls to CAOS. specialist content-domain logic is accessed only through the Studio adapter registry.
@@ -362,3 +460,28 @@ This boundary is intentional: the orchestration core remains provider-neutral an
 `sms-studio work-cycle PROJECT --plan-only` exposes current parallel-ready lanes, decision blockers and exact-input handoff packets. It does not claim tasks or exercise agent, human or external execution authority. The execution form runs only explicitly registered and admitted local tool operations in bounded DAG rounds; the worker pool does not repeatedly run the same failed tool in one invocation. Input SHA mismatches block only affected branches. `source_evidence_audit` is a deterministic research execution operation over registered UTF-8 sources with immutable digests. Its quote-coverage receipt is candidate evidence, not external fact verification, independent acceptance or publication authority.
 
 Current new owner work uses `SOCIAL_MEDIA_OWNER_SCOPE_V2_20261125`. Previously current owner projects from the prior product scope require explicit `migrate-scope`; the upgrade retains existing events and assets, revokes live claims and supersedes old decisions, without granting any old archive instance current authority. CAOS remains external parent governance; this runtime cannot prove that ChatGPT/Codex selected or performed the parent's native Skill.
+
+
+## Demand-specific editorial and audience contracts
+
+The professional capability registry may contain exact demand_profiles. Use the exact demand ID when available; a GROUP_LEVEL_FALLBACK is only a broad locator and must not be described as exact resource selection. Candidate references remain candidates until independently validated.
+
+Public-facing deliverables may optionally carry communication_intent. It records audience value and think/feel/do hypotheses, with one reasoned primary action when an action is declared. It does not predict engagement, verify creative quality or authorize publication. The standalone short-copy inspector checks structure only and does not impose a fixed character count or require a CTA.
+
+
+Every current declared demand has an exact source-located professional reference profile with applicability, counterexamples and selection notes. Exact lookup returns only scoped resources, techniques, professional lenses and Skill sections; the group overview is not inherited. Existing evidence statuses and current-provider verification boundaries remain unchanged. Profile existence is not independent craft validation. Future missing profiles remain explicit group-level gaps.
+
+
+### Account, content and commercial measurement (non-video capable)
+
+The existing `business_outcome_metrics` adapter supports a separate `SMS_BUSINESS_OBSERVATION_V1` input schema when the requested outcome is an account, individual content item (including article or image), campaign, offer or portfolio observation. Do not invent Episode IDs or published video minutes for these tasks.
+
+Supply the spec as `outcome_receipt_input` and every actual source JSON as a separate declared, immutable artifact input. The spec contains:
+
+- `schema_version`: `SMS_BUSINESS_OBSERVATION_V1`
+- `subject`: `kind` (ACCOUNT, CONTENT, CAMPAIGN, OFFER, PORTFOLIO), exact `id`, optional `platform`
+- `window`: timezone-aware ISO `start` and `end`
+- `metrics`: entries with `id`, `unit`, `semantics`, and either a `source` object (`input` exact imported JSON name, `path` list of JSON keys/indices) or `unavailable_reason`
+- optional `ratios`: entries with `id`, `numerator` metric ID, `denominator` metric ID and `semantics`
+
+Example: a metric path `["metrics","impressions"]` reads that actual number from its separately imported source JSON, not a value asserted in the spec. Each extracted number is linked to source artifact ID, version and SHA-256. Missing sources or incompatible paths reject execution; explicitly unavailable metrics and ratios with missing or nonpositive denominator return null, never an invented zero. A ratio is a raw quotient with explicit units, not automatically a percent. Review the provenance, subject/window and metric semantics against the actual platform export, including whether numerator and denominator are comparable. The result proves only extraction and arithmetic on the declared input bytes, not live platform authenticity, causal improvement or owner acceptance. No account update, purchase, upload or publishing effect is performed. The historical Episode outcome path remains available only when video economics are actually relevant.

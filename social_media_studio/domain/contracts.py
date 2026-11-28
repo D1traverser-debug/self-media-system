@@ -6,6 +6,8 @@ from math import gcd
 import re
 from typing import Any, Mapping
 
+from .communication import CommunicationIntent, CommunicationIntentError
+
 
 class ContentContractError(ValueError):
     """A declared deliverable loses identity, scope or output semantics."""
@@ -17,10 +19,11 @@ DELIVERABLE_TYPES = frozenset({
     "IDENTITY_ASSET", "ANALYSIS_REPORT",
 })
 AUDIO_PROMISES = frozenset({"BITSTREAM_IDENTITY", "PCM_IDENTITY", "PERCEPTUAL_SIMILARITY"})
+_COMMUNICATION_DELIVERABLES = frozenset({"SHORT_COPY", "LONG_ARTICLE", "PLATFORM_PACKAGE", "STATIC_IMAGE", "MULTI_ASPECT_IMAGE_SET", "ORIGINAL_VIDEO"})
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
 _ALLOWED_FIELDS = frozenset({
     "id", "type", "locale", "platform", "shape", "source_refs", "constraints",
-    "acceptance", "prohibitions", "variants",
+    "acceptance", "prohibitions", "variants", "communication_intent",
 })
 
 
@@ -146,6 +149,7 @@ class DeliverableContract:
     prohibitions: tuple[str, ...]
     constraints: dict[str, Any]
     acceptance: dict[str, Any]
+    communication_intent: CommunicationIntent | None = None
 
     @classmethod
     def from_mapping(cls, value: Mapping[str, Any]) -> "DeliverableContract":
@@ -195,11 +199,23 @@ class DeliverableContract:
         promise = constraints.get("original_audio_promise")
         if promise is not None and (kind != "MEDIA_TRANSFORM" or promise not in AUDIO_PROMISES):
             raise ContentContractError("original_audio_promise must be a supported MEDIA_TRANSFORM mode")
+        source_refs = _text_list(value.get("source_refs", []), "source_refs")
+        communication_intent = None
+        if value.get("communication_intent") is not None:
+            if kind not in _COMMUNICATION_DELIVERABLES:
+                raise ContentContractError("communication_intent is only valid for public-facing deliverables")
+            try:
+                communication_intent = CommunicationIntent.from_mapping(value["communication_intent"])
+            except CommunicationIntentError as exc:
+                raise ContentContractError(str(exc)) from exc
+            if not set(communication_intent.grounding_refs).issubset(set(source_refs)):
+                raise ContentContractError("communication_intent grounding_refs must resolve through deliverable source_refs")
         return cls(
             id=identifier, type=kind, locale=value.get("locale"), platform=value.get("platform"),
-            shape=shape, variants=variants, source_refs=_text_list(value.get("source_refs", []), "source_refs"),
+            shape=shape, variants=variants, source_refs=source_refs,
             prohibitions=_text_list(value.get("prohibitions", []), "prohibitions"),
             constraints=dict(constraints), acceptance=dict(acceptance),
+            communication_intent=communication_intent,
         )
 
     def as_dict(self) -> dict[str, Any]:
@@ -208,6 +224,7 @@ class DeliverableContract:
                 "variants": [item.as_dict() for item in self.variants],
             "source_refs": list(self.source_refs), "prohibitions": list(self.prohibitions),
                 "constraints": dict(self.constraints), "acceptance": dict(self.acceptance),
+                "communication_intent": self.communication_intent.as_dict() if self.communication_intent else None,
                 "acceptance_assurance": "UNVERIFIED"}
 
 
