@@ -14,8 +14,7 @@ Evidence base:
 
 1. The Novel Writing Agent's `SHIRI_ZHONGYAN/DISTILLATION_PASS_02_OPENING_MICROCRAFT.md` and Pass 01: learning evidence for attention, question turnover, character-specific perception, multi-function detail, dialogue as adversarial information exchange, emotional aftershock, and paragraph rhythm. These mechanisms are translated, not copied as fiction rules.
 2. The Financial Writing Agent's `hooks.md`, `style.md`, `editorial.md`, and `writing_kernel.py`: candidate mechanisms for reader retention, concrete anchors, paragraph economics, voice evidence, anti-scaffolding review and staged revision.
-3. The exact owner-accepted article `The Rug Became the Ad`, source `QUANT_X_ARTICLE_CINEMA_FINAL.md`, SHA-256 `c4cc97053119bf9cb47dd54ebe7eb85b0c100cb1eaf2906d32e0be679d0f0430`. This is one accepted hybrid argument/narrative essay, not a universal sample or independent reader study.
-4. Professional craft references: Purdue OWL, Harvard College Writing Center, Duke Graduate School Scientific Writing Resource, University of Nevada Reno Writing & Speaking Center, The Open Notebook, Nieman Storyboard, and peer-reviewed work on reader expectations, metaphor comprehension, narrative engagement and cognitive load. URLs and scope notes appear in §15.
+3. Professional craft references: Purdue OWL, Harvard College Writing Center, Duke Graduate School Scientific Writing Resource, University of Nevada Reno Writing & Speaking Center, The Open Notebook, Nieman Storyboard, and peer-reviewed work on reader expectations, metaphor comprehension, narrative engagement and cognitive load. URLs and scope notes appear in §15.
 
 Authority order: current owner brief and artifact-specific decisions > CAOS governance > SMS Skill and editorial assurance contracts > current source/evidence > this candidate playbook > external craft references. A technique never overrides factual accuracy, evidence, author intent, reader job, privacy, copyright, or publication authorization.
 
@@ -504,23 +503,20 @@ Where possible, ask a reader unfamiliar with the subject to explain the central 
 | Ending feels pasted on | Ending not designed with reader contract | Compare opening promise with final payoff | Rebuild the ending from the article's actual contribution |
 | “AI-like” prose audit becomes a blacklist | Surface symptoms mistaken for root cause | Identify the exact generic/repetitive span | Minimal semantic rewrite from material and author stance |
 
-## 14. Retrospective microcraft replay — owner-accepted article
+## 14. Reusable retrospective replay protocol
 
-The exact accepted source is mapped in the companion file:
+When a real article has explicit owner acceptance and its exact source version is recoverable, a private retrospective replay can help convert the artifact into learning evidence. Keep that case evidence in the private Library; public method references should contain only transferable abstractions and external sources.
 
-`LONG_FORM_MICROCRAFT_REPLAY_01_THE_RUG_BECAME_THE_AD.md`
+A replay should:
 
-Key observations from the accepted hybrid essay:
+1. Bind the exact accepted source bytes/version; do not substitute an earlier draft, editorial rebuild, plan or audit summary.
+2. Separate direct textual evidence from the analyst's interpretation and from hypotheses about reader effect.
+3. Inspect the opening, sentence flow, paragraph functions, transitions, detail selection, rhetorical devices, emotion/voice and ending at the level actually supported by the source.
+4. Run ablations: identify what changes if a device is removed, replaced or moved.
+5. Record where a technique is genre-specific, where it should not transfer, and what counterexample could falsify the proposed mechanism.
+6. Keep retrospective mapping separate from independent cold-reader validation, publication state, audience metrics and method promotion.
 
-- The opening compresses time, money and behavior into a concrete anchor, then expands into the verified event. The crossed-out “End of story” creates a false-closure beat before the reversal.
-- The article's short standalone lines are attached to actual changes in reader model or emotional beat; they are not evidence that short paragraphs should be used everywhere.
-- The sentence pair “The trade advertised the story. The story advertised the trade.” makes a feedback relation visible through parallel reversal. Its value is analytical, not merely sonic.
-- The image / audience reframe, community / entry-price distinction, first-joke / second-joke contrast, and final advertisement callback all reuse motifs while changing their meaning.
-- The hypothetical two-screen creative choice is explicitly framed as a thought experiment. It is not presented as a reported event.
-- The seven-day test converts a critical thesis into an operational proposal and observable criteria.
-- The Dogecoin example acts as a bounded counterexample to total cynicism, not as proof that every token community can reproduce the result.
-
-This is retrospective analysis of one owner-accepted work. It does not prove that the techniques caused reader retention or that the playbook improves future articles. The exact article must not become a sentence, structure or motif template.
+A replay is a way to learn from a real artifact, not proof that the observed technique caused retention or improved quality. Do not copy its wording, motifs, structure or topic into unrelated work.
 
 ## 15. Research references and evidence limits
 
@@ -552,7 +548,6 @@ This is retrospective analysis of one owner-accepted work. It does not prove tha
 
 - Novel Writing Agent, `research/masterworks/SHIRI_ZHONGYAN/DISTILLATION_PASS_02_OPENING_MICROCRAFT.md` and Pass 01: fiction-derived learning evidence, not universal nonfiction validation.
 - Financial Writing Agent, `references/hooks.md`, `references/style.md`, `references/editorial.md`: domain-specific candidate methods; its own cross-topic independent quality validation remains bounded.
-- SMS owner-accepted case card, `/Social Media Studio/Methods/Projects/15_The_Rug_Became_the_Ad.md`: article-level acceptance does not imply publication, independent cold-reader validation, audience metrics or universal method verification.
 
 ## 16. Learning and promotion gates
 
@@ -568,4 +563,4 @@ Before promotion:
 6. Run repository tests and inspect the actual Skill route / knowledge-catalog entry.
 7. Keep rollback simple: remove the route or revert the candidate document without affecting the CAOS control plane or existing article artifacts.
 
-A CI pass verifies code and routing contracts, not literary quality. One owner-accepted article supports case learning, not causal proof of technique effectiveness. No metric, style detector, self-review or checklist can substitute for actual reader outcome evidence.
+A CI pass verifies code and routing contracts, not literary quality. A retrospective case replay supports case learning, not causal proof of technique effectiveness. No metric, style detector, self-review or checklist can substitute for actual reader outcome evidence.
