@@ -86,6 +86,34 @@ Test materially different openings, not synonym variants. Compare a scene-led, c
 
 Do not impose “first three sentences” or a universal paragraph count. The first-screen area is a cold-reader diagnostic zone, not a syntax template.
 
+### 2.5 Curiosity, information gaps and answer debt
+
+A useful theory of epistemic curiosity treats it as arising when a reader becomes aware of a specific gap between what they know and what they want to know. This is more useful for editorial design than the vague instruction to “make it mysterious.” It is a theoretical lens, not a universal law or a direct formula for retention. Research on curiosity also cautions that definitions and measurement are contested; novelty-seeking, attention and a desire for specific knowledge should not be collapsed into one construct.
+
+For writing, a productive information gap has four properties:
+
+1. **Visible:** the reader can tell what is missing. A contradiction, decision, anomaly, consequence or mechanism makes the gap legible.
+2. **Relevant:** closing the gap changes the reader's understanding, decision or interpretation; the missing fact is not merely trivia.
+3. **Approachable:** the reader has enough context to understand the question and a credible expectation that the article can answer it. A gap that is too obscure or impossible to close produces confusion or distrust.
+4. **Paid down:** each major section supplies evidence, narrows possibilities, answers part of the question or reframes it for a reason. The article does not keep adding new mysteries while avoiding the old ones.
+
+Use a lightweight **answer-debt ledger** for complex articles:
+
+| Reader question | Where it is created | Why it matters | Planned answer / evidence | State |
+|---|---|---|---|---|
+| What happened? | Opening | Establishes the event | Verified timeline | OPEN / PARTIAL / ANSWERED |
+| Why did it happen? | Early mechanism | Explains the cause or incentive | Primary evidence and competing explanations | OPEN / PARTIAL / ANSWERED / REFRAMED |
+| Who benefits or pays? | Stakeholder section | Reveals distribution of outcomes | Cohort / actor distinctions | OPEN / PARTIAL / ANSWERED |
+| What follows? | Later implication | Gives the reader a usable conclusion | Consequence, decision rule or uncertainty | OPEN / PARTIAL / ANSWERED / INTENTIONALLY UNRESOLVED |
+
+The table is illustrative; actual questions must come from the current article. Do not turn every paragraph into a question or make every question explicit. A visible contradiction can create the same cognitive gap without a question mark.
+
+**Question-turnover rule:** an answer may create a more important next question, but it must first repay or materially reduce the previous question. If a new question appears, record what changed and why the reader should now care about it. If the article cannot answer a question, mark the boundary honestly rather than disguising it as suspense.
+
+**Anti-clickbait rule:** do not enlarge a gap merely to delay information. The information-gap account predicts stronger curiosity for information that can meaningfully close the gap; it also describes curiosity as transient and sometimes disappointing when satisfied. Therefore, the article must deliver more than the relief of finally revealing a withheld fact. The answer should provide understanding, evidence, consequence or a better model.
+
+**Engagement is multidimensional:** a 2026 meta-analysis distinguishes attention, understanding, emotional engagement and presence, and reports different relationships between those dimensions and narrative outcomes. Treat this as a warning against optimizing only for attention. A reader who continues but cannot explain the argument has not received the intended value. These findings are associations in narrative-engagement research, not a causal estimate for any particular writing device or X Article.
+
 ## 3. Sentence engineering
 
 ### 3.1 Topic, character and action
@@ -456,6 +484,7 @@ Do not run every diagnostic on every article. Select two to four high-risk dimen
 - Is the central question or contribution visible early enough?
 - Is there a concrete anchor and early proof of value?
 - Is the open question worth the reader's effort?
+- For complex articles, list the major reader questions and check that each is answered, materially narrowed, reframed with evidence or intentionally left open.
 
 ### Pass B — Paragraph function map
 
@@ -540,6 +569,9 @@ A replay is a way to learn from a real artifact, not proof that the observed tec
 ### Rhetoric / cognition / metaphor
 
 - Holyoak & Stamenković (2018), [Metaphor Comprehension: A Critical Review of Theories and Evidence](https://doi.org/10.1037/bul0000145), *Psychological Bulletin*: reviews competing accounts of metaphor comprehension; does not support treating every metaphor as a simple one-to-one analogy.
+- Loewenstein (1994), [The Psychology of Curiosity: A Review and Reinterpretation](https://doi.org/10.1037/0033-2909.116.1.75), *Psychological Bulletin*: information-gap account of specific epistemic curiosity; treat as a theoretical lens, not a universal reader-behavior law.
+- Kidd & Hayden (2015), [The Psychology and Neuroscience of Curiosity](https://doi.org/10.1016/j.neuron.2015.09.010), *Neuron*: reviews curiosity research and emphasizes unresolved definitional and measurement questions.
+- Yi, Liu, Walter, Busselle & Bilandzic (2026), [Engagement Is Not One Thing](https://doi.org/10.1080/15213269.2026.2705870): meta-analysis distinguishes attention, understanding, emotional engagement and presence; associations do not prove that a particular prose device causes engagement in a specific article.
 - Cheng et al. (2026), [Seductive Details, Cognitive Load, and Learning Outcomes](https://doi.org/10.1007/s10648-025-10099-z), *Educational Psychology Review*: meta-analysis of 50 studies / 177 effect sizes reports a small average negative effect of irrelevant seductive details on learning outcomes (g = -0.16), with moderators. This is educational-material evidence, not a direct estimate of article retention.
 - Yi, Liu, Walter, Busselle & Bilandzic (2026), [Engagement Is Not One Thing](https://doi.org/10.1080/15213269.2026.2705870): meta-analysis of 52 studies / 12,705 participants separates attention, understanding, emotional engagement and presence. Associations do not prove that a particular prose device causes engagement in a specific article.
 - Schneider, Beege, Nebel & Rey (2018), [A meta-analysis of how signaling affects learning with media](https://doi.org/10.1016/j.edurev.2017.11.001): signals that reveal relevant information structure can help learning; transfer to prose formatting must be tested rather than assumed.
