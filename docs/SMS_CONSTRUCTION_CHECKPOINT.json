@@ -16,15 +16,15 @@
     "branch": "refactor/sms-complete-professional-studio-20261126",
     "pull_request": 56,
     "main_at_observation": "7cd1cff75fdb807cab8a23c8991dab793573c051",
-    "observed_head": "ca4bb814270b552cb240ba8234d4afde14b9b900",
-    "observed_ci_run": null,
-    "observed_ci": "PENDING_EXACT_HEAD_PR_CI",
+    "observed_head": "f0271ff644a58bc4fd3ca9fa9ffccc5be0cfd0f1",
+    "observed_ci_run": 46093306124,
+    "observed_ci": "EXACT_HEAD_PR_CI_PASS__618_TESTS__SYSTEM_AUDIT_TOPOLOGY_AND_SMOKE_PASS",
     "observed_failure": null,
     "new_changes": "Upper-architecture construction 2026-11-27: single-ledger release policy and release service; declarative semantic demand preconditions; variant release coverage; explicit operator exact-digest grant for unsandboxed Python; existing executor registry risk metadata; opt-in byte-observed output conformance and owner-clause trace by exact variant. All are structural capability boundaries, not actual independent owner acceptance or production provider availability. Internal evolution 2026-11-27: private owner preference profile, private cross-chat casebook and process-quality baseline; scoped owner-authorized retrospective cross-chat import; direct-session learning without dummy projects; separate preference/episode/method lifecycles; exact candidate skill references loaded as bounded methods. No raw private chats or owner profile committed to public repository. 2026-11-28 follow-up: discovered private method portfolio was stored but absent from the SMS Skill/STUDIO_ENTRY retrieval path. Added canonical CAOS source fallback and explicit distinction between source read and native Skill selection; added private method-index/project-card retrieval and a hard D-versus-M anti-template boundary; added regression tests and an ADR. Project cards remain candidate-only; fresh-chat native activation and owner-outcome validation remain open.",
     "status": "DRAFT_NOT_MERGED__PRODUCT_OUTCOME_UNVERIFIED",
-    "observed_head_semantics": "Pre-checkpoint code head ca4bb814270b552cb240ba8234d4afde14b9b900 contains the CAOS parent-source resolution and private method portfolio retrieval contract. Its exact-head CI is pending. This checkpoint update advances the branch again; re-query the new exact head and exact-head CI. Last known green remains 61744ed17f658357aa131538f9c13741eeec5cf5/run 46045524457. This checkpoint is a resume record, not CI authority.",
-    "last_known_green_sha": "61744ed17f658357aa131538f9c13741eeec5cf5",
-    "last_known_green_pr_run": 46045524457,
+    "observed_head_semantics": "Exact PR head f0271ff644a58bc4fd3ca9fa9ffccc5be0cfd0f1 passed PR workflow run 46093306124: 618 tests, system audit, topology audit, standalone smoke and historical-program regression smoke passed. Push-event CI not verified. This checkpoint commit advances the branch; re-query actual head and exact-head CI after this update. Checkpoint is a resume record, not CI authority.",
+    "last_known_green_sha": "f0271ff644a58bc4fd3ca9fa9ffccc5be0cfd0f1",
+    "last_known_green_pr_run": 46093306124,
     "repository_full_name": "D1traverser-debug/self-media-system",
     "repository_url": "https://github.com/D1traverser-debug/self-media-system",
     "rename_checked_repository_id": "1411170938",
@@ -69,7 +69,7 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "System audit, topology, full tests and all CLI smoke checks pass on actual integration head; failures investigated, not suppressed.",
-      "next_action": "Pre-update exact head 61744ed17f658357aa131538f9c13741eeec5cf5 passed PR CI run 46045524457: 616 tests, system audit, topology audit, standalone/historical-program/installed-outside-repository smoke. This checkpoint commit advances the branch; verify its new exact head and CI before marking baseline current.",
+      "next_action": "Exact PR head f0271ff644a58bc4fd3ca9fa9ffccc5be0cfd0f1 passed run 46093306124: 618 tests plus system/topology/smoke checks. This checkpoint update advances the branch; re-query new head and exact-head CI before claiming current baseline.",
       "blocker": null,
       "evidence": [
         "Exact previous head 314bef109a92c15dc862ba8808379da16dc069fa CI 45925295903 and 45925301602 PASS; not evidence for new head.",
@@ -79,7 +79,8 @@
         "Commit 1bdfba4 exact-head PR CI 45958790902 and push CI 45958783530 PASS, including observed-output conformance/owner trace tests. 6cfc858 and this checkpoint update require their own exact-head readback.",
         "Commit 24b4d64 exact-head PR CI run 45994365924 and push CI run 45994357761 both PASS: 612 tests; standalone system audit, source-topology audit, smoke, historical-program regression and installed-outside-repo checks all PASS.",
         "2026-11-28 continuation readback: actual PR #56 head 92bf80174d0ee97da214e55dfb6b94ebb8fe7f6d; exact-head PR workflow run 46032368297 completed success. Job test passed; pytest reported 615 passed in 44.95s; standalone system audit, subsystem topology, standalone smoke, historical-program smoke and installed-outside-repository smoke all passed. This proves structural regression on that head only; production readiness remains PARTIAL. Push-event CI for this exact head was not verified.",
-        "2026-11-28: exact head 61744ed17f658357aa131538f9c13741eeec5cf5 passed PR workflow run 46045524457. pytest: 616 passed in 40.51s; system audit, topology audit, standalone smoke, historical Program fixture and installed-outside-repository smoke passed. Push-event CI for this head not verified."
+        "2026-11-28: exact head 61744ed17f658357aa131538f9c13741eeec5cf5 passed PR workflow run 46045524457. pytest: 616 passed in 40.51s; system audit, topology audit, standalone smoke, historical Program fixture and installed-outside-repository smoke passed. Push-event CI for this head not verified.",
+        "2026-11-28: exact PR head f0271ff644a58bc4fd3ca9fa9ffccc5be0cfd0f1 passed workflow run 46093306124; 618 tests in 27.90s, system audit PASS, complete source topology audit PASS, standalone smoke PASS, historical-program regression PASS. Push CI not verified."
       ]
     },
     {
@@ -343,7 +344,7 @@
       "scenario_ids": [],
       "status": "OPEN",
       "acceptance": "All required obligations and acceptance scenarios independently satisfied or explicitly owner-approved scope change; exact-head CI; clean rollback, repeatable entry/resume and owner-facing handoff. No automatic merge or publish.",
-      "next_action": "Re-query exact branch head and PR CI after this checkpoint commit. Keep PR #56 Draft and unmerged; reconcile B01-B09 against actual owner outcomes before any merge decision.",
+      "next_action": "Re-query live branch head and exact-head PR CI after this checkpoint update. Keep PR #56 Draft and unmerged; native fresh-chat Skill-selection/application and independent owner outcome remain OPEN.",
       "blocker": null,
       "evidence": []
     }
