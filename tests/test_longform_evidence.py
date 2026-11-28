@@ -159,3 +159,21 @@ def test_longform_craft_atlas_is_registered_and_routed():
     skill = (root / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
     assert "long-form-craft-atlas.md" in editorial
     assert "long-form-craft-atlas" in skill
+
+
+def test_longform_microcraft_playbook_is_registered_and_conditionally_routed():
+    root = Path(__file__).resolve().parents[1]
+    catalog = json.loads((root / "social_media_studio/data/knowledge_catalog.json").read_text(encoding="utf-8"))
+    entry = next(item for item in catalog["entries"] if item["id"] == "long-form-microcraft-playbook")
+    assert entry["status"] == "CANDIDATE_REQUIRES_REVALIDATION"
+    assert (root / entry["ref"]).is_file()
+    replay = root / "skills/social-media-studio/references/long-form-microcraft-replay-01-the-rug-became-the-ad.md"
+    assert replay.is_file()
+    playbook = (root / entry["ref"]).read_text(encoding="utf-8")
+    assert "Given → new information flow" in playbook
+    assert "Cohesion versus coherence" in playbook
+    assert "No metric, style detector" in playbook
+    editorial = (root / "skills/social-media-studio/references/long-form-editorial.md").read_text(encoding="utf-8")
+    skill = (root / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "long-form-microcraft-playbook.md" in editorial
+    assert "long-form-microcraft-playbook" in skill
