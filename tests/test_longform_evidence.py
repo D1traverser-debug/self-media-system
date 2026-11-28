@@ -171,7 +171,7 @@ def test_longform_microcraft_playbook_is_registered_and_conditionally_routed():
     assert replay.is_file()
     playbook = (root / entry["ref"]).read_text(encoding="utf-8")
     assert "Given → new information flow" in playbook
-    assert "Cohesion versus coherence" in playbook
+    assert "Coherence versus cohesion" in playbook
     assert "No metric, style detector" in playbook
     editorial = (root / "skills/social-media-studio/references/long-form-editorial.md").read_text(encoding="utf-8")
     skill = (root / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
