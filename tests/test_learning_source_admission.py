@@ -104,6 +104,30 @@ def test_exact_demand_profiles_point_to_the_expected_editorial_and_packaging_sou
     assert "platform-packaging" in groups["visual_design"]["demand_profiles"]["cover_design"]["knowledge_refs"]
 
 
+def test_caos_parent_source_is_resolved_before_substantive_sms_decisions():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    canonical = "D1traverser-debug/cognition-agent-os/.agents/skills/goal-grounded-semantic-review/SKILL.md"
+    for text in (skill_text, entry_text):
+        assert canonical in text
+        assert "CAOS_SOURCE_READ_FOR_SESSION" in text
+        assert "NATIVE_SKILL_SELECTION_VERIFIED" in text
+        assert "native Skill selection" in text
+
+
+def test_private_project_method_cards_are_retrieved_before_method_selection():
+    skill_text = (ROOT / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    entry_text = (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
+    for text in (skill_text, entry_text):
+        assert "/Social Media Studio/Methods/Cross-Project/INDEX.md" in text
+        assert "/Social Media Studio/Methods/Projects/" in text
+        assert "one-off owner-selected line" in text or "one-off selected phrase" in text
+        assert "project decision" in text.lower()
+        assert "counterexample" in text.lower()
+    assert "do not bulk-load every card" in skill_text
+    assert "matching keywords alone do not establish applicability" in skill_text
+
+
 def test_self_learning_protocol_has_unique_ordered_sections():
     import re
     text = POLICY.read_text(encoding="utf-8")
