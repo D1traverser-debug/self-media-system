@@ -19,6 +19,10 @@ def test_registered_operations_declare_one_effect_risk():
     assert PRODUCTION_EXECUTORS.effect_risk("python_frame_render") == TRUSTED_CODE_UNSANDBOXED
     assert all(PRODUCTION_EXECUTORS.effect_risk(name) == LOCAL_DETERMINISTIC
                for name in operations if name != "python_frame_render")
+    records = PRODUCTION_EXECUTORS.public_records()
+    assert {item["name"] for item in records} == set(operations)
+    assert all(item["dispatcher_ref"].startswith("social_media_studio.production.handlers.")
+               and ":" in item["implementation_ref"] for item in records)
 
 
 def test_unknown_risk_and_implicit_registration_fail_closed():
@@ -26,8 +30,14 @@ def test_unknown_risk_and_implicit_registration_fail_closed():
     with pytest.raises(TypeError):
         r.register("unverified", lambda context: None)
     with pytest.raises(ValueError, match="known effect risk"):
-        r.register("unverified", lambda context: None, effect_risk="TRUST_ME")
+        r.register("unverified", lambda context: None, effect_risk="TRUST_ME",
+                   implementation_ref="social_media_studio.production.handlers:unverified")
     assert not r.supports("unverified")
+    with pytest.raises(TypeError):
+        r.register("missing-ref", lambda context: None, effect_risk=LOCAL_DETERMINISTIC)
+    with pytest.raises(ValueError, match="implementation_ref"):
+        r.register("malformed-ref", lambda context: None, effect_risk=LOCAL_DETERMINISTIC,
+                   implementation_ref="handlers.unverified")
     assert not authorize_effect("UNKNOWN_RISK").admitted
 
 

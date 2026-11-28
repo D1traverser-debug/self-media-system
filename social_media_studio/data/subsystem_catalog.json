@@ -8,7 +8,8 @@
     "minimum_subsystems": 16,
     "minimum_code_modules": 64,
     "minimum_domain_adapters": 17,
-    "minimum_production_operations": 6
+    "minimum_production_operations": 6,
+    "production_dispatcher_subsystem": "execution_and_owner_scope"
   },
   "separate_cognition_controller": false,
   "parent_governance": {
@@ -524,6 +525,36 @@
       "user_workspaces_touched": false,
       "source_history_preserved_by_git": true,
       "retained_current_equivalent_regression": "tests/test_studio_engine.py::test_competitive_candidates_require_owner_adjudication_over_every_candidate"
+    }
+  ],
+  "cross_subsystem_adapter_bindings": [
+    {
+      "adapter": "episode_intent_validate",
+      "operation_owner_subsystem": "motion_and_production",
+      "implementation_owner_subsystem": "business_growth_commercial",
+      "boundary": "BUSINESS_PROGRAM_TO_EPISODE_HANDOFF",
+      "rationale": "The business adapter validates the Program-owned commercial, portfolio, production-strategy and source-artifact handoff; the motion subsystem owns downstream Episode production admission."
+    },
+    {
+      "adapter": "shot_contract_materialize",
+      "operation_owner_subsystem": "motion_and_production",
+      "implementation_owner_subsystem": "editorial_and_language",
+      "boundary": "EDITORIAL_PLAN_TO_MOTION_CONTRACT",
+      "rationale": "The adapter consumes the exact EditorialPlan and materializes a shot-level production contract; editorial owns the source plan schema while motion owns the resulting shot contract."
+    },
+    {
+      "adapter": "shot_contract_validate",
+      "operation_owner_subsystem": "motion_and_production",
+      "implementation_owner_subsystem": "editorial_and_language",
+      "boundary": "EDITORIAL_PLAN_TO_MOTION_CONTRACT",
+      "rationale": "The adapter validates the shot contract against the exact EditorialPlan; editorial owns the source plan semantics while motion owns shot execution constraints."
+    },
+    {
+      "adapter": "shot_route",
+      "operation_owner_subsystem": "provider_capability_routing",
+      "implementation_owner_subsystem": "motion_and_production",
+      "boundary": "MOTION_SHOT_TO_PROVIDER_ROUTING",
+      "rationale": "The motion adapter binds shot-specific requirements to the evidence-bound model router; motion owns the shot request while provider routing owns engine selection policy."
     }
   ]
 }

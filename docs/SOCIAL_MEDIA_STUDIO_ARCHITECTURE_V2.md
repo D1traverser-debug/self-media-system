@@ -467,3 +467,16 @@ Baseline `8545f53` passed both exact-head CI runs (45926452418 and 45926458785).
 ## Task-neutral business observation
 
 Actual `business_outcome_metrics` previously required EpisodeOutcomeReceipt plus ProductionEconomics.published_minutes > 0. This is a shared measurement boundary defect for article, still image, account and commercial tasks. Reuse the registered local adapter with an explicit scoped observation schema rather than create a second controller, guess video economics or imply live platform access. The adapter extracts numeric values from separately declared immutable JSON source artifacts, records each source path and byte identity, preserves unavailable values and undefined ratios, and does not claim semantic authenticity or causality. The legacy Episode schema remains an isolated supported route. Falsifiers: unbound input, incorrect path, self-sourcing spec, invalid window, nonfinite number, missing denominator, absent metric incorrectly converted to zero, or new effect authority. See tests/test_business_observation.py for isolated examples and typed worker integration.
+
+
+## Z. Operation implementation ownership and cross-subsystem bridges (2026-11-28)
+
+The subsystem topology has two distinct ownership questions: the semantic subsystem that owns an operation, and the subsystem that owns the code implementing it. These are usually the same for domain adapters, but a small number of adapters are deliberate cross-subsystem bridges. The existing topology audit previously checked only operation-name coverage and source-file ownership; it did not verify this join.
+
+The current contract reuses the existing registries and catalog:
+
+- A domain adapter's registered handler module is its implementation source. If its implementation owner differs from the semantic operation owner, the subsystem catalog must contain one exact `cross_subsystem_adapter_bindings` record with both owners, a boundary label and a source-grounded rationale. Missing, stale or mismatched records fail the audit.
+- A production executor records both its central dispatcher reference and exact `module:symbol` implementation reference. The dispatcher belongs to `execution_and_owner_scope`; the delegated implementation must belong to the subsystem that owns the production operation.
+- The topology audit reports both bindings. This is static ownership evidence, not proof of runtime provider availability, creative quality or owner acceptance.
+
+The four current domain-adapter bridges are Program→Episode handoff (business→motion), EditorialPlan→ShotContract materialization/validation (editorial→motion), and shot-specific routing (motion→provider routing). They are not automatically defects and must not be moved or reclassified by filename alone. Any new bridge requires an explicit rationale and regression coverage. No new controller, router, task database or effect authority is introduced.

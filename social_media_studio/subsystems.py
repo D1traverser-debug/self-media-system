@@ -14,6 +14,8 @@ import re
 import subprocess
 from typing import Any
 
+from .domain_adapters.registry import DOMAIN_ADAPTERS
+
 
 def _source_files(root: Path) -> list[str]:
     try:
@@ -323,11 +325,98 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         errors.append("catalog adapter ownership differs from real registered adapters")
     if set(operation_map) != set(PRODUCTION_EXECUTORS.operations()):
         errors.append("catalog executor ownership differs from actual registered tool operations")
+
+    # A domain adapter's registered handler is its implementation. Its semantic
+    # operation owner may differ only through an explicit, source-bound bridge.
+    raw_bridges = cat.get("cross_subsystem_adapter_bindings", [])
+    if not isinstance(raw_bridges, list):
+        errors.append("cross-subsystem adapter bindings must be an array")
+        raw_bridges = []
+    bridge_map: dict[str, dict[str, Any]] = {}
+    for item in raw_bridges:
+        if not isinstance(item, dict):
+            errors.append("cross-subsystem adapter binding is malformed")
+            continue
+        name = item.get("adapter")
+        if not isinstance(name, str) or not name or name in bridge_map:
+            errors.append(f"invalid or duplicate cross-subsystem adapter binding: {name!r}")
+            continue
+        bridge_map[name] = item
+    adapter_implementation_bindings: list[dict[str, Any]] = []
+    for name, spec in DOMAIN_ADAPTERS.items():
+        handler = spec.handler
+        module = str(getattr(handler, "__module__", ""))
+        module_path = module.replace(".", "/") + ".py"
+        implementation_owner = owners.get(module_path)
+        operation_owner = adapter_map.get(name)
+        if implementation_owner is None:
+            errors.append(f"domain adapter handler module has no subsystem owner: {name} -> {module_path}")
+        if operation_owner is None:
+            errors.append(f"domain adapter has no semantic operation owner: {name}")
+        is_bridge = implementation_owner != operation_owner
+        bridge = bridge_map.get(name)
+        if is_bridge:
+            if bridge is None:
+                errors.append(f"missing cross-subsystem adapter binding: {name}")
+            else:
+                if bridge.get("operation_owner_subsystem") != operation_owner:
+                    errors.append(f"cross-subsystem adapter operation owner mismatch: {name}")
+                if bridge.get("implementation_owner_subsystem") != implementation_owner:
+                    errors.append(f"cross-subsystem adapter implementation owner mismatch: {name}")
+                if not str(bridge.get("boundary") or "").strip() or not str(bridge.get("rationale") or "").strip():
+                    errors.append(f"cross-subsystem adapter binding lacks boundary rationale: {name}")
+        elif bridge is not None:
+            errors.append(f"stale cross-subsystem adapter binding for same-owner adapter: {name}")
+        adapter_implementation_bindings.append({
+            "adapter": name, "handler_ref": spec.handler_ref,
+            "operation_owner_subsystem": operation_owner,
+            "implementation_owner_subsystem": implementation_owner,
+            "cross_subsystem_bridge": is_bridge,
+        })
+    for name in bridge_map:
+        if name not in DOMAIN_ADAPTERS:
+            errors.append(f"cross-subsystem adapter binding references unknown adapter: {name}")
+
+    # Production handlers are centralized in the execution control plane;
+    # their declared implementation refs must resolve to the owning domain subsystem.
+    dispatcher_owner_expected = topology_contract.get("production_dispatcher_subsystem")
+    if dispatcher_owner_expected not in ids:
+        errors.append("production dispatcher subsystem is missing from the topology contract")
+    production_implementation_bindings: list[dict[str, Any]] = []
+    production_records = PRODUCTION_EXECUTORS.public_records()
+    if {item.get("name") for item in production_records} != set(operation_map):
+        errors.append("production implementation records differ from subsystem operation ownership")
+    for item in production_records:
+        name = str(item.get("name") or "")
+        dispatcher_ref = str(item.get("dispatcher_ref") or "")
+        dispatcher_module = dispatcher_ref.rsplit(".", 1)[0] if "." in dispatcher_ref else ""
+        dispatcher_path = dispatcher_module.replace(".", "/") + ".py"
+        dispatcher_owner = owners.get(dispatcher_path)
+        implementation_ref = str(item.get("implementation_ref") or "")
+        implementation_module, separator, implementation_symbol = implementation_ref.partition(":")
+        implementation_path = implementation_module.replace(".", "/") + ".py" if implementation_module else ""
+        implementation_owner = owners.get(implementation_path)
+        operation_owner = operation_map.get(name)
+        if dispatcher_owner != dispatcher_owner_expected:
+            errors.append(f"production dispatcher owner mismatch: {name} -> {dispatcher_path}")
+        if not separator or not implementation_symbol.strip() or implementation_owner is None:
+            errors.append(f"production implementation reference is unresolved: {name} -> {implementation_ref}")
+        elif implementation_owner != operation_owner:
+            errors.append(f"production implementation owner mismatch: {name} -> {implementation_path}")
+        production_implementation_bindings.append({
+            "operation": name, "dispatcher_ref": dispatcher_ref,
+            "dispatcher_owner_subsystem": dispatcher_owner,
+            "implementation_ref": implementation_ref,
+            "implementation_owner_subsystem": implementation_owner,
+            "operation_owner_subsystem": operation_owner,
+        })
     return {
         "pass": not errors, "assurance": "REPOSITORY_STRUCTURE_AND_STATIC_AST_ONLY",
         "tracked_files": len(files), "code_modules": len(python_files),
         "owned_modules": len(owners), "subsystems": len(ids),
         "domain_adapters": len(adapter_map), "production_operations": len(operation_map),
+        "adapter_implementation_bindings": adapter_implementation_bindings,
+        "production_implementation_bindings": production_implementation_bindings,
         "topology_contract": topology_contract,
         "unclassified_paths": unclassified, "violations": sorted(set(errors)),
         "all_tracked_file_sha256": all_file_sha256,

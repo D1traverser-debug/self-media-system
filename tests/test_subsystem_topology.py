@@ -259,3 +259,73 @@ def test_dangling_deleted_source_in_current_manifest_is_rejected(tmp_path):
     assert report["pass"] is False
     assert any("current config points to missing source" in issue
                and "legacy/operator_view.py" in issue for issue in report["violations"])
+
+
+def test_domain_adapter_implementation_owner_is_same_or_explicit_cross_subsystem_bridge():
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    rows = {item["adapter"]: item for item in report["adapter_implementation_bindings"]}
+    assert len(rows) == 17
+    assert set(rows) == {
+        "business_object_validate", "episode_intent_validate", "editorial_plan_validate",
+        "shot_contract_materialize", "shot_contract_validate", "ipos_bundle_inspect",
+        "media_graph_initialize", "ipos_bundle_import", "ipos_shot_bind",
+        "ipos_continuity_snapshot", "ipos_continuity_link", "timeline_validate",
+        "shot_route", "extended_media_qa", "continuity_assess",
+        "business_outcome_metrics", "programmatic_graphic_render",
+    }
+    bridges = {name for name, item in rows.items() if item["cross_subsystem_bridge"]}
+    assert bridges == {
+        "episode_intent_validate", "shot_contract_materialize",
+        "shot_contract_validate", "shot_route",
+    }
+
+
+def test_missing_cross_subsystem_adapter_binding_is_rejected(tmp_path):
+    cat = _isolated_source_checkout(tmp_path)
+    cat["cross_subsystem_adapter_bindings"] = [
+        item for item in cat["cross_subsystem_adapter_bindings"]
+        if item["adapter"] != "shot_route"
+    ]
+    (tmp_path / "social_media_studio/data/subsystem_catalog.json").write_text(
+        json.dumps(cat, ensure_ascii=False, indent=2), encoding="utf-8",
+    )
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("missing cross-subsystem adapter binding: shot_route" in item
+               for item in report["violations"])
+
+
+def test_production_implementation_must_belong_to_declared_operation_subsystem(tmp_path):
+    cat = _isolated_source_checkout(tmp_path)
+    motion = next(item for item in cat["subsystems"] if item["id"] == "motion_and_production")
+    visual = next(item for item in cat["subsystems"] if item["id"] == "visual_and_static_design")
+    motion["production_operations"].remove("ffmpeg_assemble")
+    visual["production_operations"].append("ffmpeg_assemble")
+    (tmp_path / "social_media_studio/data/subsystem_catalog.json").write_text(
+        json.dumps(cat, ensure_ascii=False, indent=2), encoding="utf-8",
+    )
+    report = audit_subsystems(tmp_path)
+    assert report["pass"] is False
+    assert any("production implementation owner mismatch: ffmpeg_assemble" in item
+               for item in report["violations"])
+
+
+def test_production_dispatcher_and_implementation_bindings_are_complete():
+    report = audit_subsystems(ROOT)
+    assert report["pass"], report["violations"]
+    rows = {item["operation"]: item for item in report["production_implementation_bindings"]}
+    assert set(rows) == {
+        "python_frame_render", "ffmpeg_assemble", "delivery_package",
+        "ffprobe_media_qa", "ffmpeg_video_audio_copy", "source_evidence_audit",
+    }
+    assert all(item["dispatcher_owner_subsystem"] == "execution_and_owner_scope"
+               for item in rows.values())
+    assert {name: item["implementation_owner_subsystem"] for name, item in rows.items()} == {
+        "python_frame_render": "visual_and_static_design",
+        "ffmpeg_assemble": "motion_and_production",
+        "delivery_package": "platform_packaging_delivery",
+        "ffprobe_media_qa": "media_understanding_and_transform",
+        "ffmpeg_video_audio_copy": "media_understanding_and_transform",
+        "source_evidence_audit": "research_and_understanding",
+    }
