@@ -169,3 +169,34 @@ def test_local_evidence_routes_support_their_own_requested_report_not_unrelated_
             selection={"deliverables": {"report": [key]}})["demand_composition"]
         assert view["deliverables"][0]["proposed_professional_routes"][0]["demand_id"] == key
         assert view["effect_authorized"] is False
+
+@pytest.mark.parametrize("kind,demand,config", [
+    ("LONG_ARTICLE", "narrative_and_script", {"domain_adapter": {"name": "editorial_plan_validate"}}),
+    ("ORIGINAL_VIDEO", "video_generation", {"domain_adapter": {"name": "shot_route"}}),
+    ("SHORT_COPY", "research_and_fact_check", {"production": {"operation": "source_evidence_audit"}}),
+    ("ANALYSIS_REPORT", "commercial_design", {"domain_adapter": {"name": "business_object_validate"}}),
+    ("ORIGINAL_VIDEO", "technical_media_qa", {"production": {"operation": "ffprobe_media_qa"}}),
+    ("PLATFORM_PACKAGE", "platform_native_variant", {"production": {"operation": "delivery_package"}}),
+])
+def test_support_operation_cannot_be_bound_as_requested_final_candidate(tmp_path, kind, demand, config):
+    engine = make_engine(tmp_path, [{"id": "requested", "type": kind}])
+    node = task("support", "requested", demand, executor="tool")
+    node["requirements"].update(config)
+    with pytest.raises(ValueError, match="support-only"):
+        engine.add_tasks("fresh", [node])
+    node["requirements"].pop("deliverable_outputs")
+    engine.add_tasks("fresh", [node])
+
+
+@pytest.mark.parametrize("kind,demand,config", [
+    ("ANALYSIS_REPORT", "technical_media_qa", {"production": {"operation": "ffprobe_media_qa"}}),
+    ("ANALYSIS_REPORT", "business_measurement", {"domain_adapter": {"name": "business_outcome_metrics"}}),
+    ("ORIGINAL_VIDEO", "programmatic_motion_graphics", {"production": {"operation": "python_frame_render"}}),
+    ("MEDIA_TRANSFORM", "video_reframe", {"production": {"operation": "ffmpeg_video_audio_copy"}}),
+])
+def test_bounded_candidate_routes_remain_admissible_without_claiming_execution(tmp_path, kind, demand, config):
+    engine = make_engine(tmp_path, [{"id": "requested", "type": kind}])
+    node = task("candidate", "requested", demand, executor="tool")
+    node["requirements"].update(config)
+    engine.add_tasks("fresh", [node])
+    assert not engine.status("fresh")["deliverable_progress"]["candidate_coverage_complete"]

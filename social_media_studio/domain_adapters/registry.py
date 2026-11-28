@@ -34,6 +34,7 @@ class DomainAdapterSpec:
     promotes_candidate: bool
     publishes: bool
     known_gap: str
+    candidate_deliverable_types: tuple[str, ...]
 
     def public_record(self) -> dict[str, Any]:
         record = asdict(self)
@@ -42,7 +43,8 @@ class DomainAdapterSpec:
         return record
 
 
-def _spec(name, handler, group, required, output, assurance, gap, *, effect="PROJECT_LOCAL_ARTIFACT_WRITE"):
+def _spec(name, handler, group, required, output, assurance, gap, *, effect="PROJECT_LOCAL_ARTIFACT_WRITE",
+          candidate_types=()):
     return DomainAdapterSpec(
         name=name,
         handler=handler,
@@ -56,6 +58,7 @@ def _spec(name, handler, group, required, output, assurance, gap, *, effect="PRO
         promotes_candidate=False,
         publishes=False,
         known_gap=gap,
+        candidate_deliverable_types=tuple(candidate_types),
     )
 
 
@@ -120,6 +123,7 @@ _DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
         "timeline_validate", handle_timeline_validate, "motion_production",
         ("timeline_input", "media_graph_input"), "task-declared JSON timeline validation receipt",
         "TIMELINE_METADATA_VALIDATION", "Timeline metadata validation is not a complete video review.",
+        candidate_types=("ANALYSIS_REPORT",),
     ),
     "shot_route": _spec(
         "shot_route", handle_shot_route, "motion_production",
@@ -130,16 +134,19 @@ _DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
         "extended_media_qa", handle_extended_media_qa, "verification_delivery",
         ("media_input",), "task-declared JSON technical media-QA report",
         "TECHNICAL_MEASUREMENT_NOT_AESTHETIC", "Technical checks do not replace editorial or aesthetic acceptance.",
+        candidate_types=("ANALYSIS_REPORT",),
     ),
     "continuity_assess": _spec(
         "continuity_assess", handle_continuity_assess, "motion_production",
         ("continuity_input",), "task-declared JSON declared-rule continuity assessment",
         "DECLARED_RULE_CONTINUITY_ASSESSMENT", "Assessment is limited to supplied continuity data and rules.",
+        candidate_types=("ANALYSIS_REPORT",),
     ),
     "business_outcome_metrics": _spec(
         "business_outcome_metrics", handle_business_outcome_metrics, "growth_commercial",
         ("outcome_receipt_input",), "task-declared JSON derived episode metrics or scoped source-bound account/content/campaign/offer/portfolio observations",
         "DERIVED_METRICS_NOT_CAUSAL_GROWTH", "Exact declared-source numeric extraction or legacy episode derivation; not live platform authenticity, causal growth or commercial lift.",
+        candidate_types=("ANALYSIS_REPORT",),
     ),
     "programmatic_graphic_render": _spec(
         "programmatic_graphic_render", handle_programmatic_graphic_render, "visual_design",
@@ -149,6 +156,7 @@ _DOMAIN_ADAPTERS: dict[str, DomainAdapterSpec] = {
         "CANDIDATE_RENDER_NOT_PROMOTION_OR_RELEASE",
         "Local candidate render only; no provider generation, promotion, publication or aesthetic PASS.",
         effect="PROJECT_LOCAL_CANDIDATE_RENDER",
+        candidate_types=("ORIGINAL_VIDEO","ANALYSIS_REPORT"),
     ),
 }
 

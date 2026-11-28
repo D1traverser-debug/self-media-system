@@ -200,6 +200,15 @@ def validate_task_binding(brief: dict[str, Any], task: dict[str, Any]) -> dict[s
                 or not isinstance(binding["deliverable_id"], str) or binding["deliverable_id"] not in refs):
             raise ValueError(f"{name}: invalid deliverable output identity")
         item = items[binding["deliverable_id"]]
+        if local_route:
+            # A support route may be useful without producing the owner's
+            # requested artifact. Reject that substitution at admission.
+            eligible = any(
+                item["type"] in r["local_support"].get("local_candidate_types", {}).get(local_route, [])
+                for r in resolved[binding["deliverable_id"]]
+            )
+            if not eligible:
+                raise ValueError(f"{name}: local route is support-only for this deliverable type")
         variants = {v["id"] for v in item["variants"]} or {item["id"]}
         if not isinstance(binding["variant_id"], str) or binding["variant_id"] not in variants:
             raise ValueError(f"{name}: output references unknown current deliverable variant")
@@ -476,6 +485,15 @@ def capability_lookup(
             else "GROUP_LEVEL_FALLBACK" if demand_id
             else "GROUP_OVERVIEW"
         )
+        # Source-owned output ceilings, intersected with the selected demand.
+        # No local candidate is an accepted artifact or provider availability.
+        eligible_types = set(selected_route["deliverable_types"]) if selected_route else DELIVERABLE_TYPES
+        local_candidate_types = {
+            **{"domain_adapter:" + name: sorted(set(DOMAIN_ADAPTERS[name].candidate_deliverable_types) & eligible_types)
+               for name in route_adapters},
+            **{"production:" + item["name"]: sorted(set(item["candidate_deliverable_types"]) & eligible_types)
+               for item in PRODUCTION_EXECUTORS.public_records() if item["name"] in route_operations},
+        }
         resolved_groups.append({
             **group,
             "knowledge_resources": [knowledge_by_id[ref] for ref in knowledge_refs],
@@ -496,6 +514,7 @@ def capability_lookup(
                 "domain_adapters": [item for item in public_domain_adapter_registry()
                                     if item["name"] in route_adapters],
                 "production_operations": list(route_operations),
+                **({"local_candidate_types": local_candidate_types} if local_candidate_types else {}),
                 "production_effect_risks": [
                     {"operation": operation,
                      "risk_class": PRODUCTION_EXECUTORS.effect_risk(operation),

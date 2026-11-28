@@ -135,3 +135,19 @@ def test_missing_or_wrong_group_operation_contract_fails_closed():
             group["demand_routes"]["short_form_copy"]["deliverable_types"]=["FAKE"]
         with pytest.raises(ValueError):
             capability_lookup(profile=raw)
+
+def test_local_candidate_ceiling_is_disclosed_for_every_exact_demand():
+    for group in capability_lookup()["groups"]:
+        for key, contract in group["demand_routes"].items():
+            view = capability_lookup(demand_id=key)["groups"][0]["executor_routes"]
+            expected = {"domain_adapter:" + n for n in contract["local_support_adapters"]}
+            expected |= {"production:" + n for n in contract["local_support_operations"]}
+            ceilings = view.get("local_candidate_types", {})
+            assert set(ceilings) == expected
+            assert all(set(types) <= set(contract["deliverable_types"]) for types in ceilings.values())
+            assert not view["actual_executor_verified"]
+    assert capability_lookup(demand_id="video_generation")["groups"][0]["executor_routes"]["local_candidate_types"] == {
+        "domain_adapter:shot_route": []}
+    assert capability_lookup(demand_id="technical_media_qa")["groups"][0]["executor_routes"]["local_candidate_types"] == {
+        "domain_adapter:extended_media_qa": ["ANALYSIS_REPORT"],
+        "production:ffprobe_media_qa": ["ANALYSIS_REPORT"]}
