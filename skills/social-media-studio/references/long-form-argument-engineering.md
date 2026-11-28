@@ -107,6 +107,7 @@ Use this lightweight card for central or high-risk claims, not for every sentenc
 | Claim type | Descriptive, interpretive, causal, comparative, predictive, normative or prescriptive? |
 | Scope | Who, what, where, when and under which conditions? |
 | Grounds | What source, data, observation or calculation supports it? |
+| Source lineage / independence | Is this a primary observation, an independent corroboration or a derivative repetition of another source? |
 | Warrant | Why does this evidence support this conclusion? |
 | Backing | Why should the reader accept the warrant? |
 | Assumptions | What must be true for the inference to hold? |
@@ -121,6 +122,22 @@ A completed card is a reasoning aid, not proof that the claim is true. Source pr
 ### 3.3 Do not force the full Toulmin model everywhere
 
 The full six-part model is useful when a claim is disputed, consequential or rests on an assumption readers may reject. For ordinary, low-risk statements, the core claim–grounds–warrant check may be sufficient. The categories can overlap in complex arguments; the model is a diagnostic lens, not a universal prose skeleton.
+
+### 3.4 Warrant-specific critical questions
+
+A generic “does this make sense?” check is too weak. Identify the kind of inference doing the work, then ask the critical questions that could defeat that inference. The following are reusable question families, not an exhaustive universal checklist. Select only those relevant to the actual claim.
+
+| Warrant / inference family | Critical questions |
+|---|---|
+| **Authority / testimony** | Does the source have direct access to the fact? Is the expertise relevant to this exact claim? Is the source independent, current and accurately represented? What incentives, conflicts or limits affect its reliability? Is the statement within the source's actual remit? |
+| **Generalization from cases or samples** | How were cases selected? Are they representative of the population or only visible examples? What is the denominator and base rate? Are failures and missing cases visible? Would one counterexample narrow the rule or defeat it? |
+| **Analogy / transfer** | Which similarities are causally or functionally relevant? Which differences could change the outcome? Is the mechanism shared, or is the analogy only visual/verbal? What conditions must hold for the lesson to transfer? |
+| **Causal inference** | Does the cause precede the outcome? Is there a plausible mechanism? What confounders, reverse causation or selection effects remain? What would likely happen without the proposed cause? What evidence could distinguish the alternatives? |
+| **Sign / indicator / symptom** | How specific is the indicator? What else could produce it? What is the base rate? Is the measurement valid, or is a proxy being mistaken for the underlying condition? |
+| **Consequences / prediction** | What links the action or event to the predicted result? How likely and how large is the effect? Who benefits or bears the downside? Over what time horizon? What second-order effects or reversal conditions matter? |
+| **Practical recommendation** | Does the action serve the stated objective? What are the alternatives, including doing nothing? Are resources, authority and timing available? What implementation dependencies, side effects and failure indicators apply? |
+
+A useful adversarial pass asks whether the same grounds could support a different conclusion under another plausible warrant. If so, the warrant—not the amount of prose—needs examination.
 
 ## 4. Build an argument graph, not just a list of paragraphs
 
@@ -303,6 +320,17 @@ Distinguish four separate checks:
 4. **Independent review:** did someone other than the drafting model check the interpretation?
 
 A trace that confirms a number appears in a source does not prove the source is authoritative or that the number entails the conclusion. A calculation requires a reproducible method and independent arithmetic/logic check where consequential. A citation is not a warrant.
+
+### 9.1 Source lineage and corroboration
+
+Count independent observation, not URLs. Five articles that repeat one company press release, one wire report or one anonymous-source claim do not provide five independent confirmations. Map the lineage:
+
+1. **Origin:** filing, dataset, direct interview, original observation, official statement or other first-known source.
+2. **Transmission:** wire copy, syndicated story, press summary, repost, analyst note or commentary derived from the origin.
+3. **Independent corroboration:** a source that obtained the relevant information independently, or separately observed the same event.
+4. **Interpretation:** a source that explains or evaluates the information but does not independently establish the underlying event.
+
+For each consequential claim, record the source family and whether apparent corroboration is genuinely independent. A primary source can establish what an institution said or filed; it does not automatically establish that the institution's interpretation is correct. An expert can interpret evidence without being an independent witness to the underlying event. If all available reports trace back to one origin, say so and narrow the assurance rather than inflating the source count.
 
 ## 10. From argument graph to article structure
 
