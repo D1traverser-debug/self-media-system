@@ -202,6 +202,12 @@
       "scope": "Long-form articles, essays and X Articles. Reader contract, argument/story architecture, information progression and payoff. Does not impose finance-specific evidence rules or short-form/video stages."
     },
     {
+      "id": "long-form-craft-atlas",
+      "ref": "skills/social-media-studio/references/long-form-craft-atlas.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Domain-independent craft atlas adapted from Novel Writing Agent and Financial Writing Agent; genre routing and 16 diagnostic dimensions for narrative, argument, explanation, prose and reader cognition. Select applicable methods only; fiction devices do not authorize nonfiction invention; not a universal template or validated writing-quality claim."
+    },
+    {
       "id": "platform-packaging",
       "ref": "skills/social-media-studio/references/platform-packaging.md",
       "status": "CANDIDATE_REQUIRES_REVALIDATION",
