@@ -215,7 +215,13 @@ def inspect_long_article(data: Mapping[str, Any]) -> dict[str, Any]:
         if sid is not None and sid not in seen:
             raise EditorialContractError("visual placement references unknown article section")
         _text(item.get("purpose"), "visual purpose")
+    from .longform_evidence import inspect_editorial_trace
+    try:
+        editorial_trace = inspect_editorial_trace(data)
+    except (ValueError, TypeError) as exc:
+        raise EditorialContractError(str(exc)) from exc
     return {
+        "editorial_trace": editorial_trace,
         "schema_version": "1.0", "title": title, "locale": locale,
         "intent_kind": kind, "section_count": len(sections),
         "factual_claim_count": len(claims), "visual_slot_count": len(visual_slots),
