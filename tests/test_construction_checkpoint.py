@@ -65,4 +65,5 @@ def test_checkpoint_ci_receipt_is_consistent_and_not_a_live_head_oracle():
         for evidence in b00["evidence"]
     )
     assert "live PR head" in b00["next_action"]
-    assert "re-run" in b00["next_action"]
+    assert "exact-head PR workflow" in b00["next_action"]
+    assert "exact live SHA" in b00["next_action"]
