@@ -186,7 +186,7 @@ def test_longform_argument_engineering_is_registered_and_conditionally_routed():
     assert entry["status"] == "CANDIDATE_REQUIRES_REVALIDATION"
     assert (root / entry["ref"]).is_file()
     module = (root / entry["ref"]).read_text(encoding="utf-8")
-    assert "Claim–grounds–warrant model" in module
+    assert "claim–grounds–warrant model" in module
     assert "Counterargument" in module
     assert "counterfactual" in module
     assert "Do not force the full Toulmin model everywhere" in module
