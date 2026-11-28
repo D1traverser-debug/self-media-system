@@ -320,7 +320,7 @@
       "scenario_ids": [],
       "status": "IN_PROGRESS",
       "acceptance": "Every scenario has current positive and forbidden-effect evidence, independently reviewed applicable real outputs; reviewer independence and trust proven where required; native selection evidence separately identified.",
-      "next_action": "Run the three short-phrase cases in an independent fresh chat when possible; verify native CAOS/SMS selection trace, exact private sources, target resolution, method application, actual owner output and correction burden. Keep native selection NOT_TESTED without first-party trace.",
+      "next_action": "After domain work, complete independent typed assurance on actual owner outputs; verify native CAOS/SMS selection trace, exact private-source retrieval, independent output review and owner correction burden. Keep native selection NOT_TESTED without first-party trace.",
       "blocker": "Trusted high-assurance registry is empty; native CAOS selection not tested.",
       "evidence": [
         "Existing reference sources and catalogs mapped to scoped demand profiles with applicability and counterexamples; reference routing only, not independently replayed craft or verified providers.",
@@ -340,7 +340,8 @@
         "B00",
         "B01",
         "B02",
-        "B09"
+        "B09",
+        "B11"
       ],
       "subsystems": [],
       "scenario_ids": [],
@@ -359,7 +360,16 @@
         "2026-11-28 cold-start simulation: 继续推特长文1 provisionally resolves to QUANT X Article The Rug Became the Ad based on the earlier exact phrase 继续推特长文 and first X Article index entry; exact suffix alias is not directly proven. Separate Meme X Article exists. R11 workbench reports final author review/unpublished; article SHA differs from the c4cc... hash in the deep-dive record and requires reconciliation.",
         "2026-11-28 cold-start simulation: 继续视频制作3 strongly resolves to GTA6 Rain/Motorcycle based on historical user-scoped continuation context and project card 03. Raw suffix semantics remain unproven. The prior Street Fighter mapping was an assistant conflation of project card number with its internal C03 cover stage. Chinese copy selected; cover candidates generated but final asset acceptance remains open.",
         "Implemented cold-start continuation rules in SMS Skill and STUDIO_ENTRY; tests added for three phrases, Continuation Receipt, numeric suffix ambiguity, method-card/task identity separation, state axes and no retired workspace resurrection. ADR: docs/decisions/ADR-2026-11-28-short-phrase-continuation-recovery.md."
-      ]
+      ],
+      "goal": "Validate cold-start continuation and numeric-alias resolution across independent sessions",
+      "depends_on": [
+        "B00",
+        "B04"
+      ],
+      "subsystems": [],
+      "scenario_ids": [],
+      "acceptance": "Three independent fresh-chat continuation cases recover the correct active target, exact source/version, scoped decision locks, separate production/verification/outcome states and next action; numeric aliases are confirmed only by owner-authored evidence, and unresolved mappings remain explicitly provisional.",
+      "blocker": null
     }
   ]
 }
