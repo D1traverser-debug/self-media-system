@@ -275,7 +275,7 @@ Distinctive voice is not catchphrases. It emerges from what a speaker notices, v
 
 ## 12. Prose, paragraph economics and transitions
 
-For deep sentence- and paragraph-level execution, use the optional companion `long-form-microcraft-playbook.md` when a specific microcraft problem warrants it. It expands the diagnostics below into actionable mechanisms, counterfactuals and selective revision passes. It is not a mandatory checklist; the exact owner-accepted article's retrospective mapping is `long-form-microcraft-replay-01-the-rug-became-the-ad.md`.
+For claim-heavy reasoning, use the optional companion `long-form-argument-engineering.md` when the article depends on a thesis, interpretation, causal explanation, comparison or recommendation. For deep sentence- and paragraph-level execution, use the optional companion `long-form-microcraft-playbook.md` when a specific microcraft problem warrants it. It expands the diagnostics below into actionable mechanisms, counterfactuals and selective revision passes. It is not a mandatory checklist; the exact owner-accepted article's retrospective mapping is `long-form-microcraft-replay-01-the-rug-became-the-ad.md`.
 
 ### Paragraph economics
 
