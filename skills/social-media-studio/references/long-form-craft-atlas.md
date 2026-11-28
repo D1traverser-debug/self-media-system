@@ -275,6 +275,8 @@ Distinctive voice is not catchphrases. It emerges from what a speaker notices, v
 
 ## 12. Prose, paragraph economics and transitions
 
+For deep sentence- and paragraph-level execution, use the optional companion `long-form-microcraft-playbook.md` when a specific microcraft problem warrants it. It expands the diagnostics below into actionable mechanisms, counterfactuals and selective revision passes. It is not a mandatory checklist; the exact owner-accepted article's retrospective mapping is `long-form-microcraft-replay-01-the-rug-became-the-ad.md`.
+
 ### Paragraph economics
 
 A paragraph should perform a real job: introduce a fact/scene, explain a mechanism, advance a claim, compare, challenge, qualify, show a consequence, change perspective or deliver/open a payoff. A paragraph that only announces importance, repeats the prior point or narrates the outline must justify its space.
