@@ -214,6 +214,12 @@
       "scope": "Optional reasoning module for thesis-driven, interpretive, explanatory, causal, comparative, predictive, normative and prescriptive long-form claims. Uses claim/grounds/warrant, argument graph, causal alternatives, counterarguments and qualifiers. Do not impose on neutral reference pieces, procedural tutorials or short copy without a real argument problem."
     },
     {
+      "id": "long-form-reader-validation",
+      "ref": "skills/social-media-studio/references/long-form-reader-validation.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Optional independent reader evaluation for consequential or uncertain long-form comprehension, argument understanding, explanation transfer, procedural task success, narrative coherence, reader value, trust and variant decisions. Keep these outcomes separate; do not infer truth, population prevalence or distribution performance from small qualitative sessions."
+    },
+    {
       "id": "long-form-microcraft-playbook",
       "ref": "skills/social-media-studio/references/long-form-microcraft-playbook.md",
       "status": "CANDIDATE_REQUIRES_REVALIDATION",
