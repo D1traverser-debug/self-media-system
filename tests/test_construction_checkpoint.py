@@ -38,3 +38,31 @@ def test_construction_checkpoint_covers_current_architecture_and_acceptance():
         visit(task["id"], set())
     assert "docs/SMS_CONSTRUCTION_CHECKPOINT.json" in (ROOT / "STUDIO_ENTRY.md").read_text(encoding="utf-8")
     assert plan["authority"]["private_owner_original_precedes_this_checkpoint"] is True
+
+
+def test_checkpoint_ci_receipt_is_consistent_and_not_a_live_head_oracle():
+    plan = load("docs/SMS_CONSTRUCTION_CHECKPOINT.json")
+    integration = plan["integration"]
+    by_id = {task["id"]: task for task in plan["tasks"]}
+    b00 = by_id["B00"]
+
+    assert integration["observed_head"]
+    assert integration["observed_ci"] == "PASS"
+    assert integration["observed_ci_run"] is not None
+    assert integration["last_known_green_sha"] == integration["observed_head"]
+    assert integration["last_known_green_pr_run"] == integration["observed_ci_run"]
+    assert integration["push_ci_for_observed_head"] == "NOT_VERIFIED"
+
+    semantics = integration["observed_head_semantics"].lower()
+    assert "last verified" in semantics
+    assert "not the live branch head" in semantics
+    assert "re-query" in semantics
+
+    assert b00["status"] == "VERIFIED"
+    assert any(
+        integration["observed_head"] in evidence
+        and str(integration["observed_ci_run"]) in evidence
+        for evidence in b00["evidence"]
+    )
+    assert "live PR head" in b00["next_action"]
+    assert "re-run" in b00["next_action"]
