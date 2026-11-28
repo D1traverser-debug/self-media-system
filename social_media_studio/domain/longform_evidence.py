@@ -139,6 +139,46 @@ def inspect_editorial_trace(article: Mapping[str, Any]) -> dict[str, Any]:
             if child not in affected:
                 affected.add(child)
                 pending.append(child)
+    # Optional observations bind a method revision to a material decision in
+    # this article. They remain editor declarations, never proof of use/effect.
+    applications = []
+    seen_applications = set()
+    for row in _rows(trace.get("method_observations", []), "method_observations"):
+        key = _text(row.get("id"), "method observation id")
+        if key in seen_applications:
+            raise ValueError("duplicate method observation")
+        seen_applications.add(key)
+        target = _text(row.get("target_id"), "method target")
+        if target not in nodes:
+            raise ValueError("method observation targets unknown node")
+        method_ref = _text(row.get("method_ref"), "method_ref")
+        revision = _text(row.get("method_sha256"), "method_sha256")
+        if len(revision) != 64 or any(ch not in "0123456789abcdef" for ch in revision):
+            raise ValueError("method_sha256 must be a lowercase SHA-256 digest")
+        disposition = row.get("disposition")
+        if disposition not in ("CONSULTED_ONLY", "CHANGE_DECLARED", "RETAINED_AFTER_TEST", "REJECTED"):
+            raise ValueError("invalid method observation disposition")
+        reason = _text(row.get("reason"), "method observation reason")
+        refs = _refs(row.get("evidence_refs", []), "method evidence_refs")
+        if not refs:
+            raise ValueError("method observation requires evidence references")
+        if disposition in ("CHANGE_DECLARED", "RETAINED_AFTER_TEST"):
+            before = _text(row.get("before"), "method decision before")
+            after = _text(row.get("after"), "method decision after")
+            _text(row.get("result_ref"), "method result_ref")
+            if disposition == "CHANGE_DECLARED" and before.strip() == after.strip():
+                raise ValueError("declared method change requires different before and after")
+            if disposition == "RETAINED_AFTER_TEST" and before.strip() != after.strip():
+                raise ValueError("retained decision requires matching before and after")
+            if disposition == "RETAINED_AFTER_TEST":
+                _text(row.get("test_ref"), "method test_ref")
+        applications.append({
+            "id": key, "target_id": target, "method_ref": method_ref,
+            "method_sha256": revision, "disposition": disposition,
+            "status": "REOPEN_REQUIRED" if target in affected else "DECLARED_ONLY",
+            "method_bytes_verified": False, "application_verified": False,
+            "improvement_verified": False,
+        })
     missing_claims = sorted(claims - covered_claims)
     missing_sections = sorted(sections - covered_sections)
     return {
@@ -150,5 +190,6 @@ def inspect_editorial_trace(article: Mapping[str, Any]) -> dict[str, Any]:
         "unmapped_declared_claim_ids": missing_claims,
         "unmapped_declared_section_ids": missing_sections,
         "open_advisory_finding_ids": sorted(advisory),
+        "method_observations": applications,
         "coverage_limit": "Only declared claims/sections and dependencies checked; no semantic completeness proof.",
     }
