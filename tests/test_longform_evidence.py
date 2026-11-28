@@ -196,3 +196,21 @@ def test_longform_argument_engineering_is_registered_and_conditionally_routed():
     skill = (root / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
     assert "long-form-argument-engineering.md" in editorial
     assert "long-form-argument-engineering" in skill
+
+
+def test_longform_reader_validation_is_registered_and_conditionally_routed():
+    root = Path(__file__).resolve().parents[1]
+    catalog = json.loads((root / "social_media_studio/data/knowledge_catalog.json").read_text(encoding="utf-8"))
+    entry = next(item for item in catalog["entries"] if item["id"] == "long-form-reader-validation")
+    assert entry["status"] == "CANDIDATE_REQUIRES_REVALIDATION"
+    assert (root / entry["ref"]).is_file()
+    module = (root / entry["ref"]).read_text(encoding="utf-8")
+    assert "Silent cold read" in module
+    assert "Avoid leading questions" in module
+    assert "COMPREHENSION_SUPPORTED_FOR_TESTED_SEGMENT" in module
+    assert "NOT_TESTED" in module
+    assert "A second LLM is not automatically an independent reviewer" in module
+    editorial = (root / "skills/social-media-studio/references/long-form-editorial.md").read_text(encoding="utf-8")
+    skill = (root / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "long-form-reader-validation.md" in editorial
+    assert "long-form-reader-validation" in skill
