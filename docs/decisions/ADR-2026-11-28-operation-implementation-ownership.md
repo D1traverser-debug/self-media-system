@@ -31,7 +31,7 @@ At the pre-change PR #56 head `2341f700f2a36772a48a826ffb8ed8bf707510ac`:
 Reuse the existing subsystem catalog, domain-adapter registry and production-executor registry. Do not add a second router, subsystem registry, project database or controller.
 
 1. A domain adapter's registered handler module is its implementation owner. If that differs from its semantic operation owner in the subsystem catalog, require one exact `cross_subsystem_adapter_bindings` record with both owners, boundary type and rationale. Missing, stale, duplicate or mismatched bridge records fail the topology audit.
-2. A production executor records both its central dispatcher reference and its exact `module:symbol` implementation reference. The dispatcher must remain owned by `execution_and_owner_scope`; the implementation module must be owned by the subsystem that owns the operation.
+2. A production executor records both its central dispatcher reference and its exact `module:symbol` implementation reference. The dispatcher must remain owned by `execution_and_owner_scope`; the implementation module must be owned by the subsystem that owns the operation. The symbol itself must resolve against the tracked source AST, including class methods.
 3. The topology report exposes these bindings so tests and future audits can inspect them.
 4. The new metadata does not authorize an effect, provider call, candidate promotion, release or publication. Existing effect gates remain authoritative.
 
@@ -44,7 +44,7 @@ Reuse the existing subsystem catalog, domain-adapter registry and production-exe
 
 ## Validation and limits
 
-The candidate change adds explicit bridge records for the four observed cross-subsystem adapters, exact implementation references for all six production operations, static owner-binding checks, and adversarial tests for missing bridges and incorrect production ownership.
+The candidate change adds explicit bridge records for the four observed cross-subsystem adapters, exact implementation references for all six production operations, static module-and-symbol resolution, owner-binding checks, and adversarial tests for missing bridges, unresolved symbols and incorrect production ownership.
 CI success proves repository regression only. It does not prove creative quality, provider account permissions, native SMS Skill selection, independent review, publication or commercial outcomes. The trusted high-assurance reviewer registry remains empty. PR #56 remains Draft and unmerged until the separate acceptance gates are satisfied.
 
 ## Rollback

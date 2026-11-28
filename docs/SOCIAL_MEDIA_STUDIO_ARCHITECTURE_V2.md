@@ -476,7 +476,7 @@ The subsystem topology has two distinct ownership questions: the semantic subsys
 The current contract reuses the existing registries and catalog:
 
 - A domain adapter's registered handler module is its implementation source. If its implementation owner differs from the semantic operation owner, the subsystem catalog must contain one exact `cross_subsystem_adapter_bindings` record with both owners, a boundary label and a source-grounded rationale. Missing, stale or mismatched records fail the audit.
-- A production executor records both its central dispatcher reference and exact `module:symbol` implementation reference. The dispatcher belongs to `execution_and_owner_scope`; the delegated implementation must belong to the subsystem that owns the production operation.
+- A production executor records both its central dispatcher reference and exact `module:symbol` implementation reference. The dispatcher belongs to `execution_and_owner_scope`; the delegated implementation module and symbol must resolve against tracked source and belong to the subsystem that owns the production operation.
 - The topology audit reports both bindings. This is static ownership evidence, not proof of runtime provider availability, creative quality or owner acceptance.
 
 The four current domain-adapter bridges are Program→Episode handoff (business→motion), EditorialPlan→ShotContract materialization/validation (editorial→motion), and shot-specific routing (motion→provider routing). They are not automatically defects and must not be moved or reclassified by filename alone. Any new bridge requires an explicit rationale and regression coverage. No new controller, router, task database or effect authority is introduced.

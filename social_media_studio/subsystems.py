@@ -38,6 +38,28 @@ def _module(path: str) -> str:
     return ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
 
 
+def _symbol_exists(path: Path, symbol_path: str) -> bool:
+    """Resolve a module-level function or a class method against tracked source AST."""
+    if not symbol_path or not path.is_file():
+        return False
+    try:
+        nodes = ast.parse(path.read_text(encoding="utf-8"), filename=str(path)).body
+    except (OSError, UnicodeError, SyntaxError):
+        return False
+    parts = symbol_path.split(".")
+    for index, part in enumerate(parts):
+        found = next((node for node in nodes
+                      if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
+                      and node.name == part), None)
+        if found is None:
+            return False
+        if index < len(parts) - 1:
+            if not isinstance(found, ast.ClassDef):
+                return False
+            nodes = found.body
+    return True
+
+
 def _imports(path: Path, module: str) -> set[str]:
     syntax = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     deps: set[str] = set()
@@ -348,11 +370,16 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         module = str(getattr(handler, "__module__", ""))
         module_path = module.replace(".", "/") + ".py"
         implementation_owner = owners.get(module_path)
+        handler_symbol = str(getattr(handler, "__name__", ""))
+        handler_symbol_resolved = bool(implementation_owner is not None and
+                                       _symbol_exists(root / module_path, handler_symbol))
         operation_owner = adapter_map.get(name)
         if implementation_owner is None:
             errors.append(f"domain adapter handler module has no subsystem owner: {name} -> {module_path}")
         if operation_owner is None:
             errors.append(f"domain adapter has no semantic operation owner: {name}")
+        if not handler_symbol_resolved:
+            errors.append(f"domain adapter handler symbol is unresolved: {name} -> {module_path}:{handler_symbol}")
         is_bridge = implementation_owner != operation_owner
         bridge = bridge_map.get(name)
         if is_bridge:
@@ -371,6 +398,7 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             "adapter": name, "handler_ref": spec.handler_ref,
             "operation_owner_subsystem": operation_owner,
             "implementation_owner_subsystem": implementation_owner,
+            "handler_symbol_resolved": handler_symbol_resolved,
             "cross_subsystem_bridge": is_bridge,
         })
     for name in bridge_map:
@@ -399,8 +427,13 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
         operation_owner = operation_map.get(name)
         if dispatcher_owner != dispatcher_owner_expected:
             errors.append(f"production dispatcher owner mismatch: {name} -> {dispatcher_path}")
+        implementation_symbol_resolved = bool(separator and implementation_symbol.strip()
+                                              and implementation_owner is not None
+                                              and _symbol_exists(root / implementation_path, implementation_symbol))
         if not separator or not implementation_symbol.strip() or implementation_owner is None:
             errors.append(f"production implementation reference is unresolved: {name} -> {implementation_ref}")
+        elif not implementation_symbol_resolved:
+            errors.append(f"production implementation symbol is unresolved: {name} -> {implementation_ref}")
         elif implementation_owner != operation_owner:
             errors.append(f"production implementation owner mismatch: {name} -> {implementation_path}")
         production_implementation_bindings.append({
@@ -408,6 +441,7 @@ def audit_subsystems(repo_root: str | Path | None = None) -> dict[str, Any]:
             "dispatcher_owner_subsystem": dispatcher_owner,
             "implementation_ref": implementation_ref,
             "implementation_owner_subsystem": implementation_owner,
+            "implementation_symbol_resolved": implementation_symbol_resolved,
             "operation_owner_subsystem": operation_owner,
         })
     return {

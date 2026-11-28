@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-from social_media_studio.subsystems import audit_subsystems, _imports, _module
+from social_media_studio.subsystems import audit_subsystems, _imports, _module, _symbol_exists
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -274,6 +274,7 @@ def test_domain_adapter_implementation_owner_is_same_or_explicit_cross_subsystem
         "shot_route", "extended_media_qa", "continuity_assess",
         "business_outcome_metrics", "programmatic_graphic_render",
     }
+    assert all(item["handler_symbol_resolved"] for item in rows.values())
     bridges = {name for name, item in rows.items() if item["cross_subsystem_bridge"]}
     assert bridges == {
         "episode_intent_validate", "shot_contract_materialize",
@@ -321,6 +322,7 @@ def test_production_dispatcher_and_implementation_bindings_are_complete():
     }
     assert all(item["dispatcher_owner_subsystem"] == "execution_and_owner_scope"
                for item in rows.values())
+    assert all(item["implementation_symbol_resolved"] for item in rows.values())
     assert {name: item["implementation_owner_subsystem"] for name, item in rows.items()} == {
         "python_frame_render": "visual_and_static_design",
         "ffmpeg_assemble": "motion_and_production",
@@ -329,3 +331,28 @@ def test_production_dispatcher_and_implementation_bindings_are_complete():
         "ffmpeg_video_audio_copy": "media_understanding_and_transform",
         "source_evidence_audit": "research_and_understanding",
     }
+
+
+def test_internal_symbol_resolver_checks_top_level_functions_and_class_methods(tmp_path):
+    source = tmp_path / "implementation.py"
+    source.write_text(
+        "def inspect():\n    pass\n\nclass Renderer:\n    def render(self):\n        pass\n",
+        encoding="utf-8",
+    )
+    assert _symbol_exists(source, "inspect")
+    assert _symbol_exists(source, "Renderer.render")
+    assert not _symbol_exists(source, "Renderer.missing")
+
+
+def test_unresolved_production_implementation_symbol_fails_topology_audit(monkeypatch):
+    from social_media_studio.production.registry import PRODUCTION_EXECUTORS
+    records = list(PRODUCTION_EXECUTORS.public_records())
+    target = next(item for item in records if item["name"] == "python_frame_render")
+    target["implementation_ref"] = (
+        "social_media_studio.production.python_frame_renderer:PythonFrameRenderer.missing"
+    )
+    monkeypatch.setattr(PRODUCTION_EXECUTORS, "public_records", lambda: tuple(records))
+    report = audit_subsystems(ROOT)
+    assert report["pass"] is False
+    assert any("production implementation symbol is unresolved: python_frame_render" in item
+               for item in report["violations"])
