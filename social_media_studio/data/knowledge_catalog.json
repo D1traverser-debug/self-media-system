@@ -208,6 +208,12 @@
       "scope": "Domain-independent craft atlas adapted from Novel Writing Agent and Financial Writing Agent; genre routing and 16 diagnostic dimensions for narrative, argument, explanation, prose and reader cognition. Select applicable methods only; fiction devices do not authorize nonfiction invention; not a universal template or validated writing-quality claim."
     },
     {
+      "id": "long-form-microcraft-playbook",
+      "ref": "skills/social-media-studio/references/long-form-microcraft-playbook.md",
+      "status": "CANDIDATE_REQUIRES_REVALIDATION",
+      "scope": "Deep sentence, paragraph, transition, detail, metaphor, rhetoric, emotion, quotation, explanation and ending craft. Select only for material micro-level writing problems; no fixed prose formula, no AI-humanizer, and no claim of independent quality validation."
+    },
+    {
       "id": "platform-packaging",
       "ref": "skills/social-media-studio/references/platform-packaging.md",
       "status": "CANDIDATE_REQUIRES_REVALIDATION",
