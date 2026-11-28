@@ -214,3 +214,64 @@ def test_longform_reader_validation_is_registered_and_conditionally_routed():
     skill = (root / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
     assert "long-form-reader-validation.md" in editorial
     assert "long-form-reader-validation" in skill
+
+
+def method_observation():
+    return {
+        "id": "method-1", "target_id": "argument",
+        "method_ref": "candidate-method", "method_sha256": "a" * 64,
+        "disposition": "CHANGE_DECLARED", "reason": "Scope changed after counterexample.",
+        "before": "Every instance", "after": "Only tested instances",
+        "evidence_refs": ["counterexample-v1"], "result_ref": "draft-v2",
+    }
+
+
+def test_method_use_declarations_do_not_certify_application_or_improvement():
+    a = packet()
+    a["editorial_trace"]["method_observations"] = [method_observation()]
+    r = inspect(a)["method_observations"][0]
+    assert r["disposition"] == "CHANGE_DECLARED"
+    assert r["status"] == "DECLARED_ONLY"
+    assert not any(r[k] for k in ("method_bytes_verified", "application_verified", "improvement_verified"))
+    a["editorial_trace"]["changed_node_ids"] = ["source"]
+    assert inspect(a)["method_observations"][0]["status"] == "REOPEN_REQUIRED"
+
+
+def test_method_observation_requires_valid_target_revision_and_actual_declared_delta():
+    for key, value in (("target_id", "unknown"), ("method_sha256", "latest"),
+                       ("after", "Every instance"), ("evidence_refs", []),
+                       ("result_ref", "")):
+        a = packet()
+        row = method_observation()
+        row[key] = value
+        a["editorial_trace"]["method_observations"] = [row]
+        with pytest.raises(EditorialContractError):
+            inspect(a)
+
+
+def test_consultation_and_rejection_do_not_claim_an_applied_change():
+    a = packet()
+    row = method_observation()
+    for key in ("before", "after", "result_ref"):
+        row.pop(key)
+    row["disposition"] = "CONSULTED_ONLY"
+    a["editorial_trace"]["method_observations"] = [row]
+    assert inspect(a)["method_observations"][0]["disposition"] == "CONSULTED_ONLY"
+    row["disposition"] = "REJECTED"
+    assert inspect(a)["method_observations"][0]["disposition"] == "REJECTED"
+    row["disposition"] = "RETAINED_AFTER_TEST"
+    with pytest.raises(EditorialContractError):
+        inspect(a)
+    row.update(before="same", after="same", result_ref="draft", test_ref="test")
+    assert inspect(a)["method_observations"][0]["application_verified"] is False
+
+
+def test_revision_and_duplicates_invalidate_or_reject_method_observations():
+    a = packet()
+    row = method_observation()
+    a["editorial_trace"]["method_observations"] = [row, row.copy()]
+    with pytest.raises(EditorialContractError):
+        inspect(a)
+    a["editorial_trace"]["method_observations"] = [row]
+    a["title"] = "Different manuscript"
+    assert inspect(a)["status"] == "STALE_ARTICLE_TRACE"
