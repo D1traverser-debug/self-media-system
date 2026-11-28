@@ -1,5 +1,7 @@
 """Synthetic regressions for trace mechanics; not tests of writing quality."""
 from copy import deepcopy
+import json
+from pathlib import Path
 
 import pytest
 
@@ -145,3 +147,15 @@ def test_nonargument_does_not_need_argument_graph_and_short_copy_unaffected():
                                 "platform": "X", "locale": "en-US",
                                 "content_intent": "short observation"})
     assert "editorial_trace" not in short
+
+
+def test_longform_craft_atlas_is_registered_and_routed():
+    root = Path(__file__).resolve().parents[1]
+    catalog = json.loads((root / "social_media_studio/data/knowledge_catalog.json").read_text(encoding="utf-8"))
+    entry = next(item for item in catalog["entries"] if item["id"] == "long-form-craft-atlas")
+    assert entry["status"] == "CANDIDATE_REQUIRES_REVALIDATION"
+    assert (root / entry["ref"]).is_file()
+    editorial = (root / "skills/social-media-studio/references/long-form-editorial.md").read_text(encoding="utf-8")
+    skill = (root / "skills/social-media-studio/SKILL.md").read_text(encoding="utf-8")
+    assert "long-form-craft-atlas.md" in editorial
+    assert "long-form-craft-atlas" in skill
