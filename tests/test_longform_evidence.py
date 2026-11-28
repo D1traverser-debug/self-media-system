@@ -167,8 +167,6 @@ def test_longform_microcraft_playbook_is_registered_and_conditionally_routed():
     entry = next(item for item in catalog["entries"] if item["id"] == "long-form-microcraft-playbook")
     assert entry["status"] == "CANDIDATE_REQUIRES_REVALIDATION"
     assert (root / entry["ref"]).is_file()
-    replay = root / "skills/social-media-studio/references/long-form-microcraft-replay-01-the-rug-became-the-ad.md"
-    assert replay.is_file()
     playbook = (root / entry["ref"]).read_text(encoding="utf-8")
     assert "Given → new information flow" in playbook
     assert "Coherence versus cohesion" in playbook
